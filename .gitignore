@@ -3,10 +3,10 @@ __pycache__/
 .ruff_cache/
 .venv/
 *.pyc
-runs/
-checkpoints/
+/runs/
+/checkpoints/
 *.pt
 *.pth
 *.safetensors
-data/
+/data/
 .ipynb_checkpoints/
