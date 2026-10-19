@@ -10,7 +10,7 @@
 | **M5** | Dynamic Compute Allocation | Token-level dynamic routing / Mixture-of-Depths (skipping FFN/MoE on easy tokens with true FLOP reduction) | **PASSED** (Verified on Tesla T4) |
 | **M6** | Autonomous Causal Domain Gating | Autoregressive domain detection, zero-forgetting unconditioned Task A retention, `moe_head` adapter | **PASSED** (Verified on Tesla T4) |
 | **M7** | Generalization & Multi-Seed Verification | 4-arm 3-seed benchmark, numerical prose decoupling (`domain_trigger_token_ids=['=']`), carry/borrow evaluation | **PASSED** (Verified on Tesla T4) |
-| **M8** | Autonomous Curriculum & Growth Controller | State machine (`EVALUATE -> SELECT -> PLAN -> TRAIN -> VERIFY -> PROMOTE/ROLLBACK`), bounded compute budgets | Planned |
+| **M8** | Autonomous Curriculum & Growth Controller | State machine (`EVALUATE -> SELECT -> PLAN -> TRAIN -> VERIFY -> PROMOTE/ROLLBACK`), bounded compute budgets | **PASSED** |
 | **M9** | Natural Language & Practical Reasoning | BPE subword tokenizer, instruction dataset, scaled Transformer backbone, verified reasoning tasks | Planned |
 
 ---
@@ -65,3 +65,14 @@
 - 4-arm architecture comparison across 3 seeds (`[42, 43, 44]`): Dense FT, Modular MoE, MoE + MoD, and Compute-Matched Dense Adapter Control.
 - Fine-grained category evaluation (`ADD_NO_CARRY`, `ADD_CARRY`, `SUB_NO_BORROW`, `SUB_BORROW`, `PARITY`, `OOD_EXTRAPOLATION`).
 - Empirical finding: MoD + MoE (Arm 3) delivers highest modular accuracy with 33% fewer active parameters, outperforming matched adapter baselines. Character-level carry addition/borrow subtraction requires algorithmic curricula or subword/scratchpad modeling before parameter scaling.
+
+### M8: Autonomous Curriculum & Growth Controller
+- Minimal learning controller implementing state machine:
+  $$\text{EVALUATE} \to \text{SELECT\_TASK} \to \text{PLAN} \to \text{TRAIN} \to \text{VERIFY} \to \text{PROMOTE / ROLLBACK} \to \text{STOP}$$
+- Machine-verifiable procedural task suite with independent external ground-truth verifiers: addition, subtraction, multiplication, parity, string reversal.
+- Bounded training experiments: explicit step, batch, and token compute budgets.
+- Isolated candidate training (`candidate_dir`): base checkpoint is guaranteed immutable during candidate evaluation.
+- Dual-gate candidate verification: candidate must achieve minimum target skill improvement ($\Delta \text{acc} \ge \text{min\_gain}$) while strictly preserving prior task performance within tolerance ($\Delta \text{loss}_{\text{retention}} \le \text{tolerance}$).
+- Verified rollback mechanism: candidates failing verification are cleanly rejected, keeping base checkpoint active without degradation.
+- Crash and interruption recovery via persistent `controller_state.json`.
+- `amg auto-learn` CLI interface.

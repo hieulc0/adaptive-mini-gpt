@@ -9,6 +9,27 @@
 
 ## Qualification Run Log
 
+### M8: Autonomous Curriculum & Adaptive Growth Controller Qualification
+- **Date**: 2026-10-19
+- **Environment**: Linux x86_64, Python 3.12, PyTorch 2.4+
+- **Test Suite Verification**: **48/48 pytest tests passed** (including task generators, external verifiers, state transitions, promotion, rollback, and crash recovery).
+- **Core Controller Architecture**:
+  - Deterministic state machine:
+    $$\text{EVALUATE} \to \text{SELECT\_TASK} \to \text{PLAN} \to \text{TRAIN} \to \text{VERIFY} \to \text{PROMOTE / ROLLBACK} \to \text{STOP}$$
+  - **Machine-Verifiable Procedural Battery**: `addition`, `subtraction`, `multiplication`, `parity`, `reverse` with independent external ground-truth verifiers.
+  - **Isolated Candidate Training**: Candidates train in `candidate_{task}_{exp_id}` without modifying active base checkpoint.
+  - **Dual Verification Gate**:
+    - **Skill Gain**: Candidate must improve target accuracy by $\ge \delta_{\text{gain}}$ (or meet mastery threshold).
+    - **Retention Invariant**: Maximum drift on prior skills (clean prose, numerical prose) must remain $\le \epsilon_{\text{regression}}$ ($0.05$).
+  - **Empirically Qualified Behaviors**:
+    - **Autonomous Promotion**: Successfully selects weakest unmastered task, trains candidate with zero-init expert growth, verifies target improvement without retention loss, and atomically promotes to active model.
+    - **Autonomous Rollback**: Rejects regression candidates, archives candidate state, and preserves known-good base model.
+    - **Crash Recovery**: Resumes seamlessly from interrupted `controller_state.json` without step loss.
+- **CLI Command**: `amg auto-learn --checkpoint-dir <dir> --output-dir <dir> --budget-steps 200`
+- **Status**: **M8 GATE PASSED**. Full autonomous learning cycle executed and verified with deterministic gating and rollback guarantees.
+
+---
+
 ### M7: Rigorous Generalization, Retention & 4-Arm Multi-Seed Architecture Verification (Google Colab T4)
 - **Date**: 2026-10-19
 - **Environment**: Google Colab (Linux, Python 3.13.15, PyTorch 2.4+, CUDA 13.0)

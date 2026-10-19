@@ -16,6 +16,7 @@ from adaptive_mini_gpt.adaptive.growth import (
     grow_model_depth,
     grow_model_experts,
 )
+from adaptive_mini_gpt.autonomous import GrowthAction, LearningController
 from adaptive_mini_gpt.data.dataset import (
     TokenDataset,
     generate_arithmetic_corpus,
@@ -405,6 +406,26 @@ def cmd_inspect(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_auto_learn(args: argparse.Namespace) -> int:
+    """Execute autonomous learning controller cycle (M8)."""
+    controller = LearningController(
+        base_checkpoint_dir=args.checkpoint_dir,
+        output_dir=args.output_dir,
+        budget_steps=args.budget_steps,
+        min_improvement=args.min_improvement,
+        max_regression_tolerance=args.max_regression,
+        target_accuracy_threshold=args.target_threshold,
+        growth_action=GrowthAction(args.growth_action),
+        force_task=args.force_task,
+        device=args.device,
+        precision=args.precision,
+        seed=args.seed,
+    )
+    result = controller.run_cycle()
+    print(json.dumps(result, indent=None if getattr(args, "json_output", False) else 2))
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     common_parser = argparse.ArgumentParser(add_help=False)
     common_parser.add_argument(
@@ -595,6 +616,68 @@ def build_parser() -> argparse.ArgumentParser:
     p_insp.add_argument("--config", type=str, default="configs/tiny.yaml")
     p_insp.add_argument("--checkpoint", type=str, default=None)
     p_insp.set_defaults(func=cmd_inspect)
+
+    # auto-learn (M8)
+    p_auto = subparsers.add_parser(
+        "auto-learn",
+        help="Run autonomous learning controller cycle (M8).",
+        parents=[common_parser],
+    )
+    p_auto.add_argument(
+        "--checkpoint-dir",
+        "--checkpoint",
+        dest="checkpoint_dir",
+        type=str,
+        required=True,
+        help="Path to active model checkpoint or directory.",
+    )
+    p_auto.add_argument(
+        "--output-dir",
+        type=str,
+        default="runs/auto_learn",
+        help="Directory to store candidate runs, journal, and promoted models.",
+    )
+    p_auto.add_argument(
+        "--budget-steps",
+        type=int,
+        default=200,
+        help="Compute budget: max training steps for candidate.",
+    )
+    p_auto.add_argument(
+        "--min-improvement",
+        type=float,
+        default=0.05,
+        help="Minimum target accuracy improvement required to promote.",
+    )
+    p_auto.add_argument(
+        "--max-regression",
+        type=float,
+        default=0.05,
+        help="Maximum tolerable retention loss regression on prior domains.",
+    )
+    p_auto.add_argument(
+        "--target-threshold",
+        type=float,
+        default=0.95,
+        help="Target skill accuracy threshold for considering a skill mastered.",
+    )
+    p_auto.add_argument(
+        "--growth-action",
+        type=str,
+        default="auto",
+        choices=["auto", "continue", "grow_expert"],
+        help="Structural adaptation strategy.",
+    )
+    p_auto.add_argument(
+        "--force-task",
+        type=str,
+        default=None,
+        help="Force learning of a specific task (e.g. 'addition', 'subtraction', 'parity').",
+    )
+    p_auto.add_argument("--device", type=str, default="auto", choices=["auto", "cpu", "cuda"])
+    p_auto.add_argument("--precision", type=str, default="fp16", choices=["fp32", "fp16", "bf16"])
+    p_auto.add_argument("--seed", type=int, default=42)
+    p_auto.set_defaults(func=cmd_auto_learn)
 
     return parser
 
