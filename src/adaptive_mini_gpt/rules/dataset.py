@@ -1,10 +1,17 @@
-"""Dataset generation for Verified Rules and Reasoning Loop (M14).
+"""Dataset generation for Verified Rules and Grounded Reasoning (M14/M15).
 
 Generates partitioned, unfamiliar natural-language questions across 4 operations:
 - 'reverse'
 - 'add'
 - 'compare'
 - 'average_speed'
+
+Includes edge-case variations:
+- Varied paraphrasing and changed argument ordering
+- Distracting numbers (e.g. year, flight/room numbers)
+- Multiword entity names
+- Varied unit expressions (km vs kilometers, hours vs hrs vs h)
+- Malformed / ambiguous / contradictory queries requiring explicit abstention
 
 Maintains strictly disjoint train (70%), val (15%), and test (15%) splits via deterministic cryptographic partitioning.
 """
@@ -14,7 +21,7 @@ from __future__ import annotations
 import hashlib
 import random
 import string
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from adaptive_mini_gpt.rules.loop import format_rule_call
@@ -27,22 +34,29 @@ class RuleProblem:
     question: str
     rule_name: str
     args: dict[str, Any]
-    expected_answer: str
+    expected_answer: str | None
     split: str
+    is_malformed: bool = False
+    should_abstain: bool = False
+    abstain_reason: str | None = None
 
     def to_tool_pair(self) -> str:
         """Instruction pair with ground truth tool call as assistant completion."""
-        call_str = format_rule_call(self.rule_name, self.args)
+        if self.should_abstain:
+            call_str = f"Abstain: {self.abstain_reason or 'Invalid or contradictory query'}"
+        else:
+            call_str = format_rule_call(self.rule_name, self.args)
         return f"<|user|>\n{self.question}\n<|assistant|>\n{call_str}<|eos|>\n"
 
     def to_direct_pair(self) -> str:
         """Instruction pair with direct answer as assistant completion (neural baseline)."""
-        return f"<|user|>\n{self.question}\n<|assistant|>\n{self.expected_answer}<|eos|>\n"
+        ans = self.expected_answer if self.expected_answer is not None else "Cannot determine"
+        return f"<|user|>\n{self.question}\n<|assistant|>\n{ans}<|eos|>\n"
 
 
 def get_rule_split(key: str) -> str:
     """Deterministically partition key into train (70%), val (15%), or test (15%)."""
-    h = int(hashlib.sha256(f"m14_rule_salt:{key}".encode()).hexdigest()[:8], 16)
+    h = int(hashlib.sha256(f"m15_rule_salt:{key}".encode()).hexdigest()[:8], 16)
     bucket = h % 100
     if bucket < 70:
         return "train"
@@ -57,7 +71,7 @@ def generate_rule_problems(
     seed: int = 42,
     split: str = "train",
 ) -> list[RuleProblem]:
-    """Generate balanced, partitioned rule problems with varied natural language paraphrasing."""
+    """Generate balanced, partitioned rule problems with varied paraphrasing and edge cases."""
     rng = random.Random(seed)
     problems: list[RuleProblem] = []
 
@@ -71,6 +85,8 @@ def generate_rule_problems(
         "Invert the character string '{w}'.",
         "Spell the word '{w}' in reverse order.",
         "What is the reverse of '{w}'?",
+        "Please reverse the characters of '{w}'.",
+        "Take '{w}' and write it backward.",
     ]
     seen_words: set[str] = set()
     rev_count = 0
@@ -100,14 +116,17 @@ def generate_rule_problems(
         rev_count += 1
 
     # -------------------------------------------------------------
-    # 2. Add Problems
+    # 2. Add Problems (with changed ordering and distracting numbers)
     # -------------------------------------------------------------
     add_templates = [
-        "What is {a} plus {b}?",
-        "Calculate the sum of {a} and {b}.",
-        "Add {a} and {b} together.",
-        "What is the total of {a} and {b}?",
-        "Compute {a} + {b}.",
+        ("What is {a} plus {b}?", False),
+        ("Calculate the sum of {a} and {b}.", False),
+        ("Add {a} and {b} together.", False),
+        ("What is the total of {a} and {b}?", False),
+        ("Compute {a} + {b}.", False),
+        ("Add {b} to {a}.", False),  # Changed argument ordering
+        ("In the year 2024, what is {a} plus {b}?", True),  # Distracting number 2024
+        ("Room 402 record shows {a} plus {b}. Calculate sum.", True),  # Distracting number 402
     ]
     seen_adds: set[tuple[int, int]] = set()
     add_count = 0
@@ -123,8 +142,8 @@ def generate_rule_problems(
             continue
         seen_adds.add(pair)
 
-        template = rng.choice(add_templates)
-        q = template.format(a=a, b=b)
+        tmpl, has_distractor = rng.choice(add_templates)
+        q = tmpl.format(a=a, b=b)
         expected = str(a + b)
         problems.append(
             RuleProblem(
@@ -138,12 +157,13 @@ def generate_rule_problems(
         add_count += 1
 
     # -------------------------------------------------------------
-    # 3. Compare Problems
+    # 3. Compare Problems (Single-word and Multiword Entities)
     # -------------------------------------------------------------
     name_pool = [
         "Anna", "Ben", "Chris", "David", "Emma", "Frank", "Grace", "Henry",
         "Ivy", "Jack", "Kate", "Liam", "Mia", "Noah", "Olivia", "Paul",
         "Queen", "Ryan", "Sophia", "Tom", "Uma", "Victor", "Wendy", "Zack",
+        "Mary Jane", "Uncle Bob", "Big Brother", "King George", "Saint Peter",
     ]
     attributes = [
         ("taller", "taller"),
@@ -186,15 +206,19 @@ def generate_rule_problems(
         comp_count += 1
 
     # -------------------------------------------------------------
-    # 4. Average Speed Problems
+    # 4. Average Speed Problems (Varied Units, Inverted Order, Distractors)
     # -------------------------------------------------------------
     speed_templates = [
-        "A train travels {d} km in {t} hours. Calculate average speed.",
-        "A car covers a distance of {d} km in {t} hours. What is its average speed?",
-        "An airplane flies {d} km in {t} hours. Find the average speed.",
-        "Calculate the average speed of a vehicle traveling {d} km in {t} hours.",
-        "If a runner covers {d} km in {t} hours, what is the average speed?",
+        ("A train travels {d} {u_d} in {t} {u_t}. Calculate average speed.", False),
+        ("A car covers a distance of {d} {u_d} in {t} {u_t}. What is its average speed?", False),
+        ("An airplane flies {d} {u_d} in {t} {u_t}. Find the average speed.", False),
+        ("Calculate the average speed of a vehicle traveling {d} {u_d} in {t} {u_t}.", False),
+        ("Taking {t} {u_t} to cover {d} {u_d}, what is the vehicle's average speed?", False),  # Changed order
+        ("Flight 707 covers {d} {u_d} in {t} {u_t}. Calculate average speed.", True),  # Distracting flight number
     ]
+    unit_dist_options = ["km", "kilometers"]
+    unit_time_options = ["hours", "hrs", "h"]
+
     seen_speeds: set[tuple[int, int]] = set()
     speed_count = 0
     attempts = 0
@@ -210,8 +234,10 @@ def generate_rule_problems(
             continue
         seen_speeds.add(pair)
 
-        template = rng.choice(speed_templates)
-        q = template.format(d=d, t=t)
+        tmpl, _ = rng.choice(speed_templates)
+        u_d = rng.choice(unit_dist_options)
+        u_t = rng.choice(unit_time_options)
+        q = tmpl.format(d=d, t=t, u_d=u_d, u_t=u_t)
         expected = f"{base_speed} km/h"
         problems.append(
             RuleProblem(
@@ -226,6 +252,103 @@ def generate_rule_problems(
 
     rng.shuffle(problems)
     return problems
+
+
+def generate_abstention_problems(
+    num_samples: int = 20,
+    seed: int = 12345,
+    split: str = "test",
+) -> list[RuleProblem]:
+    """Generate malformed, ambiguous, contradictory, or unsupported problems requiring explicit abstention."""
+    rng = random.Random(seed)
+    malformed_problems: list[RuleProblem] = []
+
+    # 1. Negative or zero time for average speed
+    invalid_speed_cases = [
+        ("A vehicle travels 120 km in 0 hours. What is its average speed?", "Zero duration violates physical kinematics"),
+        ("A car travels 150 km in -2 hours. Calculate average speed.", "Negative time violates physical preconditions"),
+        ("An airplane covers 0 km in -5 hours. Find average speed.", "Non-positive duration"),
+    ]
+    for q, reason in invalid_speed_cases:
+        malformed_problems.append(
+            RuleProblem(
+                question=q,
+                rule_name="average_speed",
+                args={},
+                expected_answer=None,
+                split=split,
+                is_malformed=True,
+                should_abstain=True,
+                abstain_reason=reason,
+            )
+        )
+
+    # 2. Incomplete or ambiguous addition
+    invalid_add_cases = [
+        ("What is 150 plus?", "Missing second operand for addition"),
+        ("Calculate the sum of 450.", "Only one operand supplied"),
+        ("Compute 10, 20, 30, and 40.", "Ambiguous multi-number addition without binary schema"),
+    ]
+    for q, reason in invalid_add_cases:
+        malformed_problems.append(
+            RuleProblem(
+                question=q,
+                rule_name="add",
+                args={},
+                expected_answer=None,
+                split=split,
+                is_malformed=True,
+                should_abstain=True,
+                abstain_reason=reason,
+            )
+        )
+
+    # 3. Contradictory comparison cycle & disconnected reachability
+    invalid_compare_cases = [
+        (
+            "If Anna is taller than Ben and Ben is taller than Anna, who is taller, Anna or Ben?",
+            "Contradictory cyclic ordering between Anna and Ben",
+        ),
+        (
+            "If Anna is taller than Ben and Chris is taller than David, who is taller, Anna or David?",
+            "Indeterminate: no transitive path connects Anna and David",
+        ),
+    ]
+    for q, reason in invalid_compare_cases:
+        malformed_problems.append(
+            RuleProblem(
+                question=q,
+                rule_name="compare",
+                args={},
+                expected_answer=None,
+                split=split,
+                is_malformed=True,
+                should_abstain=True,
+                abstain_reason=reason,
+            )
+        )
+
+    # 4. Missing string sequence to reverse
+    invalid_reverse_cases = [
+        ("Spell the word in reverse order.", "Missing target string to invert"),
+        ("Invert the character sequence.", "No character string provided"),
+    ]
+    for q, reason in invalid_reverse_cases:
+        malformed_problems.append(
+            RuleProblem(
+                question=q,
+                rule_name="reverse",
+                args={},
+                expected_answer=None,
+                split=split,
+                is_malformed=True,
+                should_abstain=True,
+                abstain_reason=reason,
+            )
+        )
+
+    rng.shuffle(malformed_problems)
+    return malformed_problems[:num_samples]
 
 
 def generate_rule_instruction_corpus(

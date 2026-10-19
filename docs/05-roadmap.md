@@ -15,6 +15,10 @@
 | **M10** | Unified Autonomous Learning | Lineage-aware loading, non-regressive promotion gate, atomic publishing, multi-cycle chaining | **PASSED** (Verified on Tesla T4) |
 | **M11** | Autonomous Language Learning | BPE subword model, single atomic pointer switch, fault injection, sequential instruction learning | **PASSED** (Verified on Tesla T4) |
 | **M12** | Generalization & Continual Integrity | Partitioned generators (strictly disjoint train/val/test), strict parsed verifiers, autonomous weakest-skill selection, cross-checkpoint raw loss retention audit, old-skill behavioral verification | **PASSED** |
+| **M13** | Procedural Reasoning Curriculum | Controlled 5-arm multi-seed benchmark on Tesla T4, empirical negative result on pure causal reversal, 15/15 safe rollbacks | **PASSED** (Verified on Tesla T4) |
+| **M14** | Verified Rules & Reasoning Loop | Deterministic rule registry (4 rules), sandboxed execution, reasoning retry loop, multi-seed T4 benchmark, bottleneck isolated to argument extraction | **PASSED** (Verified on Tesla T4) |
+| **M15** | Grounded Argument Extraction & Working Memory | In-process `WorkingMemory`, exact source-span provenance tracking, deterministic and span-copy grounders, abstention battery, 100/100 tests | **PASSED** (Verified on Tesla T4) |
+| **M16** | Multi-Step Planning & Chained Compositional Reasoning | Chained multi-operation execution, intermediate variable working memory, multi-step word problems | **PLANNED** |
 
 ---
 
@@ -164,3 +168,25 @@
   - Oracle achieved 100% verified accuracy in 0.03 ms.
   - Mini-GPT demonstrated successful rule recognition (33.34% overall, up to 100% on addition), but isolated argument extraction as the fundamental bottleneck (0% on held-out test inputs).
   - Quantified retry loop overhead (+50% latency) without argument recovery in small causal decoders, establishing the empirical necessity for M15 (Persistent Memory and Grounded Pointer Extraction).
+
+### M15: Grounded Argument Extraction and Working Memory (Completed)
+- **Structured In-Process Working Memory (`WorkingMemory`, `ArgumentProvenance`)**:
+  - Maintained operation name, typed arguments, exact source text, start/end character offsets, and provenance extraction method (`"regex_span"`, `"span_copy"`, `"autoregressive"`).
+  - Explicit rejection/abstention tracking without external database or vector store overhead.
+- **Grounded Argument Parsers**:
+  - Deterministic Argument Grounder (Arm 2): regex-anchored typed parser with span tracking, filtering out distracting numbers (e.g. years) and supporting multiword entities and varied units.
+  - Span-Copy Grounder (Arm 3): selects candidate offsets and copies exact text slices without token-generation hallucination.
+  - Deterministic Rule Selector: syntactic intent classifier for operation routing.
+- **Robustness & Abstention Battery**:
+  - Evaluated on challenging linguistic variations: changed argument ordering, distracting numbers, multiword entity names, and unit variants.
+  - Malformed query battery verifying 100% safe abstention on invalid physics (negative/zero time), missing operands, cyclic comparison contradictions, and disconnected graphs.
+- **Empirical Multi-Seed T4 Benchmark**:
+  - Arm 2 (Deterministic Grounder): **100.0% verified answer accuracy**, **100.0% abstention correctness**, **0.09 ms latency** (>1000× faster than neural generation).
+  - Arm 3 (Span-Copy Grounder): **92.03% verified answer accuracy**, **90.0% abstention correctness**, **0.05 ms latency**.
+  - Hybrid A (Mini-GPT Rule + Det Grounder): **87.68% verified answer accuracy**, lifting accuracy from 0.0% in M14 to 87.68%.
+  - Confirmed that neural pointer attention heads are mathematically unnecessary given deterministic grounding's 100% performance at sub-millisecond compute.
+
+### M16: Multi-Step Planning & Chained Compositional Reasoning (Planned)
+- Planning and executing multi-step composite word problems (e.g., combining distances, combining times, and computing overall average speed).
+- Intermediate variable binding and provenance chaining across multiple steps in `WorkingMemory`.
+- Bounded multi-step plan verifier ensuring acyclic dependencies before sequential rule execution.

@@ -1,7 +1,8 @@
-"""Rules, Deterministic Execution, and Reasoning Loop Package (M14)."""
+"""Rules, Deterministic Execution, Working Memory, and Grounded Reasoning (M14/M15)."""
 
 from adaptive_mini_gpt.rules.dataset import (
     RuleProblem,
+    generate_abstention_problems,
     generate_rule_instruction_corpus,
     generate_rule_problems,
     get_rule_split,
@@ -10,12 +11,23 @@ from adaptive_mini_gpt.rules.executor import (
     RuleExecutionResult,
     RuleExecutor,
 )
+from adaptive_mini_gpt.rules.grounding import (
+    AbstentionException,
+    DeterministicArgumentGrounder,
+    DeterministicRuleSelector,
+    GroundingError,
+    SpanCopyArgumentGrounder,
+)
 from adaptive_mini_gpt.rules.loop import (
     AttemptRecord,
     ReasoningController,
     ReasoningResult,
     format_rule_call,
     parse_rule_call,
+)
+from adaptive_mini_gpt.rules.memory import (
+    ArgumentProvenance,
+    WorkingMemory,
 )
 from adaptive_mini_gpt.rules.registry import (
     RULE_REGISTRY,
@@ -36,7 +48,12 @@ from adaptive_mini_gpt.rules.registry import (
 )
 
 __all__ = [
+    "AbstentionException",
+    "ArgumentProvenance",
     "AttemptRecord",
+    "DeterministicArgumentGrounder",
+    "DeterministicRuleSelector",
+    "GroundingError",
     "RULE_REGISTRY",
     "ReasoningController",
     "ReasoningResult",
@@ -46,12 +63,15 @@ __all__ = [
     "RuleProblem",
     "RuleSpecification",
     "SchemaValidationError",
+    "SpanCopyArgumentGrounder",
     "VerificationError",
+    "WorkingMemory",
     "execute_add",
     "execute_average_speed",
     "execute_compare",
     "execute_reverse",
     "format_rule_call",
+    "generate_abstention_problems",
     "generate_rule_instruction_corpus",
     "generate_rule_problems",
     "get_rule",
