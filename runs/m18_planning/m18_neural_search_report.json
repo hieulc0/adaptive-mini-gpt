@@ -1,0 +1,709 @@
+{
+  "title": "M18 \u2014 Neural-Guided Search and Deep Compositional Reasoning Qualification",
+  "device": "cuda",
+  "precision": "fp32",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "configurations": [
+    "1. Arm A: M17 Neural Full-Plan Generation (Baseline)",
+    "2. Arm B: Grammar Search (No Neural Model)",
+    "3. Arm C: Grammar Search + Mini-GPT Candidate Ranking",
+    "4. Arm D: M17 Neural Plan + Bounded Feedback Retry",
+    "5. Arm E: Oracle Structural Plan (Upper Bound)"
+  ],
+  "lineage_runs": {
+    "seed_42": {
+      "neural_slots": {
+        "configuration": "1. Arm A: M17 Neural Full-Plan Generation (Baseline)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.78,
+        "plan_exact_match_rate": 0.18,
+        "verified_answer_accuracy": 0.18,
+        "failure_rate": 0.26,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 188.81,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.0
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.9,
+            "plan_validity_rate": 0.9
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 0.8,
+          "3": 0.0,
+          "4": 0.0,
+          "5": 0.0
+        }
+      },
+      "grammar_search": {
+        "configuration": "2. Arm B: Grammar Search (No Neural Model)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 1.0,
+        "plan_exact_match_rate": 1.0,
+        "verified_answer_accuracy": 1.0,
+        "failure_rate": 0.0,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 15.33,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 1.0,
+          "3": 1.0,
+          "4": 1.0,
+          "5": 1.0
+        }
+      },
+      "grammar_neural_ranked": {
+        "configuration": "3. Arm C: Grammar Search + Mini-GPT Candidate Ranking",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.8,
+        "plan_exact_match_rate": 0.8,
+        "verified_answer_accuracy": 0.8,
+        "failure_rate": 0.2,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 1079.15,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 1.0,
+          "3": 1.0,
+          "4": 0.0,
+          "5": 0.0
+        }
+      },
+      "neural_slots_retry": {
+        "configuration": "4. Arm D: M17 Neural Plan + Bounded Feedback Retry",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.78,
+        "plan_exact_match_rate": 0.18,
+        "verified_answer_accuracy": 0.18,
+        "failure_rate": 0.26,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 247.71,
+        "mean_retries": 0.52,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.0
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.9,
+            "plan_validity_rate": 0.9
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 0.8,
+          "3": 0.0,
+          "4": 0.0,
+          "5": 0.0
+        }
+      },
+      "oracle_slots": {
+        "configuration": "5. Arm E: Oracle Structural Plan (Upper Bound)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 1.0,
+        "plan_exact_match_rate": 1.0,
+        "verified_answer_accuracy": 1.0,
+        "failure_rate": 0.0,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 0.1,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 1.0,
+          "3": 1.0,
+          "4": 1.0,
+          "5": 1.0
+        }
+      }
+    },
+    "seed_43": {
+      "neural_slots": {
+        "configuration": "1. Arm A: M17 Neural Full-Plan Generation (Baseline)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.8,
+        "plan_exact_match_rate": 0.22,
+        "verified_answer_accuracy": 0.16,
+        "failure_rate": 0.32,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 186.39,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.2
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.8,
+            "plan_validity_rate": 0.9
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.95
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 0.6,
+          "3": 0.0,
+          "4": 0.0,
+          "5": 0.0
+        }
+      },
+      "grammar_search": {
+        "configuration": "2. Arm B: Grammar Search (No Neural Model)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 1.0,
+        "plan_exact_match_rate": 1.0,
+        "verified_answer_accuracy": 1.0,
+        "failure_rate": 0.0,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 15.84,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 1.0,
+          "3": 1.0,
+          "4": 1.0,
+          "5": 1.0
+        }
+      },
+      "grammar_neural_ranked": {
+        "configuration": "3. Arm C: Grammar Search + Mini-GPT Candidate Ranking",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.8,
+        "plan_exact_match_rate": 0.8,
+        "verified_answer_accuracy": 0.8,
+        "failure_rate": 0.2,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 1094.36,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 1.0,
+          "3": 1.0,
+          "4": 0.0,
+          "5": 0.0
+        }
+      },
+      "neural_slots_retry": {
+        "configuration": "4. Arm D: M17 Neural Plan + Bounded Feedback Retry",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.82,
+        "plan_exact_match_rate": 0.24,
+        "verified_answer_accuracy": 0.18,
+        "failure_rate": 0.3,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 259.57,
+        "mean_retries": 0.62,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.2
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.9,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.95
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 0.6,
+          "3": 0.0,
+          "4": 0.0,
+          "5": 0.0
+        }
+      },
+      "oracle_slots": {
+        "configuration": "5. Arm E: Oracle Structural Plan (Upper Bound)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 1.0,
+        "plan_exact_match_rate": 1.0,
+        "verified_answer_accuracy": 1.0,
+        "failure_rate": 0.0,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 0.1,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 1.0,
+          "3": 1.0,
+          "4": 1.0,
+          "5": 1.0
+        }
+      }
+    },
+    "seed_44": {
+      "neural_slots": {
+        "configuration": "1. Arm A: M17 Neural Full-Plan Generation (Baseline)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.78,
+        "plan_exact_match_rate": 0.2,
+        "verified_answer_accuracy": 0.02,
+        "failure_rate": 0.26,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 187.12,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.0
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.1,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.95
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 0.0,
+          "3": 0.0,
+          "4": 0.0,
+          "5": 0.0
+        }
+      },
+      "grammar_search": {
+        "configuration": "2. Arm B: Grammar Search (No Neural Model)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 1.0,
+        "plan_exact_match_rate": 1.0,
+        "verified_answer_accuracy": 1.0,
+        "failure_rate": 0.0,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 15.34,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 1.0,
+          "3": 1.0,
+          "4": 1.0,
+          "5": 1.0
+        }
+      },
+      "grammar_neural_ranked": {
+        "configuration": "3. Arm C: Grammar Search + Mini-GPT Candidate Ranking",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.8,
+        "plan_exact_match_rate": 0.8,
+        "verified_answer_accuracy": 0.8,
+        "failure_rate": 0.2,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 1122.69,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 1.0,
+          "3": 1.0,
+          "4": 0.0,
+          "5": 0.0
+        }
+      },
+      "neural_slots_retry": {
+        "configuration": "4. Arm D: M17 Neural Plan + Bounded Feedback Retry",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.78,
+        "plan_exact_match_rate": 0.2,
+        "verified_answer_accuracy": 0.02,
+        "failure_rate": 0.26,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 248.61,
+        "mean_retries": 0.52,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.0
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.1,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.95
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 0.0,
+          "3": 0.0,
+          "4": 0.0,
+          "5": 0.0
+        }
+      },
+      "oracle_slots": {
+        "configuration": "5. Arm E: Oracle Structural Plan (Upper Bound)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 1.0,
+        "plan_exact_match_rate": 1.0,
+        "verified_answer_accuracy": 1.0,
+        "failure_rate": 0.0,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 0.1,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "1": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "2": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "addition_depth_ladder_accuracy": {
+          "2": 1.0,
+          "3": 1.0,
+          "4": 1.0,
+          "5": 1.0
+        }
+      }
+    }
+  },
+  "addition_depth_ladder": {},
+  "summary": {
+    "neural_slots": {
+      "configuration": "1. Arm A: M17 Neural Full-Plan Generation (Baseline)",
+      "mean_verified_answer_accuracy": 0.12,
+      "mean_plan_validity_rate": 0.7867,
+      "mean_plan_exact_match_rate": 0.2,
+      "mean_failure_rate": 0.28,
+      "mean_abstention_correctness": 0.0,
+      "mean_latency_ms": 187.44,
+      "mean_retries": 0.0,
+      "addition_depth_ladder": {
+        "depth_2_accuracy": 0.4667,
+        "depth_3_accuracy": 0.0,
+        "depth_4_accuracy": 0.0,
+        "depth_5_accuracy": 0.0
+      }
+    },
+    "grammar_search": {
+      "configuration": "2. Arm B: Grammar Search (No Neural Model)",
+      "mean_verified_answer_accuracy": 1.0,
+      "mean_plan_validity_rate": 1.0,
+      "mean_plan_exact_match_rate": 1.0,
+      "mean_failure_rate": 0.0,
+      "mean_abstention_correctness": 1.0,
+      "mean_latency_ms": 15.5,
+      "mean_retries": 0.0,
+      "addition_depth_ladder": {
+        "depth_2_accuracy": 1.0,
+        "depth_3_accuracy": 1.0,
+        "depth_4_accuracy": 1.0,
+        "depth_5_accuracy": 1.0
+      }
+    },
+    "grammar_neural_ranked": {
+      "configuration": "3. Arm C: Grammar Search + Mini-GPT Candidate Ranking",
+      "mean_verified_answer_accuracy": 0.8,
+      "mean_plan_validity_rate": 0.8,
+      "mean_plan_exact_match_rate": 0.8,
+      "mean_failure_rate": 0.2,
+      "mean_abstention_correctness": 1.0,
+      "mean_latency_ms": 1098.73,
+      "mean_retries": 0.0,
+      "addition_depth_ladder": {
+        "depth_2_accuracy": 1.0,
+        "depth_3_accuracy": 1.0,
+        "depth_4_accuracy": 0.0,
+        "depth_5_accuracy": 0.0
+      }
+    },
+    "neural_slots_retry": {
+      "configuration": "4. Arm D: M17 Neural Plan + Bounded Feedback Retry",
+      "mean_verified_answer_accuracy": 0.1267,
+      "mean_plan_validity_rate": 0.7933,
+      "mean_plan_exact_match_rate": 0.2067,
+      "mean_failure_rate": 0.2733,
+      "mean_abstention_correctness": 0.0,
+      "mean_latency_ms": 251.96,
+      "mean_retries": 0.55,
+      "addition_depth_ladder": {
+        "depth_2_accuracy": 0.4667,
+        "depth_3_accuracy": 0.0,
+        "depth_4_accuracy": 0.0,
+        "depth_5_accuracy": 0.0
+      }
+    },
+    "oracle_slots": {
+      "configuration": "5. Arm E: Oracle Structural Plan (Upper Bound)",
+      "mean_verified_answer_accuracy": 1.0,
+      "mean_plan_validity_rate": 1.0,
+      "mean_plan_exact_match_rate": 1.0,
+      "mean_failure_rate": 0.0,
+      "mean_abstention_correctness": 1.0,
+      "mean_latency_ms": 0.1,
+      "mean_retries": 0.0,
+      "addition_depth_ladder": {
+        "depth_2_accuracy": 1.0,
+        "depth_3_accuracy": 1.0,
+        "depth_4_accuracy": 1.0,
+        "depth_5_accuracy": 1.0
+      }
+    }
+  },
+  "timestamp": 1792452398.9465806
+}

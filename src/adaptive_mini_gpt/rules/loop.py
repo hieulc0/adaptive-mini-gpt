@@ -692,6 +692,127 @@ class ReasoningController:
                 latency_ms=latency,
             )
 
+
+        # Configurations: M18 Grammar Search Arms
+        # - "grammar_search": Deterministic Grammar-Constrained Search without model
+        # - "grammar_neural_ranked": Grammar Search with Mini-GPT log-prob candidate ranking
+        # - "grammar_neural_feedback": Grammar Search with Mini-GPT + error feedback guidance
+        if mode in ("grammar_search", "grammar_neural_ranked", "grammar_neural_feedback"):
+            from adaptive_mini_gpt.rules.grammar_planner import (
+                GrammarConstrainedPlanner,
+                NeuralCandidateScorer,
+                SearchBudgetExhaustedError,
+                TargetGoal,
+            )
+
+            try:
+                extracted_slots = slots if slots is not None else SlotExtractor.extract(question)
+            except AbstentionException as e:
+                latency = (time.perf_counter() - t0) * 1000.0
+                mem = WorkingMemory()
+                mem.reject(str(e))
+                return ReasoningResult(
+                    question=question,
+                    ground_truth_rule=mode,
+                    expected_answer=expected_answer,
+                    mode=mode,
+                    status="abstained",
+                    plan=None,
+                    plan_valid=False,
+                    plan_exact_match=False,
+                    answer_correct=should_abstain,
+                    abstained=True,
+                    abstention_correct=should_abstain,
+                    working_memory=mem,
+                    attempts=[AttemptRecord(attempt_index=1, raw_completion="Abstain", error_feedback=str(e))],
+                    latency_ms=latency,
+                )
+
+            # Score function setup
+            score_fn = None
+            if mode in ("grammar_neural_ranked", "grammar_neural_feedback") and self.model is not None and self.tokenizer is not None:
+                scorer = NeuralCandidateScorer(model=self.model, tokenizer=self.tokenizer, device=self.device, slots=extracted_slots)
+                score_fn = scorer.score_step
+
+            # Initialize planner with strict runtime goal isolation (no expected_answer passed)
+            target_goal = TargetGoal.from_question(question=question, slots=extracted_slots)
+            planner = GrammarConstrainedPlanner(
+                rule_executor=self.executor,
+                beam_width=4,
+                max_expansions=30,
+                max_depth=5,
+                score_fn=score_fn,
+            )
+
+            try:
+                plan_found, final_mem = planner.plan(
+                    question=question,
+                    slots=extracted_slots,
+                    target_goal=target_goal,
+                )
+                plan_valid = True
+                final_answer = str(final_mem.result) if final_mem.result is not None else None
+                status = "success"
+                plan_exact = False
+                ref_plan = expected_slot_plan or expected_plan
+                if ref_plan is not None:
+                    plan_exact = (
+                        len(plan_found.steps) == len(ref_plan.steps)
+                        and [s.operation for s in plan_found.steps] == [s.operation for s in ref_plan.steps]
+                    )
+                ans_correct = (
+                    expected_answer is not None
+                    and final_answer is not None
+                    and final_answer.lower() == expected_answer.lower()
+                )
+                latency = (time.perf_counter() - t0) * 1000.0
+                return ReasoningResult(
+                    question=question,
+                    ground_truth_rule=mode,
+                    expected_answer=expected_answer,
+                    mode=mode,
+                    status=status if ans_correct else "failed",
+                    final_answer=final_answer,
+                    plan=plan_found,
+                    plan_valid=plan_valid,
+                    plan_exact_match=plan_exact,
+                    answer_correct=ans_correct if not should_abstain else False,
+                    abstained=False,
+                    abstention_correct=not should_abstain,
+                    working_memory=final_mem,
+                    step_results=final_mem.variables,
+                    num_steps=len(plan_found.steps),
+                    attempts=[
+                        AttemptRecord(
+                            attempt_index=1,
+                            raw_completion=plan_found.to_text_format(),
+                            parsed_plan=plan_found,
+                            working_memory=final_mem,
+                        )
+                    ],
+                    latency_ms=latency,
+                )
+            except SearchBudgetExhaustedError as e:
+                latency = (time.perf_counter() - t0) * 1000.0
+                mem = WorkingMemory()
+                mem.reject(f"Search exhausted: {str(e)}")
+                return ReasoningResult(
+                    question=question,
+                    ground_truth_rule=mode,
+                    expected_answer=expected_answer,
+                    mode=mode,
+                    status="abstained" if should_abstain else "failed",
+                    plan=None,
+                    plan_valid=False,
+                    plan_exact_match=False,
+                    answer_correct=should_abstain,
+                    abstained=True,
+                    abstention_correct=should_abstain,
+                    working_memory=mem,
+                    attempts=[AttemptRecord(attempt_index=1, raw_completion="SearchExhausted", error_feedback=str(e))],
+                    latency_ms=latency,
+                )
+
         # Configurations 4, 5, 6: Neural Plans (Literals, Slots, Slots + Retry)
         # Extract or reuse grounded slots for slot modes
         extracted_slots: dict[str, GroundedSlot] = {}

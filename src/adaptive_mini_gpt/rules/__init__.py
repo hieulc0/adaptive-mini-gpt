@@ -59,6 +59,7 @@ from adaptive_mini_gpt.rules.plan import (
 )
 from adaptive_mini_gpt.rules.grammar_planner import (
     GrammarConstrainedPlanner,
+    NeuralCandidateScorer,
     PlanGrammar,
     SearchBudgetExhaustedError,
     TargetGoal,

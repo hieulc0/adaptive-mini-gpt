@@ -19,7 +19,8 @@
 | **M14** | Verified Rules & Reasoning Loop | Deterministic rule registry (4 rules), sandboxed execution, reasoning retry loop, multi-seed T4 benchmark, bottleneck isolated to argument extraction | **PASSED** (Verified on Tesla T4) |
 | **M15** | Grounded Argument Extraction & Working Memory | In-process `WorkingMemory`, exact source-span provenance tracking, deterministic and span-copy grounders, abstention battery, 100/100 tests | **PASSED** (Verified on Tesla T4) |
 | **M16** | Multi-Step Planning & Chained Compositional Reasoning | Typed `ExecutionPlan`, topological validation, acyclic step execution, multi-segment kinematics, intermediate working memory | **PASSED** (Verified on Tesla T4) |
-| **M17** | Hybrid Neural Planning & Grounded Slot Injection | Decouple neural structural plan synthesis from grounded variable injection, persistent working memory across turns | **PLANNED** |
+| **M17** | Hybrid Neural Planning & Grounded Slot Injection | Decouple neural structural plan synthesis from grounded variable injection, persistent working memory across turns | **PASSED** (Verified on Tesla T4) |
+| **M18** | Grammar-Constrained Execution-Guided Planning | Stepwise typed search, isolated branch working memory, runtime goal isolation, 5-arm T4 benchmark | **PASSED** (Verified on Tesla T4) |
 
 ---
 
@@ -220,7 +221,7 @@
   - Conversational Working Memory: **80.0% Turn 1 accuracy**, **90.0% Turn 2 accuracy**, and **100.0% safe abstention** on ambiguous queries.
   - Proves conclusively that eliminating literal value hallucination via slot grounding unlocks end-to-end neural multi-step execution.
 
-### M18: Grammar-Constrained, Execution-Guided Planning (In-Progress)
+### M18: Grammar-Constrained, Execution-Guided Planning (Completed)
 - **Phase 1: Deterministic Baseline Audit & Reconciliation (Completed)**:
   - Repaired 5-step kinematics argument regression in `DeterministicTemplatePlanner._plan_multi_segment_speed` (`b: d3` -> `b: t3`).
   - Added regression test `test_deterministic_template_planner_three_segment_speed_regression` with unequal distances and times.
@@ -232,6 +233,21 @@
   - `TargetGoal` & Semantic Verification: Decouples structural plan executability from question goal completion (dependency completeness, unit consistency, ground-truth match).
   - Controlled Addition Depth Ladders: Isolated DAG depth across 2, 3, 4, 5 steps with identical operand distribution.
   - Test Suite: 128/128 passing tests across full project repository.
-- **Phase 3-6: Neural Step Proposing, Bounded Search Ablations, and T4 Benchmark Qualification (Upcoming)**:
-  - Compare M17 deterministic baseline vs. monolithic neural generation vs. grammar-constrained stepwise search.
-  - Benchmark on NVIDIA Tesla T4 across 3 lineages.
+- **Phase 3: Strict Runtime Ground-Truth Isolation (Completed)**:
+  - Removed `expected_answer` from runtime `TargetGoal` and `evaluate_semantics`.
+  - Stepwise candidate search and ranking operate strictly without access to expected benchmark answers.
+  - Runtime validation evaluates postconditions exclusively via:
+    1. Verification status in working memory (`working_memory.verified`)
+    2. Transitive input slot dependency coverage (`required_slots <= final_deps`)
+    3. Output unit consistency (`final_unit == expected_unit`)
+- **Phase 4: Neural-Guided Candidate Scoring (`NeuralCandidateScorer`) (Completed)**:
+  - Evaluates log-probabilities of valid candidate steps using prefix conditioning (question + available slots + executed prefix steps).
+- **Phase 5: Multi-Seed Empirical Benchmark on NVIDIA Tesla T4 GPU (Completed)**:
+  - Conducted 5-arm ablation across 3 independent lineages (seeds 42, 43, 44) on real Tesla T4 GPU:
+    - Arm A (M17 Monolithic Neural Slots Baseline): **12.00% verified accuracy**, 78.67% plan validity, 187.44 ms latency.
+    - Arm B (Grammar Search without Model): **100.00% verified accuracy**, 100.0% plan validity, 100.0% abstention correctness, **15.50 ms latency** (>12x faster than neural).
+    - Arm C (Grammar Search + Mini-GPT Ranking): **80.00% verified accuracy**, 80.0% plan validity, 100.0% abstention correctness, 1098.73 ms latency.
+    - Arm D (M17 Neural Plan + Bounded Feedback Retry): **12.67% verified accuracy**, 79.33% plan validity, 251.96 ms latency.
+    - Arm E (Oracle Structural Plan Upper Bound): **100.00% verified accuracy**, 0.10 ms latency.
+  - Addition Depth Ladder (2, 3, 4, 5 steps): Arm B solves 100% across all depths (2 to 5 steps); Arm C solves 100% on depths 2 and 3; monolithic Arm A drops to 0% beyond depth 2.
+  - Core Scientific Finding: Stepwise grammar constraints and isolated branch memory completely eliminate structural planning failures. However, under identical search budgets, unranked grammar search (Arm B) outperforms neural log-probability ranking (Arm C: 80%), demonstrating that the 4-layer Mini-GPT does not yet provide superior heuristic guidance over deterministic topological constraint satisfaction.

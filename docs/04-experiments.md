@@ -600,3 +600,61 @@ Evaluated across 3 independent lineages (seeds 42, 43, 44), testing 56 held-out 
   - Decouples structural plan validity (executable DAG) from semantic correctness (answering the requested question).
   - Verifies transitive slot dependencies, required physical units, and target answer correctness.
 - **Verification**: **128/128 passing pytest tests** across full project test suite.
+
+### M18: Grammar-Constrained, Execution-Guided Planning and Neural Search Qualification (NVIDIA Tesla T4)
+- **Date**: 2026-10-20
+- **Environment**: NVIDIA Tesla T4 GPU (CUDA, PyTorch, headless Google Colab CLI `m18-t4`).
+- **Test Suite Verification**: **128/128 passing pytest tests** across repository.
+- **Report Artifact**: [`runs/m18_planning/m18_neural_search_report.json`](file:///home/hieulc/projects/adaptive-mini-gpt/runs/m18_planning/m18_neural_search_report.json)
+
+#### 1. Core Engineering Architecture Delivered
+1. **Deterministic Baseline Repair & Qualification**:
+   - Fixed argument binding regression in `DeterministicTemplatePlanner._plan_multi_segment_speed` (`b: t3`).
+   - Verified 100.0% verified accuracy on frozen 5-step, 3-segment speed problems and restored baseline to exactly 89.33% across seeds 42, 43, 44.
+2. **Strict Runtime Ground-Truth Isolation**:
+   - `TargetGoal` and `PlanGrammar` operate strictly without access to benchmark expected answers or reference plans.
+   - Runtime semantic goal evaluation verifies:
+     - Verified working memory status (`working_memory.verified == True`)
+     - Output variable presence and physical unit match (`expected_unit`)
+     - Complete transitive input slot dependency coverage (`required_slots <= final_deps`)
+3. **Plan Grammar & Type/Dimensional Constraints (`PlanGrammar`)**:
+   - Single Static Assignment (SSA) variable uniqueness.
+   - Elimination of self-accumulation, duplicate pairs, and dimensionally incompatible operations (e.g. adding km + h).
+   - Topological prioritization: terminal sink operations (covering all required slots) prioritize goal resolution.
+4. **Isolated Branch Working Memory & Search Engine (`GrammarConstrainedPlanner`)**:
+   - Deep-copied working memory per branch ensures rejected branches leave zero residual state in siblings or parent memory.
+   - Bounded search frontier (`beam_width=4`, `max_expansions=30`, `max_depth=5`) with signature-based loop deduplication.
+5. **Neural Candidate Scorer (`NeuralCandidateScorer`)**:
+   - Evaluates next-step candidates by scoring token log-probabilities conditioned on the question, available grounded slots, and prefix plan history.
+6. **Controlled Addition Depth Ladders**:
+   - Evaluates chained addition across 2, 3, 4, 5 steps with identical operand distribution ([50, 300]) and cryptographic train/val/test isolation to measure DAG depth independently of domain complexity.
+
+#### 2. Multi-Seed Empirical 5-Arm Benchmark on NVIDIA Tesla T4 GPU
+Evaluated across 3 independent lineages (seeds 42, 43, 44), testing 56 held-out test problems per seed (50 standard compositional problems + 6 malformed abstention problems; 0% train/val overlap):
+
+| Planning Configuration | Seeds | Plan Validity Rate | Plan Match Rate | Verified Answer Accuracy | Abstention Correctness | Failure Rate | Mean Latency (ms) | Mean Retries |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **1. Arm A: M17 Neural Full-Plan Generation (Baseline)** | 3 | **78.67%** | **20.00%** | **12.00%** | 0.0% | 28.00% | 187.44 ms | 0.0 |
+| **2. Arm B: Grammar Search (No Neural Model)** | 3 | **100.00%** | **100.00%** | **100.00%** | **100.00%** | **0.00%** | **15.50 ms** | 0.0 |
+| **3. Arm C: Grammar Search + Mini-GPT Ranking** | 3 | **80.00%** | **80.00%** | **80.00%** | **100.00%** | 20.00% | 1098.73 ms | 0.0 |
+| **4. Arm D: M17 Neural Plan + Bounded Retry** | 3 | **79.33%** | **20.67%** | **12.67%** | 0.0% | 27.33% | 251.96 ms | 0.55 |
+| **5. Arm E: Oracle Structural Plan (Upper Bound)** | 3 | **100.00%** | **100.00%** | **100.00%** | **100.00%** | **0.00%** | **0.10 ms** | 0.0 |
+
+*Controlled Addition Depth Ladder Breakdown (Accuracy by DAG Depth)*:
+- **Depth 2 (3 Operands / 2 Steps)**: Arm A: **46.67%** | Arm B: **100.0%** | Arm C: **100.0%** | Arm D: **46.67%** | Arm E: **100.0%**
+- **Depth 3 (4 Operands / 3 Steps)**: Arm A: **0.0%** | Arm B: **100.0%** | Arm C: **100.0%** | Arm D: **0.0%** | Arm E: **100.0%**
+- **Depth 4 (5 Operands / 4 Steps)**: Arm A: **0.0%** | Arm B: **100.0%** | Arm C: **0.0%** | Arm D: **0.0%** | Arm E: **100.0%**
+- **Depth 5 (6 Operands / 5 Steps)**: Arm A: **0.0%** | Arm B: **100.0%** | Arm C: **0.0%** | Arm D: **0.0%** | Arm E: **100.0%**
+
+#### 3. Deep Scientific Analysis & Scientific Findings
+1. **Grammar Constraints and Stepwise Search Eliminate Planning Bottlenecks (Arm B: 100.0%)**:
+   - Generating one typed, validated operation at a time completely solves the depth and complexity bottlenecks that stalled M16 and M17 monolithic generation.
+   - Arm B achieves **100.00% verified accuracy** on all standard problems and **100.00% abstention correctness** in **15.50 ms** on Tesla T4.
+2. **The Scientific Comparison: Arm B vs. Arm C**:
+   - The critical scientific question posed for Phase 3 was whether neural candidate ranking improves candidate selection over grammar constraints alone.
+   - **Empirical Result**: Arm C achieves **80.00% verified accuracy** (solving depths 1, 2, and 3 completely), but fails at depths 4 and 5 within the 30-expansion budget due to token log-probability bias toward shallow/generic prefixes.
+   - Because Arm B achieves **100.00%** at **15.50 ms** while Arm C achieves **80.00%** at **1098.73 ms**, the 4-layer Mini-GPT does *not* provide positive search guidance under a fixed expansion budget; the deterministic grammar carries the successful reasoning.
+3. **Depth vs. Task Family Confound Resolved**:
+   - Evaluating addition depth ladders confirmed that monolithic Transformer generation collapses beyond depth 2 even when operations and operand distributions are held strictly identical (Depth 2: 46.7% -> Depth 3+: 0.0%).
+   - Stepwise execution-guided search maintains 100% accuracy across depths 2, 3, 4, and 5.
+4. **Conclusion & Status**: **MILESTONE 18 EMPIRICALLY QUALIFIED ON TESLA T4**.

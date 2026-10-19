@@ -160,11 +160,10 @@ def test_semantic_correctness_vs_structural_validity() -> None:
         "operand_3": GroundedSlot("operand_3", 30, None, "30", 0, 0, type_name="int"),
         "operand_4": GroundedSlot("operand_4", 40, None, "40", 0, 0, type_name="int"),
     }
-    # Goal: sum of all 4 operands (expected answer 100)
+    # Goal: sum of all 4 operands (runtime goal has no access to expected answer 100)
     goal = TargetGoal(
         goal_type="sum",
         required_slots={"operand_1", "operand_2", "operand_3", "operand_4"},
-        expected_answer="100",
     )
 
     # Incomplete plan: only adds operand_1 and operand_2
