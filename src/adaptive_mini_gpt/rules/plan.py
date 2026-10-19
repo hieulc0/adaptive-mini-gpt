@@ -1,9 +1,9 @@
-"""Typed Execution Plan Representation and Verification (M16).
+"""Typed Execution Plan Representation, Grounded Slot Injection, and Verification (M16/M17).
 
 Implements bounded, typed, acyclic multi-step execution plans:
-- PlanStep: explicit operation, literal or variable reference arguments ($var), output variable, units, dependencies.
-- ExecutionPlan: sequence of up to 5 steps, topological validation, cycle rejection, missing reference checks.
-- PlanExecutor: executes steps topologically against WorkingMemory, resolves variable bindings, checks unit consistency, and records provenance.
+- PlanStep: explicit operation, literal, slot ($distance_1) or variable ($var) reference arguments, units, dependencies.
+- ExecutionPlan: sequence of up to 5 steps, topological validation, cycle rejection, slot and variable reference checks.
+- PlanExecutor: executes steps topologically against WorkingMemory and GroundedSlot registry, resolves variable bindings, checks unit consistency, and records provenance.
 
 Safety:
 - Disallows arbitrary Python execution (no eval, no exec, no shell).
@@ -19,7 +19,13 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from adaptive_mini_gpt.rules.executor import RuleExecutionResult, RuleExecutor
-from adaptive_mini_gpt.rules.memory import StepProvenance, WorkingMemory
+from adaptive_mini_gpt.rules.memory import (
+    AmbiguousReferenceError,
+    ConversationMemory,
+    GroundedSlot,
+    StepProvenance,
+    WorkingMemory,
+)
 from adaptive_mini_gpt.rules.registry import RULE_REGISTRY, SchemaValidationError
 
 
@@ -32,7 +38,7 @@ class PlanValidationError(PlanError):
 
 
 class DependencyResolutionError(PlanError):
-    """Raised when an execution step references an unverified or missing variable."""
+    """Raised when an execution step references an unverified or missing variable/slot."""
 
 
 class UnitMismatchError(PlanError):
@@ -45,7 +51,7 @@ class PlanStep:
 
     output_var: str
     operation: str
-    args: dict[str, Any]  # literal constants or variable references like "$dist"
+    args: dict[str, Any]  # literal constants, slots ($distance_1), or variable references ($var)
     units: str | None = None
     step_index: int = 1
 
@@ -84,8 +90,8 @@ class ExecutionPlan:
     steps: list[PlanStep] = field(default_factory=list)
     final_var: str | None = None
 
-    def validate(self) -> None:
-        """Validate topological ordering, cycle freedom, step bound, and registered operations."""
+    def validate(self, allowed_slots: set[str] | None = None) -> None:
+        """Validate topological ordering, cycle freedom, step bound, registered operations, and slot/var refs."""
         if not self.steps:
             raise PlanValidationError("Execution plan cannot be empty")
         if len(self.steps) > 5:
@@ -109,17 +115,30 @@ class ExecutionPlan:
                     f"Variable '{step.output_var}' is redefined in step {step.step_index} (SSA violation)"
                 )
 
-            # Check dependencies: must be defined in prior steps
+            # Check dependencies: must be defined in prior steps or be a known slot/cross-turn ref
             refs = step.get_referenced_variables()
             for r in refs:
                 if r == step.output_var:
                     raise PlanValidationError(
                         f"Step {step.step_index} ('{step.output_var}') contains self-dependency on '${r}'"
                     )
-                if r not in defined_vars:
-                    raise PlanValidationError(
-                        f"Step {step.step_index} references undefined variable '${r}' (must be defined in prior step)"
-                    )
+
+                is_cross_turn = "." in r
+                if allowed_slots is not None:
+                    # Strict validation against allowed slots and defined step variables
+                    if r not in defined_vars and r not in allowed_slots and not is_cross_turn:
+                        raise PlanValidationError(
+                            f"Step {step.step_index} references unknown slot or undefined variable '${r}'"
+                        )
+                else:
+                    # If allowed_slots is not passed, check if defined or slot-like identifier
+                    is_slot_name = r.startswith((
+                        "distance_", "duration_", "operand_", "metric_", "entity_", "text_", "slot_"
+                    ))
+                    if r not in defined_vars and not is_cross_turn and not is_slot_name:
+                        raise PlanValidationError(
+                            f"Step {step.step_index} references undefined variable '${r}' (must be defined in prior step)"
+                        )
 
             defined_vars.add(step.output_var)
 
@@ -173,7 +192,7 @@ class PlanExecutionResult:
 
 
 class PlanExecutor:
-    """Executes validated multi-step plans deterministically with provenance tracking."""
+    """Executes validated multi-step plans deterministically with provenance and grounded slot binding."""
 
     def __init__(self, rule_executor: RuleExecutor | None = None) -> None:
         self.rule_executor = rule_executor if rule_executor is not None else RuleExecutor()
@@ -182,14 +201,17 @@ class PlanExecutor:
         self,
         plan: ExecutionPlan,
         working_memory: WorkingMemory | None = None,
+        conversation_memory: ConversationMemory | None = None,
     ) -> PlanExecutionResult:
-        """Execute all steps in topological order, binding intermediate variables into WorkingMemory."""
+        """Execute all steps in topological order, binding intermediate variables and slots into WorkingMemory."""
         t0 = time.perf_counter()
         mem = working_memory if working_memory is not None else WorkingMemory()
 
-        # Step 1: Validate plan syntax, acyclicity, and step count
+        allowed_slots = set(mem.slots.keys()) if mem.slots else None
+
+        # Step 1: Validate plan syntax, acyclicity, step count, and slot references
         try:
-            plan.validate()
+            plan.validate(allowed_slots=allowed_slots)
         except PlanValidationError as e:
             mem.reject(f"Plan validation failed: {str(e)}")
             latency = (time.perf_counter() - t0) * 1000.0
@@ -205,68 +227,111 @@ class PlanExecutor:
 
         step_results: dict[str, Any] = {}
 
+        def _resolve_ref(ref_name: str, step_i: int) -> tuple[Any, str | None]:
+            """Helper to resolve a variable or slot reference to (value, unit)."""
+            # 1. Check intermediate plan variables
+            if ref_name in mem.variables:
+                return mem.variables[ref_name], mem.step_units.get(ref_name)
+
+            # 2. Check grounded input slots (M17)
+            if ref_name in mem.slots:
+                slot = mem.slots[ref_name]
+                return slot.value, slot.unit
+
+            # 3. Check cross-turn conversational memory (M17 Phase 5)
+            if conversation_memory is not None:
+                try:
+                    return conversation_memory.resolve_reference(ref_name)
+                except Exception as ex:
+                    raise DependencyResolutionError(
+                        f"Step {step_i}: Failed to resolve conversational reference '${ref_name}': {str(ex)}"
+                    ) from ex
+
+            raise DependencyResolutionError(
+                f"Step {step_i}: Missing verified variable or grounded slot '${ref_name}'"
+            )
+
         # Step 2: Sequential topological execution
         for step_idx, step in enumerate(plan.steps, start=1):
-            # Resolve variable references
             resolved_args: dict[str, Any] = {}
-            for arg_key, arg_val in step.args.items():
-                if isinstance(arg_val, str) and arg_val.startswith("$"):
-                    ref_var = arg_val[1:].strip()
-                    if ref_var not in mem.variables:
-                        err_msg = f"Step {step_idx}: Missing verified variable '${ref_var}'"
-                        mem.reject(err_msg)
-                        latency = (time.perf_counter() - t0) * 1000.0
-                        return PlanExecutionResult(
-                            success=False,
-                            final_var=plan.final_var,
-                            final_result=None,
-                            step_results=step_results,
-                            working_memory=mem,
-                            executed_steps=step_idx - 1,
-                            error=err_msg,
-                            failed_step_index=step_idx,
-                            latency_ms=latency,
-                        )
-                    resolved_args[arg_key] = mem.variables[ref_var]
-                elif isinstance(arg_val, list):
-                    resolved_list: list[Any] = []
-                    for item in arg_val:
-                        if isinstance(item, str) and item.startswith("$"):
-                            ref_var = item[1:].strip()
-                            if ref_var not in mem.variables:
-                                err_msg = f"Step {step_idx}: Missing verified variable '${ref_var}'"
-                                mem.reject(err_msg)
-                                latency = (time.perf_counter() - t0) * 1000.0
-                                return PlanExecutionResult(
-                                    success=False,
-                                    final_var=plan.final_var,
-                                    final_result=None,
-                                    step_results=step_results,
-                                    working_memory=mem,
-                                    executed_steps=step_idx - 1,
-                                    error=err_msg,
-                                    failed_step_index=step_idx,
-                                    latency_ms=latency,
-                                )
-                            resolved_list.append(mem.variables[ref_var])
-                        else:
-                            resolved_list.append(item)
-                    resolved_args[arg_key] = resolved_list
-                else:
-                    resolved_args[arg_key] = arg_val
+            arg_units: dict[str, str | None] = {}
+
+            # Resolve variable/slot references
+            try:
+                for arg_key, arg_val in step.args.items():
+                    if isinstance(arg_val, str) and arg_val.startswith("$"):
+                        ref_var = arg_val[1:].strip()
+                        val, u = _resolve_ref(ref_var, step_idx)
+                        resolved_args[arg_key] = val
+                        arg_units[arg_key] = u
+                    elif isinstance(arg_val, list):
+                        resolved_list: list[Any] = []
+                        for item in arg_val:
+                            if isinstance(item, str) and item.startswith("$"):
+                                ref_var = item[1:].strip()
+                                val, u = _resolve_ref(ref_var, step_idx)
+                                resolved_list.append(val)
+                            else:
+                                resolved_list.append(item)
+                        resolved_args[arg_key] = resolved_list
+                    else:
+                        resolved_args[arg_key] = arg_val
+            except DependencyResolutionError as e:
+                mem.reject(str(e))
+                latency = (time.perf_counter() - t0) * 1000.0
+                return PlanExecutionResult(
+                    success=False,
+                    final_var=plan.final_var,
+                    final_result=None,
+                    step_results=step_results,
+                    working_memory=mem,
+                    executed_steps=step_idx - 1,
+                    error=str(e),
+                    failed_step_index=step_idx,
+                    latency_ms=latency,
+                )
 
             # Unit consistency checks for arithmetic
             if step.operation == "add":
-                # If both arguments reference earlier steps, check their units
-                units_used = []
-                for val in step.args.values():
-                    if isinstance(val, str) and val.startswith("$"):
-                        ref_var = val[1:].strip()
-                        u = mem.step_units.get(ref_var)
-                        if u:
-                            units_used.append(u)
+                # Check units of operands
+                units_used = [u for u in arg_units.values() if u is not None]
                 if len(units_used) == 2 and units_used[0] != units_used[1]:
                     err_msg = f"Step {step_idx}: Unit mismatch in addition: '{units_used[0]}' vs '{units_used[1]}'"
+                    mem.reject(err_msg)
+                    latency = (time.perf_counter() - t0) * 1000.0
+                    return PlanExecutionResult(
+                        success=False,
+                        final_var=plan.final_var,
+                        final_result=None,
+                        step_results=step_results,
+                        working_memory=mem,
+                        executed_steps=step_idx - 1,
+                        error=err_msg,
+                        failed_step_index=step_idx,
+                        latency_ms=latency,
+                    )
+
+            # Unit checks for kinematics average_speed
+            if step.operation == "average_speed":
+                d_unit = arg_units.get("distance_km")
+                t_unit = arg_units.get("time_hours")
+                if d_unit and d_unit not in ("km", "kilometers", "kilometer"):
+                    err_msg = f"Step {step_idx}: Incompatible distance unit in average_speed: '{d_unit}'"
+                    mem.reject(err_msg)
+                    latency = (time.perf_counter() - t0) * 1000.0
+                    return PlanExecutionResult(
+                        success=False,
+                        final_var=plan.final_var,
+                        final_result=None,
+                        step_results=step_results,
+                        working_memory=mem,
+                        executed_steps=step_idx - 1,
+                        error=err_msg,
+                        failed_step_index=step_idx,
+                        latency_ms=latency,
+                    )
+                if t_unit and t_unit not in ("h", "hours", "hrs", "hour"):
+                    err_msg = f"Step {step_idx}: Incompatible time unit in average_speed: '{t_unit}'"
                     mem.reject(err_msg)
                     latency = (time.perf_counter() - t0) * 1000.0
                     return PlanExecutionResult(

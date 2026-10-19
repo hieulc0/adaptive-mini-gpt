@@ -1,4 +1,4 @@
-"""Rules, Deterministic Execution, Working Memory, Grounded Reasoning, and Multi-Step Planning (M14/M15/M16)."""
+"""Rules, Deterministic Execution, Working Memory, Grounded Slots, and Multi-Step Planning (M14/M15/M16/M17)."""
 
 from adaptive_mini_gpt.rules.dataset import (
     RuleProblem,
@@ -16,7 +16,9 @@ from adaptive_mini_gpt.rules.grounding import (
     DeterministicArgumentGrounder,
     DeterministicRuleSelector,
     GroundingError,
+    SlotExtractor,
     SpanCopyArgumentGrounder,
+    format_available_slots,
 )
 from adaptive_mini_gpt.rules.loop import (
     AttemptRecord,
@@ -27,12 +29,18 @@ from adaptive_mini_gpt.rules.loop import (
     parse_rule_call,
 )
 from adaptive_mini_gpt.rules.memory import (
+    AmbiguousReferenceError,
     ArgumentProvenance,
+    ConversationMemory,
+    ConversationTurn,
+    GroundedSlot,
     StepProvenance,
     WorkingMemory,
 )
 from adaptive_mini_gpt.rules.multistep_dataset import (
+    ConversationSessionProblem,
     MultiStepProblem,
+    generate_conversational_problems,
     generate_multistep_abstention_problems,
     generate_multistep_instruction_corpus,
     generate_multistep_problems,
@@ -72,13 +80,18 @@ from adaptive_mini_gpt.rules.registry import (
 
 __all__ = [
     "AbstentionException",
+    "AmbiguousReferenceError",
     "ArgumentProvenance",
     "AttemptRecord",
+    "ConversationMemory",
+    "ConversationSessionProblem",
+    "ConversationTurn",
     "DependencyResolutionError",
     "DeterministicArgumentGrounder",
     "DeterministicRuleSelector",
     "DeterministicTemplatePlanner",
     "ExecutionPlan",
+    "GroundedSlot",
     "GroundingError",
     "MultiStepProblem",
     "PlanError",
@@ -95,6 +108,7 @@ __all__ = [
     "RuleProblem",
     "RuleSpecification",
     "SchemaValidationError",
+    "SlotExtractor",
     "SpanCopyArgumentGrounder",
     "StepProvenance",
     "UnitMismatchError",
@@ -105,8 +119,10 @@ __all__ = [
     "execute_average_speed",
     "execute_compare",
     "execute_reverse",
+    "format_available_slots",
     "format_rule_call",
     "generate_abstention_problems",
+    "generate_conversational_problems",
     "generate_multistep_abstention_problems",
     "generate_multistep_instruction_corpus",
     "generate_multistep_problems",
@@ -118,8 +134,4 @@ __all__ = [
     "list_allowed_rules",
     "parse_plan",
     "parse_rule_call",
-    "verify_add",
-    "verify_average_speed",
-    "verify_compare",
-    "verify_reverse",
 ]

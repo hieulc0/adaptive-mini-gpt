@@ -1,12 +1,13 @@
-"""Dataset generation for Multi-Step Planning and Compositional Reasoning (M16).
+"""Dataset generation for Multi-Step Planning and Grounded Slot Binding (M16/M17).
 
 Generates partitioned, multi-step compositional problems across 2 to 5 steps:
 - Multi-segment average speed (2 segments = 3 steps, 3 segments = 5 steps)
 - Chained arithmetic (3 operands = 2 steps, 4 operands = 3 steps, 5 operands = 4 steps)
 - Transitive comparison chains (4+ entities)
-- Mixed operations
+- Typed Grounded Slot registries with stable slot IDs ($distance_1, $duration_1, etc.)
+- Multi-turn Conversational Sessions (M17 Phase 5) with cross-turn reference resolution
 - Robust variations: changed phrasing, inverted order, distracting numbers (years, flight numbers)
-- Abstention battery: invalid dimensions (adding km + h), non-positive time, cyclic relations, missing data
+- Abstention battery: invalid dimensions, non-positive time, cyclic relations, ambiguous conversational referents
 
 Enforces strictly disjoint train (70%), val (15%), and test (15%) splits via SHA-256 cryptographic hash.
 """
@@ -15,9 +16,11 @@ from __future__ import annotations
 
 import hashlib
 import random
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
+from adaptive_mini_gpt.rules.grounding import format_available_slots
+from adaptive_mini_gpt.rules.memory import GroundedSlot
 from adaptive_mini_gpt.rules.plan import ExecutionPlan, PlanStep
 
 
@@ -31,22 +34,53 @@ class MultiStepProblem:
     num_steps: int
     archetype: str
     split: str
+    slots: dict[str, GroundedSlot] = field(default_factory=dict)
+    expected_slot_plan: ExecutionPlan | None = None
     is_malformed: bool = False
     should_abstain: bool = False
     abstain_reason: str | None = None
 
     def to_plan_pair(self) -> str:
-        """Instruction pair with ground truth plan as assistant completion."""
+        """Instruction pair with ground truth plan with literals as assistant completion (M16 format)."""
         if self.should_abstain:
             completion = f"Abstain: {self.abstain_reason or 'Invalid query'}"
         else:
             completion = self.expected_plan.to_text_format()
         return f"<|user|>\n{self.question}\n<|assistant|>\n{completion}<|eos|>\n"
 
+    def to_slot_plan_pair(self) -> str:
+        """Instruction pair with available slots in user prompt and slot-referencing plan as completion (M17 format)."""
+        slots_text = format_available_slots(self.slots)
+        user_content = f"{self.question}\n{slots_text}"
+        if self.should_abstain:
+            completion = f"Abstain: {self.abstain_reason or 'Invalid query'}"
+        else:
+            plan = self.expected_slot_plan if self.expected_slot_plan is not None else self.expected_plan
+            completion = plan.to_text_format()
+        return f"<|user|>\n{user_content}\n<|assistant|>\n{completion}<|eos|>\n"
+
     def to_direct_pair(self) -> str:
         """Instruction pair with direct answer as assistant completion (neural baseline)."""
         ans = self.expected_answer if self.expected_answer is not None else "Cannot determine"
         return f"<|user|>\n{self.question}\n<|assistant|>\n{ans}<|eos|>\n"
+
+
+@dataclass
+class ConversationSessionProblem:
+    """A multi-turn conversational reasoning session across 2 consecutive turns (M17 Phase 5)."""
+
+    session_id: str
+    turn1_question: str
+    turn1_expected_answer: str | None
+    turn1_plan: ExecutionPlan
+    turn1_slots: dict[str, GroundedSlot]
+    turn2_question: str
+    turn2_expected_answer: str | None
+    turn2_plan: ExecutionPlan
+    turn2_slots: dict[str, GroundedSlot]
+    is_ambiguous: bool = False
+    should_abstain_turn2: bool = False
+    abstain_reason: str | None = None
 
 
 def get_multistep_split(key: str) -> str:
@@ -66,7 +100,7 @@ def generate_multistep_problems(
     seed: int = 42,
     split: str = "train",
 ) -> list[MultiStepProblem]:
-    """Generate balanced multi-step problems partitioned by cryptographic hash."""
+    """Generate balanced multi-step problems with both literal and grounded-slot execution plans."""
     rng = random.Random(seed)
     problems: list[MultiStepProblem] = []
 
@@ -93,7 +127,6 @@ def generate_multistep_problems(
         d2 = v2 * t2
         total_d = d1 + d2
         total_t = t1 + t2
-        # Ensure clean speed
         if total_d % total_t != 0:
             continue
         expected_speed = f"{total_d // total_t} km/h"
@@ -105,7 +138,7 @@ def generate_multistep_problems(
         tmpl = rng.choice(speed_templates_2seg)
         q = tmpl.format(d1=d1, t1=t1, d2=d2, t2=t2)
 
-        plan = ExecutionPlan(
+        literal_plan = ExecutionPlan(
             steps=[
                 PlanStep(output_var="d_total", operation="add", args={"a": float(d1), "b": float(d2)}, units="km"),
                 PlanStep(output_var="t_total", operation="add", args={"a": float(t1), "b": float(t2)}, units="h"),
@@ -119,14 +152,37 @@ def generate_multistep_problems(
             final_var="overall_speed",
         )
 
+        slots = {
+            "distance_1": GroundedSlot("distance_1", float(d1), "km", f"{d1} km", 0, 0, "deterministic"),
+            "duration_1": GroundedSlot("duration_1", float(t1), "h", f"{t1} hours", 0, 0, "deterministic"),
+            "distance_2": GroundedSlot("distance_2", float(d2), "km", f"{d2} km", 0, 0, "deterministic"),
+            "duration_2": GroundedSlot("duration_2", float(t2), "h", f"{t2} hours", 0, 0, "deterministic"),
+        }
+
+        slot_plan = ExecutionPlan(
+            steps=[
+                PlanStep(output_var="d_total", operation="add", args={"a": "$distance_1", "b": "$distance_2"}, units="km"),
+                PlanStep(output_var="t_total", operation="add", args={"a": "$duration_1", "b": "$duration_2"}, units="h"),
+                PlanStep(
+                    output_var="overall_speed",
+                    operation="average_speed",
+                    args={"distance_km": "$d_total", "time_hours": "$t_total"},
+                    units="km/h",
+                ),
+            ],
+            final_var="overall_speed",
+        )
+
         problems.append(
             MultiStepProblem(
                 question=q,
-                expected_plan=plan,
+                expected_plan=literal_plan,
                 expected_answer=expected_speed,
                 num_steps=3,
                 archetype="2segment_speed",
                 split=split,
+                slots=slots,
+                expected_slot_plan=slot_plan,
             )
         )
         count += 1
@@ -147,7 +203,6 @@ def generate_multistep_problems(
         v = rng.choice([50, 60, 75, 80, 90, 100])
         total_t = t1 + t2 + t3
         total_d = v * total_t
-        # Partition distance
         d1 = rng.randint(40, 120)
         d2 = rng.randint(40, 120)
         d3 = total_d - (d1 + d2)
@@ -163,7 +218,7 @@ def generate_multistep_problems(
         q = tmpl.format(d1=d1, t1=t1, d2=d2, t2=t2, d3=d3, t3=t3)
         expected_speed = f"{v} km/h"
 
-        plan = ExecutionPlan(
+        literal_plan = ExecutionPlan(
             steps=[
                 PlanStep(output_var="d_12", operation="add", args={"a": float(d1), "b": float(d2)}, units="km"),
                 PlanStep(output_var="d_total", operation="add", args={"a": "$d_12", "b": float(d3)}, units="km"),
@@ -179,14 +234,41 @@ def generate_multistep_problems(
             final_var="overall_speed",
         )
 
+        slots = {
+            "distance_1": GroundedSlot("distance_1", float(d1), "km", f"{d1} km", 0, 0, "deterministic"),
+            "duration_1": GroundedSlot("duration_1", float(t1), "h", f"{t1} hours", 0, 0, "deterministic"),
+            "distance_2": GroundedSlot("distance_2", float(d2), "km", f"{d2} km", 0, 0, "deterministic"),
+            "duration_2": GroundedSlot("duration_2", float(t2), "h", f"{t2} hours", 0, 0, "deterministic"),
+            "distance_3": GroundedSlot("distance_3", float(d3), "km", f"{d3} km", 0, 0, "deterministic"),
+            "duration_3": GroundedSlot("duration_3", float(t3), "h", f"{t3} hours", 0, 0, "deterministic"),
+        }
+
+        slot_plan = ExecutionPlan(
+            steps=[
+                PlanStep(output_var="d_12", operation="add", args={"a": "$distance_1", "b": "$distance_2"}, units="km"),
+                PlanStep(output_var="d_total", operation="add", args={"a": "$d_12", "b": "$distance_3"}, units="km"),
+                PlanStep(output_var="t_12", operation="add", args={"a": "$duration_1", "b": "$duration_2"}, units="h"),
+                PlanStep(output_var="t_total", operation="add", args={"a": "$t_12", "b": "$duration_3"}, units="h"),
+                PlanStep(
+                    output_var="overall_speed",
+                    operation="average_speed",
+                    args={"distance_km": "$d_total", "time_hours": "$t_total"},
+                    units="km/h",
+                ),
+            ],
+            final_var="overall_speed",
+        )
+
         problems.append(
             MultiStepProblem(
                 question=q,
-                expected_plan=plan,
+                expected_plan=literal_plan,
                 expected_answer=expected_speed,
                 num_steps=5,
                 archetype="3segment_speed",
                 split=split,
+                slots=slots,
+                expected_slot_plan=slot_plan,
             )
         )
         count += 1
@@ -217,7 +299,7 @@ def generate_multistep_problems(
         q = tmpl.format(a=a, b=b, c=c)
         expected_ans = str(a + b + c)
 
-        plan = ExecutionPlan(
+        literal_plan = ExecutionPlan(
             steps=[
                 PlanStep(output_var="sum_1", operation="add", args={"a": a, "b": b}),
                 PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": c}),
@@ -225,14 +307,30 @@ def generate_multistep_problems(
             final_var="sum_2",
         )
 
+        slots = {
+            "operand_1": GroundedSlot("operand_1", a, None, str(a), 0, 0, "deterministic", type_name="int"),
+            "operand_2": GroundedSlot("operand_2", b, None, str(b), 0, 0, "deterministic", type_name="int"),
+            "operand_3": GroundedSlot("operand_3", c, None, str(c), 0, 0, "deterministic", type_name="int"),
+        }
+
+        slot_plan = ExecutionPlan(
+            steps=[
+                PlanStep(output_var="sum_1", operation="add", args={"a": "$operand_1", "b": "$operand_2"}),
+                PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": "$operand_3"}),
+            ],
+            final_var="sum_2",
+        )
+
         problems.append(
             MultiStepProblem(
                 question=q,
-                expected_plan=plan,
+                expected_plan=literal_plan,
                 expected_answer=expected_ans,
                 num_steps=2,
                 archetype="chained_addition_3",
                 split=split,
+                slots=slots,
+                expected_slot_plan=slot_plan,
             )
         )
         count += 1
@@ -263,7 +361,7 @@ def generate_multistep_problems(
         q = tmpl.format(a=a, b=b, c=c, d=d)
         expected_ans = str(a + b + c + d)
 
-        plan = ExecutionPlan(
+        literal_plan = ExecutionPlan(
             steps=[
                 PlanStep(output_var="sum_1", operation="add", args={"a": a, "b": b}),
                 PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": c}),
@@ -272,14 +370,32 @@ def generate_multistep_problems(
             final_var="sum_3",
         )
 
+        slots = {
+            "operand_1": GroundedSlot("operand_1", a, None, str(a), 0, 0, "deterministic", type_name="int"),
+            "operand_2": GroundedSlot("operand_2", b, None, str(b), 0, 0, "deterministic", type_name="int"),
+            "operand_3": GroundedSlot("operand_3", c, None, str(c), 0, 0, "deterministic", type_name="int"),
+            "operand_4": GroundedSlot("operand_4", d, None, str(d), 0, 0, "deterministic", type_name="int"),
+        }
+
+        slot_plan = ExecutionPlan(
+            steps=[
+                PlanStep(output_var="sum_1", operation="add", args={"a": "$operand_1", "b": "$operand_2"}),
+                PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": "$operand_3"}),
+                PlanStep(output_var="sum_3", operation="add", args={"a": "$sum_2", "b": "$operand_4"}),
+            ],
+            final_var="sum_3",
+        )
+
         problems.append(
             MultiStepProblem(
                 question=q,
-                expected_plan=plan,
+                expected_plan=literal_plan,
                 expected_answer=expected_ans,
                 num_steps=3,
                 archetype="chained_addition_4",
                 split=split,
+                slots=slots,
+                expected_slot_plan=slot_plan,
             )
         )
         count += 1
@@ -308,7 +424,7 @@ def generate_multistep_problems(
         )
         expected_ans = e[0]
 
-        plan = ExecutionPlan(
+        literal_plan = ExecutionPlan(
             steps=[
                 PlanStep(
                     output_var="comparison_result",
@@ -323,14 +439,23 @@ def generate_multistep_problems(
             final_var="comparison_result",
         )
 
+        slots = {
+            "entity_1": GroundedSlot("entity_1", e[0], None, e[0], 0, 0, "deterministic", type_name="str"),
+            "entity_2": GroundedSlot("entity_2", e[1], None, e[1], 0, 0, "deterministic", type_name="str"),
+            "entity_3": GroundedSlot("entity_3", e[2], None, e[2], 0, 0, "deterministic", type_name="str"),
+            "entity_4": GroundedSlot("entity_4", e[3], None, e[3], 0, 0, "deterministic", type_name="str"),
+        }
+
         problems.append(
             MultiStepProblem(
                 question=q,
-                expected_plan=plan,
+                expected_plan=literal_plan,
                 expected_answer=expected_ans,
                 num_steps=1,
                 archetype="multi_entity_compare",
                 split=split,
+                slots=slots,
+                expected_slot_plan=literal_plan,
             )
         )
         count += 1
@@ -347,7 +472,6 @@ def generate_multistep_abstention_problems(
     """Generate multi-step malformed, dimensional mismatch, cyclic, or contradictory queries."""
     rng = random.Random(seed)
     abstention_cases: list[tuple[str, str, str]] = [
-        # Dimensional incompatibility
         (
             "A runner covers 15 km in 2 hours. What is 15 km plus 2 hours?",
             "dimensional_mismatch",
@@ -358,7 +482,6 @@ def generate_multistep_abstention_problems(
             "dimensional_mismatch",
             "Incompatible physical dimensions: cannot add distance to duration",
         ),
-        # Negative / Zero duration
         (
             "A car travels 120 km in 2 hours, then 80 km in 0 hours. What is its overall average speed?",
             "invalid_physics_zero_duration",
@@ -369,13 +492,11 @@ def generate_multistep_abstention_problems(
             "invalid_physics_negative_duration",
             "Negative duration violates physical kinematics",
         ),
-        # Contradictory comparison cycle in multi-step query
         (
             "If Anna is taller than Ben, Ben is taller than Chris, and Chris is taller than Anna, who is taller, Anna or Chris?",
             "contradictory_cycle",
             "Contradictory cyclic ordering detected between entities",
         ),
-        # Missing segment data
         (
             "A truck travels 100 km in 2 hours, then covers another distance. What is its overall average speed?",
             "missing_segment_data",
@@ -407,17 +528,207 @@ def generate_multistep_abstention_problems(
     return problems[:num_samples]
 
 
+def generate_conversational_problems(
+    num_sessions: int = 12,
+    seed: int = 42,
+    split: str = "test",
+) -> list[ConversationSessionProblem]:
+    """Generate 2-turn conversational reasoning sessions across consecutive turns (M17 Phase 5)."""
+    rng = random.Random(seed)
+    sessions: list[ConversationSessionProblem] = []
+
+    # Case 1: Standard 2-turn average speed continuation
+    # Turn 1: 120 km in 2 hours -> 60 km/h
+    # Turn 2: then 90 km in 3 hours -> overall speed = (120 + 90) / (2 + 3) = 42 km/h
+    turn1_q = "A car travels 120 km in 2 hours. What was its average speed?"
+    turn1_slots = {
+        "distance_1": GroundedSlot("distance_1", 120.0, "km", "120 km", 0, 0),
+        "duration_1": GroundedSlot("duration_1", 2.0, "h", "2 hours", 0, 0),
+    }
+    turn1_plan = ExecutionPlan(
+        steps=[
+            PlanStep(
+                output_var="speed_1",
+                operation="average_speed",
+                args={"distance_km": "$distance_1", "time_hours": "$duration_1"},
+                units="km/h",
+            )
+        ],
+        final_var="speed_1",
+    )
+
+    turn2_q = "It then traveled another 90 km in 3 hours. What was the average speed for the whole journey?"
+    turn2_slots = {
+        "distance_2": GroundedSlot("distance_2", 90.0, "km", "90 km", 0, 0),
+        "duration_2": GroundedSlot("duration_2", 3.0, "h", "3 hours", 0, 0),
+    }
+    turn2_plan = ExecutionPlan(
+        steps=[
+            PlanStep(output_var="d_total", operation="add", args={"a": "$turn1.distance_1", "b": "$distance_2"}, units="km"),
+            PlanStep(output_var="t_total", operation="add", args={"a": "$turn1.duration_1", "b": "$duration_2"}, units="h"),
+            PlanStep(
+                output_var="overall_speed",
+                operation="average_speed",
+                args={"distance_km": "$d_total", "time_hours": "$t_total"},
+                units="km/h",
+            ),
+        ],
+        final_var="overall_speed",
+    )
+    sessions.append(
+        ConversationSessionProblem(
+            session_id="conv_speed_2turn_1",
+            turn1_question=turn1_q,
+            turn1_expected_answer="60 km/h",
+            turn1_plan=turn1_plan,
+            turn1_slots=turn1_slots,
+            turn2_question=turn2_q,
+            turn2_expected_answer="42 km/h",
+            turn2_plan=turn2_plan,
+            turn2_slots=turn2_slots,
+        )
+    )
+
+    # Case 2: Arithmetic continuation
+    # Turn 1: 45 + 55 = 100
+    # Turn 2: Now add 35 to the previous result -> 135
+    t1_add_q = "Calculate the sum of 45 and 55."
+    t1_add_slots = {
+        "operand_1": GroundedSlot("operand_1", 45, None, "45", 0, 0, type_name="int"),
+        "operand_2": GroundedSlot("operand_2", 55, None, "55", 0, 0, type_name="int"),
+    }
+    t1_add_plan = ExecutionPlan(
+        steps=[PlanStep(output_var="sum_1", operation="add", args={"a": "$operand_1", "b": "$operand_2"})],
+        final_var="sum_1",
+    )
+    t2_add_q = "Now add 35 to that result."
+    t2_add_slots = {
+        "operand_1": GroundedSlot("operand_1", 35, None, "35", 0, 0, type_name="int"),
+    }
+    t2_add_plan = ExecutionPlan(
+        steps=[PlanStep(output_var="final_sum", operation="add", args={"a": "$turn1.sum_1", "b": "$operand_1"})],
+        final_var="final_sum",
+    )
+    sessions.append(
+        ConversationSessionProblem(
+            session_id="conv_arith_2turn_2",
+            turn1_question=t1_add_q,
+            turn1_expected_answer="100",
+            turn1_plan=t1_add_plan,
+            turn1_slots=t1_add_slots,
+            turn2_question=t2_add_q,
+            turn2_expected_answer="135",
+            turn2_plan=t2_add_plan,
+            turn2_slots=t2_add_slots,
+        )
+    )
+
+    # Case 3: Ambiguous reference rejection / abstention
+    # Turn 1: has distance 120 km and duration 2 h
+    # Turn 2: "Now take that value and add 10." -> Ambiguous referent! Must abstain
+    t1_amb_q = "A vehicle travels 120 km in 2 hours."
+    t1_amb_slots = {
+        "distance_1": GroundedSlot("distance_1", 120.0, "km", "120 km", 0, 0),
+        "duration_1": GroundedSlot("duration_1", 2.0, "h", "2 hours", 0, 0),
+    }
+    t1_amb_plan = ExecutionPlan(
+        steps=[
+            PlanStep(output_var="d", operation="add", args={"a": "$distance_1", "b": 0}, units="km"),
+            PlanStep(output_var="t", operation="add", args={"a": "$duration_1", "b": 0}, units="h"),
+        ],
+        final_var="d",
+    )
+    t2_amb_q = "Now take that value and add 10."
+    dummy_amb_plan = ExecutionPlan(
+        steps=[PlanStep(output_var="err", operation="add", args={"a": 0, "b": 0})],
+        final_var="err",
+    )
+    sessions.append(
+        ConversationSessionProblem(
+            session_id="conv_ambiguous_turn2",
+            turn1_question=t1_amb_q,
+            turn1_expected_answer="120.0",
+            turn1_plan=t1_amb_plan,
+            turn1_slots=t1_amb_slots,
+            turn2_question=t2_amb_q,
+            turn2_expected_answer=None,
+            turn2_plan=dummy_amb_plan,
+            turn2_slots={},
+            is_ambiguous=True,
+            should_abstain_turn2=True,
+            abstain_reason="Ambiguous referent 'that value' cannot be safely resolved across multiple prior quantities",
+        )
+    )
+
+    # Generate more variations up to num_sessions
+    for i in range(len(sessions), num_sessions):
+        d1 = rng.randint(60, 150)
+        t1 = rng.randint(2, 3)
+        d2 = rng.randint(40, 120)
+        t2 = rng.randint(2, 3)
+        tot_d = d1 + d2
+        tot_t = t1 + t2
+        while tot_d % tot_t != 0:
+            d2 += 10
+            tot_d = d1 + d2
+        ans = f"{tot_d // tot_t} km/h"
+
+        t1_q = f"A bus travels {d1} km in {t1} hours. What is its initial average speed?"
+        t1_s = {
+            "distance_1": GroundedSlot("distance_1", float(d1), "km", f"{d1} km", 0, 0),
+            "duration_1": GroundedSlot("duration_1", float(t1), "h", f"{t1} hours", 0, 0),
+        }
+        t1_p = ExecutionPlan(
+            steps=[PlanStep(output_var="s1", operation="average_speed", args={"distance_km": "$distance_1", "time_hours": "$duration_1"}, units="km/h")],
+            final_var="s1",
+        )
+        t2_q = f"It then covers another {d2} km in {t2} hours. What was the average speed for the whole trip?"
+        t2_s = {
+            "distance_2": GroundedSlot("distance_2", float(d2), "km", f"{d2} km", 0, 0),
+            "duration_2": GroundedSlot("duration_2", float(t2), "h", f"{t2} hours", 0, 0),
+        }
+        t2_p = ExecutionPlan(
+            steps=[
+                PlanStep(output_var="d_tot", operation="add", args={"a": "$turn1.distance_1", "b": "$distance_2"}, units="km"),
+                PlanStep(output_var="t_tot", operation="add", args={"a": "$turn1.duration_1", "b": "$duration_2"}, units="h"),
+                PlanStep(output_var="speed_all", operation="average_speed", args={"distance_km": "$d_tot", "time_hours": "$t_tot"}, units="km/h"),
+            ],
+            final_var="speed_all",
+        )
+        sessions.append(
+            ConversationSessionProblem(
+                session_id=f"conv_gen_{i}",
+                turn1_question=t1_q,
+                turn1_expected_answer=f"{d1 // t1 if d1 % t1 == 0 else round(d1/t1, 1)} km/h",
+                turn1_plan=t1_p,
+                turn1_slots=t1_s,
+                turn2_question=t2_q,
+                turn2_expected_answer=ans,
+                turn2_plan=t2_p,
+                turn2_slots=t2_s,
+            )
+        )
+
+    return sessions[:num_sessions]
+
+
 def generate_multistep_instruction_corpus(
     num_samples_per_archetype: int = 25,
     seed: int = 42,
     split: str = "train",
-    format_type: str = "plan",
+    format_type: str = "slot_plan",
 ) -> tuple[str, str]:
-    """Generate training text corpus of multi-step problem pairs."""
+    """Generate training text corpus of multi-step problem pairs (supporting 'slot_plan', 'plan', or 'direct')."""
     problems = generate_multistep_problems(num_samples_per_archetype, seed=seed, split=split)
-    pairs = [
-        p.to_plan_pair() if format_type == "plan" else p.to_direct_pair() for p in problems
-    ]
+    pairs = []
+    for p in problems:
+        if format_type == "slot_plan":
+            pairs.append(p.to_slot_plan_pair())
+        elif format_type == "plan":
+            pairs.append(p.to_plan_pair())
+        else:
+            pairs.append(p.to_direct_pair())
+
     text = "".join(pairs)
     fp = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
     return text, fp

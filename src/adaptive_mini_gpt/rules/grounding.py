@@ -1,8 +1,9 @@
-"""Grounded Argument Extraction and Provenance Linking (M15).
+"""Grounded Argument Extraction, Provenance Linking, and Typed Slot Registry (M15/M16/M17).
 
-Extracts rule arguments directly from input text by binding source spans:
+Extracts rule arguments and typed slots directly from input text by binding source spans:
 - Arm 2: Deterministic rule-aware argument parsing with exact span tracking.
 - Arm 3: Source-span selection with exact text slice copying.
+- Phase 1 (M17): Typed Grounded Slot Extraction with stable slot IDs and unit validation.
 - Rejection/abstention on malformed, ambiguous, contradictory, or unsupported inputs.
 
 Safety:
@@ -15,7 +16,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from adaptive_mini_gpt.rules.memory import ArgumentProvenance, WorkingMemory
+from adaptive_mini_gpt.rules.memory import ArgumentProvenance, GroundedSlot, WorkingMemory
 from adaptive_mini_gpt.rules.registry import RULE_REGISTRY, SchemaValidationError
 
 
@@ -121,14 +122,14 @@ class DeterministicRuleSelector:
 
 
 class DeterministicArgumentGrounder:
-    """Extracts typed arguments with source spans from natural language prompts."""
+    """Parses and grounds arguments deterministically with full provenance tracking."""
 
     @classmethod
     def ground(cls, rule_name: str, question: str) -> WorkingMemory:
-        """Ground question into working memory with full provenance."""
+        """Ground rule arguments from question text into WorkingMemory."""
         rule_name = rule_name.strip().lower()
         if rule_name not in RULE_REGISTRY:
-            raise SchemaValidationError(f"Unregistered rule '{rule_name}'")
+            raise GroundingError(f"Cannot ground unknown rule: '{rule_name}'")
 
         mem = WorkingMemory(operation=rule_name)
 
@@ -140,8 +141,9 @@ class DeterministicArgumentGrounder:
             return cls._ground_compare(question, mem)
         elif rule_name == "average_speed":
             return cls._ground_average_speed(question, mem)
-        else:
-            raise SchemaValidationError(f"No grounder implemented for rule '{rule_name}'")
+
+        mem.reject(f"No deterministic grounder implemented for rule: '{rule_name}'")
+        return mem
 
     @classmethod
     def _ground_reverse(cls, question: str, mem: WorkingMemory) -> WorkingMemory:
@@ -220,7 +222,6 @@ class DeterministicArgumentGrounder:
     @classmethod
     def _ground_compare(cls, question: str, mem: WorkingMemory) -> WorkingMemory:
         """Ground transitive comparison premises and target entities."""
-        # Comparison adjectives and their antonyms
         adj_pairs = {
             "taller": "shorter",
             "faster": "slower",
@@ -231,7 +232,6 @@ class DeterministicArgumentGrounder:
         all_adjs = list(adj_pairs.keys()) + list(adj_pairs.values())
         adj_pattern = "|".join(all_adjs)
 
-        # Entity can be single word or multiword title: e.g. "Mary Jane", "Ben", "Uncle Bob"
         ent_pat = r"([A-Z][a-zA-Z]*(?:\s+[A-Z][a-zA-Z]*)*)"
         premise_pat = rf"{ent_pat}\s+is\s+({adj_pattern})\s+than\s+{ent_pat}"
 
@@ -247,16 +247,13 @@ class DeterministicArgumentGrounder:
             adj = pm.group(2).strip().lower()
             ent2 = pm.group(3).strip()
 
-            # Strip leading discourse markers
             ent1 = re.sub(r"^(?:If|Suppose|Given that|Given|Assuming)\s+", "", ent1, flags=re.IGNORECASE).strip()
 
-            # Normalize to >: if adj is standard (taller), ent1 > ent2; if inverse (shorter), ent2 > ent1
             if adj in adj_pairs:
                 relations.append(f"{ent1} > {ent2}")
             else:
                 relations.append(f"{ent2} > {ent1}")
 
-        # Target entities to compare: "who is SUP, X or Y?" or "Between X and Y, who is SUP?"
         target_pat = rf"(?:who|which one)\s+is\s+(?:[a-zA-Z]+),\s*{ent_pat}\s+or\s+{ent_pat}"
         tm = re.search(target_pat, question, re.IGNORECASE)
         if not tm:
@@ -268,7 +265,7 @@ class DeterministicArgumentGrounder:
             target_b = tm.group(2).strip()
             mem.bind_argument("entity_a", target_a, target_a, (tm.start(1), tm.end(1)), "str", "regex_span")
             mem.bind_argument("entity_b", target_b, target_b, (tm.start(2), tm.end(2)), "str", "regex_span")
-            mem.bind_argument("relations", relations, str(relations), (premise_matches[0].start(), premise_matches[-1].end()), "list[str]", "derived_premises")
+            mem.bind_argument("relations", relations, str(relations), (premise_matches[0].start(), premise_matches[-1].end()), "list[str]\", \"derived_premises")
             return mem
 
         mem.reject("Could not identify target entities to compare")
@@ -277,9 +274,7 @@ class DeterministicArgumentGrounder:
     @classmethod
     def _ground_average_speed(cls, question: str, mem: WorkingMemory) -> WorkingMemory:
         """Ground distance and duration values with unit parsing and precondition validation."""
-        # Distance: [-]N km / [-]N kilometers
         d_m = re.search(r"(-?\d+(?:\.\d+)?)\s*(?:km|kilometers?)\b", question, re.IGNORECASE)
-        # Time: [-]N hours / [-]N hrs / [-]N h
         t_m = re.search(r"(-?\d+(?:\.\d+)?)\s*(?:hours?|hrs?|h)\b", question, re.IGNORECASE)
 
         if not d_m:
@@ -293,7 +288,6 @@ class DeterministicArgumentGrounder:
         d_val = float(d_str)
         t_val = float(t_str)
 
-        # Precondition checks
         if t_val <= 0:
             mem.reject(f"Invalid duration: time must be strictly positive (>0), got {t_val}")
             return mem
@@ -338,7 +332,7 @@ class SpanCopyArgumentGrounder:
             return mem
 
         elif rule_name == "add":
-            num_spans = list(re.finditer(r"\b\d+(?:\.\d+)?\b", question))
+            num_spans = list(re.finditer(r"\b\d+(?:\\.\d+)?\b", question))
             plus_match = re.search(r"\b(?:plus|\+|sum of|and|total of)\b", question, re.IGNORECASE)
             if plus_match and len(num_spans) >= 2:
                 anchor = plus_match.start()
@@ -384,3 +378,351 @@ class SpanCopyArgumentGrounder:
 
         mem.reject(f"Span copy not supported for rule '{rule_name}'")
         return mem
+
+
+# =====================================================================
+# Typed Grounded Slot Extractor (M17 Phase 1)
+# =====================================================================
+
+
+def format_available_slots(slots: dict[str, GroundedSlot]) -> str:
+    """Format slot list into clean string representation for prompt injection."""
+    if not slots:
+        return "Available slots: None"
+    lines = ["Available slots:"]
+    for sid, s in slots.items():
+        u_str = f" {s.unit}" if s.unit else ""
+        lines.append(f"- ${sid}: {s.value}{u_str}")
+    return "\n".join(lines)
+
+
+class SlotExtractor:
+    """Extracts typed, source-grounded input slots from question text (M17 Phase 1).
+
+    Produces stable canonical slot identifiers and typed values:
+    - Kinematics: distance_1, duration_1, distance_2, duration_2, ...
+    - Arithmetic: operand_1, operand_2, operand_3, ...
+    - Comparison: entity_1, metric_1, entity_2, metric_2, ...
+    - Exact source-span offsets, physical units, and provenance.
+    - Rejects invalid dimensions, negative durations, or ambiguous references.
+    """
+
+    @classmethod
+    def extract(cls, question: str) -> dict[str, GroundedSlot]:
+        """Extract typed GroundedSlot registry from question text."""
+        q = question.strip()
+        q_lower = q.lower()
+
+        # Step 1: Detect dimensional incompatibilities
+        if re.search(r"\badd\b.*?\bkm\b.*?\b(?:hours?|hrs?|h)\b", q_lower) or re.search(
+            r"\bwhat is\b.*?\bkm\b\s*plus\s*.*?(?:hours?|hrs?|h)\b", q_lower
+        ):
+            raise AbstentionException("Incompatible physical dimensions: cannot add distance to duration")
+
+        # Step 2: Multi-segment kinematics / Average Speed
+        is_speed_query = "average speed" in q_lower or (
+            ("km" in q_lower or "kilometer" in q_lower)
+            and ("hour" in q_lower or "hrs" in q_lower or "h" in q_lower)
+        )
+        if is_speed_query:
+            try:
+                return cls._extract_speed_slots(q)
+            except AbstentionException:
+                raise
+            except Exception:
+                pass
+
+        # Step 3: Arithmetic chained addition
+        is_arithmetic = any(kw in q_lower for kw in ("sum of", "plus", "total of", "add")) and (
+            "+" in q_lower or "and" in q_lower or "," in q_lower or "together" in q_lower or "plus" in q_lower
+        )
+        if is_arithmetic and "than" not in q_lower:
+            return cls._extract_arithmetic_slots(q)
+
+        # Step 4: Comparison
+        if any(kw in q_lower for kw in ("taller", "faster", "heavier", "older", "stronger", "shorter", "slower")):
+            return cls._extract_comparison_slots(q)
+
+        # Step 5: Reverse
+        if any(kw in q_lower for kw in ("reverse", "backward", "invert")):
+            return cls._extract_reverse_slots(q)
+
+        # Fallback numeric extraction
+        return cls._extract_fallback_numbers(q)
+
+    @classmethod
+    def _extract_speed_slots(cls, question: str) -> dict[str, GroundedSlot]:
+        """Extract kinematics slots (distance_i, duration_i) from journey description."""
+        slots: dict[str, GroundedSlot] = {}
+
+        # Standard pattern: "X km in Y hours"
+        seg_pat = re.compile(
+            r"(-?\d+(?:\.\d+)?)\s*(?:km|kilometers?)\s*(?:in|for|over)\s*(-?\d+(?:\.\d+)?)\s*(?:hours?|hrs?|h)\b",
+            re.IGNORECASE,
+        )
+        segments = list(seg_pat.finditer(question))
+
+        if segments:
+            for idx, m in enumerate(segments, start=1):
+                d_str, t_str = m.group(1), m.group(2)
+                d_val, t_val = float(d_str), float(t_str)
+                if t_val <= 0:
+                    raise AbstentionException(f"Invalid duration in segment {idx}: {t_val} <= 0 violates physical kinematics")
+                if d_val < 0:
+                    raise AbstentionException(f"Invalid distance in segment {idx}: {d_val} < 0 violates physical constraints")
+
+                slots[f"distance_{idx}"] = GroundedSlot(
+                    slot_id=f"distance_{idx}",
+                    value=d_val,
+                    unit="km",
+                    source_text=m.group(1) + " km",
+                    start_idx=m.start(1),
+                    end_idx=m.end(1),
+                    extraction_method="deterministic_kinematics",
+                    verified=True,
+                    type_name="float",
+                )
+                slots[f"duration_{idx}"] = GroundedSlot(
+                    slot_id=f"duration_{idx}",
+                    value=t_val,
+                    unit="h",
+                    source_text=m.group(2) + " hours",
+                    start_idx=m.start(2),
+                    end_idx=m.end(2),
+                    extraction_method="deterministic_kinematics",
+                    verified=True,
+                    type_name="float",
+                )
+            return slots
+
+        # Inverted pattern: "Y hours to cover X km"
+        seg_pat_inv = re.compile(
+            r"(-?\d+(?:\.\d+)?)\s*(?:hours?|hrs?|h)\s*(?:to cover|traveling)\s*(-?\d+(?:\.\d+)?)\s*(?:km|kilometers?)\b",
+            re.IGNORECASE,
+        )
+        inv_segments = list(seg_pat_inv.finditer(question))
+        if inv_segments:
+            for idx, m in enumerate(inv_segments, start=1):
+                t_str, d_str = m.group(1), m.group(2)
+                t_val, d_val = float(t_str), float(d_str)
+                if t_val <= 0:
+                    raise AbstentionException(f"Invalid duration in segment {idx}: {t_val} <= 0 violates physical kinematics")
+                if d_val < 0:
+                    raise AbstentionException(f"Invalid distance in segment {idx}: {d_val} < 0 violates physical constraints")
+
+                slots[f"distance_{idx}"] = GroundedSlot(
+                    slot_id=f"distance_{idx}",
+                    value=d_val,
+                    unit="km",
+                    source_text=m.group(2) + " km",
+                    start_idx=m.start(2),
+                    end_idx=m.end(2),
+                    extraction_method="deterministic_kinematics",
+                    verified=True,
+                    type_name="float",
+                )
+                slots[f"duration_{idx}"] = GroundedSlot(
+                    slot_id=f"duration_{idx}",
+                    value=t_val,
+                    unit="h",
+                    source_text=m.group(1) + " hours",
+                    start_idx=m.start(1),
+                    end_idx=m.end(1),
+                    extraction_method="deterministic_kinematics",
+                    verified=True,
+                    type_name="float",
+                )
+            return slots
+
+        # Single segment speed fallback
+        d_m = re.search(r"(-?\d+(?:\.\d+)?)\s*(?:km|kilometers?)\b", question, re.IGNORECASE)
+        t_m = re.search(r"(-?\d+(?:\.\d+)?)\s*(?:hours?|hrs?|h)\b", question, re.IGNORECASE)
+        if d_m and t_m:
+            d_val, t_val = float(d_m.group(1)), float(t_m.group(1))
+            if t_val <= 0:
+                raise AbstentionException(f"Invalid duration: {t_val} <= 0 violates physical kinematics")
+            if d_val < 0:
+                raise AbstentionException(f"Invalid distance: {d_val} < 0 violates physical constraints")
+
+            slots["distance_1"] = GroundedSlot(
+                slot_id="distance_1",
+                value=d_val,
+                unit="km",
+                source_text=d_m.group(0),
+                start_idx=d_m.start(1),
+                end_idx=d_m.end(1),
+                extraction_method="deterministic_kinematics",
+                verified=True,
+                type_name="float",
+            )
+            slots["duration_1"] = GroundedSlot(
+                slot_id="duration_1",
+                value=t_val,
+                unit="h",
+                source_text=t_m.group(0),
+                start_idx=t_m.start(1),
+                end_idx=t_m.end(1),
+                extraction_method="deterministic_kinematics",
+                verified=True,
+                type_name="float",
+            )
+            return slots
+
+        raise AbstentionException("Could not extract valid kinematics slots from journey description")
+
+    @classmethod
+    def _extract_arithmetic_slots(cls, question: str) -> dict[str, GroundedSlot]:
+        """Extract arithmetic operand slots (operand_1, operand_2, ...) with distractor filtering."""
+        slots: dict[str, GroundedSlot] = {}
+
+        # Filter out 4-digit years like 'year 2024' or 'flight 204'
+        all_numbers = list(re.finditer(r"\b\d+(?:\.\d+)?\b", question))
+        filtered: list[re.Match[str]] = []
+        for m in all_numbers:
+            txt = m.group(0)
+            if len(txt) == 4 and (txt.startswith("20") or txt.startswith("19")):
+                prefix = question[max(0, m.start() - 15) : m.start()].lower()
+                if any(w in prefix for w in ("year", "in the", "since", "during")):
+                    continue
+            filtered.append(m)
+
+        if not filtered:
+            raise AbstentionException("No valid numeric operands found for arithmetic")
+
+        for idx, m in enumerate(filtered, start=1):
+            val_str = m.group(0)
+            val = float(val_str) if "." in val_str else int(val_str)
+            slots[f"operand_{idx}"] = GroundedSlot(
+                slot_id=f"operand_{idx}",
+                value=val,
+                unit=None,
+                source_text=val_str,
+                start_idx=m.start(),
+                end_idx=m.end(),
+                extraction_method="deterministic_arithmetic",
+                verified=True,
+                type_name="float" if isinstance(val, float) else "int",
+            )
+        return slots
+
+    @classmethod
+    def _extract_comparison_slots(cls, question: str) -> dict[str, GroundedSlot]:
+        """Extract entities and metrics for comparison chains."""
+        slots: dict[str, GroundedSlot] = {}
+        ent_metric_pat = re.compile(
+            r"([A-Z][a-zA-Z]*(?:\s+[A-Z][a-zA-Z]*)*)\s+is\s+(\d+(?:\.\d+)?)\s*([a-zA-Z/]+)?",
+            re.IGNORECASE,
+        )
+        matches = list(ent_metric_pat.finditer(question))
+        if matches:
+            for idx, m in enumerate(matches, start=1):
+                ent = m.group(1).strip()
+                val_str = m.group(2)
+                val = float(val_str) if "." in val_str else int(val_str)
+                unit = m.group(3).strip() if m.group(3) else None
+                slots[f"entity_{idx}"] = GroundedSlot(
+                    slot_id=f"entity_{idx}",
+                    value=ent,
+                    unit=None,
+                    source_text=ent,
+                    start_idx=m.start(1),
+                    end_idx=m.end(1),
+                    extraction_method="deterministic_comparison",
+                    verified=True,
+                    type_name="str",
+                )
+                slots[f"metric_{idx}"] = GroundedSlot(
+                    slot_id=f"metric_{idx}",
+                    value=val,
+                    unit=unit,
+                    source_text=val_str,
+                    start_idx=m.start(2),
+                    end_idx=m.end(2),
+                    extraction_method="deterministic_comparison",
+                    verified=True,
+                    type_name="float" if isinstance(val, float) else "int",
+                )
+            return slots
+
+        ents = list(re.finditer(r"\b([A-Z][a-z]+)\b", question))
+        if ents:
+            seen: set[str] = set()
+            idx = 1
+            for em in ents:
+                w = em.group(1)
+                if w not in seen and w not in ("If", "Suppose", "Given", "Between", "Who", "Which"):
+                    seen.add(w)
+                    slots[f"entity_{idx}"] = GroundedSlot(
+                        slot_id=f"entity_{idx}",
+                        value=w,
+                        unit=None,
+                        source_text=w,
+                        start_idx=em.start(),
+                        end_idx=em.end(),
+                        extraction_method="deterministic_comparison",
+                        verified=True,
+                        type_name="str",
+                    )
+                    idx += 1
+            return slots
+
+        raise AbstentionException("Could not extract comparison entities from text")
+
+    @classmethod
+    def _extract_reverse_slots(cls, question: str) -> dict[str, GroundedSlot]:
+        """Extract text slot to reverse."""
+        quotes = list(re.finditer(r"['\"]([a-zA-Z0-9_-]+)['\"]", question))
+        if quotes:
+            m = quotes[0]
+            val = m.group(1)
+            return {
+                "text_1": GroundedSlot(
+                    slot_id="text_1",
+                    value=val,
+                    unit=None,
+                    source_text=val,
+                    start_idx=m.start(1),
+                    end_idx=m.end(1),
+                    extraction_method="deterministic_string",
+                    verified=True,
+                    type_name="str",
+                )
+            }
+        m_word = re.search(r"(?:reverse|invert|backward|reverse of)\s+([a-zA-Z0-9_-]+)", question, re.IGNORECASE)
+        if m_word:
+            val = m_word.group(1)
+            return {
+                "text_1": GroundedSlot(
+                    slot_id="text_1",
+                    value=val,
+                    unit=None,
+                    source_text=val,
+                    start_idx=m_word.start(1),
+                    end_idx=m_word.end(1),
+                    extraction_method="deterministic_string",
+                    verified=True,
+                    type_name="str",
+                )
+            }
+        raise AbstentionException("No target text found to reverse")
+
+    @classmethod
+    def _extract_fallback_numbers(cls, question: str) -> dict[str, GroundedSlot]:
+        """Extract all numbers as generic operand slots."""
+        matches = list(re.finditer(r"\b\d+(?:\.\d+)?\b", question))
+        slots: dict[str, GroundedSlot] = {}
+        for idx, m in enumerate(matches, start=1):
+            val_str = m.group(0)
+            val = float(val_str) if "." in val_str else int(val_str)
+            slots[f"operand_{idx}"] = GroundedSlot(
+                slot_id=f"operand_{idx}",
+                value=val,
+                unit=None,
+                source_text=val_str,
+                start_idx=m.start(),
+                end_idx=m.end(),
+                extraction_method="fallback_number",
+                verified=True,
+                type_name="float" if isinstance(val, float) else "int",
+            )
+        return slots

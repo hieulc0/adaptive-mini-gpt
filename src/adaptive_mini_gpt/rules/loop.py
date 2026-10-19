@@ -1,18 +1,18 @@
-"""Reasoning and Verification Loop with Bounded Retries, Working Memory, and Multi-Step Planning (M14/M15/M16).
+"""Reasoning and Verification Loop with Bounded Retries, Working Memory, and Multi-Step Planning (M14/M15/M16/M17).
 
 Coordinates Mini-GPT, Grounded Extraction, Working Memory, and Multi-Step Plans:
 1. Select operation (autonomous Mini-GPT, deterministic rule classifier, or oracle).
 2. Ground arguments with exact source-span provenance into WorkingMemory (M15).
 3. Synthesize and validate multi-step execution plans with dependency checking (M16).
-4. Execute deterministically via RuleExecutor and PlanExecutor.
-5. Verify postconditions at every step.
-6. Support explicit abstention on malformed, contradictory, or unsupported queries.
-7. Support bounded retries on autoregressive feedback without leaking benchmark ground-truth answers.
+4. Extract typed Grounded Slots and bind structural plans without literal token copying (M17).
+5. Support bounded retries on autoregressive feedback without leaking benchmark ground-truth answers.
+6. Support multi-turn conversational reasoning with cross-turn reference resolution (M17 Phase 5).
 """
 
 from __future__ import annotations
 
 import ast
+import copy
 import json
 import logging
 import re
@@ -29,10 +29,23 @@ from adaptive_mini_gpt.rules.grounding import (
     DeterministicArgumentGrounder,
     DeterministicRuleSelector,
     GroundingError,
+    SlotExtractor,
     SpanCopyArgumentGrounder,
+    format_available_slots,
 )
-from adaptive_mini_gpt.rules.memory import WorkingMemory
-from adaptive_mini_gpt.rules.plan import ExecutionPlan, PlanExecutionResult, PlanExecutor, PlanValidationError
+from adaptive_mini_gpt.rules.memory import (
+    AmbiguousReferenceError,
+    ConversationMemory,
+    ConversationTurn,
+    GroundedSlot,
+    WorkingMemory,
+)
+from adaptive_mini_gpt.rules.plan import (
+    ExecutionPlan,
+    PlanExecutionResult,
+    PlanExecutor,
+    PlanValidationError,
+)
 from adaptive_mini_gpt.rules.planner import DeterministicTemplatePlanner, parse_plan
 
 logger = logging.getLogger(__name__)
@@ -231,9 +244,7 @@ class ReasoningController:
         """Solve a single-step question (M14/M15)."""
         t0 = time.perf_counter()
 
-        # =================================================================
-        # Configuration 1: Neural Only (Baseline)
-        # =================================================================
+        # Configuration 1: Neural Only
         if mode == "neural_only":
             prompt = f"<|user|>\n{question}\n<|assistant|>\n"
             raw_ans = self._generate(prompt)
@@ -257,9 +268,7 @@ class ReasoningController:
                 latency_ms=latency,
             )
 
-        # =================================================================
-        # Configuration 2: Oracle Rule Engine (Upper Bound)
-        # =================================================================
+        # Configuration 2: Oracle Rule Engine
         if mode == "oracle":
             if should_abstain:
                 latency = (time.perf_counter() - t0) * 1000.0
@@ -326,9 +335,7 @@ class ReasoningController:
                 latency_ms=latency,
             )
 
-        # =================================================================
         # Grounded Arms (deterministic, span_copy, and hybrids)
-        # =================================================================
         if mode in (
             "deterministic",
             "span_copy",
@@ -474,7 +481,6 @@ class ReasoningController:
                 latency_ms=latency,
             )
 
-        # Autoregressive tool call fallback
         latency = (time.perf_counter() - t0) * 1000.0
         return ReasoningResult(
             question=question,
@@ -493,20 +499,21 @@ class ReasoningController:
         mode: str = "deterministic_template",
         max_retries: int = 2,
         should_abstain: bool = False,
+        slots: dict[str, GroundedSlot] | None = None,
+        expected_slot_plan: ExecutionPlan | None = None,
     ) -> ReasoningResult:
-        """Solve a multi-step composition problem across M16 planning configurations:
+        """Solve a multi-step composition problem across M16/M17 planning configurations:
 
         1. 'neural_only': Direct Mini-GPT completion without tools.
-        2. 'oracle': Oracle-generated plan executed deterministically.
-        3. 'deterministic_template': Deterministic Template Planner with grounded execution.
-        4. 'model_plan': Mini-GPT generated structured plan with deterministic execution (no retry).
-        5. 'model_plan_retry': Mini-GPT plan generation with bounded verification feedback loop.
+        2. 'oracle' / 'oracle_slots': Oracle plan with deterministic execution / slot injection.
+        3. 'deterministic_template': Deterministic Template Planner with literal execution (Arm A).
+        4. 'neural_literals' / 'model_plan': Mini-GPT plan with generated literals (Arm B, M16 baseline).
+        5. 'neural_slots': Mini-GPT plan with deterministic slot injection, no retry (Arm C).
+        6. 'neural_slots_retry': Mini-GPT plan with slot injection and bounded verification retry (Arm D).
         """
         t0 = time.perf_counter()
 
-        # =================================================================
         # Configuration 1: Neural Only Direct Completion
-        # =================================================================
         if mode == "neural_only":
             prompt = f"<|user|>\n{question}\n<|assistant|>\n"
             raw_ans = self._generate(prompt, max_tokens=32)
@@ -531,10 +538,8 @@ class ReasoningController:
                 latency_ms=latency,
             )
 
-        # =================================================================
-        # Configuration 2: Oracle Plan Execution
-        # =================================================================
-        if mode == "oracle":
+        # Configuration 2: Oracle Plan Execution (Arm E)
+        if mode in ("oracle", "oracle_slots"):
             if should_abstain:
                 latency = (time.perf_counter() - t0) * 1000.0
                 return ReasoningResult(
@@ -553,10 +558,15 @@ class ReasoningController:
                     latency_ms=latency,
                 )
 
-            if expected_plan is None:
-                raise ValueError("expected_plan required for oracle multi-step mode")
+            target_plan = expected_slot_plan or expected_plan
+            if target_plan is None:
+                raise ValueError("expected_plan or expected_slot_plan required for oracle multi-step mode")
 
-            plan_res = self.plan_executor.execute(expected_plan)
+            mem = WorkingMemory()
+            if slots:
+                mem.slots = copy.copy(slots)
+
+            plan_res = self.plan_executor.execute(target_plan, working_memory=mem)
             final_ans = str(plan_res.final_result) if plan_res.success else None
             is_correct = (
                 plan_res.success
@@ -571,7 +581,7 @@ class ReasoningController:
                 mode=mode,
                 status="success" if is_correct else "failed",
                 final_answer=final_ans,
-                plan=expected_plan,
+                plan=target_plan,
                 plan_valid=True,
                 plan_exact_match=True,
                 answer_correct=is_correct,
@@ -579,12 +589,12 @@ class ReasoningController:
                 abstention_correct=not should_abstain,
                 working_memory=plan_res.working_memory,
                 step_results=plan_res.step_results,
-                num_steps=len(expected_plan.steps),
+                num_steps=len(target_plan.steps),
                 attempts=[
                     AttemptRecord(
                         attempt_index=1,
-                        raw_completion=expected_plan.to_text_format(),
-                        parsed_plan=expected_plan,
+                        raw_completion=target_plan.to_text_format(),
+                        parsed_plan=target_plan,
                         execution_result=plan_res,
                         working_memory=plan_res.working_memory,
                     )
@@ -592,16 +602,13 @@ class ReasoningController:
                 latency_ms=latency,
             )
 
-        # =================================================================
-        # Configuration 3: Deterministic Template Planner (Arm C)
-        # =================================================================
+        # Configuration 3: Deterministic Template Planner (Arm A)
         if mode == "deterministic_template":
             try:
                 plan = DeterministicTemplatePlanner.plan(question)
                 plan_valid = True
                 plan_error = None
             except AbstentionException as e:
-                # Safely abstained
                 latency = (time.perf_counter() - t0) * 1000.0
                 mem = WorkingMemory()
                 mem.reject(str(e))
@@ -685,12 +692,41 @@ class ReasoningController:
                 latency_ms=latency,
             )
 
-        # =================================================================
-        # Configurations 4 & 5: Model Plan Generation (+ Optional Feedback Retry)
-        # =================================================================
-        base_prompt = f"<|user|>\n{question}\n<|assistant|>\n"
+        # Configurations 4, 5, 6: Neural Plans (Literals, Slots, Slots + Retry)
+        # Extract or reuse grounded slots for slot modes
+        extracted_slots: dict[str, GroundedSlot] = {}
+        if mode in ("neural_slots", "neural_slots_retry"):
+            try:
+                extracted_slots = slots if slots is not None else SlotExtractor.extract(question)
+            except AbstentionException as e:
+                latency = (time.perf_counter() - t0) * 1000.0
+                mem = WorkingMemory()
+                mem.reject(str(e))
+                return ReasoningResult(
+                    question=question,
+                    ground_truth_rule="neural_slots",
+                    expected_answer=expected_answer,
+                    mode=mode,
+                    status="abstained",
+                    plan=None,
+                    plan_valid=False,
+                    plan_exact_match=False,
+                    answer_correct=should_abstain,
+                    abstained=True,
+                    abstention_correct=should_abstain,
+                    working_memory=mem,
+                    attempts=[AttemptRecord(attempt_index=1, raw_completion="Abstain", error_feedback=str(e))],
+                    latency_ms=latency,
+                )
+
+            slots_prompt = format_available_slots(extracted_slots)
+            base_prompt = f"<|user|>\n{question}\n{slots_prompt}\n<|assistant|>\n"
+        else:
+            # Arm B: literals without slots in prompt
+            base_prompt = f"<|user|>\n{question}\n<|assistant|>\n"
+
         current_prompt = base_prompt
-        retries_allowed = max_retries if mode == "model_plan_retry" else 0
+        retries_allowed = max_retries if mode in ("model_plan_retry", "neural_slots_retry") else 0
         attempt_idx = 0
 
         final_answer = None
@@ -705,7 +741,7 @@ class ReasoningController:
 
         while attempt_idx <= retries_allowed:
             attempt_idx += 1
-            raw_comp = self._generate(current_prompt, max_tokens=96)
+            raw_comp = self._generate(current_prompt, max_tokens=110)
             record = AttemptRecord(attempt_index=attempt_idx, raw_completion=raw_comp)
 
             # Check for model abstention
@@ -720,14 +756,20 @@ class ReasoningController:
                 record.parsed_plan = plan_parsed
                 plan_valid = True
 
-                if expected_plan is not None:
+                ref_plan = expected_slot_plan or expected_plan
+                if ref_plan is not None:
                     plan_exact = (
-                        len(plan_parsed.steps) == len(expected_plan.steps)
-                        and [s.operation for s in plan_parsed.steps] == [s.operation for s in expected_plan.steps]
+                        len(plan_parsed.steps) == len(ref_plan.steps)
+                        and [s.operation for s in plan_parsed.steps] == [s.operation for s in ref_plan.steps]
                     )
 
+                # Initialize working memory with extracted slots
+                step_mem = WorkingMemory()
+                if extracted_slots:
+                    step_mem.slots = copy.copy(extracted_slots)
+
                 # Execute plan
-                plan_res = self.plan_executor.execute(plan_parsed)
+                plan_res = self.plan_executor.execute(plan_parsed, working_memory=step_mem)
                 record.execution_result = plan_res
                 record.working_memory = plan_res.working_memory
                 last_mem = plan_res.working_memory
@@ -756,13 +798,13 @@ class ReasoningController:
             if attempt_idx <= retries_allowed:
                 feedback = (
                     f"{raw_comp}\n<|system|>\nError: {record.error_feedback}. "
-                    f"Please provide a corrected plan in format: 1. var = op(args...) [units]\\n<|assistant|>\n"
+                    f"Please provide a corrected plan in format: 1. var = op(args...) [units]\n<|assistant|>\n"
                 )
                 current_prompt = current_prompt + feedback
                 if len(self.tokenizer.encode(current_prompt)) > self.model.config.context_length - 60:
                     current_prompt = (
                         f"<|user|>\n{question}\n<|system|>\nPrevious plan error: {record.error_feedback}. "
-                        f"Provide corrected plan.\\n<|assistant|>\n"
+                        f"Provide corrected plan.\n<|assistant|>\n"
                     )
 
         latency = (time.perf_counter() - t0) * 1000.0
@@ -786,3 +828,79 @@ class ReasoningController:
             total_retries=attempt_idx - 1,
             latency_ms=latency,
         )
+
+    def solve_conversational_turn(
+        self,
+        question: str,
+        conversation_memory: ConversationMemory,
+        expected_answer: str | None = None,
+        expected_plan: ExecutionPlan | None = None,
+        slots: dict[str, GroundedSlot] | None = None,
+        should_abstain: bool = False,
+    ) -> dict[str, Any]:
+        """Execute a single conversational turn with cross-turn reference resolution (M17 Phase 5)."""
+        t0 = time.perf_counter()
+        turn = conversation_memory.start_turn(user_message=question)
+
+        try:
+            # 1. Ground slots for this turn
+            turn_slots = slots if slots is not None else SlotExtractor.extract(question)
+            for sid, s in turn_slots.items():
+                turn.working_memory.bind_slot(s)
+        except AbstentionException as e:
+            turn.working_memory.reject(str(e))
+            turn.status = "abstained"
+            latency = (time.perf_counter() - t0) * 1000.0
+            return {
+                "turn_id": turn.turn_id,
+                "status": "abstained",
+                "answer": None,
+                "answer_correct": should_abstain,
+                "error": str(e),
+                "latency_ms": latency,
+            }
+
+        # 2. Synthesize or use plan
+        plan = expected_plan
+        if plan is None:
+            try:
+                plan, _ = DeterministicTemplatePlanner.plan_with_slots(question)
+            except Exception as e:
+                turn.working_memory.reject(str(e))
+                turn.status = "abstained" if should_abstain else "failed"
+                latency = (time.perf_counter() - t0) * 1000.0
+                return {
+                    "turn_id": turn.turn_id,
+                    "status": turn.status,
+                    "answer": None,
+                    "answer_correct": should_abstain,
+                    "error": str(e),
+                    "latency_ms": latency,
+                }
+
+        # 3. Execute plan with conversation_memory
+        plan_res = self.plan_executor.execute(
+            plan=plan,
+            working_memory=turn.working_memory,
+            conversation_memory=conversation_memory,
+        )
+
+        final_ans = str(plan_res.final_result) if plan_res.success else None
+        turn.assistant_response = final_ans
+        is_correct = (
+            plan_res.success
+            and expected_answer is not None
+            and final_ans.lower() == expected_answer.lower()
+        )
+        status = "success" if is_correct else ("abstained" if should_abstain else "failed")
+        turn.status = status
+        latency = (time.perf_counter() - t0) * 1000.0
+
+        return {
+            "turn_id": turn.turn_id,
+            "status": status,
+            "answer": final_ans,
+            "answer_correct": is_correct if not should_abstain else (not plan_res.success),
+            "error": plan_res.error,
+            "latency_ms": latency,
+        }

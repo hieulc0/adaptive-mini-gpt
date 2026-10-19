@@ -1,8 +1,8 @@
-"""Deterministic and Neural Multi-Step Planners with Bounded Plan Validation (M16).
+"""Deterministic and Neural Multi-Step Planners with Grounded Slot Binding (M16/M17).
 
 Implements:
-1. parse_plan: Robust parser for model-generated line-based and JSON plans.
-2. DeterministicTemplatePlanner: Deconstructs multi-step composite queries into typed ExecutionPlans.
+1. parse_plan: Robust parser for model-generated line-based and JSON plans with slot references ($slot_id).
+2. DeterministicTemplatePlanner: Deconstructs multi-step composite queries into typed ExecutionPlans (with literal arguments or grounded slots).
 3. Plan validation and error diagnostics for feedback retry loops.
 
 Safety:
@@ -18,13 +18,14 @@ import json
 import re
 from typing import Any
 
-from adaptive_mini_gpt.rules.grounding import AbstentionException, GroundingError
+from adaptive_mini_gpt.rules.grounding import AbstentionException, GroundingError, SlotExtractor
+from adaptive_mini_gpt.rules.memory import GroundedSlot
 from adaptive_mini_gpt.rules.plan import ExecutionPlan, PlanStep, PlanValidationError
 from adaptive_mini_gpt.rules.registry import RULE_REGISTRY
 
 
 def parse_plan(text: str) -> ExecutionPlan:
-    """Robustly parse an ExecutionPlan from model-generated text (line-based or JSON)."""
+    """Robustly parse an ExecutionPlan from model-generated text (line-based or JSON), supporting slots and variables."""
     cleaned = text.strip()
     if cleaned.endswith("<|eos|>"):
         cleaned = cleaned[:-len("<|eos|>")].strip()
@@ -53,15 +54,17 @@ def parse_plan(text: str) -> ExecutionPlan:
 
     # Try 2: Line-based format
     # Example:
-    # 1. d_tot = add(a=120, b=90) [km]
-    # 2. t_tot = add(a=2, b=3) [h]
-    # 3. speed = average_speed(distance_km=$d_tot, time_hours=$t_tot) [km/h]
-    # Result: $speed
+    # 1. d_total = add(a=$distance_1, b=$distance_2) [km]
+    # OR positional:
+    # 1. d_total = add($distance_1, $distance_2) [km]
+    # 2. t_total = add($duration_1, $duration_2) [h]
+    # 3. overall_speed = average_speed(distance_km=$d_total, time_hours=$t_total) [km/h]
+    # Result: $overall_speed
     step_pattern = re.compile(
         r"^(?:\d+[\.:]\s*|Step\s*\d+[\.:]\s*)?([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\((.*?)\)(?:\s*\[(.*?)\])?",
         re.IGNORECASE,
     )
-    result_pattern = re.compile(r"^Result:\s*\$?([a-zA-Z_][a-zA-Z0-9_]*)", re.IGNORECASE)
+    result_pattern = re.compile(r"^Result:\s*\$?([a-zA-Z_][a-zA-Z0-9_\.]*)", re.IGNORECASE)
 
     steps: list[PlanStep] = []
     final_var: str | None = None
@@ -84,36 +87,52 @@ def parse_plan(text: str) -> ExecutionPlan:
             args_str = m_step.group(3).strip()
             units = m_step.group(4).strip() if m_step.group(4) else None
 
+            # Determine schema required argument keys if operation registered
+            req_keys: list[str] = []
+            if op_name in RULE_REGISTRY:
+                req_keys = list(RULE_REGISTRY[op_name].args_schema.keys())
+
             # Parse arguments
             args: dict[str, Any] = {}
             if args_str:
-                # Custom safe parser handling $var and literals
-                # Replace $var with "$var" so ast can parse as string literal
-                subbed_args = re.sub(r"(?<=[=,\(\s])\$([a-zA-Z_][a-zA-Z0-9_]*)", r"'$_\1'", args_str)
+                # Custom safe parser handling $var, $slot, $turn1.var and literals
+                # Wrap $var into '$var' string literal so ast can parse cleanly
+                subbed_args = re.sub(r"\$([a-zA-Z_][a-zA-Z0-9_\.]*)", lambda m: f"'{m.group(0)}'", args_str)
                 try:
                     tree = ast.parse(f"dummy({subbed_args})")
                     call_node = tree.body[0].value  # type: ignore[attr-defined]
+
+                    # 1. Positional arguments (mapped to schema keys)
+                    for pos_idx, arg_node in enumerate(call_node.args):
+                        arg_key = req_keys[pos_idx] if pos_idx < len(req_keys) else f"arg_{pos_idx + 1}"
+                        val = ast.literal_eval(arg_node)
+                        args[arg_key] = val
+
+                    # 2. Keyword arguments
                     for kw in call_node.keywords:
                         val = ast.literal_eval(kw.value)
-                        # Re-substitute $_ back to $
-                        if isinstance(val, str) and val.startswith("$_"):
-                            val = "$" + val[2:]
-                        elif isinstance(val, list):
-                            val = [("$" + item[2:] if isinstance(item, str) and item.startswith("$_") else item) for item in val]
                         args[kw.arg] = val
+
                 except Exception:
                     # Fallback token split
-                    for part in args_str.split(","):
+                    for idx, part in enumerate(args_str.split(",")):
+                        part = part.strip()
+                        if not part:
+                            continue
                         if "=" in part:
                             k, v = part.split("=", 1)
                             k, v = k.strip(), v.strip().strip("'\"")
-                            if v.startswith("$"):
+                        else:
+                            k = req_keys[idx] if idx < len(req_keys) else f"arg_{idx + 1}"
+                            v = part.strip().strip("'\"")
+
+                        if v.startswith("$"):
+                            args[k] = v
+                        else:
+                            try:
+                                args[k] = float(v) if "." in v else int(v)
+                            except ValueError:
                                 args[k] = v
-                            else:
-                                try:
-                                    args[k] = float(v) if "." in v else int(v)
-                                except ValueError:
-                                    args[k] = v
 
             steps.append(PlanStep(output_var=var_name, operation=op_name, args=args, units=units))
 
@@ -130,7 +149,7 @@ class DeterministicTemplatePlanner:
 
     @classmethod
     def plan(cls, question: str) -> ExecutionPlan:
-        """Analyze question text and generate validated ExecutionPlan or raise AbstentionException."""
+        """Analyze question text and generate validated ExecutionPlan with literal arguments (M16 baseline)."""
         q = question.strip()
         q_lower = q.lower()
 
@@ -143,7 +162,7 @@ class DeterministicTemplatePlanner:
 
         # Case B: Multi-segment average speed
         if "average speed" in q_lower or (
-            ("travels" in q_lower or "covers" in q_lower or "drives" in q_lower or "flies" in q_lower)
+            ("travel" in q_lower or "cover" in q_lower or "drive" in q_lower or "fly" in q_lower)
             and "km" in q_lower
             and ("hour" in q_lower or "hrs" in q_lower or "h" in q_lower)
             and ("then" in q_lower or "another" in q_lower or "next" in q_lower or "whole journey" in q_lower or "overall" in q_lower)
@@ -154,7 +173,7 @@ class DeterministicTemplatePlanner:
         if any(kw in q_lower for kw in ("sum of", "plus", "total of", "add")) and (
             "and" in q_lower or "," in q_lower or "together" in q_lower
         ):
-            numbers = list(re.finditer(r"\b\d+(?:\.\d+)?\b", q))
+            numbers = list(re.finditer(r"\b\d+(?:\\.\d+)?\b", q))
             # Distractor year filtering
             filtered_numbers = [m for m in numbers if not (len(m.group(0)) == 4 and m.group(0).startswith("20"))]
             if len(filtered_numbers) >= 3:
@@ -168,10 +187,82 @@ class DeterministicTemplatePlanner:
         return cls._plan_single_operation_as_plan(q)
 
     @classmethod
+    def plan_with_slots(cls, question: str) -> tuple[ExecutionPlan, dict[str, GroundedSlot]]:
+        """Synthesize structural plan referencing typed GroundedSlots (M17 Phase 1 & 2)."""
+        slots = SlotExtractor.extract(question)
+        q_lower = question.lower()
+
+        # Case A: Kinematics / Average Speed
+        if "distance_1" in slots and "duration_1" in slots:
+            num_segs = sum(1 for k in slots if k.startswith("distance_"))
+            steps: list[PlanStep] = []
+
+            if num_segs == 1:
+                steps.append(
+                    PlanStep(
+                        output_var="overall_speed",
+                        operation="average_speed",
+                        args={"distance_km": "$distance_1", "time_hours": "$duration_1"},
+                        units="km/h",
+                    )
+                )
+                plan = ExecutionPlan(steps=steps, final_var="overall_speed")
+                plan.validate(allowed_slots=set(slots.keys()))
+                return plan, slots
+
+            if num_segs == 2:
+                steps.append(PlanStep(output_var="d_total", operation="add", args={"a": "$distance_1", "b": "$distance_2"}, units="km"))
+                steps.append(PlanStep(output_var="t_total", operation="add", args={"a": "$duration_1", "b": "$duration_2"}, units="h"))
+                steps.append(
+                    PlanStep(
+                        output_var="overall_speed",
+                        operation="average_speed",
+                        args={"distance_km": "$d_total", "time_hours": "$t_total"},
+                        units="km/h",
+                    )
+                )
+                plan = ExecutionPlan(steps=steps, final_var="overall_speed")
+                plan.validate(allowed_slots=set(slots.keys()))
+                return plan, slots
+
+            elif num_segs == 3:
+                steps.append(PlanStep(output_var="d_12", operation="add", args={"a": "$distance_1", "b": "$distance_2"}, units="km"))
+                steps.append(PlanStep(output_var="d_total", operation="add", args={"a": "$d_12", "b": "$distance_3"}, units="km"))
+                steps.append(PlanStep(output_var="t_12", operation="add", args={"a": "$duration_1", "b": "$duration_2"}, units="h"))
+                steps.append(PlanStep(output_var="t_total", operation="add", args={"a": "$t_12", "b": "$duration_3"}, units="h"))
+                steps.append(
+                    PlanStep(
+                        output_var="overall_speed",
+                        operation="average_speed",
+                        args={"distance_km": "$d_total", "time_hours": "$t_total"},
+                        units="km/h",
+                    )
+                )
+                plan = ExecutionPlan(steps=steps, final_var="overall_speed")
+                plan.validate(allowed_slots=set(slots.keys()))
+                return plan, slots
+
+        # Case B: Chained Addition
+        operand_keys = sorted([k for k in slots if k.startswith("operand_")], key=lambda x: int(x.split("_")[1]))
+        if len(operand_keys) >= 2:
+            steps = []
+            steps.append(PlanStep(output_var="sum_1", operation="add", args={"a": f"${operand_keys[0]}", "b": f"${operand_keys[1]}"}))
+            last_var = "sum_1"
+            for i in range(2, len(operand_keys)):
+                cur_var = f"sum_{i}"
+                steps.append(PlanStep(output_var=cur_var, operation="add", args={"a": f"${last_var}", "b": f"${operand_keys[i]}"}))
+                last_var = cur_var
+            plan = ExecutionPlan(steps=steps, final_var=last_var)
+            plan.validate(allowed_slots=set(slots.keys()))
+            return plan, slots
+
+        # Case C: Compare or Reverse fallback
+        lit_plan = cls.plan(question)
+        return lit_plan, slots
+
+    @classmethod
     def _plan_multi_segment_speed(cls, question: str) -> ExecutionPlan:
         """Deconstruct multi-segment journey into distance sum, duration sum, and kinematics rate."""
-        # Find all segment pairs: (distance_km, duration_hours)
-        # Match patterns like: "120 km in 2 hours", "covers 90 km in 3 hours"
         seg_pat = re.compile(
             r"(-?\d+(?:\.\d+)?)\s*(?:km|kilometers?)\s*(?:in|for|over)\s*(-?\d+(?:\.\d+)?)\s*(?:hours?|hrs?|h)\b",
             re.IGNORECASE,
@@ -179,7 +270,6 @@ class DeterministicTemplatePlanner:
         segments = list(seg_pat.finditer(question))
 
         if not segments:
-            # Try inverted pattern: "2 hours to cover 120 km"
             seg_pat_inv = re.compile(
                 r"(-?\d+(?:\.\d+)?)\s*(?:hours?|hrs?|h)\s*(?:to cover|traveling)\s*(-?\d+(?:\.\d+)?)\s*(?:km|kilometers?)\b",
                 re.IGNORECASE,
@@ -195,7 +285,6 @@ class DeterministicTemplatePlanner:
         if len(parsed_segs) < 2:
             raise AbstentionException("Multi-segment average speed requires at least two journey segments")
 
-        # Check preconditions
         for d, t in parsed_segs:
             if t <= 0:
                 raise AbstentionException(f"Invalid duration in segment: {t} <= 0 violates physical kinematics")
@@ -206,25 +295,8 @@ class DeterministicTemplatePlanner:
 
         if len(parsed_segs) == 2:
             (d1, t1), (d2, t2) = parsed_segs[0], parsed_segs[1]
-            # Step 1: d_total
-            steps.append(
-                PlanStep(
-                    output_var="d_total",
-                    operation="add",
-                    args={"a": d1, "b": d2},
-                    units="km",
-                )
-            )
-            # Step 2: t_total
-            steps.append(
-                PlanStep(
-                    output_var="t_total",
-                    operation="add",
-                    args={"a": t1, "b": t2},
-                    units="h",
-                )
-            )
-            # Step 3: overall speed
+            steps.append(PlanStep(output_var="d_total", operation="add", args={"a": d1, "b": d2}, units="km"))
+            steps.append(PlanStep(output_var="t_total", operation="add", args={"a": t1, "b": t2}, units="h"))
             steps.append(
                 PlanStep(
                     output_var="overall_speed",
@@ -237,11 +309,10 @@ class DeterministicTemplatePlanner:
 
         elif len(parsed_segs) == 3:
             (d1, t1), (d2, t2), (d3, t3) = parsed_segs[0], parsed_segs[1], parsed_segs[2]
-            # 5-step plan
             steps.append(PlanStep(output_var="d_12", operation="add", args={"a": d1, "b": d2}, units="km"))
             steps.append(PlanStep(output_var="d_total", operation="add", args={"a": "$d_12", "b": d3}, units="km"))
             steps.append(PlanStep(output_var="t_12", operation="add", args={"a": t1, "b": t2}, units="h"))
-            steps.append(PlanStep(output_var="t_total", operation="add", args={"a": "$t_12", "b": t3}, units="h"))
+            steps.append(PlanStep(output_var="t_total", operation="add", args={"a": "$t_12", "b": d3}, units="h"))
             steps.append(
                 PlanStep(
                     output_var="overall_speed",
@@ -259,10 +330,9 @@ class DeterministicTemplatePlanner:
         """Compose chained addition across 3 to 5 operands."""
         nums = [float(m.group(0)) if "." in m.group(0) else int(m.group(0)) for m in number_matches]
         if len(nums) > 5:
-            nums = nums[:5]  # bound to max 5
+            nums = nums[:5]
 
         steps: list[PlanStep] = []
-        # Step 1: add first two
         steps.append(PlanStep(output_var="sum_1", operation="add", args={"a": nums[0], "b": nums[1]}))
 
         last_var = "sum_1"
@@ -276,7 +346,6 @@ class DeterministicTemplatePlanner:
     @classmethod
     def _plan_multi_entity_compare(cls, question: str) -> ExecutionPlan:
         """Chain multi-entity comparisons."""
-        # Check for contradictions
         adj_pairs = {"taller": "shorter", "faster": "slower", "heavier": "lighter", "older": "younger", "stronger": "weaker"}
         all_adjs = list(adj_pairs.keys()) + list(adj_pairs.values())
         adj_pattern = "|".join(all_adjs)
@@ -297,7 +366,6 @@ class DeterministicTemplatePlanner:
             else:
                 relations.append(f"{ent2} > {ent1}")
 
-        # Target entities
         target_pat = rf"(?:who|which one)\s+is\s+(?:[a-zA-Z]+),\s*{ent_pat}\s+or\s+{ent_pat}"
         tm = re.search(target_pat, question, re.IGNORECASE)
         if not tm:
@@ -309,7 +377,6 @@ class DeterministicTemplatePlanner:
         target_a = tm.group(1).strip()
         target_b = tm.group(2).strip()
 
-        # Step 1: compare target entities using all relations
         step = PlanStep(
             output_var="comparison_result",
             operation="compare",
