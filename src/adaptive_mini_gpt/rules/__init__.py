@@ -1,4 +1,4 @@
-"""Rules, Deterministic Execution, Working Memory, and Grounded Reasoning (M14/M15)."""
+"""Rules, Deterministic Execution, Working Memory, Grounded Reasoning, and Multi-Step Planning (M14/M15/M16)."""
 
 from adaptive_mini_gpt.rules.dataset import (
     RuleProblem,
@@ -22,12 +22,35 @@ from adaptive_mini_gpt.rules.loop import (
     AttemptRecord,
     ReasoningController,
     ReasoningResult,
+    are_arguments_semantically_equivalent,
     format_rule_call,
     parse_rule_call,
 )
 from adaptive_mini_gpt.rules.memory import (
     ArgumentProvenance,
+    StepProvenance,
     WorkingMemory,
+)
+from adaptive_mini_gpt.rules.multistep_dataset import (
+    MultiStepProblem,
+    generate_multistep_abstention_problems,
+    generate_multistep_instruction_corpus,
+    generate_multistep_problems,
+    get_multistep_split,
+)
+from adaptive_mini_gpt.rules.plan import (
+    DependencyResolutionError,
+    ExecutionPlan,
+    PlanError,
+    PlanExecutionResult,
+    PlanExecutor,
+    PlanStep,
+    PlanValidationError,
+    UnitMismatchError,
+)
+from adaptive_mini_gpt.rules.planner import (
+    DeterministicTemplatePlanner,
+    parse_plan,
 )
 from adaptive_mini_gpt.rules.registry import (
     RULE_REGISTRY,
@@ -51,9 +74,18 @@ __all__ = [
     "AbstentionException",
     "ArgumentProvenance",
     "AttemptRecord",
+    "DependencyResolutionError",
     "DeterministicArgumentGrounder",
     "DeterministicRuleSelector",
+    "DeterministicTemplatePlanner",
+    "ExecutionPlan",
     "GroundingError",
+    "MultiStepProblem",
+    "PlanError",
+    "PlanExecutionResult",
+    "PlanExecutor",
+    "PlanStep",
+    "PlanValidationError",
     "RULE_REGISTRY",
     "ReasoningController",
     "ReasoningResult",
@@ -64,19 +96,27 @@ __all__ = [
     "RuleSpecification",
     "SchemaValidationError",
     "SpanCopyArgumentGrounder",
+    "StepProvenance",
+    "UnitMismatchError",
     "VerificationError",
     "WorkingMemory",
+    "are_arguments_semantically_equivalent",
     "execute_add",
     "execute_average_speed",
     "execute_compare",
     "execute_reverse",
     "format_rule_call",
     "generate_abstention_problems",
+    "generate_multistep_abstention_problems",
+    "generate_multistep_instruction_corpus",
+    "generate_multistep_problems",
     "generate_rule_instruction_corpus",
     "generate_rule_problems",
+    "get_multistep_split",
     "get_rule",
     "get_rule_split",
     "list_allowed_rules",
+    "parse_plan",
     "parse_rule_call",
     "verify_add",
     "verify_average_speed",

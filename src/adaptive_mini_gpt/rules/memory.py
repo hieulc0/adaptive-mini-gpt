@@ -1,10 +1,11 @@
-"""Structured Working Memory with Provenance and Span Tracking (M15).
+"""Structured Working Memory with Provenance and Span Tracking (M15/M16).
 
 Implements bounded, in-process working memory representing resolved information:
-- Operation name
-- Extracted argument values
-- Exact source-span provenance (source text, start/end character offsets, type)
-- Deterministic verification state and result
+- Operation name (single-step) / Plan tracking (multi-step)
+- Extracted argument values and intermediate step variables
+- Exact source-span provenance and variable reference dependencies
+- Units and dimensional consistency tracking
+- Deterministic verification state and results
 - Explicit rejection / abstention reasons
 
 Safety:
@@ -42,6 +43,32 @@ class ArgumentProvenance:
 
 
 @dataclass
+class StepProvenance:
+    """Provenance tracking for a derived intermediate variable in a multi-step plan (M16)."""
+
+    var_name: str
+    operation: str
+    raw_args: dict[str, Any]
+    resolved_args: dict[str, Any]
+    result: Any
+    units: str | None = None
+    step_index: int = 1
+    verified: bool = True
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "var_name": self.var_name,
+            "operation": self.operation,
+            "raw_args": copy_serializable(self.raw_args),
+            "resolved_args": copy_serializable(self.resolved_args),
+            "result": copy_serializable(self.result),
+            "units": self.units,
+            "step_index": self.step_index,
+            "verified": self.verified,
+        }
+
+
+@dataclass
 class WorkingMemory:
     """Structured in-process working memory for rule reasoning and execution."""
 
@@ -53,6 +80,11 @@ class WorkingMemory:
     status: str = "empty"  # "empty" | "grounded" | "verified" | "rejected"
     error: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+
+    # Multi-step planning extensions (M16)
+    variables: dict[str, Any] = field(default_factory=dict)
+    step_provenance: dict[str, StepProvenance] = field(default_factory=dict)
+    step_units: dict[str, str | None] = field(default_factory=dict)
 
     def bind_operation(self, operation: str) -> None:
         """Set active operation."""
@@ -81,6 +113,31 @@ class WorkingMemory:
         )
         self.status = "grounded"
 
+    def bind_step_variable(
+        self,
+        var_name: str,
+        value: Any,
+        operation: str,
+        raw_args: dict[str, Any],
+        resolved_args: dict[str, Any],
+        units: str | None = None,
+        step_index: int = 1,
+    ) -> None:
+        """Bind intermediate verified variable from plan step execution (M16)."""
+        self.variables[var_name] = value
+        self.step_units[var_name] = units
+        self.step_provenance[var_name] = StepProvenance(
+            var_name=var_name,
+            operation=operation,
+            raw_args=raw_args,
+            resolved_args=resolved_args,
+            result=value,
+            units=units,
+            step_index=step_index,
+            verified=True,
+        )
+        self.status = "executing_plan"
+
     def bind_result(self, result: Any, verified: bool = True) -> None:
         """Record verified execution result."""
         self.result = result
@@ -103,6 +160,9 @@ class WorkingMemory:
             "operation": self.operation,
             "arguments": copy_serializable(self.arguments),
             "provenance": {k: v.to_dict() for k, v in self.provenance.items()},
+            "variables": copy_serializable(self.variables),
+            "step_provenance": {k: v.to_dict() for k, v in self.step_provenance.items()},
+            "step_units": self.step_units,
             "verified": self.verified,
             "result": copy_serializable(self.result),
             "status": self.status,

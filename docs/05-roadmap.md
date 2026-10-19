@@ -18,7 +18,8 @@
 | **M13** | Procedural Reasoning Curriculum | Controlled 5-arm multi-seed benchmark on Tesla T4, empirical negative result on pure causal reversal, 15/15 safe rollbacks | **PASSED** (Verified on Tesla T4) |
 | **M14** | Verified Rules & Reasoning Loop | Deterministic rule registry (4 rules), sandboxed execution, reasoning retry loop, multi-seed T4 benchmark, bottleneck isolated to argument extraction | **PASSED** (Verified on Tesla T4) |
 | **M15** | Grounded Argument Extraction & Working Memory | In-process `WorkingMemory`, exact source-span provenance tracking, deterministic and span-copy grounders, abstention battery, 100/100 tests | **PASSED** (Verified on Tesla T4) |
-| **M16** | Multi-Step Planning & Chained Compositional Reasoning | Chained multi-operation execution, intermediate variable working memory, multi-step word problems | **PLANNED** |
+| **M16** | Multi-Step Planning & Chained Compositional Reasoning | Typed `ExecutionPlan`, topological validation, acyclic step execution, multi-segment kinematics, intermediate working memory | **PASSED** (Verified on Tesla T4) |
+| **M17** | Hybrid Neural Planning & Grounded Slot Injection | Decouple neural structural plan synthesis from grounded variable injection, persistent working memory across turns | **PLANNED** |
 
 ---
 
@@ -186,7 +187,22 @@
   - Hybrid A (Mini-GPT Rule + Det Grounder): **87.68% verified answer accuracy**, lifting accuracy from 0.0% in M14 to 87.68%.
   - Confirmed that neural pointer attention heads are mathematically unnecessary given deterministic grounding's 100% performance at sub-millisecond compute.
 
-### M16: Multi-Step Planning & Chained Compositional Reasoning (Planned)
-- Planning and executing multi-step composite word problems (e.g., combining distances, combining times, and computing overall average speed).
-- Intermediate variable binding and provenance chaining across multiple steps in `WorkingMemory`.
-- Bounded multi-step plan verifier ensuring acyclic dependencies before sequential rule execution.
+### M16: Multi-Step Planning and Compositional Reasoning (Completed)
+- **Typed Execution Plans & Topological Validation**:
+  - `PlanStep` and `ExecutionPlan` with strict constraints ($\le 5$ steps, SSA variable naming, cycle rejection, forward-reference rejection).
+  - Complete exception containment and zero arbitrary code execution (`eval`, `exec`).
+- **Intermediate Working Memory & Dimensional Safety**:
+  - Extended `WorkingMemory` with intermediate variable store (`variables`), step provenance (`step_provenance`), and physical unit tracking (`step_units`).
+  - Unit mismatch rejection prevents adding incompatible dimensions (e.g. distance + time).
+- **Multi-Step Planners**:
+  - `DeterministicTemplatePlanner`: Automatically synthesizes validated multi-step plans for multi-segment kinematics (2-segment = 3 steps, 3-segment = 5 steps), chained addition, and transitive comparison graphs.
+  - `parse_plan`: Robust parser for line-based and JSON plan completions.
+- **Empirical Multi-Seed T4 Benchmark**:
+  - Arm C (Deterministic Planner): **89.33% verified accuracy** (up to 96.0% on Seed 42, 100.0% on 5-step problems), **100.0% abstention correctness**, and **0.15 ms latency**.
+  - Arm D (Mini-GPT Plan Generator): Demonstrated that a 4-layer model acquires structured plan grammar (**43.33% valid plans**), but isolated literal argument hallucination as the remaining neural planning barrier.
+  - Commutative argument equivalence audit resolved M15 metric gap (semantic argument match strictly **100.0%**).
+
+### M17: Hybrid Neural Planning and Grounded Slot Injection (Planned)
+- Decoupling neural plan structure generation (which succeeds at 43–52%) from grounded variable slot extraction (which succeeds at 100% in M15).
+- Neural template generation with placeholder slots (`dist_tot = add($arg1, $arg2)`) populated by grounded source-span extractors.
+- Multi-turn persistent working memory across conversational reasoning tasks.
