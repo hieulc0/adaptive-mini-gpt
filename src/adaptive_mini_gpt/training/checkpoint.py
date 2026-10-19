@@ -17,7 +17,6 @@ import torch.nn as nn
 from torch.optim import Optimizer
 from torch.optim.lr_scheduler import LRScheduler
 
-from adaptive_mini_gpt.data.tokenizer import CharacterTokenizer
 from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.training.config import TrainingConfig
 
@@ -92,13 +91,13 @@ class CheckpointManager:
         optimizer: Optimizer,
         model_config: ModelConfig,
         training_config: TrainingConfig,
-        tokenizer: CharacterTokenizer,
-        dataset_fingerprint: str,
-        step: int,
-        tokens_seen: int,
-        data_position: int,
-        best_val_loss: float,
-        run_id: str,
+        tokenizer: Any | None = None,
+        dataset_fingerprint: str = "",
+        step: int = 0,
+        tokens_seen: int = 0,
+        data_position: int = 0,
+        best_val_loss: float = float("inf"),
+        run_id: str = "run",
         scaler: Any | None = None,
         scheduler: LRScheduler | None = None,
         is_best: bool = False,
@@ -115,8 +114,16 @@ class CheckpointManager:
             "best_val_loss": best_val_loss,
             "model_config": model_config.to_dict(),
             "training_config": training_config.to_dict(),
-            "tokenizer": tokenizer.to_dict(),
-            "tokenizer_fingerprint": tokenizer.get_fingerprint(),
+            "tokenizer": (
+                tokenizer.to_dict()
+                if tokenizer is not None and hasattr(tokenizer, "to_dict")
+                else None
+            ),
+            "tokenizer_fingerprint": (
+                tokenizer.get_fingerprint()
+                if tokenizer is not None and hasattr(tokenizer, "get_fingerprint")
+                else ""
+            ),
             "dataset_fingerprint": dataset_fingerprint,
             "rng_states": self._get_rng_states(),
             "model_state_dict": model.state_dict(),
@@ -142,8 +149,8 @@ class CheckpointManager:
         os.replace(target_temp, target_path)
 
         # 3. If best, save best.pt
-        best_path = self.save_dir / "best.pt"
         if is_best:
+            best_path = self.save_dir / "best.pt"
             best_temp = self.save_dir / "best.pt.tmp"
             torch.save(checkpoint_data, best_temp)
             self._smoke_test_checkpoint(best_temp)
@@ -168,8 +175,8 @@ class CheckpointManager:
             try:
                 self._copy_verified_to_backup(versioned_path, self.backup_dir)
                 self._copy_verified_to_backup(target_path, self.backup_dir)
-                if is_best and best_path.exists():
-                    self._copy_verified_to_backup(best_path, self.backup_dir)
+                if is_best and (self.save_dir / "best.pt").exists():
+                    self._copy_verified_to_backup(self.save_dir / "best.pt", self.backup_dir)
                 self._prune_old_checkpoints(self.backup_dir)
                 self._update_manifest(
                     manifest_dir=self.backup_dir,
@@ -348,7 +355,7 @@ class CheckpointManager:
         checkpoint_path: str | Path,
         model: nn.Module,
         optimizer: Optimizer | None = None,
-        tokenizer: CharacterTokenizer | None = None,
+        tokenizer: Any | None = None,
         dataset_fingerprint: str | None = None,
         scaler: Any | None = None,
         scheduler: LRScheduler | None = None,
@@ -403,7 +410,7 @@ class CheckpointManager:
 
         # 2. Validate tokenizer compatibility
         ckpt_tok_fp = checkpoint.get("tokenizer_fingerprint", "")
-        if tokenizer is not None:
+        if tokenizer is not None and hasattr(tokenizer, "get_fingerprint"):
             curr_tok_fp = tokenizer.get_fingerprint()
             if ckpt_tok_fp and curr_tok_fp and ckpt_tok_fp != curr_tok_fp:
                 raise ValueError(

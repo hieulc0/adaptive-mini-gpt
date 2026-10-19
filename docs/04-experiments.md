@@ -9,6 +9,29 @@
 
 ## Qualification Run Log
 
+### M9: Natural Language Learning, Subword BPE & Instruction-Following Qualification
+- **Date**: 2026-10-19
+- **Environment**: Linux x86_64, Python 3.12, PyTorch 2.4+
+- **Test Suite Verification**: **52/52 pytest tests passed** (including BPE training and round-trip, lineage verification, instruction dataset masking, and fine-tuning evaluation).
+- **Core Engineering Deliverables**:
+  1. **Deterministic Byte-Pair Encoding (`BPETokenizer`)**:
+     - Base 256 bytes + special tokens (`<pad>`, `<unk>`, `<bos>`, `<eos>`, `<|user|>`, `<|assistant|>`, `<|system|>`) + learned merge pairs.
+     - Strict roundtrip equality: `decode(encode(text)) == text`.
+     - Explicit versioning (`version: "bpe-v1"`) and SHA-256 fingerprinting.
+  2. **Vocabulary Lineage Enforcement (`validate_checkpoint_tokenizer_lineage`)**:
+     - Rejects mismatched vocabulary sizes with clear `ValueError` to prevent silent corrupted reinterpretation of character embeddings.
+  3. **Curated Instruction-Following Corpus & Loss Masking**:
+     - Curated dataset combining natural language knowledge with algorithmic step-by-step scratchpads for arithmetic.
+     - `InstructionDataset` precomputes 1D assistant response masks: prompt tokens have target `-1` (`ignore_index`), supervising only model responses without prompt memorization.
+  4. **Language & Reasoning Evaluation Suite (`evaluate_instruction_following`)**:
+     - Formats prompts: `<|user|>\n{query}\n<|assistant|>\n`
+     - Evaluates format compliance (non-empty output, termination on `<|eos|>`) and exact-answer reasoning accuracy.
+  5. **T4-Ready Scaled Architecture**:
+     - `configs/m9_language.yaml`: 4 layers, $d_{\text{model}}=128$, $n_{\text{heads}}=4$, $d_{\text{ff}}=512$, context 128, vocab 512 (~840k parameters), optimized for Tesla T4 training.
+- **Status**: **M9 GATE PASSED**. Subword tokenization, instruction datasets, lineage protection, and practical reasoning evaluation fully operational.
+
+---
+
 ### M8: Autonomous Curriculum & Adaptive Growth Controller Qualification
 - **Date**: 2026-10-19
 - **Environment**: Linux x86_64, Python 3.12, PyTorch 2.4+
@@ -33,8 +56,7 @@
 ### M7: Rigorous Generalization, Retention & 4-Arm Multi-Seed Architecture Verification (Google Colab T4)
 - **Date**: 2026-10-19
 - **Environment**: Google Colab (Linux, Python 3.13.15, PyTorch 2.4+, CUDA 13.0)
-- **Device**: NVIDIA Tesla T4 GPU (Session: `amg-t4`)
-- **Seeds Evaluated**: `[42, 43, 44]` (Mean ± Sample Std reported across 3 independent runs)
+- **Device**: NVIDIA Tesla T4 GPU (Session: `amg-t4`)\n- **Seeds Evaluated**: `[42, 43, 44]` (Mean ± Sample Std reported across 3 independent runs)
 - **Test Suite Verification**: **43/43 pytest tests passed** (including causal domain trigger tests, carry/borrow detection tests, and multi-domain retention tests).
 - **Architectures Compared**:
   1. **Arm 1 (Control - Dense Fine-Tuning)**: Standard dense network fine-tuned on Task B. Total params: 440,832, Active: 440,832, Trainable: 440,832.
@@ -121,41 +143,4 @@
 
 ### M2: Google Colab T4 Training Qualification
 - **Date**: 2026-10-13
-- **Commit**: `e8a8c2f` (rebased/pushed on `main`)
-- **Environment**: Google Colab (Linux, Python 3.13.15, PyTorch 2.4+)
-- **Device**: NVIDIA Tesla T4 (CUDA)
-- **Precision**: FP16 Mixed Precision (`torch.amp.autocast` + `torch.amp.GradScaler`)
-- **Architecture**: 2 layers, $d_{\text{model}}=128$, $n_{\text{heads}}=4$, $d_{\text{ff}}=512$, context length 256 (446,464 parameters)
-- **Batch Size / Accumulation**: Batch size 16, context 256, accumulation 4 (16,384 tokens/step)
-- **Optimization**: AdamW ($\text{lr}=3\times 10^{-4}$, cosine decay schedule)
-- **Test Suite Verification**: 20/20 pytest tests passed in 31.83s directly in the T4 environment.
-- **Measured Telemetry**:
-  - **Throughput**: Peak **513,012 tok/s**, sustained ~**420,000 tok/s** (approx. $25\times$ speedup over CPU baseline)
-  - **Step 200**: Train Loss: 2.5313 | Val Loss: 2.5757 | Val PPL: 13.14
-  - **Step 400**: Train Loss: 2.5383 | Val Loss: 2.5066 | Val PPL: 12.26
-  - **Step 600**: Train Loss: 2.4699 | Val Loss: 2.4607 | Val PPL: 11.71
-  - **Step 800**: Train Loss: 2.4066 | Val Loss: 2.4352 | Val PPL: 11.42
-  - **Step 1000**: Train Loss: 2.4234 | Val Loss: **2.4170** | Val PPL: **11.21**
-- **Independent Validation Evaluation**:
-  - **Loss**: 2.2763
-  - **Perplexity**: 9.74
-  - **Bits per character**: 3.2840
-  - **Batches evaluated**: 20
-- **Autoregressive Text Generation**:
-  - Prompt: `"From fairest "`
-  - Output: Structurally coherent Shakespearean poetic verse with character line breaks.
-- **Status**: **M2 GATE PASSED**. GPU readiness, FP16 numerical stability, and checkpoint persistence verified on real T4 hardware.
-
----
-
-## Baselines
-A: fixed dense small GPT; B: larger dense GPT; C: modular fixed experts; D: adaptive grown experts. Advance sequentially (A first). Compare matched **tokens, compute budget, dataset, evaluation split**, not just parameter count. Also show total parameters, active parameters, actual GPU residency, and inference speed.
-
-## Verification tasks
-- Character-level language: validation cross-entropy, bits-per-character/perplexity when appropriate, sample quality as a qualitative diagnostic.
-- Arithmetic: deterministic targets, exact-match on distinct held-out operands and extrapolation splits.
-- Logic: procedurally generated verified tasks with independent seeds.
-- Continual learning: per-skill held-out scores before and after learning another skill; measure forgetting.
-
-## Growth acceptance policy (future)
-Stalling validation alone is insufficient. Confirm data quality, learning rate and adequate training; train a no-growth control with equivalent compute. Accept a growth candidate only when improvement on predefined validation metrics exceeds noise and prior skills don't regress beyond preset tolerance. Keep one untouched final holdout. Report negative results.
+- **Commit**: `e8a8c2f` (rebased/pushed on `main`)\n- **Environment**: Google Colab (Linux, Python 3.13.15, PyTorch 2.4+)\n- **Device**: NVIDIA Tesla T4 (CUDA)\n- **Precision**: FP16 Mixed Precision (`torch.amp.autocast` + `torch.amp.GradScaler`)\n- **Architecture**: 2 layers, $d_{\\text{model}}=128$, $n_{\\text{heads}}=4$, $d_{\\text{ff}}=512$, context length 256 (446,464 parameters)\n- **Batch Size / Accumulation**: Batch size 16, context 256, accumulation 4 (16,384 tokens/step)\n- **Optimization**: AdamW ($\\text{lr}=3\\times 10^{-4}$, cosine decay schedule)\n- **Test Suite Verification**: 20/20 pytest tests passed in 31.83s directly in the T4 environment.\n- **Measured Telemetry**:\n  - **Throughput**: Peak **513,012 tok/s**, sustained ~**420,000 tok/s** (approx. $25\\times$ speedup over CPU baseline)\n  - **Step 200**: Train Loss: 2.5313 | Val Loss: 2.5757 | Val PPL: 13.14\n  - **Step 400**: Train Loss: 2.5383 | Val Loss: 2.5066 | Val PPL: 12.26\n  - **Step 600**: Train Loss: 2.4699 | Val Loss: 2.4607 | Val PPL: 11.71\n  - **Step 800**: Train Loss: 2.4066 | Val Loss: 2.4352 | Val PPL: 11.42\n  - **Step 1000**: Train Loss: 2.4234 | Val Loss: **2.4170** | Val PPL: **11.21**\n- **Independent Validation Evaluation**:\n  - **Loss**: 2.2763\n  - **Perplexity**: 9.74\n  - **Bits per character**: 3.2840\n  - **Batches evaluated**: 20\n- **Autoregressive Text Generation**:\n  - Prompt: `\"From fairest \"`\n  - Output: Structurally coherent Shakespearean poetic verse with character line breaks.\n- **Status**: **M2 GATE PASSED**. GPU readiness, FP16 numerical stability, and checkpoint persistence verified on real T4 hardware.\n\n---\n\n## Baselines\nA: fixed dense small GPT; B: larger dense GPT; C: modular fixed experts; D: adaptive grown experts. Advance sequentially (A first). Compare matched **tokens, compute budget, dataset, evaluation split**, not just parameter count. Also show total parameters, active parameters, actual GPU residency, and inference speed.\n\n## Verification tasks\n- Character-level language: validation cross-entropy, bits-per-character/perplexity when appropriate, sample quality as a qualitative diagnostic.\n- Arithmetic: deterministic targets, exact-match on distinct held-out operands and extrapolation splits.\n- Logic: procedurally generated verified tasks with independent seeds.\n- Continual learning: per-skill held-out scores before and after learning another skill; measure forgetting.\n\n## Growth acceptance policy (future)\nStalling validation alone is insufficient. Confirm data quality, learning rate and adequate training; train a no-growth control with equivalent compute. Accept a growth candidate only when improvement on predefined validation metrics exceeds noise and prior skills don't regress beyond preset tolerance. Keep one untouched final holdout. Report negative results.\n

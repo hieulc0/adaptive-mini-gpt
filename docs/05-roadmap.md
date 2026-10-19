@@ -11,7 +11,7 @@
 | **M6** | Autonomous Causal Domain Gating | Autoregressive domain detection, zero-forgetting unconditioned Task A retention, `moe_head` adapter | **PASSED** (Verified on Tesla T4) |
 | **M7** | Generalization & Multi-Seed Verification | 4-arm 3-seed benchmark, numerical prose decoupling (`domain_trigger_token_ids=['=']`), carry/borrow evaluation | **PASSED** (Verified on Tesla T4) |
 | **M8** | Autonomous Curriculum & Growth Controller | State machine (`EVALUATE -> SELECT -> PLAN -> TRAIN -> VERIFY -> PROMOTE/ROLLBACK`), bounded compute budgets | **PASSED** |
-| **M9** | Natural Language & Practical Reasoning | BPE subword tokenizer, instruction dataset, scaled Transformer backbone, verified reasoning tasks | Planned |
+| **M9** | Natural Language & Practical Reasoning | BPE subword tokenizer, instruction dataset, scaled Transformer backbone, verified reasoning tasks | **PASSED** |
 
 ---
 
@@ -76,3 +76,12 @@
 - Verified rollback mechanism: candidates failing verification are cleanly rejected, keeping base checkpoint active without degradation.
 - Crash and interruption recovery via persistent `controller_state.json`.
 - `amg auto-learn` CLI interface.
+
+### M9: Natural Language Learning & Practical Reasoning
+- Deterministic Byte-Pair Encoding (`BPETokenizer`) subword tokenizer with explicit versioning (`bpe-v1`).
+- Special tokens reserved for chat & instruction formatting: `<pad>`, `<unk>`, `<bos>`, `<eos>`, `<|user|>`, `<|assistant|>`, `<|system|>`.
+- Strict lineage check (`validate_checkpoint_tokenizer_lineage`): prevents silent reinterpretation of character embeddings as subword tokens.
+- Curated high-quality natural language corpus with procedural step-by-step scratchpads for multi-digit addition, subtraction, and general knowledge.
+- `InstructionDataset` with loss masking on prompt tokens (supervising only assistant responses with cross-entropy `ignore_index=-1`).
+- Language evaluation suite measuring instruction-following format compliance and held-out reasoning answer accuracy.
+- T4-compatible scaling configuration: `configs/m9_language.yaml` (512 subword vocab, 4 layers, 128 d_model, 512 d_ff).

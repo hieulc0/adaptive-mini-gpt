@@ -18,6 +18,7 @@ amg = "adaptive_mini_gpt.cli:main"
 
 [tool.ruff]
 line-length = 100
+extend-exclude = ["notebooks"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]

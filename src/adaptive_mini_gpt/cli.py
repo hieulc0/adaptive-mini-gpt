@@ -305,14 +305,16 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
     val_ds = TokenDataset(val_tokens, context_length=model_config.context_length)
 
     bypass_moe = getattr(args, "bypass_moe", False)
-    metrics = evaluate_dataset(
-        model=model,
-        dataset=val_ds,
-        batch_size=args.batch_size,
-        device=device,
-        max_batches=args.max_batches,
-        task_id=args.task_id,
-        bypass_moe=bypass_moe,
+    metrics: dict[str, Any] = dict(
+        evaluate_dataset(
+            model=model,
+            dataset=val_ds,
+            batch_size=args.batch_size,
+            device=device,
+            max_batches=args.max_batches,
+            task_id=args.task_id,
+            bypass_moe=bypass_moe,
+        )
     )
     if model.config.adaptive_enabled and model.last_aux_info and not bypass_moe:
         metrics["router_entropy"] = model.last_aux_info.get("router_entropy", 0.0)

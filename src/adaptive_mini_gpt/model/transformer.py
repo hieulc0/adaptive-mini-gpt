@@ -338,19 +338,20 @@ class MiniGPT(nn.Module):
                 logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1
             )
             ce_loss_val = ce_loss.item()
-            loss = ce_loss
+            total_loss: Tensor = ce_loss
             if self.config.adaptive_enabled and len(entropies) > 0 and not effective_bypass_moe:
                 n_moe = len(entropies)
                 mean_bal = total_balance_loss / n_moe
                 mean_z = total_z_loss / n_moe
-                loss = (
-                    loss
+                total_loss = (
+                    total_loss
                     + self.config.aux_loss_weight * mean_bal
                     + self.config.z_loss_weight * mean_z
                 )
             if self.config.mod_enabled and len(mod_fractions) > 0 and not effective_bypass_moe:
                 mean_mod = total_mod_loss / len(mod_fractions)
-                loss = loss + 0.1 * mean_mod
+                total_loss = total_loss + 0.1 * mean_mod
+            loss = total_loss
 
         info: dict[str, Any] = {"ce_loss": ce_loss_val}
         if entropies and not effective_bypass_moe:

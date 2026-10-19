@@ -1,0 +1,28 @@
+# M9 Language Model & Instruction Training Configuration
+model:
+  vocab_size: 512
+  d_model: 128
+  n_layers: 4
+  n_heads: 4
+  d_ff: 512
+  context_length: 128
+  dropout: 0.1
+  tie_word_embeddings: false
+  adaptive_enabled: false
+
+training:
+  seed: 42
+  batch_size: 16
+  gradient_accumulation: 2
+  learning_rate: 0.001
+  weight_decay: 0.01
+  max_steps: 500
+  warmup_steps: 50
+  lr_schedule: cosine
+  min_lr: 0.0001
+  eval_every_steps: 100
+  eval_max_batches: 20
+  grad_clip: 1.0
+  device: auto
+  precision: fp16
+  save_dir: runs/m9_language

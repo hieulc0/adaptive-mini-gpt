@@ -13,8 +13,6 @@ import numpy as np
 import torch
 from torch.optim.lr_scheduler import LambdaLR, LRScheduler
 
-from adaptive_mini_gpt.data.dataset import TokenDataset
-from adaptive_mini_gpt.data.tokenizer import CharacterTokenizer
 from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.training.checkpoint import CheckpointManager
@@ -48,9 +46,9 @@ class Trainer:
         model: MiniGPT,
         model_config: ModelConfig,
         training_config: TrainingConfig,
-        train_dataset: TokenDataset,
-        val_dataset: TokenDataset,
-        tokenizer: CharacterTokenizer,
+        train_dataset: Any,
+        val_dataset: Any,
+        tokenizer: Any,
         dataset_fingerprint: str,
         run_id: str | None = None,
     ) -> None:
