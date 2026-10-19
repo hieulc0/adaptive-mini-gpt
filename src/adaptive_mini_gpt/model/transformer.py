@@ -104,6 +104,7 @@ class TransformerBlock(nn.Module):
         x: Tensor,
         task_id: int | None = None,
         bypass_moe: bool = False,
+        domain_mask: Tensor | None = None,
         **kwargs: Any,
     ) -> tuple[Tensor, dict[str, Any] | None]:
         x = x + self.attn(self.ln_1(x))
@@ -126,6 +127,10 @@ class TransformerBlock(nn.Module):
         aux_info = None
         if self.moe is not None and not bypass_moe:
             moe_out, aux_info = self.moe(normed, task_id=task_id)
+            if domain_mask is not None:
+                moe_out = torch.where(
+                    domain_mask.unsqueeze(-1), moe_out, torch.zeros_like(moe_out)
+                )
             ffn_out = ffn_out + moe_out
         x = x + ffn_out
         return x, aux_info
@@ -159,6 +164,9 @@ class MiniGPT(nn.Module):
         for pn, p in self.named_parameters():
             if pn.endswith("c_proj.weight"):
                 torch.nn.init.normal_(p, mean=0.0, std=0.02 / (2 * config.n_layers) ** 0.5)
+        # Ensure moe_head output projection stays zero-initialized after self.apply
+        if self.moe_head is not None:
+            nn.init.zeros_(self.moe_head.w_down.weight)
 
         self.last_aux_info: dict[str, Any] = {}
         self._embedding_grad_mask: Tensor | None = None
@@ -180,13 +188,14 @@ class MiniGPT(nn.Module):
         freeze_existing_experts: bool = False,
         trainable_token_ids: list[int] | None = None,
     ) -> None:
-        """Freeze shared dense backbone so only modular experts/routers/MoD/moe_head train.
+        """Freeze shared dense backbone parameters.
 
-        If `trainable_token_ids` is provided (or persisted in `self.config.trainable_token_ids`),
-        only those specific token rows in `wte` (input embeddings) are allowed to update via
-        gradient masking. Keeping `lm_head` frozen while allowing zero-initialized `moe_head` to
-        learn ensures strictly 0.000000 forgetting when `bypass_moe=True`, while allowing
-        sharp output predictions on new tasks when `bypass_moe=False`.
+        Only modular experts, routers, MoD, and moe_head remain trainable.
+        If `trainable_token_ids` is provided (or stored on `self.config`), only those specific
+        token rows in `wte` (input embeddings) are allowed to update via gradient masking.
+        Keeping `lm_head` frozen while routing output adaptation through `moe_head` eliminates
+        softmax denominator drift on prior tasks, guaranteeing 0.000000 forgetting when
+        `bypass_moe=True`.
         """
         if trainable_token_ids is not None:
             self.config.trainable_token_ids = list(trainable_token_ids)
@@ -216,7 +225,7 @@ class MiniGPT(nn.Module):
                 return grad * self._embedding_grad_mask.to(grad.device, dtype=grad.dtype)
 
             self.wte.weight.requires_grad = True
-            if not getattr(self, "_wte_hook_registered", False):
+            if not self._wte_hook_registered:
                 self.wte.weight.register_hook(_mask_grad)
                 self._wte_hook_registered = True
 
@@ -253,7 +262,7 @@ class MiniGPT(nn.Module):
         bypass_moe: bool = False,
         **kwargs: Any,
     ) -> tuple[Tensor, Tensor | None]:
-        """Forward pass through the Transformer."""
+        """Forward pass through the Transformer with M6 autonomous domain gating."""
         b, t = idx.size()
         if t > self.config.context_length:
             raise ValueError(
@@ -267,6 +276,23 @@ class MiniGPT(nn.Module):
         pos_emb = self.wpe(pos)
         x = self.drop(tok_emb + pos_emb)
 
+        # M6 Autonomous Causal Domain Gating:
+        # Automatically detect if specialist domain tokens appear in the causal context prefix.
+        domain_token_mask: Tensor | None = None
+        effective_bypass_moe = bypass_moe
+        if (
+            not bypass_moe
+            and self.config.adaptive_enabled
+            and self.config.trainable_token_ids
+        ):
+            specialist_ids = torch.tensor(
+                self.config.trainable_token_ids, dtype=idx.dtype, device=device
+            )
+            is_spec = torch.isin(idx, specialist_ids)  # (B, T)
+            domain_token_mask = is_spec.cumsum(dim=-1) > 0  # Causal prefix accumulation
+            if not domain_token_mask.any():
+                effective_bypass_moe = True
+
         total_balance_loss = torch.tensor(0.0, device=device)
         total_z_loss = torch.tensor(0.0, device=device)
         total_mod_loss = torch.tensor(0.0, device=device)
@@ -275,7 +301,13 @@ class MiniGPT(nn.Module):
         mod_fractions: list[float] = []
 
         for block in self.blocks:
-            x, aux = block(x, task_id=task_id, bypass_moe=bypass_moe, **kwargs)
+            x, aux = block(
+                x,
+                task_id=task_id,
+                bypass_moe=effective_bypass_moe,
+                domain_mask=domain_token_mask,
+                **kwargs,
+            )
             if aux is not None:
                 if "balance_loss" in aux:
                     total_balance_loss = total_balance_loss + aux["balance_loss"]
@@ -288,8 +320,13 @@ class MiniGPT(nn.Module):
 
         x = self.ln_f(x)
         logits = self.lm_head(x)
-        if self.moe_head is not None and not bypass_moe:
-            logits = logits + self.moe_head(x)
+        if self.moe_head is not None and not effective_bypass_moe:
+            moe_logits = self.moe_head(x)
+            if domain_token_mask is not None:
+                moe_logits = torch.where(
+                    domain_token_mask.unsqueeze(-1), moe_logits, torch.zeros_like(moe_logits)
+                )
+            logits = logits + moe_logits
 
         loss: Tensor | None = None
         ce_loss_val = 0.0
@@ -299,7 +336,7 @@ class MiniGPT(nn.Module):
             )
             ce_loss_val = ce_loss.item()
             loss = ce_loss
-            if self.config.adaptive_enabled and len(entropies) > 0 and not bypass_moe:
+            if self.config.adaptive_enabled and len(entropies) > 0 and not effective_bypass_moe:
                 n_moe = len(entropies)
                 mean_bal = total_balance_loss / n_moe
                 mean_z = total_z_loss / n_moe
@@ -308,12 +345,12 @@ class MiniGPT(nn.Module):
                     + self.config.aux_loss_weight * mean_bal
                     + self.config.z_loss_weight * mean_z
                 )
-            if self.config.mod_enabled and len(mod_fractions) > 0 and not bypass_moe:
+            if self.config.mod_enabled and len(mod_fractions) > 0 and not effective_bypass_moe:
                 mean_mod = total_mod_loss / len(mod_fractions)
-                loss = loss + 0.01 * mean_mod
+                loss = loss + 0.1 * mean_mod
 
         info: dict[str, Any] = {"ce_loss": ce_loss_val}
-        if entropies and not bypass_moe:
+        if entropies and not effective_bypass_moe:
             mean_util = torch.stack(utilizations).mean(dim=0).tolist()
             info.update({
                 "balance_loss": (total_balance_loss / len(entropies)).item(),
@@ -321,7 +358,7 @@ class MiniGPT(nn.Module):
                 "router_entropy": sum(entropies) / len(entropies),
                 "expert_utilization": [round(u, 4) for u in mean_util],
             })
-        if mod_fractions and not bypass_moe:
+        if mod_fractions and not effective_bypass_moe:
             active_frac = round(sum(mod_fractions) / len(mod_fractions), 4)
             info.update({
                 "mod_aux_loss": (total_mod_loss / len(mod_fractions)).item(),

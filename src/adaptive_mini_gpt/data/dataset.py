@@ -158,13 +158,17 @@ def is_holdout_arithmetic_pair(op_type: int, a: int, b: int) -> bool:
 
 
 def generate_arithmetic_corpus(num_samples: int = 2000, seed: int = 42) -> tuple[str, str]:
-    """Generate a deterministic procedural arithmetic & parity corpus (disjoint from holdout)."""
+    """Generate deterministic procedural arithmetic & parity corpus with a gradual curriculum."""
     g = torch.Generator().manual_seed(seed)
     lines: list[str] = []
     while len(lines) < num_samples:
         op_type = int(torch.randint(0, 3, (1,), generator=g).item())
-        a = int(torch.randint(0, 100, (1,), generator=g).item())
-        b = int(torch.randint(0, 100, (1,), generator=g).item())
+        # Curriculum: 50% single-digit [0, 10) for fast bootstrap,
+        # 50% two-digit [0, 100) for generalizable skill
+        is_single_digit = int(torch.randint(0, 2, (1,), generator=g).item()) == 1
+        upper = 10 if is_single_digit else 100
+        a = int(torch.randint(0, upper, (1,), generator=g).item())
+        b = int(torch.randint(0, upper, (1,), generator=g).item())
         if op_type == 1:
             a, b = max(a, b), min(a, b)
         elif op_type == 2:

@@ -23,7 +23,7 @@ class MixtureOfDepthsRouter(nn.Module):
         self.gate = nn.Linear(d_model, 1, bias=bias)
         nn.init.normal_(self.gate.weight, mean=0.0, std=0.02)
         if self.gate.bias is not None:
-            nn.init.zeros_(self.gate.bias)
+            nn.init.constant_(self.gate.bias, 0.25)
 
     def forward_sublayer(
         self,

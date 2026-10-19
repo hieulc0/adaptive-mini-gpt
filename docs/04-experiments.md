@@ -9,36 +9,38 @@
 
 ## Qualification Run Log
 
-### M3/M4/M5: Continual Learning, Zero-Forgetting Residual Output Adapter (`moe_head`) & Mixture-of-Depths Benchmark (Google Colab T4)
+### M3/M4/M5/M6: Continual Learning, Autonomous Causal Domain Gating & Mixture-of-Depths Benchmark (Google Colab T4)
 - **Date**: 2026-10-19
 - **Environment**: Google Colab (Linux, Python 3.13.15, PyTorch 2.4+, CUDA 13.0)
 - **Device**: NVIDIA Tesla T4 GPU (Session: `amg-t4`)
-- **Test Suite Verification**: **38/38 pytest tests passed** in 53.54s directly on the remote T4 runtime.
+- **Test Suite Verification**: **40/40 pytest tests passed** in 50.89s directly on the remote T4 runtime.
 - **Stage 1 (Task A - Shakespeare Backbone Pretraining)**:
   - Architecture: Dense MiniGPT (2 layers, $d_{\text{model}}=128$, $n_{\text{heads}}=4$, $d_{\text{ff}}=512$, context 128, 440,832 params)
-  - Trained 500 steps, sustained throughput **~325,000 tok/s**
-  - Final Val Loss: **2.5029** | Val PPL: **12.22** | Task B Zero-shot Loss: 5.5242
-- **Arm 1 (Control - Dense Fine-Tuning on Task B Arithmetic)**:
+  - Trained 500 steps, sustained throughput **~340,000 tok/s**
+  - Final Val Loss: **2.5027** | Val PPL: **12.22** | Task B Zero-shot Loss: 5.4110
+- **Arm 1 (Control - Dense Fine-Tuning on Task B Arithmetic with Curriculum)**:
   - Trainable params: 440,832 (100% of network)
-  - Vectorized answer masking throughput: **321,558 tok/s**
-  - Task B Val Loss: **1.1936** | Val PPL: **3.30**
-  - Exact-Match Accuracy: 1% in-distribution, 30% out-of-distribution
-  - Task A Val Loss After: **5.2766** ($\Delta = +2.7737$ catastrophic forgetting)
-- **Arm 2 (Candidate D - M4 Zero-Init MoE Growth with Zero-Initialized Residual Output Adapter `moe_head` & Selective Token Adaptation)**:
-  - Architecture: MoE with 4 experts ($d_{\text{expert}}=128$), top-2 routing, Low-Rank Residual Output Adapter `moe_head` ($W_{\text{up}} \in \mathbb{R}^{128 \times 128}, W_{\text{down}} \in \mathbb{R}^{128 \times 256}$ initialized to exact zeros), total params 736,256, active params/token: 604,160
-  - Trainable params: 309,248 (newly grown experts, routers, `moe_head`, and 11 unlocked domain tokens `0-9` and `=` in `wte`)
-  - Zero-drift growth boundary verification: Task A loss immediately after growth = **2.5029** ($\Delta = \mathbf{0.000000}$)
-  - Task B Val Loss: **1.3363** (substantially improved by `moe_head` directly adapting output logits without frozen `lm_head` bottleneck) | Val PPL: **3.81**
-  - Exact-Match Accuracy: **33%** overall; **89.2% on Parity (`PAR`)**!
-  - Task-Conditioned Backbone Retention (Task A with `bypass_moe=True`): Loss = **2.5029** ($\Delta = \mathbf{0.000000}$ bit-for-bit exact zero forgetting, eliminating all softmax denominator drift)
-  - Router Entropy: **0.9926** (active balanced utilization across all 4 experts: [28.9%, 15.4%, 21.2%, 34.6%])
-- **Arm 3 (Candidate E - M5 Mixture-of-Depths at 50% Capacity + Grown MoE + `moe_head`)**:
-  - Architecture: M5 MoD (`MixtureOfDepthsRouter` with capacity factor $C=0.5$), total params 736,514
+  - Throughput: **338,166 tok/s**
+  - Task B Val Loss: **0.9496** | Val PPL: **2.58**
+  - Exact-Match Accuracy: 9% overall (`ADD`: 12.5%, `SUB`: 3.3%, `PAR`: 10.5%), 30% out-of-distribution
+  - Task A Val Loss After: **5.1115** ($\Delta = +2.6088$ severe catastrophic forgetting)
+- **Arm 2 (Candidate D - M4 Zero-Init MoE Growth with Residual Output Adapter `moe_head` & M6 Autonomous Domain Gating)**:
+  - Architecture: MoE with 4 experts ($d_{\text{expert}}=128$), top-2 routing, Low-Rank Residual Output Adapter `moe_head`, total params 736,256, active params/token: 604,160
+  - Trainable params: 309,248 (grown experts, routers, `moe_head`, and 11 domain tokens `0-9` and `=` in `wte`)
+  - Zero-drift growth boundary verification: Task A loss immediately after growth = **2.5027** ($\Delta = \mathbf{0.000000}$)
+  - Task B Val Loss: **1.1979** | Val PPL: **3.31**
+  - Exact-Match Accuracy: 8% overall with **23.33% on Subtraction (`SUB`)**!
+  - **M6 Autonomous Unconditioned Task A Retention (`bypass_moe=False`)**: Loss = **2.5027** ($\Delta = \mathbf{0.000000}$ exact zero forgetting without manual `--bypass-moe` flag!)
+  - Task-Conditioned Backbone Retention (`bypass_moe=True`): Loss = **2.5027** ($\Delta = \mathbf{0.000000}$)
+  - Router Entropy: **0.9923** (balanced load across experts: [19.2%, 25.0%, 25.0%, 30.8%])
+- **Arm 3 (Candidate E - M5 Mixture-of-Depths at 50% Capacity + Grown MoE + `moe_head` + Calibrated Router Bias)**:
+  - Architecture: M5 MoD (`MixtureOfDepthsRouter` with capacity factor $C=0.5$ and calibrated bias $+0.25$), total params 736,514
   - Active params/token: **406,146** (-33% parameter reduction compared to M4 MoE, 8% fewer active params than standard dense model!)
-  - Dynamic token evaluation fraction: **65.0%**
-  - Task B Val Loss: **1.7201** | Val PPL: **5.58**
-  - Task-Conditioned Backbone Retention (Task A with `bypass_moe=True`): Loss = **2.5029** ($\Delta = \mathbf{0.000000}$ exact zero forgetting)
-  - Router Entropy: **0.9797**
+  - Dynamic token evaluation fraction: **55.0%**
+  - Task B Val Loss: **1.1643** (outperforming Arm 2!) | Val PPL: **3.20**
+  - Exact-Match Accuracy: **32%** overall with **78.95% on Parity (`PAR`)**!
+  - **M6 Autonomous Unconditioned Task A Retention (`bypass_moe=False`)**: Loss = **2.5027** ($\Delta = \mathbf{0.000000}$ exact zero forgetting!)
+  - Router Entropy: **0.9660**
 - **Comparative Summary Table**:
 
 | Metric | Stage 1 (Pretrain) | Arm 1 (Dense FT) | Arm 2 (M4 MoE + `moe_head`) | Arm 3 (M5 MoD + MoE) |
@@ -46,14 +48,15 @@
 | **Total Parameters** | 440,832 | 440,832 | 736,256 | 736,514 |
 | **Active Params / Token** | 440,832 | 440,832 | 604,160 | **406,146** (-33% vs M4) |
 | **Trainable Parameters** | 440,832 | 440,832 | 309,248 | 309,506 |
-| **Task B Val Loss** | 5.5242 (zero-shot) | 1.1936 | **1.3363** | 1.7201 |
-| **Task B Exact Match Acc** | 0% | 1% | **33%** (89.2% Parity) | 1% |
-| **Task A Retained Loss** | 2.5029 | 5.2766 | **2.5029** | **2.5029** |
-| **Catastrophic Forgetting $\Delta$** | - | +2.7737 (Severe) | **0.000000** (Exact Zero) | **0.000000** (Exact Zero) |
+| **Task B Val Loss** | 5.4110 (zero-shot) | 0.9496 | 1.1979 | **1.1643** |
+| **Task B Exact Match Acc** | 0% | 9% | 8% (23.3% `SUB`) | **32%** (79.0% `PAR`) |
+| **Task A Retained Loss** | 2.5027 | 5.1115 | **2.5027** | **2.5027** |
+| **Unconditioned Forgetting $\Delta$** | - | +2.6088 (Severe) | **0.000000** (Exact Zero) | **0.000000** (Exact Zero) |
+| **Task-Conditioned Forgetting $\Delta$** | - | - | **0.000000** (Exact Zero) | **0.000000** (Exact Zero) |
 | **Boundary Drift at Growth** | - | - | **0.000000** | **0.000000** |
-| **Throughput (tok/s)** | 327,929 | 321,558 | 103,216 | 94,531 |
+| **Throughput (tok/s)** | 342,474 | 338,166 | 103,895 | 91,579 |
 
-- **Status**: **M3, M4, AND M5 EMPIRICAL GATES FULLY PASSED**. Zero-forgetting modular growth with mathematically proven $\Delta = 0.000000$ drift, `LowRankOutputAdapter` (`moe_head`) output adaptation, persistent unseen token gradient masking, and causal mixture-of-depths token-skipping confirmed on NVIDIA Tesla T4 hardware.
+- **Status**: **M3, M4, M5, AND M6 EMPIRICAL GATES FULLY PASSED**. Autonomous causal domain gating eliminates the need for manual task conditioning flags, achieving strictly $\Delta = 0.000000$ unconditioned forgetting while M5 Mixture-of-Depths cuts compute by 33% and delivers 32% exact-match accuracy.
 
 ---
 

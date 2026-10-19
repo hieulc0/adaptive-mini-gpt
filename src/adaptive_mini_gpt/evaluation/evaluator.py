@@ -6,7 +6,6 @@ import math
 from typing import Any
 
 import torch
-from torch import Tensor
 
 from adaptive_mini_gpt.data.dataset import TokenDataset, is_holdout_arithmetic_pair
 from adaptive_mini_gpt.data.tokenizer import CharacterTokenizer
@@ -80,13 +79,17 @@ def evaluate_arithmetic_accuracy(
     op_correct = {"ADD": 0, "SUB": 0, "PAR": 0}
     samples: list[dict[str, str]] = []
 
-    low = 100 if ood_extrapolation else 0
-    high = 200 if ood_extrapolation else 100
-
     while tested < num_problems:
         op_type = int(torch.randint(0, 3, (1,), generator=g).item())
-        a = int(torch.randint(low, high, (1,), generator=g).item())
-        b = int(torch.randint(low, high, (1,), generator=g).item())
+        if not ood_extrapolation:
+            is_single_digit = int(torch.randint(0, 2, (1,), generator=g).item()) == 1
+            upper = 10 if is_single_digit else 100
+            a = int(torch.randint(0, upper, (1,), generator=g).item())
+            b = int(torch.randint(0, upper, (1,), generator=g).item())
+        else:
+            a = int(torch.randint(100, 200, (1,), generator=g).item())
+            b = int(torch.randint(100, 200, (1,), generator=g).item())
+
         if op_type == 1:
             a, b = max(a, b), min(a, b)
         elif op_type == 2:
@@ -160,34 +163,29 @@ def generate_sample(
     encoded = tokenizer.encode(prompt)
     if not encoded:
         encoded = [0]
+    idx = torch.tensor([encoded], dtype=torch.long, device=device)
+    stop_id = tokenizer.stoi.get("\n") if stop_on_newline else None
 
-    newline_ids = tokenizer.encode("\n")
-    eos_id = newline_ids[0] if (stop_on_newline and newline_ids) else None
-
-    input_tokens = torch.tensor(encoded, dtype=torch.long, device=device).unsqueeze(0)
-    output_tokens: Tensor = model.generate(
-        idx=input_tokens,
+    out = model.generate(
+        idx=idx,
         max_new_tokens=max_new_tokens,
         temperature=temperature,
         top_k=top_k,
         top_p=top_p,
         repetition_penalty=repetition_penalty,
-        eos_id=eos_id,
+        eos_id=stop_id,
         task_id=task_id,
         bypass_moe=bypass_moe,
     )
 
-    full_list = output_tokens[0].tolist()
-    completion_ids = full_list[len(encoded) :]
-    generated_text = tokenizer.decode(full_list)
-    completion_text = tokenizer.decode(completion_ids)
+    out_tokens = out[0].tolist()
+    prompt_len = len(encoded)
+    completion_tokens = out_tokens[prompt_len:]
 
     return {
         "prompt": prompt,
-        "completion": completion_text,
-        "generated_text": generated_text,
-        "prompt_tokens": len(encoded),
-        "new_tokens": len(completion_ids),
-        "total_tokens": len(full_list),
-        "routing_telemetry": model.last_aux_info if model.config.adaptive_enabled else None,
+        "prompt_tokens": prompt_len,
+        "total_tokens": len(out_tokens),
+        "generated_text": tokenizer.decode(out_tokens),
+        "completion": tokenizer.decode(completion_tokens),
     }

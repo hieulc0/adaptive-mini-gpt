@@ -172,6 +172,24 @@ def test_moe_output_adapter_and_zero_drift_bypass() -> None:
     assert torch.equal(logits_base, logits_bypassed), "Softmax leak! Bypassed logits drifted!"
 
 
+def test_moe_head_zero_init_on_direct_instantiation() -> None:
+    """MiniGPT instantiated with adaptive_enabled=True must keep moe_head zero-initialized."""
+    cfg = ModelConfig(
+        vocab_size=32,
+        d_model=16,
+        n_layers=1,
+        n_heads=2,
+        d_ff=32,
+        context_length=8,
+        adaptive_enabled=True,
+        n_experts=2,
+        top_k=1,
+    )
+    model = MiniGPT(cfg)
+    assert model.moe_head is not None
+    assert torch.all(model.moe_head.w_down.weight == 0.0)
+
+
 def test_zero_softmax_denominator_drift_on_task_a() -> None:
     """Training unseen tokens + MoE + moe_head on Task B must produce 0.000000 drift on Task A."""
     torch.manual_seed(42)
@@ -222,6 +240,58 @@ def test_zero_softmax_denominator_drift_on_task_a() -> None:
     assert loss_a_before is not None and loss_a_after is not None
     assert torch.equal(logits_a_before, logits_a_after), "Task A logits drifted!"
     assert loss_a_before.item() == loss_a_after.item(), "Task A loss drifted!"
+
+
+def test_m6_autonomous_domain_gating_unconditioned() -> None:
+    """M6 causal domain gating: without bypass_moe flag, Task A preserves bitwise 0.0 drift."""
+    torch.manual_seed(42)
+    cfg = ModelConfig(
+        vocab_size=32,
+        d_model=16,
+        n_layers=1,
+        n_heads=2,
+        d_ff=32,
+        context_length=8,
+        dropout=0.0,
+        tie_word_embeddings=False,
+    )
+    model = MiniGPT(cfg)
+    model.eval()
+
+    # Base Task A probe using tokens [0..25]
+    x_task_a = torch.tensor([[1, 5, 10, 15, 20, 2, 8, 12]])
+    y_task_a = torch.tensor([[5, 10, 15, 20, 2, 8, 12, 3]])
+    with torch.no_grad():
+        logits_a_base, loss_a_base = model(x_task_a, y_task_a)
+
+    grow_model_experts(
+        model,
+        add_experts=2,
+        freeze_backbone=True,
+        trainable_token_ids=[30, 31],
+    )
+    opt = model.configure_optimizers(learning_rate=1e-2, weight_decay=0.01)
+
+    # Train on Task B (using specialist tokens 30, 31)
+    model.train()
+    x_task_b = torch.tensor([[30, 4, 31, 8, 30, 31, 2, 9]])
+    y_task_b = torch.tensor([[4, 31, 8, 30, 31, 2, 9, 31]])
+    for _ in range(5):
+        opt.zero_grad()
+        _, loss_b = model(x_task_b, y_task_b)
+        assert loss_b is not None
+        loss_b.backward()
+        opt.step()
+
+    # Now evaluate on Task A WITHOUT passing bypass_moe=True!
+    model.eval()
+    with torch.no_grad():
+        logits_a_auto, loss_a_auto = model(x_task_a, y_task_a, bypass_moe=False)
+
+    assert torch.equal(logits_a_base, logits_a_auto), (
+        "M6 auto-gating failed on pure Task A sequence!"
+    )
+    assert loss_a_base.item() == loss_a_auto.item()
 
 
 def test_vectorized_dataset_masking() -> None:
