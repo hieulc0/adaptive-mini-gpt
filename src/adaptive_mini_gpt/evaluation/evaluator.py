@@ -1,4 +1,4 @@
-"""Evaluation, exact-match skill verification, and generation utilities."""
+"""Evaluation, exact-match skill verification, and generation utilities (M7-M12)."""
 
 from __future__ import annotations
 
@@ -156,9 +156,7 @@ def evaluate_arithmetic_accuracy(
             samples.append({"prompt": prompt, "expected": expected, "predicted": pred})
         tested += 1
 
-    by_op = {
-        k: round(op_correct[k] / max(1, op_totals[k]), 4) for k in ("ADD", "SUB", "PAR")
-    }
+    by_op = {k: round(op_correct[k] / max(1, op_totals[k]), 4) for k in ("ADD", "SUB", "PAR")}
 
     return {
         "exact_match_accuracy": round(correct / max(1, num_problems), 4),
@@ -268,14 +266,10 @@ def evaluate_arithmetic_detailed(
             if pred == expected:
                 cat_correct[cat] += 1
             if len(cat_samples[cat]) < 3:
-                cat_samples[cat].append(
-                    {"prompt": prompt, "expected": expected, "predicted": pred}
-                )
+                cat_samples[cat].append({"prompt": prompt, "expected": expected, "predicted": pred})
             tested_in_cat += 1
 
-    by_category = {
-        cat: round(cat_correct[cat] / max(1, cat_total[cat]), 4) for cat in categories
-    }
+    by_category = {cat: round(cat_correct[cat] / max(1, cat_total[cat]), 4) for cat in categories}
     in_domain_cats = ["ADD_NO_CARRY", "ADD_CARRY", "SUB_NO_BORROW", "SUB_BORROW", "PARITY"]
     in_domain_corr = sum(cat_correct[c] for c in in_domain_cats)
     in_domain_tot = sum(cat_total[c] for c in in_domain_cats)
@@ -301,8 +295,15 @@ def evaluate_text_retention_suite(
     tokenizer: Any,
     device: torch.device | str = "cpu",
     max_batches: int = 20,
+    baseline_losses: dict[str, float] | None = None,
 ) -> dict[str, Any]:
-    """Evaluate language retention across clean Shakespeare, numerical prose, and mixed prose."""
+    """Evaluate language retention across clean Shakespeare, numerical prose, and mixed prose.
+
+    If baseline_losses is provided, delta_loss reports the true cross-checkpoint drift:
+    delta_loss = cand_loss - base_loss.
+    Otherwise, if baseline_losses is None, delta_loss reports intra-checkpoint MoE delta.
+    Raw unrounded losses are also preserved in 'raw_loss' for rigorous auditing.
+    """
     text_clean = (
         "From fairest creatures we desire increase, That thereby beauty's rose might never die.\n"
         "When forty winters shall besiege thy brow, And dig deep trenches in thy beauty's field.\n"
@@ -355,28 +356,95 @@ def evaluate_text_retention_suite(
         model, ds_mix, batch_size=8, device=device, max_batches=max_batches, bypass_moe=True
     )
 
+    def _package_domain(
+        domain_key: str, res_auto: dict[str, float], res_byp: dict[str, float]
+    ) -> dict[str, Any]:
+        loss_auto = res_auto["loss"]
+        loss_byp = res_byp["loss"]
+        bpc = res_auto["bits_per_character"]
+
+        if baseline_losses is not None and domain_key in baseline_losses:
+            base_loss = baseline_losses[domain_key]
+            delta = loss_auto - base_loss
+        else:
+            base_loss = loss_auto
+            delta = loss_auto - loss_byp
+
+        return {
+            "loss_auto": round(loss_auto, 6),
+            "raw_loss": loss_auto,
+            "loss_base": round(base_loss, 6),
+            "delta_loss": round(delta, 6),
+            "bpc_auto": round(bpc, 4),
+            "loss_bypassed": round(loss_byp, 6),
+            "moe_delta": round(loss_auto - loss_byp, 6),
+        }
+
     return {
-        "clean_prose": {
-            "loss_auto": round(res_clean_auto["loss"], 4),
-            "bpc_auto": round(res_clean_auto["bits_per_character"], 4),
-            "loss_bypassed": round(res_clean_byp["loss"], 4),
-            "bpc_bypassed": round(res_clean_byp["bits_per_character"], 4),
-            "delta_loss": round(res_clean_auto["loss"] - res_clean_byp["loss"], 6),
-        },
-        "numerical_prose": {
-            "loss_auto": round(res_num_auto["loss"], 4),
-            "bpc_auto": round(res_num_auto["bits_per_character"], 4),
-            "loss_bypassed": round(res_num_byp["loss"], 4),
-            "bpc_bypassed": round(res_num_byp["bits_per_character"], 4),
-            "delta_loss": round(res_num_auto["loss"] - res_num_byp["loss"], 6),
-        },
-        "mixed_prose_math": {
-            "loss_auto": round(res_mix_auto["loss"], 4),
-            "bpc_auto": round(res_mix_auto["bits_per_character"], 4),
-            "loss_bypassed": round(res_mix_byp["loss"], 4),
-            "bpc_bypassed": round(res_mix_byp["bits_per_character"], 4),
-            "delta_loss": round(res_mix_auto["loss"] - res_mix_byp["loss"], 6),
-        },
+        "clean_prose": _package_domain("clean_prose", res_clean_auto, res_clean_byp),
+        "numerical_prose": _package_domain("numerical_prose", res_num_auto, res_num_byp),
+        "mixed_prose_math": _package_domain("mixed_prose_math", res_mix_auto, res_mix_byp),
+    }
+
+
+@torch.no_grad()
+def evaluate_prior_skills_accuracy(
+    model: MiniGPT,
+    tokenizer: Any,
+    prior_tasks: list[str],
+    device: torch.device | str = "cpu",
+    num_samples: int = 50,
+    seed: int = 42,
+) -> dict[str, dict[str, float]]:
+    """Evaluate exact-match accuracy on previously learned skills via autoregressive generation.
+
+    Verifies non-regression with real generation behavior, not merely loss.
+    """
+    from adaptive_mini_gpt.autonomous.tasks import TASK_REGISTRY, evaluate_task_holdout
+
+    results: dict[str, dict[str, float]] = {}
+    for tid in prior_tasks:
+        if tid in TASK_REGISTRY:
+            task = TASK_REGISTRY[tid]
+            res = evaluate_task_holdout(
+                model=model,
+                tokenizer=tokenizer,
+                task=task,
+                device=device,  # pyright: ignore[reportArgumentType]
+                num_samples=num_samples,
+                seed=seed,
+                split="test",
+            )
+            results[tid] = {
+                "accuracy": res["accuracy"],
+                "correct": res["correct"],
+                "total": res["total"],
+            }
+    return results
+
+
+@torch.no_grad()
+def evaluate_mixed_domain_retention(
+    model: MiniGPT,
+    tokenizer: Any,
+    device: torch.device | str = "cpu",
+    max_batches: int = 10,
+) -> dict[str, float]:
+    """Evaluate loss and perplexity on mixed interleaved prose and procedural sequences."""
+    text_mixed = (
+        "In 1599 Shakespeare opened the Globe Theatre. rev(theatre)=ertaeth\n"
+        "King Henry assembled 45 horses and 27 knights. ADD 45+27=72\n"
+        "The astronomer observed 108 distant stellar clusters. PAR 108=EVEN\n"
+        "The expedition departed with 64 provisions and consumed 19. SUB 64-19=45\n"
+        "The poet penned 154 sonnets across 12 manuscripts. rev(sonnet)=tennos\n"
+    ) * 10
+    tok_mix = torch.tensor(tokenizer.encode(text_mixed), dtype=torch.long)
+    ds_mix = TokenDataset(tok_mix, context_length=min(model.config.context_length, 64))
+    res = evaluate_dataset(model, ds_mix, batch_size=8, device=device, max_batches=max_batches)
+    return {
+        "loss": round(res["loss"], 6),
+        "perplexity": round(res["perplexity"], 4),
+        "bpc": round(res["bits_per_character"], 4),
     }
 
 

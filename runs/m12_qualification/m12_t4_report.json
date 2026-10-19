@@ -1,0 +1,1180 @@
+{
+  "timestamp": 1792406157.2324083,
+  "gpu_name": "Tesla T4",
+  "device": "cuda",
+  "precision": "fp16",
+  "model_architecture": {
+    "vocab_size": 350,
+    "d_model": 128,
+    "n_layers": 4,
+    "n_heads": 4,
+    "d_ff": 512,
+    "context_length": 128
+  },
+  "summary": {
+    "num_seeds": 3,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "autonomous_selection_consistent": true,
+    "selected_task": "instruction_reasoning",
+    "train_test_overlap": 0,
+    "baseline_accuracy": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "candidate_accuracy": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "accuracy_gain": {
+      "mean": 0.0,
+      "std": 0.0
+    },
+    "breakdown": {
+      "unseen_in_distribution_len_3_6": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "ood_extrapolation_len_7_8": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "alphanumeric_combinations": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "retention_drift": {
+      "clean_prose_loss_drift": {
+        "mean": 0.9652,
+        "std": 0.0725
+      },
+      "numerical_prose_loss_drift": {
+        "mean": 0.888,
+        "std": 0.0171
+      },
+      "mixed_prose_loss_drift": {
+        "mean": 1.003,
+        "std": 0.0212
+      }
+    }
+  },
+  "acceptance_check": {
+    "unseen_len_3_6_target_90pct": {
+      "target": 0.9,
+      "achieved": 0.0,
+      "passed": false
+    },
+    "ood_len_7_8_target_70pct": {
+      "target": 0.7,
+      "achieved": 0.0,
+      "passed": false
+    },
+    "retention_drift_bounded": {
+      "target": "<= 0.10",
+      "max_observed": 1.044534,
+      "passed": false
+    },
+    "zero_train_test_overlap": true,
+    "autonomous_selection_used": true,
+    "overall_empirical_qualification": "NOT_QUALIFIED"
+  },
+  "per_seed_runs": [
+    {
+      "seed": 42,
+      "selected_task": "instruction_reasoning",
+      "selection_reason": "Autonomous selection: 'instruction_reasoning' is weakest unmastered skill (accuracy: 0.0000 < 0.95) out of eligible pool: [('instruction_reasoning', 0.0), ('instruction_symbolic', 0.0), ('instruction_qa', 0.0)].",
+      "decision": "ROLLBACK",
+      "decision_reason": "Target accuracy gain +0.0091 below min 0.05; Retention drift 0.991938 exceeds tolerance 0.08",
+      "gpu_training_sec": 3.5,
+      "wall_clock_sec": 61.25,
+      "steps_trained": 150,
+      "tokens_seen": 614400,
+      "target_task_test": {
+        "baseline_accuracy": 0.0,
+        "candidate_accuracy": 0.0,
+        "gain": 0.0,
+        "total_evaluated": 100.0,
+        "split": "test"
+      },
+      "reversal_breakdown_test": {
+        "baseline": {
+          "unseen_in_distribution_len_3_6": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "tihd1l",
+                "expected": "l1dhit",
+                "completion": "The ontis: [xamm'algorisibe re, x = 40 = 1. Adynits divisibers: [x = 1.",
+                "correct": false
+              },
+              {
+                "word": "t8pk",
+                "expected": "kp8t",
+                "completion": "The reate reate reate ontise reate reate reate re, xamm complate ontise se listanis",
+                "correct": false
+              },
+              {
+                "word": "whw3qd",
+                "expected": "dq3whw",
+                "completion": "The reate ontise reate reate reate reate on se se se se se se se se se se se se",
+                "correct": false
+              }
+            ]
+          },
+          "ood_extrapolation_len_7_8": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "ht3r12j",
+                "expected": "j21r3th",
+                "completion": "The ontise reate re, for - - - 40 = 40 = 40 = 40 = 8 + 370 = 8 + 370 = 85 = 8",
+                "correct": false
+              },
+              {
+                "word": "cew1nmc",
+                "expected": "cmn1wec",
+                "completion": "The reate reate ontise reate reate reate reate reate reate on se se se se se se se li",
+                "correct": false
+              },
+              {
+                "word": "dtk1xpb5",
+                "expected": "5bpx1ktd",
+                "completion": "The of 'algoris: 2. Add by 8 + 3. Add the tisibtisibtens: [x = 1. Add the un",
+                "correct": false
+              }
+            ]
+          },
+          "alphanumeric_combinations": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "sl9",
+                "expected": "9ls",
+                "completion": "The ontise reate re, for se re, for efore, for exise listancate ple: [xise of ' is",
+                "correct": false
+              },
+              {
+                "word": "4kij",
+                "expected": "jik4",
+                "completion": "The reate re, xamprogothate ontise re, x = 1. Sunits: [x = 1. Subtract 6 = 1",
+                "correct": false
+              },
+              {
+                "word": "sk35i",
+                "expected": "i53ks",
+                "completion": "The ontise reate reate re, xamprogorise re, x = 1. Sunits: 8 + 37 = 1. Subt",
+                "correct": false
+              }
+            ]
+          },
+          "alpha_only": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "knovdq",
+                "expected": "qdvonk",
+                "completion": "The re, 92. Subtisibla'alla' is divisibla' is divisibla' is divisibla'",
+                "correct": false
+              },
+              {
+                "word": "spghn",
+                "expected": "nhgps",
+                "completion": "The reate re, xise ontise reate ontise se se se se se se se se se se s: 70",
+                "correct": false
+              },
+              {
+                "word": "nkf",
+                "expected": "fkn",
+                "completion": "The re, 92. Add the units: 5 = 1. Add the units: 5 = 1. Add the tens: 5 = 1. Sun",
+                "correct": false
+              }
+            ]
+          },
+          "digits_only": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "6232",
+                "expected": "2326",
+                "completion": "The ontis: [xamplist in numberefore, x in Parisiberefore, xisibers isible of",
+                "correct": false
+              },
+              {
+                "word": "4891",
+                "expected": "1984",
+                "completion": "The re, form'algothm'algorithm'm'algla'.\n<|user|>htirogla'.\n<|user|>'.\n<|user|>'.\n<|user|>ht",
+                "correct": false
+              },
+              {
+                "word": "904713",
+                "expected": "317409",
+                "completion": "The re, form'algorisides divisides divis: 2x = 8 + 3. Add the tisides divisibl",
+                "correct": false
+              }
+            ]
+          }
+        },
+        "candidate": {
+          "unseen_in_distribution_len_3_6": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "tihd1l",
+                "expected": "l1dhit",
+                "completion": "To add 6 + 3:\n1. 10 + 10 = 10\n2. 30 + 1 = 1\nResult: 133.\n<|user|>ubtrac",
+                "correct": false
+              },
+              {
+                "word": "t8pk",
+                "expected": "kp8t",
+                "completion": "To add 6 + 60:\n1. 60 + 60 = 10\n2. 0 + 7 = 1\nResult: 131.\n<|user|>ubtrac",
+                "correct": false
+              },
+              {
+                "word": "whw3qd",
+                "expected": "dq3whw",
+                "completion": "To add 6 + 60:\n1. 60 + 60 = 10\n2. 0 + 6 = 1\nResult: 131.\n<|user|>ubtrac",
+                "correct": false
+              }
+            ]
+          },
+          "ood_extrapolation_len_7_8": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "ht3r12j",
+                "expected": "j21r3th",
+                "completion": "To add 6 + 3:\n1. 10 + 60 = 10\n2. 3 + 1 = 1\nResult: 1110.\n<|user|>ubto",
+                "correct": false
+              },
+              {
+                "word": "cew1nmc",
+                "expected": "cmn1wec",
+                "completion": "To add 6 + 60:\n1. 10 + 60 = 10\n2. 0 + 0 = 10\nResult: 130.\n<|user|>ult:",
+                "correct": false
+              },
+              {
+                "word": "dtk1xpb5",
+                "expected": "5bpx1ktd",
+                "completion": "To add bto add 68 + 37:\n1. 60 + 70 = 10\n2. 6 + 7 = 11\n2\n2\n2 + 2 =",
+                "correct": false
+              }
+            ]
+          },
+          "alphanumeric_combinations": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "sl9",
+                "expected": "9ls",
+                "completion": "To add 6 + 60:\n1. 10 + 60 = 10\n2. 0 + 0 = 10\nResult: 130.\n<|user|>ubto",
+                "correct": false
+              },
+              {
+                "word": "4kij",
+                "expected": "jik4",
+                "completion": "To add 6 + 60 add 60 + 60 = 130.\n<|user|>ubto add 60.\n<|user|>bltract 70.\n<|user|>u",
+                "correct": false
+              },
+              {
+                "word": "sk35i",
+                "expected": "i53ks",
+                "completion": "To add 6 + 60 + 3:\n1. 10 = 10\n2. 40 + 40 = 1\nResult: 111.\n<|user|>ult:",
+                "correct": false
+              }
+            ]
+          },
+          "alpha_only": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "knovdq",
+                "expected": "qdvonk",
+                "completion": "To add 66 + 60:\n1. 60 + 60 = 10\n2. 0 + 6 = 1\nResult: 113.\n<|user|>ubtr",
+                "correct": false
+              },
+              {
+                "word": "spghn",
+                "expected": "nhgps",
+                "completion": "To add 60 + 70 + 3:\n1. 10 + 70 = 10\n20\n2. 0 + 0 = 1\nResult: 130.",
+                "correct": false
+              },
+              {
+                "word": "nkf",
+                "expected": "fkn",
+                "completion": "Resulto add 65.\n<|user|>ubtract 7 add 67 add 67 - 27:\n1. 30 + 30",
+                "correct": false
+              }
+            ]
+          },
+          "digits_only": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "6232",
+                "expected": "2326",
+                "completion": "To add 6 + 6:\n1. 60 + 60 = 10\n2. 6 + 6 = 11\nResult: 131.\n<|user|>ubtrac",
+                "correct": false
+              },
+              {
+                "word": "4891",
+                "expected": "1984",
+                "completion": "To add 6 + 6:\n1. 10 + 60 = 10\n2. 3 + 7 = 1\nResult: 113.\n<|user|>ubtract",
+                "correct": false
+              },
+              {
+                "word": "904713",
+                "expected": "317409",
+                "completion": "To add 6 + 6:\n1. 10 + 80 = 10\n2. 4 + 7 = 1\nResult: 1311.\n<|user|>ult: 1",
+                "correct": false
+              }
+            ]
+          }
+        },
+        "gains": {
+          "unseen_in_distribution_len_3_6": 0.0,
+          "ood_extrapolation_len_7_8": 0.0,
+          "alphanumeric_combinations": 0.0,
+          "alpha_only": 0.0,
+          "digits_only": 0.0
+        }
+      },
+      "retention_drift": {
+        "clean_prose_delta": 0.902489,
+        "numerical_prose_delta": 0.875457,
+        "mixed_prose_math_delta": 0.991938,
+        "base_raw_losses": {
+          "clean_prose": 5.8571821848551435,
+          "numerical_prose": 5.756687959035237,
+          "mixed_prose_math": 5.622230052947998
+        },
+        "cand_raw_losses": {
+          "clean_prose": 6.759670893351237,
+          "numerical_prose": 6.632145086924235,
+          "mixed_prose_math": 6.6141676902771
+        }
+      },
+      "prior_skills_test": {
+        "instruction_qa": {
+          "base_accuracy": 0.0,
+          "cand_accuracy": 0.05,
+          "delta_accuracy": 0.05
+        },
+        "instruction_reasoning": {
+          "base_accuracy": 0.0,
+          "cand_accuracy": 0.0,
+          "delta_accuracy": 0.0
+        }
+      },
+      "qualitative_samples": {
+        "before": [
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'photon'.\n<|assistant|>\n",
+            "completion": "The re, xamprogorise re, x = 4.\n<|user|>arise of '.\n<|user|>hena' is a' is a' is a' is a' is a'"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'matrix'.\n<|assistant|>\n",
+            "completion": "The ontism' is a' is a' is a' is a' is a' is a' is a' is a' is a' is divithat' is a' is div"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'k8f2a'.\n<|assistant|>\n",
+            "completion": "The re, form' is a' is a' is a' is a' is a' is a' is a' is a' is divirogla' is ' is a' is div"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'algorithm'.\n<|assistant|>\n",
+            "completion": "The regorise regorithm'.\n<|user|>'.\n<|user|>htirogorirogorithm'.\n<|user|>'.\n<|user|>htirog"
+          },
+          {
+            "prompt": "<|user|>\nWhat is the capital of France?\n<|assistant|>\n",
+            "completion": "The ontententensance reattween eenchaniss in ay to con eenchanise reate re"
+          }
+        ],
+        "after": [
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'photon'.\n<|assistant|>\n",
+            "completion": "To add 6 + 90 + 70:\n1. 80 = 10\n2. 0 + 0 = 1\nResult: 1110.\n<|user|>ubtr"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'matrix'.\n<|assistant|>\n",
+            "completion": "To add bto add 66 + 67:\n1. 60 + 60 = 10\n1. 60\n2. 6 + 6 = 1\nResu"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'k8f2a'.\n<|assistant|>\n",
+            "completion": "To add 1 + 1:\n1. 10 + 10 = 10\n20\n2. 1 + 1 = 1\nResult: 1110.\n<|user|>ul"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'algorithm'.\n<|assistant|>\n",
+            "completion": "To add 6 + 1. 10 + 80 = 10\n2. 30 + 0 = 1\nResult: 13.\n<|user|>ult: 13.\n<|user|>u"
+          },
+          {
+            "prompt": "<|user|>\nWhat is the capital of France?\n<|assistant|>\n",
+            "completion": "To sultens and ultract 733 - 1:\nSult: 950.\n<|user|>ubtens and units: 90"
+          }
+        ]
+      }
+    },
+    {
+      "seed": 43,
+      "selected_task": "instruction_reasoning",
+      "selection_reason": "Autonomous selection: 'instruction_reasoning' is weakest unmastered skill (accuracy: 0.0000 < 0.95) out of eligible pool: [('instruction_reasoning', 0.0), ('instruction_symbolic', 0.0), ('instruction_qa', 0.0)].",
+      "decision": "ROLLBACK",
+      "decision_reason": "Target accuracy gain +0.0182 below min 0.05; Retention drift 1.027432 exceeds tolerance 0.08",
+      "gpu_training_sec": 3.55,
+      "wall_clock_sec": 61.24,
+      "steps_trained": 150,
+      "tokens_seen": 614400,
+      "target_task_test": {
+        "baseline_accuracy": 0.0,
+        "candidate_accuracy": 0.0,
+        "gain": 0.0,
+        "total_evaluated": 100.0,
+        "split": "test"
+      },
+      "reversal_breakdown_test": {
+        "baseline": {
+          "unseen_in_distribution_len_3_6": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "a842h",
+                "expected": "h248a",
+                "completion": "The ontise reate reate re, for - - 40 = 8 + 370 = 8 + 370 = 8 + 370 = 85 = 85 =",
+                "correct": false
+              },
+              {
+                "word": "1l3",
+                "expected": "3l1",
+                "completion": "The ontism'algla'algla' is a' is a' is a' is a' is divithm' is a' is a' is a' is di",
+                "correct": false
+              },
+              {
+                "word": "z8jmd",
+                "expected": "dmj8z",
+                "completion": "The ontism' is a'algla' is a' is agla' is a' is divirogla' is divithgla' is di",
+                "correct": false
+              }
+            ]
+          },
+          "ood_extrapolation_len_7_8": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "i8gyobm",
+                "expected": "mboyg8i",
+                "completion": "The re, xt act act act act of 'algla'algorisiontisibla' is ' is ' is a' is a' is div",
+                "correct": false
+              },
+              {
+                "word": "54z2yla",
+                "expected": "aly2z45",
+                "completion": "The re, 92. Sunits: [x = 1. Subtract the units: 5 = 1. Subtract the tract the",
+                "correct": false
+              },
+              {
+                "word": "x86y53tr",
+                "expected": "rt35y68x",
+                "completion": "The ontis: [xamprogothate of ' is '.\n<|user|>isibers: [x = 1. Suboth for form'.\n<|user|>'",
+                "correct": false
+              }
+            ]
+          },
+          "alphanumeric_combinations": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "ozv40q",
+                "expected": "q04vzo",
+                "completion": "The re, form'algla'algla'algla' is divithm'.\n<|user|>gla' is ' is ' is ' is a' is ' is di",
+                "correct": false
+              },
+              {
+                "word": "quj1",
+                "expected": "1juq",
+                "completion": "The ontis: [x = 40 = 8 + 37 = 1. Add the units: 8 + 37 = 15 = 8 + 37 = 8 + 37 = 8",
+                "correct": false
+              },
+              {
+                "word": "38p",
+                "expected": "p83",
+                "completion": "The re, formhanise ontise reate reate reate reate reate ontise se se se se se list",
+                "correct": false
+              }
+            ]
+          },
+          "alpha_only": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "zlb",
+                "expected": "blz",
+                "completion": "The re, 92. Add ontis: [xisible onlate of ' is a' is a' is a' is a' is a' is a' is a",
+                "correct": false
+              },
+              {
+                "word": "awsrd",
+                "expected": "drswa",
+                "completion": "The ontise reate reate re, for se re, for se reate ontisiberse listancate listanise",
+                "correct": false
+              },
+              {
+                "word": "ksnjyd",
+                "expected": "dyjnsk",
+                "completion": "The reate ontise revise reate reate re, form'allate re, xisiberse of ' is a' is a' is",
+                "correct": false
+              }
+            ]
+          },
+          "digits_only": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "5007",
+                "expected": "7005",
+                "completion": "The re, 92. Sunits: 92. Subtract the units: 5 = 1. Subtract the ubtract the",
+                "correct": false
+              },
+              {
+                "word": "946826",
+                "expected": "628649",
+                "completion": "The ontis: [xamprogorammothate re, x = 1. Sunits: 2. Subtract 6 = 1. Su",
+                "correct": false
+              },
+              {
+                "word": "92303",
+                "expected": "30329",
+                "completion": "The ontise re, for efore, 92. Add the units: [xamplist - - - - 40 = 40 =",
+                "correct": false
+              }
+            ]
+          }
+        },
+        "candidate": {
+          "unseen_in_distribution_len_3_6": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "a842h",
+                "expected": "h248a",
+                "completion": "To add 6 + 70:\n1. 10 + 80 = 10\n2. 7 + 8 = 1\nResult: 1130.\n<|user|>ult:",
+                "correct": false
+              },
+              {
+                "word": "1l3",
+                "expected": "3l1",
+                "completion": "To add 6 + 71:\n1. 10 + 80 = 10\n2. 1 + 8 = 10\nResult: 110.\n<|user|>ult:",
+                "correct": false
+              },
+              {
+                "word": "z8jmd",
+                "expected": "dmj8z",
+                "completion": "To add 9 + 90 + 70:\n1. 80 = 10\n2. 0 + 0 = 1\nResult: 110.\n<|user|>ult: 1",
+                "correct": false
+              }
+            ]
+          },
+          "ood_extrapolation_len_7_8": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "i8gyobm",
+                "expected": "mboyg8i",
+                "completion": "To add 1 + 870 + 80:\n1. 10 = 10\n2. 1 + 8 = 1\nResult: 110.\n<|user|>ulto",
+                "correct": false
+              },
+              {
+                "word": "54z2yla",
+                "expected": "aly2z45",
+                "completion": "To add 9 + 70 + 70:\n1. 10 = 10\n1. 8 + 8 = 10\n2\n2. 2 + 8 = 1\nResult",
+                "correct": false
+              },
+              {
+                "word": "x86y53tr",
+                "expected": "rt35y68x",
+                "completion": "To add 6 + 6:\n1. 60 + 60 = 10\n2. 6 + 6 = 11\nResult: 1310.\n<|user|>ubto",
+                "correct": false
+              }
+            ]
+          },
+          "alphanumeric_combinations": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "ozv40q",
+                "expected": "q04vzo",
+                "completion": "To add 6 + 70:\n1. 1. 10 + 80 = 10\n20\n2. 0 + 0 = 1\nResult: 110.\n<|user|>",
+                "correct": false
+              },
+              {
+                "word": "quj1",
+                "expected": "1juq",
+                "completion": "To add 79 + 70 + 7:\n1. 10 = 10\n2. 8 + 8 = 1\nResult: 1110.\n<|user|>ult:",
+                "correct": false
+              },
+              {
+                "word": "38p",
+                "expected": "p83",
+                "completion": "To add 6 + 70 + 70:\n1. 70 + 70 = 10\n2. 0 + 7 = 10\nResult: 1130.\n<|user|>",
+                "correct": false
+              }
+            ]
+          },
+          "alpha_only": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "zlb",
+                "expected": "blz",
+                "completion": "To add 90 + 70:\n1. 10 + 80 = 10\n2. 0 + 0 = 1\nResult: 110.\n<|user|>ulto",
+                "correct": false
+              },
+              {
+                "word": "awsrd",
+                "expected": "drswa",
+                "completion": "To add 68 + 70:\n1. 80 + 80 = 10\n2. 8 + 8 = 11\n2\n2. 6 + 8 = 1\nResul",
+                "correct": false
+              },
+              {
+                "word": "ksnjyd",
+                "expected": "dyjnsk",
+                "completion": "To add 79 + 77:\n1. 10 + 80 = 10\n2. 80 + 7 = 10\n2. 0\nResult: 130",
+                "correct": false
+              }
+            ]
+          },
+          "digits_only": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "5007",
+                "expected": "7005",
+                "completion": "To add 6 + 70:\n1. 30 + 70 = 10\n2. 0 + 7 = 1\nResult: 1110.\n<|user|>ult:",
+                "correct": false
+              },
+              {
+                "word": "946826",
+                "expected": "628649",
+                "completion": "To add 6 + 6:\n1. 60 + 60 = 10\n2. 6 + 6 = 1\nResult: 130.\n<|user|>ubtract",
+                "correct": false
+              },
+              {
+                "word": "92303",
+                "expected": "30329",
+                "completion": "To add 6 + 6:\n1. 60 + 60 = 10\n2. 6 + 6 = 1\nResult: 1110.\n<|user|>ubto",
+                "correct": false
+              }
+            ]
+          }
+        },
+        "gains": {
+          "unseen_in_distribution_len_3_6": 0.0,
+          "ood_extrapolation_len_7_8": 0.0,
+          "alphanumeric_combinations": 0.0,
+          "alpha_only": 0.0,
+          "digits_only": 0.0
+        }
+      },
+      "retention_drift": {
+        "clean_prose_delta": 0.948477,
+        "numerical_prose_delta": 0.881047,
+        "mixed_prose_math_delta": 1.027432,
+        "base_raw_losses": {
+          "clean_prose": 5.8571821848551435,
+          "numerical_prose": 5.756687959035237,
+          "mixed_prose_math": 5.622230052947998
+        },
+        "cand_raw_losses": {
+          "clean_prose": 6.805659135182698,
+          "numerical_prose": 6.637734731038411,
+          "mixed_prose_math": 6.649662176767985
+        }
+      },
+      "prior_skills_test": {
+        "instruction_qa": {
+          "base_accuracy": 0.0,
+          "cand_accuracy": 0.0,
+          "delta_accuracy": 0.0
+        },
+        "instruction_reasoning": {
+          "base_accuracy": 0.0,
+          "cand_accuracy": 0.0,
+          "delta_accuracy": 0.0
+        }
+      },
+      "qualitative_samples": {
+        "before": [
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'photon'.\n<|assistant|>\n",
+            "completion": "The re, xamprogorise re, x = 4.\n<|user|>arise of '.\n<|user|>hena' is a' is a' is a' is a' is a'"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'matrix'.\n<|assistant|>\n",
+            "completion": "The ontism' is a' is a' is a' is a' is a' is a' is a' is a' is a' is divithat' is a' is div"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'k8f2a'.\n<|assistant|>\n",
+            "completion": "The re, form' is a' is a' is a' is a' is a' is a' is a' is a' is divirogla' is ' is a' is div"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'algorithm'.\n<|assistant|>\n",
+            "completion": "The regorise regorithm'.\n<|user|>'.\n<|user|>htirogorirogorithm'.\n<|user|>'.\n<|user|>htirog"
+          },
+          {
+            "prompt": "<|user|>\nWhat is the capital of France?\n<|assistant|>\n",
+            "completion": "The ontententensance reattween eenchaniss in ay to con eenchanise reate re"
+          }
+        ],
+        "after": [
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'photon'.\n<|assistant|>\n",
+            "completion": "To add 9 + 970 + 70:\n1. 80 = 10\n2. 8 + 8 = 1\nResult: 1110.\n<|user|>ult"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'matrix'.\n<|assistant|>\n",
+            "completion": "To add bto add 68 + 78:\n1. 80 + 80 = 10\n1. 80 + 80 = 10\n2. 0\nRe"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'k8f2a'.\n<|assistant|>\n",
+            "completion": "To add 1 + 70:\n1. 1. 10 + 80 = 10\n2. 1 + 8 = 1\nResult: 1110.\n<|user|>ul"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'algorithm'.\n<|assistant|>\n",
+            "completion": "To add 9 + 70:\n1. 10 + 80 = 10\n2. 8 + 7 = 1\nResult: 110.\n<|user|>ult: 1"
+          },
+          {
+            "prompt": "<|user|>\nWhat is the capital of France?\n<|assistant|>\n",
+            "completion": "To add 995 + 95 + 5:\n1. 50 + 50 = 110\n2. 0 + 5 = 11\nResult: 13.\n<|user|>"
+          }
+        ]
+      }
+    },
+    {
+      "seed": 44,
+      "selected_task": "instruction_reasoning",
+      "selection_reason": "Autonomous selection: 'instruction_reasoning' is weakest unmastered skill (accuracy: 0.0000 < 0.95) out of eligible pool: [('instruction_reasoning', 0.0), ('instruction_symbolic', 0.0), ('instruction_qa', 0.0)].",
+      "decision": "ROLLBACK",
+      "decision_reason": "Target accuracy gain +0.0182 below min 0.05; Retention drift 1.044534 exceeds tolerance 0.08",
+      "gpu_training_sec": 3.38,
+      "wall_clock_sec": 60.82,
+      "steps_trained": 150,
+      "tokens_seen": 614400,
+      "target_task_test": {
+        "baseline_accuracy": 0.0,
+        "candidate_accuracy": 0.0,
+        "gain": 0.0,
+        "total_evaluated": 100.0,
+        "split": "test"
+      },
+      "reversal_breakdown_test": {
+        "baseline": {
+          "unseen_in_distribution_len_3_6": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "hz5c",
+                "expected": "c5zh",
+                "completion": "The reate re, 92 se ontise reate re, for se reate ontise listancate reate lists ber",
+                "correct": false
+              },
+              {
+                "word": "92m9",
+                "expected": "9m29",
+                "completion": "The re, 92. Adynits: [xist form'.\n<|user|>units: [x berefore, x bers: [x b",
+                "correct": false
+              },
+              {
+                "word": "jlc53",
+                "expected": "35clj",
+                "completion": "The ontism'algla'algla'algla' is a' is a' is a' is a' is divithgla'.\n<|user|>gl",
+                "correct": false
+              }
+            ]
+          },
+          "ood_extrapolation_len_7_8": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "oz5rqoz4",
+                "expected": "4zoqr5zo",
+                "completion": "The regla'algla'algla'algla'algla'.\n<|user|>gla' is ' is ' is ' is '.\n<|user|>gla' is",
+                "correct": false
+              },
+              {
+                "word": "418ywq8",
+                "expected": "8qwy814",
+                "completion": "The re, xammhena'algorisiontise re, xt act act act act act acrogorisiontisib",
+                "correct": false
+              },
+              {
+                "word": "yusi8kot",
+                "expected": "tok8isuy",
+                "completion": "The regoral nits: 2x = 1. Sublate the tens: 92. Subtract the tens: 92. Sun",
+                "correct": false
+              }
+            ]
+          },
+          "alphanumeric_combinations": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "h7cc",
+                "expected": "cc7h",
+                "completion": "The reate reate ontise reate reate re, for exise on exise lists be ples berse p",
+                "correct": false
+              },
+              {
+                "word": "p0d0",
+                "expected": "0d0p",
+                "completion": "The re, 92. Add the units: 8 + 37 = 8 + 37 = 8 + 37 = 8 + 37 = 85 = 85 = 85.\n<|user|>ine",
+                "correct": false
+              },
+              {
+                "word": "xry3",
+                "expected": "3yrx",
+                "completion": "The ontise reate reate listancate re, xamm' is aberse of ' is a' is a' is a' is a' is a'",
+                "correct": false
+              }
+            ]
+          },
+          "alpha_only": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "ddayh",
+                "expected": "hyadd",
+                "completion": "The ontise reate reate re, for se reate re, form'allate re, xamm'.\n<|user|>hena' is a' is a",
+                "correct": false
+              },
+              {
+                "word": "pfc",
+                "expected": "cfp",
+                "completion": "The re, 92. Add the toract the m'algothm'algoris: 2xt act act the tis: 2xt ac",
+                "correct": false
+              },
+              {
+                "word": "ebz",
+                "expected": "zbe",
+                "completion": "The re, formhanise re, forme re, formhena'alla' is a' is a' is a' is a' is a' is a' is a",
+                "correct": false
+              }
+            ]
+          },
+          "digits_only": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "027271",
+                "expected": "172720",
+                "completion": "The ontis: 92. Adynits: 92. Add the units: 5 = 1. Add the units: 5 = 15 = 1",
+                "correct": false
+              },
+              {
+                "word": "318",
+                "expected": "813",
+                "completion": "The ontism'algla'algorithm' is a' is a' is a' is '.\n<|user|>gla' is a' is ' is a'.\n<|user|>",
+                "correct": false
+              },
+              {
+                "word": "65713",
+                "expected": "31756",
+                "completion": "Torisiontisiblate re, x = 40 = 40 = 8 + 370 = 8 + 370 + 37:\n15 = 85.\nThere",
+                "correct": false
+              }
+            ]
+          }
+        },
+        "candidate": {
+          "unseen_in_distribution_len_3_6": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "hz5c",
+                "expected": "c5zh",
+                "completion": "To add 80 + 80 + 80 = 110\n2. 0 + 0 = 10\nResult: 120.\n<|user|>ult: 12.\n<|user|>",
+                "correct": false
+              },
+              {
+                "word": "92m9",
+                "expected": "9m29",
+                "completion": "To add 2 + 9:\n1. 10 + 80 = 10\n2. 2 + 4 = 1\nResult: 124.\n<|user|>ult: 1.",
+                "correct": false
+              },
+              {
+                "word": "jlc53",
+                "expected": "35clj",
+                "completion": "To add 2 + 3:\n1. 1. 10 + 80 = 10\n20\n2. 2 + 2 = 1\nResult: 12.\n<|user|>ub",
+                "correct": false
+              }
+            ]
+          },
+          "ood_extrapolation_len_7_8": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "oz5rqoz4",
+                "expected": "4zoqr5zo",
+                "completion": "To add 8 + 80 + 80:\n1. 80 + 80 = 10\n2. 0 + 0 = 10\nResult: 110.\n<|user|>u",
+                "correct": false
+              },
+              {
+                "word": "418ywq8",
+                "expected": "8qwy814",
+                "completion": "To add 2 + 8:\n1. 10 + 80 = 10\n2. 4 + 4 = 1\nResult: 1110.\n<|user|>ubtrac",
+                "correct": false
+              },
+              {
+                "word": "yusi8kot",
+                "expected": "tok8isuy",
+                "completion": "To add 1. 1 + 80 + 80 = 110.\n<|user|>dd 20.\n<|user|>ubltract 70.\n<|user|>nits: 9 add 2",
+                "correct": false
+              }
+            ]
+          },
+          "alphanumeric_combinations": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "h7cc",
+                "expected": "cc7h",
+                "completion": "To add 3 + 60 + 30 = 120 = 12\n2. 2 + 2 = 12\nResult: 12.\n<|user|>ubto -",
+                "correct": false
+              },
+              {
+                "word": "p0d0",
+                "expected": "0d0p",
+                "completion": "To add 2. 1 + 80 + 30 = 10\n2. 0 + 4 = 1\nResult: 12.\n<|user|>ubtract tens and",
+                "correct": false
+              },
+              {
+                "word": "xry3",
+                "expected": "3yrx",
+                "completion": "To add 60 + 80:\n1. 40 + 80 = 10\n2. 0 + 0 = 1\nResult: 1110.\n<|user|>ubt",
+                "correct": false
+              }
+            ]
+          },
+          "alpha_only": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "ddayh",
+                "expected": "hyadd",
+                "completion": "1 add 80 + 80 + 80 = 110\n2. 0 + 0 = 10\n2\n2 + 0 = 10\nResult: 12.\n<|user|>u",
+                "correct": false
+              },
+              {
+                "word": "pfc",
+                "expected": "cfp",
+                "completion": "To add 3o add 2 + 3:\n1. 1. 10 + 80 = 10\n20 + 40 = 10\n2. 2 + 4 = 1\nR",
+                "correct": false
+              },
+              {
+                "word": "ebz",
+                "expected": "zbe",
+                "completion": "To add 81 add 8 + 1:\n1. 10 + 80 = 10\n2. 1 + 80 = 1\n2\n2. 2 + 4 = 1\nR",
+                "correct": false
+              }
+            ]
+          },
+          "digits_only": {
+            "accuracy": 0.0,
+            "correct": 0,
+            "total": 40,
+            "train_overlap_count": 0,
+            "samples": [
+              {
+                "word": "027271",
+                "expected": "172720",
+                "completion": "To add 2 + 2:\n1. 20 + 20 = 10\n2. 2 + 2 = 1\nResult: 124.\n<|user|>ubtract",
+                "correct": false
+              },
+              {
+                "word": "318",
+                "expected": "813",
+                "completion": "To add 2 + 30:\n1. 10 + 10 = 10\n2. 2 + 4 = 1\nResult: 110.\n<|user|>ult: 1",
+                "correct": false
+              },
+              {
+                "word": "65713",
+                "expected": "31756",
+                "completion": "To add 2 + 3:\n1. 30 + 30 = 10\n2. 2 + 3 = 1\nResult: 124.\n<|user|>ubtract",
+                "correct": false
+              }
+            ]
+          }
+        },
+        "gains": {
+          "unseen_in_distribution_len_3_6": 0.0,
+          "ood_extrapolation_len_7_8": 0.0,
+          "alphanumeric_combinations": 0.0,
+          "alpha_only": 0.0,
+          "digits_only": 0.0
+        }
+      },
+      "retention_drift": {
+        "clean_prose_delta": 1.044534,
+        "numerical_prose_delta": 0.907427,
+        "mixed_prose_math_delta": 0.989539,
+        "base_raw_losses": {
+          "clean_prose": 5.8571821848551435,
+          "numerical_prose": 5.756687959035237,
+          "mixed_prose_math": 5.622230052947998
+        },
+        "cand_raw_losses": {
+          "clean_prose": 6.9017157554626465,
+          "numerical_prose": 6.664114793141683,
+          "mixed_prose_math": 6.611769199371338
+        }
+      },
+      "prior_skills_test": {
+        "instruction_qa": {
+          "base_accuracy": 0.0,
+          "cand_accuracy": 0.05,
+          "delta_accuracy": 0.05
+        },
+        "instruction_reasoning": {
+          "base_accuracy": 0.0,
+          "cand_accuracy": 0.0,
+          "delta_accuracy": 0.0
+        }
+      },
+      "qualitative_samples": {
+        "before": [
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'photon'.\n<|assistant|>\n",
+            "completion": "The re, xamprogorise re, x = 4.\n<|user|>arise of '.\n<|user|>hena' is a' is a' is a' is a' is a'"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'matrix'.\n<|assistant|>\n",
+            "completion": "The ontism' is a' is a' is a' is a' is a' is a' is a' is a' is a' is divithat' is a' is div"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'k8f2a'.\n<|assistant|>\n",
+            "completion": "The re, form' is a' is a' is a' is a' is a' is a' is a' is a' is divirogla' is ' is a' is div"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'algorithm'.\n<|assistant|>\n",
+            "completion": "The regorise regorithm'.\n<|user|>'.\n<|user|>htirogorirogorithm'.\n<|user|>'.\n<|user|>htirog"
+          },
+          {
+            "prompt": "<|user|>\nWhat is the capital of France?\n<|assistant|>\n",
+            "completion": "The ontententensance reattween eenchaniss in ay to con eenchanise reate re"
+          }
+        ],
+        "after": [
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'photon'.\n<|assistant|>\n",
+            "completion": "To add 1 + 80 + 80:\n1. 10 + 80 = 10\n2. 0 + 4 = 1\nResult: 1110.\n<|user|>u"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'matrix'.\n<|assistant|>\n",
+            "completion": "To add 6 + 80 + 80 = 1110 = 1\n2. 0\n + 4\nResult: 12.\n<|user|>ulto - 12"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'k8f2a'.\n<|assistant|>\n",
+            "completion": "To add 2o add 2 + 3:\n1. 10 + 80 = 10\n2. 20 + 4 = 1\n2\n2\n2 + 2 = 12"
+          },
+          {
+            "prompt": "<|user|>\nReverse the sequence of characters in the word 'algorithm'.\n<|assistant|>\n",
+            "completion": "To add 20 + 80:\n1. 1. 10 + 80 = 10\n20 + 4 = 1\n2\n2. 2 + 4 = 1\nResul"
+          },
+          {
+            "prompt": "<|user|>\nWhat is the capital of France?\n<|assistant|>\n",
+            "completion": "To subtract 999 - 15:\nSubtens and units: 90 - 10 = 10.\n<|user|>ultr"
+          }
+        ]
+      }
+    }
+  ],
+  "total_wall_clock_sec": 388.94
+}

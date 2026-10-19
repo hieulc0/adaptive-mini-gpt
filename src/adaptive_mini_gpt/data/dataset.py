@@ -255,9 +255,7 @@ class TokenDataset:
         # Precompute masked target tensor once at initialization (zero per-step overhead)
         self.targets = tokens.clone()
         if self.mask_prompt_before_equals and self.equals_token_id is not None:
-            ans_mask = build_1d_answer_mask(
-                tokens, self.equals_token_id, self.newline_token_id
-            )
+            ans_mask = build_1d_answer_mask(tokens, self.equals_token_id, self.newline_token_id)
             valid_target_positions = torch.zeros_like(ans_mask)
             valid_target_positions[1:] = ans_mask[:-1]
             self.targets[~valid_target_positions] = -1

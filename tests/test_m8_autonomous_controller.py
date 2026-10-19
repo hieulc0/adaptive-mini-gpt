@@ -118,9 +118,7 @@ def base_model_checkpoint(tmp_path: Path) -> Path:
     return ckpt_dir
 
 
-def test_controller_state_machine_cycle(
-    base_model_checkpoint: Path, tmp_path: Path
-) -> None:
+def test_controller_state_machine_cycle(base_model_checkpoint: Path, tmp_path: Path) -> None:
     """Test full autonomous learning controller cycle."""
     out_dir = tmp_path / "auto_learn_test"
     controller = LearningController(
@@ -151,9 +149,7 @@ def test_controller_state_machine_cycle(
     assert history[0]["selected_task"] == "parity"
 
 
-def test_controller_rollback_on_regression(
-    base_model_checkpoint: Path, tmp_path: Path
-) -> None:
+def test_controller_rollback_on_regression(base_model_checkpoint: Path, tmp_path: Path) -> None:
     """Test controller correctly rejects candidate and rolls back if criteria fail."""
     out_dir = tmp_path / "auto_learn_rollback"
     controller = LearningController(
@@ -182,9 +178,7 @@ def test_controller_rollback_on_regression(
     assert "Target accuracy gain" in history[0]["reason"]
 
 
-def test_controller_crash_recovery(
-    base_model_checkpoint: Path, tmp_path: Path
-) -> None:
+def test_controller_crash_recovery(base_model_checkpoint: Path, tmp_path: Path) -> None:
     """Test controller can resume from an interrupted state."""
     out_dir = tmp_path / "auto_learn_crash"
     out_dir.mkdir(parents=True, exist_ok=True)

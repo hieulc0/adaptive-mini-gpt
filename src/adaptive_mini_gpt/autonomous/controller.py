@@ -1,6 +1,6 @@
-"""Autonomous learning controller implementing the unified M8/M10 state machine:
+"""Autonomous learning controller implementing the unified M8/M10/M12.1 state machine:
 
-EVALUATE -> SELECT_TASK -> PLAN -> TRAIN -> VERIFY -> PROMOTE / ROLLBACK -> STOP
+EVALUATE -> SELECT_TASK -> PLAN -> TRAIN -> VERIFY -> PROMOTE / ROLLBACK -> QUALIFY -> STOP
 """
 
 from __future__ import annotations
@@ -20,6 +20,7 @@ import torch
 from adaptive_mini_gpt.adaptive.growth import grow_model_experts
 from adaptive_mini_gpt.autonomous.tasks import (
     TASK_REGISTRY,
+    evaluate_symbolic_reversal_breakdown,
     evaluate_task_holdout,
 )
 from adaptive_mini_gpt.data.dataset import TokenDataset, split_data
@@ -73,16 +74,18 @@ class ControllerJournal:
     cumulative_gpu_seconds: float = 0.0
     consecutive_rollbacks: int = 0
     selected_task: str | None = None
+    selection_reason: str | None = None
     plan: dict[str, Any] | None = None
     baseline_metrics: dict[str, Any] = field(default_factory=dict)
     candidate_metrics: dict[str, Any] = field(default_factory=dict)
+    qualification_metrics: dict[str, Any] = field(default_factory=dict)
     decision: str | None = None
     decision_reason: str | None = None
     history: list[dict[str, Any]] = field(default_factory=list)
 
 
 class LearningController:
-    """Unified Autonomous Learning and Adaptive Growth Controller (M8/M10)."""
+    """Unified Autonomous Learning and Adaptive Growth Controller (M8/M10/M12.1)."""
 
     def __init__(
         self,
@@ -174,8 +177,11 @@ class LearningController:
         return model, tokenizer, config
 
     def step_evaluate(self, model: MiniGPT, tokenizer: Any) -> dict[str, Any]:
-        """Evaluate baseline model on task battery and text retention."""
-        logger.info("Evaluating baseline model across procedural task battery...")
+        """Evaluate baseline model on task battery and text retention.
+
+        M12.1: Uses 'val' split for task selection to prevent test split leakage.
+        """
+        logger.info("Evaluating baseline model across procedural task battery (val split)...")
         task_metrics: dict[str, Any] = {}
         for tid, task in TASK_REGISTRY.items():
             metrics = evaluate_task_holdout(
@@ -185,6 +191,7 @@ class LearningController:
                 device=self.device,
                 num_samples=100,
                 seed=self.seed + 100,
+                split="val",
             )
             task_metrics[tid] = metrics
 
@@ -194,6 +201,13 @@ class LearningController:
             tokenizer=tokenizer,
             device=self.device,
         )
+
+        # Extract raw baseline losses for strict cross-checkpoint delta comparisons
+        raw_baseline_losses = {
+            domain: retention[domain]["raw_loss"]
+            for domain in ("clean_prose", "numerical_prose", "mixed_prose_math")
+            if domain in retention and "raw_loss" in retention[domain]
+        }
 
         # For BPE models, evaluate instruction following
         if hasattr(tokenizer, "tokenizer_type") and tokenizer.tokenizer_type == "bpe":
@@ -213,27 +227,54 @@ class LearningController:
         baseline_summary = {
             "tasks": task_metrics,
             "retention": retention,
+            "raw_losses": raw_baseline_losses,
             "checkpoint_evaluated": str(self.base_checkpoint_dir),
+            "split_used": "val",
         }
         self.journal.baseline_metrics = baseline_summary
         self.journal.state = ControllerState.SELECT_TASK.value
         self._save_journal()
         return baseline_summary
 
-    def step_select_task(self) -> str | None:
-        """Select weakest task by improvement potential."""
+    def step_select_task(self, tokenizer: Any = None) -> str | None:
+        """Select weakest task autonomously by improvement potential matching model domain."""
         if self.force_task:
             if self.force_task not in TASK_REGISTRY:
                 raise ValueError(
                     f"Forced task '{self.force_task}' not in {list(TASK_REGISTRY.keys())}"
                 )
             selected = self.force_task
-            logger.info("Task selection forced to: %s", selected)
+            reason = f"Forced task selection: '{selected}'."
+            logger.info(reason)
         else:
             task_metrics = self.journal.baseline_metrics.get("tasks", {})
+            is_bpe = False
+            if tokenizer is not None:
+                is_bpe = getattr(tokenizer, "tokenizer_type", "") == "bpe"
+            elif self.journal.baseline_metrics.get("retention", {}).get("instructions") is not None:
+                is_bpe = True
+            elif hasattr(self, "base_checkpoint_dir"):
+                try:
+                    active_ckpt = CheckpointManager.find_latest_valid_checkpoint(
+                        self.base_checkpoint_dir
+                    )
+                    raw = CheckpointManager.load_raw_checkpoint(active_ckpt)
+                    is_bpe = raw.get("tokenizer", {}).get("tokenizer_type", "") == "bpe"
+                except Exception:
+                    is_bpe = False
+
+            eligible_tasks = [
+                tid
+                for tid in TASK_REGISTRY
+                if (not is_bpe or tid.startswith("instruction_"))
+                and (is_bpe or not tid.startswith("instruction_"))
+            ]
+            if not eligible_tasks:
+                eligible_tasks = list(TASK_REGISTRY.keys())
+
             unmastered = [
                 (tid, task_metrics.get(tid, {}).get("accuracy", 0.0))
-                for tid in TASK_REGISTRY
+                for tid in eligible_tasks
                 if task_metrics.get(tid, {}).get("accuracy", 0.0) < self.target_accuracy_threshold
             ]
             if not unmastered:
@@ -243,17 +284,24 @@ class LearningController:
                 )
                 self.journal.decision = "NO_ACTION"
                 self.journal.decision_reason = "All skills meet mastery threshold."
+                self.journal.selection_reason = "No unmastered task available."
                 self.journal.state = ControllerState.STOP.value
                 self._save_journal()
                 return None
 
             unmastered.sort(key=lambda x: x[1])
             selected = unmastered[0][0]
-            logger.info(
-                "Selected weakest task: '%s' (accuracy: %.4f)", selected, unmastered[0][1]
+            weakest_acc = unmastered[0][1]
+            pool_summary = [(t, round(a, 4)) for t, a in unmastered]
+            reason = (
+                f"Autonomous selection: '{selected}' is weakest unmastered skill "
+                f"(accuracy: {weakest_acc:.4f} < {self.target_accuracy_threshold:.2f}) "
+                f"out of eligible pool: {pool_summary}."
             )
+            logger.info(reason)
 
         self.journal.selected_task = selected
+        self.journal.selection_reason = reason
         self.journal.state = ControllerState.PLAN.value
         self._save_journal()
         return selected
@@ -280,8 +328,6 @@ class LearningController:
         elif self.growth_action == GrowthAction.CONTINUE:
             action = GrowthAction.CONTINUE.value
         else:
-            # AUTO: First attempt continued dense training under matched compute budget.
-            # Only grow experts if previous dense cycle was rejected on this skill.
             if self.journal.consecutive_rollbacks > 0 and (
                 not model.config.adaptive_enabled or model.config.n_experts == 0
             ):
@@ -318,8 +364,11 @@ class LearningController:
         candidate_model = copy.deepcopy(base_model)
         is_bpe = hasattr(tokenizer, "tokenizer_type") and tokenizer.tokenizer_type == "bpe"
 
-        # Generate verified task data
-        task_text, task_fp = task.generator_fn(plan.data_samples, plan.seed)
+        # Generate verified task data strictly using train split
+        if getattr(task, "split_support", False):
+            task_text, task_fp = task.generator_fn(plan.data_samples, plan.seed, split="train")
+        else:
+            task_text, task_fp = task.generator_fn(plan.data_samples, plan.seed)
 
         if not is_bpe:
             _ = tokenizer.fit(task_text)
@@ -427,7 +476,11 @@ class LearningController:
         tokenizer: Any,
         task_id: str,
     ) -> bool:
-        """Verify candidate on target skill and evaluate retention on prior tasks."""
+        """Verify candidate on target skill and evaluate retention on prior tasks.
+
+        M12.1: Uses validation split ('val') for candidate gating and selection,
+        preventing any evaluation leakage into the test set.
+        """
         cand_ckpt = CheckpointManager.find_latest_valid_checkpoint(candidate_dir)
         raw = CheckpointManager.load_raw_checkpoint(cand_ckpt)
 
@@ -438,6 +491,8 @@ class LearningController:
         candidate_model.to(self.device)
 
         task = TASK_REGISTRY[task_id]
+
+        # 1. Evaluate target skill strictly on validation split (M12.1 fix for P1)
         cand_task_eval = evaluate_task_holdout(
             model=candidate_model,
             tokenizer=tokenizer,
@@ -445,11 +500,23 @@ class LearningController:
             device=self.device,
             num_samples=100,
             seed=self.seed + 100,
+            split="val",
         )
+
+        # 2. Extract baseline raw losses for true cross-checkpoint delta computation
+        base_ret = self.journal.baseline_metrics.get("retention", {})
+        base_raw_losses = {
+            dom: base_ret.get(dom, {}).get("raw_loss", base_ret.get(dom, {}).get("loss_auto", 0.0))
+            for dom in ("clean_prose", "numerical_prose", "mixed_prose_math")
+            if dom in base_ret
+        }
+
+        # 3. Evaluate candidate prose retention with cross-checkpoint baseline comparison
         cand_retention = evaluate_text_retention_suite(
             model=candidate_model,
             tokenizer=tokenizer,
             device=self.device,
+            baseline_losses=base_raw_losses if base_raw_losses else None,
         )
 
         # For BPE models, evaluate instruction following
@@ -467,28 +534,77 @@ class LearningController:
             )
             cand_retention["instructions"] = inst_eval
 
-        self.journal.candidate_metrics = {
-            "task": cand_task_eval,
-            "retention": cand_retention,
-            "candidate_dir": str(candidate_dir),
-        }
+        # 4. Behavioral audit of previously mastered skills (acc >= 0.5 in baseline) on val split
+        base_tasks = self.journal.baseline_metrics.get("tasks", {})
+        prior_mastered_tids = [
+            tid for tid, m in base_tasks.items() if tid != task_id and m.get("accuracy", 0.0) >= 0.5
+        ]
+        prior_skills_eval: dict[str, Any] = {}
+        prior_skills_passed = True
+        prior_regressions: list[str] = []
 
-        # Gating logic
-        base_acc = (
-            self.journal.baseline_metrics.get("tasks", {})
-            .get(task_id, {})
-            .get("accuracy", 0.0)
-        )
-        cand_acc = cand_task_eval.get("accuracy", 0.0)
-        acc_gain = cand_acc - base_acc
+        for prior_tid in prior_mastered_tids:
+            prior_task = TASK_REGISTRY[prior_tid]
+            prior_res = evaluate_task_holdout(
+                model=candidate_model,
+                tokenizer=tokenizer,
+                task=prior_task,
+                device=self.device,
+                num_samples=50,
+                seed=self.seed + 200,
+                split="val",
+            )
+            prior_skills_eval[prior_tid] = prior_res
+            base_acc_prior = base_tasks[prior_tid].get("accuracy", 0.0)
+            cand_acc_prior = prior_res.get("accuracy", 0.0)
+            if cand_acc_prior < (base_acc_prior - self.max_regression_tolerance):
+                prior_skills_passed = False
+                prior_regressions.append(
+                    f"Prior skill '{prior_tid}' regressed ({base_acc_prior:.4f} -> "
+                    f"{cand_acc_prior:.4f}, drop {base_acc_prior - cand_acc_prior:.4f} > "
+                    f"{self.max_regression_tolerance})"
+                )
 
+        # 5. Extract retention deltas
         clean_delta = cand_retention.get("clean_prose", {}).get("delta_loss", 0.0)
         num_delta = cand_retention.get("numerical_prose", {}).get("delta_loss", 0.0)
         mix_delta = cand_retention.get("mixed_prose_math", {}).get("delta_loss", 0.0)
         max_retention_regression = max(clean_delta, num_delta, mix_delta)
 
+        # Raw audit dictionary
+        raw_audit = {
+            "base_raw_losses": base_raw_losses,
+            "cand_raw_losses": {
+                dom: cand_retention.get(dom, {}).get("raw_loss", 0.0)
+                for dom in ("clean_prose", "numerical_prose", "mixed_prose_math")
+            },
+            "deltas": {
+                "clean_prose": clean_delta,
+                "numerical_prose": num_delta,
+                "mixed_prose_math": mix_delta,
+            },
+            "base_checkpoint": str(self.base_checkpoint_dir),
+            "candidate_checkpoint": str(candidate_dir),
+        }
+
+        self.journal.candidate_metrics = {
+            "task": cand_task_eval,
+            "retention": cand_retention,
+            "raw_retention_audit": raw_audit,
+            "prior_skills": prior_skills_eval,
+            "candidate_dir": str(candidate_dir),
+            "split_used": "val",
+        }
+
+        # Gating logic
+        base_acc = (
+            self.journal.baseline_metrics.get("tasks", {}).get(task_id, {}).get("accuracy", 0.0)
+        )
+        cand_acc = cand_task_eval.get("accuracy", 0.0)
+        acc_gain = cand_acc - base_acc
+
         logger.info(
-            "Gate: Task '%s' Base=%.4f, Cand=%.4f (Gain=%+.4f | Min=%.4f)",
+            "Gate (val): Task '%s' Base=%.4f, Cand=%.4f (Gain=%+.4f | Min=%.4f)",
             task_id,
             base_acc,
             cand_acc,
@@ -496,7 +612,7 @@ class LearningController:
             self.min_improvement,
         )
         logger.info(
-            "Retention: Clean=%.6f, Num=%.6f, Mix=%.6f (Max=%.4f | Allowed=%.4f)",
+            "Retention Raw Drift: Clean=%+.6f, Num=%+.6f, Mix=%+.6f (Max=%.4f | Allowed=%.4f)",
             clean_delta,
             num_delta,
             mix_delta,
@@ -522,11 +638,12 @@ class LearningController:
             if cand_inst_acc < (base_inst_acc - self.max_regression_tolerance):
                 retention_passed = False
 
-        if target_passed and retention_passed:
+        if target_passed and retention_passed and prior_skills_passed:
             decision = ControllerState.PROMOTE.value
             reason = (
-                f"Accuracy improved by {acc_gain:+.4f} (>= {self.min_improvement}) "
-                f"with acceptable retention drift ({max_retention_regression:.6f})."
+                f"Accuracy improved on val by {acc_gain:+.4f} (>= {self.min_improvement}) "
+                f"with acceptable retention drift ({max_retention_regression:.6f}) "
+                f"and 0 prior skill regressions."
             )
         else:
             decision = ControllerState.ROLLBACK.value
@@ -542,6 +659,8 @@ class LearningController:
             if not retention_passed:
                 drift_str = f"Retention drift {max_retention_regression:.6f}"
                 reasons.append(f"{drift_str} exceeds tolerance {self.max_regression_tolerance}")
+            if not prior_skills_passed:
+                reasons.extend(prior_regressions)
             reason = "; ".join(reasons)
 
         self.journal.decision = decision
@@ -573,6 +692,7 @@ class LearningController:
             "promoted_at": time.time(),
             "experiment_id": self.journal.experiment_id,
             "selected_task": self.journal.selected_task,
+            "selection_reason": self.journal.selection_reason,
             "decision": "PROMOTE",
             "candidate_dir": str(candidate_dir),
             "published_checkpoint": str(pub_target),
@@ -594,6 +714,7 @@ class LearningController:
             "version_index": version_idx,
             "experiment_id": self.journal.experiment_id,
             "selected_task": self.journal.selected_task,
+            "selection_reason": self.journal.selection_reason,
             "published_dir": str(published_dir),
             "checkpoint_path": str(pub_target),
             "published_path": str(pub_target),
@@ -607,7 +728,7 @@ class LearningController:
 
         # Smoke test target referenced by pointer before switching
         CheckpointManager.load_raw_checkpoint(pub_target)
-        os.replace(pointer_temp, pointer_target)  # Single atomic pointer switch!
+        os.replace(pointer_temp, pointer_target)
 
         # Also write latest.pt and manifest.json for tool backward-compatibility
         active_target = active_dir / "latest.pt"
@@ -632,6 +753,7 @@ class LearningController:
             "decision": "PROMOTE",
             "reason": self.journal.decision_reason,
             "selected_task": self.journal.selected_task,
+            "selection_reason": self.journal.selection_reason,
             "plan": self.journal.plan,
             "baseline_metrics": self.journal.baseline_metrics,
             "candidate_metrics": self.journal.candidate_metrics,
@@ -660,6 +782,7 @@ class LearningController:
             "decision": "ROLLBACK",
             "reason": self.journal.decision_reason,
             "selected_task": self.journal.selected_task,
+            "selection_reason": self.journal.selection_reason,
             "plan": self.journal.plan,
             "baseline_metrics": self.journal.baseline_metrics,
             "candidate_metrics": self.journal.candidate_metrics,
@@ -679,6 +802,69 @@ class LearningController:
             self.base_checkpoint_dir,
         )
 
+    def step_qualify(
+        self,
+        checkpoint_dir: Path | str | None = None,
+        tokenizer: Any = None,
+        num_samples: int = 100,
+    ) -> dict[str, Any]:
+        """Strict post-selection qualification on untouched 'test' split.
+
+        Evaluates target tasks, old skills, and fine-grained reversal breakdown
+        on independent test data with 0% train/val overlap.
+        """
+        if checkpoint_dir is None:
+            checkpoint_dir = self.output_dir / "active_model"
+        ckpt_path = CheckpointManager.find_latest_valid_checkpoint(checkpoint_dir)
+        raw = CheckpointManager.load_raw_checkpoint(ckpt_path)
+        cfg_dict = raw.get("model_config", {})
+        config = ModelConfig(**cfg_dict)
+        model = MiniGPT(config)
+        model.load_state_dict(raw["model_state_dict"])
+        model.to(self.device)
+
+        if tokenizer is None:
+            tokenizer = CheckpointManager.load_tokenizer(raw, config)
+
+        logger.info("Executing final qualification strictly on 'test' split...")
+        qual_task_metrics: dict[str, Any] = {}
+        for tid, task in TASK_REGISTRY.items():
+            metrics = evaluate_task_holdout(
+                model=model,
+                tokenizer=tokenizer,
+                task=task,
+                device=self.device,
+                num_samples=num_samples,
+                seed=self.seed + 999,
+                split="test",
+            )
+            qual_task_metrics[tid] = metrics
+
+        breakdown = evaluate_symbolic_reversal_breakdown(
+            model=model,
+            tokenizer=tokenizer,
+            device=self.device,
+            samples_per_category=50,
+            seed=self.seed + 777,
+        )
+
+        qualification_report = {
+            "checkpoint": str(checkpoint_dir),
+            "step": raw.get("step", 0),
+            "tasks_test_split": qual_task_metrics,
+            "reversal_breakdown_test_split": breakdown,
+            "qualified_at": time.time(),
+        }
+
+        self.journal.qualification_metrics = qualification_report
+        self._save_journal()
+
+        qual_file = self.output_dir / "qualification_report.json"
+        with open(qual_file, "w", encoding="utf-8") as f:
+            json.dump(qualification_report, f, indent=2)
+
+        return qualification_report
+
     def prepare_next_cycle(self) -> None:
         """Reset state machine for the next consecutive learning cycle."""
         active_ckpt = self.output_dir / "active_model" / "latest.pt"
@@ -689,6 +875,7 @@ class LearningController:
         self.journal.experiment_id = f"exp_{int(time.time())}_c{self.journal.cycle_index}"
         self.journal.state = ControllerState.IDLE.value
         self.journal.selected_task = None
+        self.journal.selection_reason = None
         self.journal.plan = None
         self.journal.candidate_metrics = {}
         self.journal.decision = None
@@ -733,7 +920,7 @@ class LearningController:
             self.step_evaluate(model, tokenizer)
 
         if self.journal.state == ControllerState.SELECT_TASK.value:
-            task_id = self.step_select_task()
+            task_id = self.step_select_task(tokenizer)
             if not task_id:
                 return asdict(self.journal)
         else:

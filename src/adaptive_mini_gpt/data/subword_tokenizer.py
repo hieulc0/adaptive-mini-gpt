@@ -228,9 +228,7 @@ class BPETokenizer:
         data = {
             "version": self.version,
             "vocab": [tok.decode("latin1") for tok in self.vocab],
-            "merges": [
-                (p1.decode("latin1"), p2.decode("latin1")) for p1, p2 in self.merges
-            ],
+            "merges": [(p1.decode("latin1"), p2.decode("latin1")) for p1, p2 in self.merges],
         }
         canonical = json.dumps(data, sort_keys=True, ensure_ascii=False)
         return hashlib.sha256(canonical.encode("utf-8")).hexdigest()[:16]
@@ -240,19 +238,14 @@ class BPETokenizer:
             "tokenizer_type": self.tokenizer_type,
             "version": self.version,
             "vocab": [tok.decode("latin1") for tok in self.vocab],
-            "merges": [
-                (p1.decode("latin1"), p2.decode("latin1")) for p1, p2 in self.merges
-            ],
+            "merges": [(p1.decode("latin1"), p2.decode("latin1")) for p1, p2 in self.merges],
             "fingerprint": self.get_fingerprint(),
         }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> BPETokenizer:
         vocab = [tok.encode("latin1") for tok in data.get("vocab", [])]
-        merges = [
-            (p1.encode("latin1"), p2.encode("latin1"))
-            for p1, p2 in data.get("merges", [])
-        ]
+        merges = [(p1.encode("latin1"), p2.encode("latin1")) for p1, p2 in data.get("merges", [])]
         return cls(merges=merges, vocab=vocab)
 
     def save(self, path: str | Path) -> None:

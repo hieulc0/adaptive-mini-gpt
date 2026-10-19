@@ -111,6 +111,7 @@ class TransformerBlock(nn.Module):
         normed = self.ln_2(x)
 
         if self.mod_router is not None and not bypass_moe:
+
             def _ffn_moe_sublayer(sub_x: Tensor) -> tuple[Tensor, dict[str, Any] | None]:
                 out_sub = self.mlp(sub_x)
                 aux_sub = None
@@ -128,9 +129,7 @@ class TransformerBlock(nn.Module):
         if self.moe is not None and not bypass_moe:
             moe_out, aux_info = self.moe(normed, task_id=task_id)
             if domain_mask is not None:
-                moe_out = torch.where(
-                    domain_mask.unsqueeze(-1), moe_out, torch.zeros_like(moe_out)
-                )
+                moe_out = torch.where(domain_mask.unsqueeze(-1), moe_out, torch.zeros_like(moe_out))
             ffn_out = ffn_out + moe_out
         x = x + ffn_out
         return x, aux_info
@@ -156,9 +155,7 @@ class MiniGPT(nn.Module):
 
         self.moe_head: LowRankOutputAdapter | None = None
         if config.adaptive_enabled:
-            self.moe_head = LowRankOutputAdapter(
-                config.d_model, config.d_expert, config.vocab_size
-            )
+            self.moe_head = LowRankOutputAdapter(config.d_model, config.d_expert, config.vocab_size)
 
         self.apply(self._init_weights)
         for pn, p in self.named_parameters():
@@ -285,11 +282,7 @@ class MiniGPT(nn.Module):
             if self.config.domain_trigger_token_ids is not None
             else self.config.trainable_token_ids
         )
-        if (
-            not bypass_moe
-            and self.config.adaptive_enabled
-            and trigger_ids
-        ):
+        if not bypass_moe and self.config.adaptive_enabled and trigger_ids:
             specialist_ids = torch.tensor(trigger_ids, dtype=idx.dtype, device=device)
             is_spec = torch.isin(idx, specialist_ids)  # (B, T)
             domain_token_mask = is_spec.cumsum(dim=-1) > 0  # Causal prefix accumulation
@@ -356,19 +349,23 @@ class MiniGPT(nn.Module):
         info: dict[str, Any] = {"ce_loss": ce_loss_val}
         if entropies and not effective_bypass_moe:
             mean_util = torch.stack(utilizations).mean(dim=0).tolist()
-            info.update({
-                "balance_loss": (total_balance_loss / len(entropies)).item(),
-                "z_loss": (total_z_loss / len(entropies)).item(),
-                "router_entropy": sum(entropies) / len(entropies),
-                "expert_utilization": [round(u, 4) for u in mean_util],
-            })
+            info.update(
+                {
+                    "balance_loss": (total_balance_loss / len(entropies)).item(),
+                    "z_loss": (total_z_loss / len(entropies)).item(),
+                    "router_entropy": sum(entropies) / len(entropies),
+                    "expert_utilization": [round(u, 4) for u in mean_util],
+                }
+            )
         if mod_fractions and not effective_bypass_moe:
             active_frac = round(sum(mod_fractions) / len(mod_fractions), 4)
-            info.update({
-                "mod_aux_loss": (total_mod_loss / len(mod_fractions)).item(),
-                "mod_active_fraction": active_frac,
-                "mod_active_token_fraction": active_frac,
-            })
+            info.update(
+                {
+                    "mod_aux_loss": (total_mod_loss / len(mod_fractions)).item(),
+                    "mod_active_fraction": active_frac,
+                    "mod_active_token_fraction": active_frac,
+                }
+            )
         self.last_aux_info = info
 
         return logits, loss

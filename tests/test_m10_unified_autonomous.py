@@ -169,9 +169,7 @@ def test_promotion_gate_rejects_regression_even_above_mastery(tmp_path: Path) ->
     assert not target_passed
 
 
-def test_crash_safe_atomic_publication(
-    character_base_checkpoint: Path, tmp_path: Path
-) -> None:
+def test_crash_safe_atomic_publication(character_base_checkpoint: Path, tmp_path: Path) -> None:
     """Test verified staging, immutable published directory, and atomic active-model swap."""
     out_dir = tmp_path / "atomic_pub_test"
     controller = LearningController(
@@ -246,9 +244,7 @@ def test_two_consecutive_cycles_with_lineage(
     assert len(published_dirs) == 2
 
 
-def test_bpe_model_in_autonomous_controller(
-    bpe_base_checkpoint: Path, tmp_path: Path
-) -> None:
+def test_bpe_model_in_autonomous_controller(bpe_base_checkpoint: Path, tmp_path: Path) -> None:
     """Test autonomous controller cycle executing with a BPE subword model."""
     out_dir = tmp_path / "bpe_controller_test"
     controller = LearningController(
@@ -267,9 +263,7 @@ def test_bpe_model_in_autonomous_controller(
     assert result["decision"] == ControllerState.PROMOTE.value
 
     # Verify active checkpoint retains BPE tokenizer
-    promoted_raw = CheckpointManager.load_raw_checkpoint(
-        out_dir / "active_model" / "latest.pt"
-    )
+    promoted_raw = CheckpointManager.load_raw_checkpoint(out_dir / "active_model" / "latest.pt")
     promoted_cfg = ModelConfig(**promoted_raw["model_config"])
     promoted_tok = CheckpointManager.load_tokenizer(promoted_raw, promoted_cfg)
 

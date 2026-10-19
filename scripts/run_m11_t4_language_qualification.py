@@ -305,9 +305,7 @@ def main() -> int:
                 .get("accuracy", 0.0)
             ),
             "candidate_accuracy": (
-                c1_res.get("candidate_metrics", {})
-                .get("task", {})
-                .get("accuracy", 0.0)
+                c1_res.get("candidate_metrics", {}).get("task", {}).get("accuracy", 0.0)
             ),
             "retention": c1_res.get("candidate_metrics", {}).get("retention", {}),
         },
@@ -323,9 +321,7 @@ def main() -> int:
                 .get("accuracy", 0.0)
             ),
             "candidate_accuracy": (
-                c2_res.get("candidate_metrics", {})
-                .get("task", {})
-                .get("accuracy", 0.0)
+                c2_res.get("candidate_metrics", {}).get("task", {}).get("accuracy", 0.0)
             ),
             "retention": c2_res.get("candidate_metrics", {}).get("retention", {}),
         },

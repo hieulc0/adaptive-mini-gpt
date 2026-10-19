@@ -269,9 +269,9 @@ def run_single_seed(
     t0_arm4 = time.time()
     arm4_model = copy.deepcopy(base_model)
     arm4_model.config.adaptive_enabled = True
-    arm4_model.moe_head = LowRankOutputAdapter(
-        cfg.d_model, cfg.d_expert, cfg.vocab_size
-    ).to(device=device)
+    arm4_model.moe_head = LowRankOutputAdapter(cfg.d_model, cfg.d_expert, cfg.vocab_size).to(
+        device=device
+    )
     arm4_model.freeze_backbone(trainable_token_ids=unseen_token_ids)
     arm4_model.config.domain_trigger_token_ids = [tokenizer.stoi["="]]
 

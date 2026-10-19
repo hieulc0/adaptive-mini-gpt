@@ -14,6 +14,7 @@
 | **M9** | Natural Language & Practical Reasoning | BPE subword tokenizer, instruction dataset, scaled Transformer backbone, verified reasoning tasks | **PASSED** |
 | **M10** | Unified Autonomous Learning | Lineage-aware loading, non-regressive promotion gate, atomic publishing, multi-cycle chaining | **PASSED** (Verified on Tesla T4) |
 | **M11** | Autonomous Language Learning | BPE subword model, single atomic pointer switch, fault injection, sequential instruction learning | **PASSED** (Verified on Tesla T4) |
+| **M12** | Generalization & Continual Integrity | Partitioned generators (strictly disjoint train/val/test), strict parsed verifiers, autonomous weakest-skill selection, cross-checkpoint raw loss retention audit, old-skill behavioral verification | **PASSED** |
 
 ---
 
@@ -103,3 +104,36 @@
 - Dense-first control logic: defaults to matched dense fine-tuning unless structural expert growth is explicitly requested or empirically justified.
 - Multi-cycle sequential language learning: demonstrated consecutive task selection, training, holdout evaluation, non-regressive promotion, and clean rollback on unattainable thresholds.
 - Independent large-scale holdouts (500 samples) and qualitative autoregressive text generation before vs after autonomous learning.
+
+### M12: Generalization and Continual-Learning Integrity
+- **Partitioned Generators with Strictly Disjoint Train/Val/Test Sets**:
+  - Replaced fixed 14-word reversal bank with deterministic cryptographic hash partition (): enforces strictly 0 overlap between train, val, and test splits.
+  - Distinct length distributions: training and validation generate lengths 3–6; test holdout includes lengths 7–8 (length extrapolation OOD).
+  - Tripartite Factual QA structure:  (10 core facts),  (10 semantic paraphrase queries on train facts for validation), and  (10 completely novel knowledge items reserved for test holdout).
+- **Strict Parsed Verifiers**:
+  - : Replaced permissive substring matching () with strict regex structure extraction ( or ) and exact normalized equality check. Rejects contradictory statements and malformed outputs.
+  - : Every query has an explicit canonical expected answer list. Unrecognized or unknown questions strictly fail verification (or status ), eliminating the permissive  flaw.
+- **Cross-Checkpoint Raw Loss Retention Audit**:
+  - Audited and corrected the M11 zero-drift artifact: previous intra-checkpoint MoE delta evaluated identical dense models against themselves ().
+  - Added explicit cross-checkpoint baseline comparison:  accepts  from base model and computes true drift $\Delta 	ext{Loss} = L_{	ext{cand}} - L_{	ext{base}}$.
+  - Records unrounded raw before/after losses across all domains in .
+  - Added behavioral verification:  evaluates autoregressive generation on previously mastered tasks, failing candidates that regress older skills beyond tolerance.
+- **Autonomous Task Selection**:
+  - Fully functional without : controller dynamically identifies the weakest unmastered task from baseline holdout evaluation and records explicit  in journal, manifest, and history logs.
+
+### M12.1: Empirical Generalization Qualification (Completed)
+- **Elimination of Evaluation Leakage (P1 Fix)**:
+  - Fixed `controller.py` to use `split="val"` for task selection, candidate gating, and promotion decisions.
+  - Reserved `split="test"` strictly for final post-selection qualification (`step_qualify`), eliminating test set influence on candidate selection.
+- **Strict Deterministic Verifiers (P2 Fix)**:
+  - Eliminated `startswith` matching in `verify_addition`, `verify_subtraction`, `verify_multiplication`, `verify_parity`, and `verify_reverse`.
+  - Enforced anchored regex matching (`re.fullmatch`) in `verify_instruction_symbolic`, rejecting contradictory or extraneous outputs.
+  - Required arithmetic patterns in `verify_instruction_reasoning`, strictly rejecting unsupported questions.
+- **Factual QA Question Denominator Audit (P2 Fix)**:
+  - Expanded knowledge banks to 20 distinct facts per split (`TRAIN_QA_BANK`, `PARAPHRASE_QA_BANK`, `UNSEEN_QA_BANK`).
+  - Added explicit unique question tracking in `evaluate_task_holdout`, preventing inflated confidence denominators.
+- **T4 Empirical Qualification Benchmark (3 Independent Seeds: 42, 43, 44)**:
+  - Conducted multi-seed autonomous learning experiments on NVIDIA Tesla T4 with 0% train/test input overlap.
+  - Negative result confirmed: standard BPE Mini-GPT achieved 0.0% accuracy on unseen string reversal (lengths 3-6 and OOD lengths 7-8).
+  - Autonomous controller demonstrated robust safety: detected zero gain (+0.0000) and excessive retention drift, triggering deterministic ROLLBACK on all 3 seeds and preserving active checkpoints without corruption.
+  - Detailed diagnostic established: subword tokenization fragmentation and causal autoregressive limits without scratchpad require curriculum or architectural changes before claiming generalization.

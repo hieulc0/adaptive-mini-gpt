@@ -190,3 +190,86 @@
        - *Before Learning*: `"The revichanchanchanchanis..."` (garbled repetition)
        - *After Learning*: `"The reversed sequence is: notohp."` (exact character-level reversal)
 - **Status**: **M11 GATE FULLY PASSED**. Autonomous natural language improvement demonstrated on BPE representations with strict non-regression, single atomic pointer guarantees, and empirical T4 verification.
+
+---
+
+### M12: Generalization and Continual-Learning Integrity Qualification
+- **Date**: 2026-10-19
+- **Environment**: Linux x86_64, Python 3.12, PyTorch 2.4+
+- **Test Suite Verification**: **71/71 pytest tests passed** (including disjoint partition tests, strict symbolic and factual verifiers, autonomous weakest-skill selection, cross-checkpoint raw loss retention audits, and end-to-end cycles).
+- **Core Engineering Deliverables & Audits**:
+  1. **Strict Train/Val/Test Partitioning & Unseen Reversal**:
+     - Replaced the fixed 14-word reversal bank with deterministic cryptographic partition (`get_string_split(w)`).
+     - Verified `len(train_words & test_words) == 0` (strictly 0 train/test overlap).
+     - Test split includes unseen lengths (7–8 characters) completely excluded from training (lengths 3–6), providing true OOD length extrapolation testing.
+  2. **Tripartite Factual QA Knowledge Partitioning**:
+     - Separated factual QA into `TRAIN_QA_BANK` (10 core facts), `PARAPHRASE_QA_BANK` (10 semantic paraphrase variations testing non-verbatim generalization), and `UNSEEN_QA_BANK` (10 completely novel knowledge items).
+     - Factual recall absent from training is explicitly audited as novel test knowledge rather than conflated with generalization.
+  3. **Strict Parsed Verifiers**:
+     - `verify_instruction_symbolic`: Replaces permissive `expected in comp_clean` with structured regex extraction (`The reversed sequence is: {ans}` or `{ans}.`) and exact normalized equality matching. Rejects contradictory statements and corrupt outputs.
+     - `verify_instruction_qa`: Eliminates the permissive `len(comp_clean) > 0` bug. Every question has explicit expected answers; unknown questions strictly fail verification with status `unscorable`.
+  4. **Retention Zero-Drift Audit & Cross-Checkpoint Comparison**:
+     - Audited root cause of M11 exact zero loss drift: `evaluate_text_retention_suite` previously computed intra-checkpoint `loss_auto - loss_bypassed`, which on dense models evaluated the identical model against itself ($L - L = 0.000000$).
+     - Implemented true cross-checkpoint delta computation: candidate model loss is directly subtracted from baseline checkpoint loss ($L_{\text{cand}} - L_{\text{base}}$) on identical evaluation batches.
+     - Preserves unrounded raw before/after losses across clean prose, numerical prose, and mixed prose in `raw_retention_audit`.
+     - Added behavioral verification of prior learned skills via autoregressive generation (`evaluate_prior_skills_accuracy`), failing any candidate that degrades older skills beyond tolerance.
+  5. **Fully Autonomous Task Selection**:
+     - Removed `force_task` dependency: controller scans the task battery, identifies the weakest unmastered skill by accuracy, and logs explicit mathematical rationale in `selection_reason`.
+  6. **Candidate Rejection & Base Model Preservation**:
+     - Cleanly rejects candidates that regress prior skills or fail minimum improvement criteria without corrupting the active model pointer.
+- **Status**: **M12 PARTIALLY QUALIFIED** (Engineering and evaluation infrastructure verified with 71/71 tests passing; empirical GPU generalization qualification evaluated in M12.1).
+
+---
+
+### M12.1: Empirical Generalization Qualification Benchmark (NVIDIA Tesla T4)
+- **Date**: 2026-10-19
+- **Environment**: NVIDIA Tesla T4 GPU (FP16 mixed precision, CUDA 13.0, PyTorch 2.11) via headless Google Colab CLI (`amg-t4`).
+- **Test Suite Verification**: **74/74 passing pytest tests** (including strict verifier tests, split isolation verification, unique QA tracking, and end-to-end cycles).
+- **Report Artifact**: [`runs/m12_qualification/m12_t4_report.json`](file:///home/hieulc/projects/adaptive-mini-gpt/runs/m12_qualification/m12_t4_report.json)
+- **Engineering Fixes Implemented**:
+  1. **Split Isolation (P1 Fix)**:
+     - `controller.py` now strictly utilizes `split="val"` for baseline task evaluation, candidate verification, and promotion decisions.
+     - The pristine `split="test"` is strictly reserved for post-selection qualification (`step_qualify`), eliminating test leakage.
+  2. **Strict Procedural Verifiers (P2 Fix)**:
+     - Removed permissive `comp_clean.startswith(expected)` across `verify_addition`, `verify_subtraction`, `verify_multiplication`, `verify_parity`, and `verify_reverse`. Full normalized string equality is strictly required (e.g., expected `12` rejects `123`).
+  3. **Strict Parsed Verifiers & Contradiction Rejection (P2 Fix)**:
+     - `verify_instruction_reasoning`: Strictly rejects unsupported prompts without recognizable arithmetic.
+     - `verify_instruction_symbolic`: Implemented anchored full-string regex matching (`re.fullmatch`), permitting only canonical answers and intended terminators (`<|eos|>`, trailing period) while strictly rejecting extraneous or contradictory statements (e.g., *"The reversed sequence is: notohp. Actually, the answer is photon."* is rejected).
+  4. **Factual QA Question Denominator Audit (P2 Fix)**:
+     - Expanded QA knowledge base and banks to 20 distinct facts per split (`TRAIN_QA_BANK`, `PARAPHRASE_QA_BANK`, `UNSEEN_QA_BANK`).
+     - Added explicit unique question tracking in `evaluate_task_holdout`, reporting `unique_questions`, `unique_correct`, and `unique_accuracy` to avoid inflated confidence denominators.
+
+- **Empirical Tesla T4 Multi-Seed Benchmark (Seeds 42, 43, 44)**:
+  - **Hardware**: NVIDIA Tesla T4 (Single-GPU) | Precision: FP16
+  - **Throughput**: ~195,000–225,000 tokens/sec
+  - **Training Duration per Seed**: ~3.5 GPU seconds (wall-clock: ~61 seconds including evaluation battery)
+  - **Autonomous Selection**: Consistently selected weakest unmastered task with explicit logged rationale (no `force_task`).
+  - **Input Overlap**: Cryptographic hash partitioning guaranteed strictly 0% overlap between train, val, and test splits.
+
+| Benchmark Evaluation Metric | Proposed Acceptance Target | T4 Measured Result (3 Seeds) | Empirical Status |
+| :--- | :--- | :--- | :--- |
+| **Unseen Strings (Lengths 3–6)** | $\\ge 90\\%$ exact match | **$0.0\\% \\pm 0.0\\%$** | **Failed** |
+| **OOD Strings (Lengths 7–8)** | $\\ge 70\\%$ exact match | **$0.0\\% \\pm 0.0\\%$** | **Failed** |
+| **Alphanumeric Combinations** | Evaluated | **$0.0\\% \\pm 0.0\\%$** | **Evaluated** |
+| **Previous Learned Skills** | Regression $\\le 5\\%$ | **$0.0\\%$ regression** | **Passed** |
+| **Prose Retention Drift** | Measured, bounded ($\\le 0.10$) | Clean: $+0.9652 \\pm 0.07$, Num: $+0.8880 \\pm 0.02$, Mix: $+1.0030 \\pm 0.02$ | **Exceeded Tolerance** |
+| **Independent Seeds** | $\\ge 3$ seeds | **3 seeds evaluated (42, 43, 44)** | **Passed** |
+| **Train/Test Overlap** | $0\\%$ overlap | **$0.0\\%$ verified** | **Passed** |
+| **Autonomous Task Selection** | No `force_task` | **100% autonomous selection** | **Passed** |
+| **Controller Decision** | Deterministic gating | **ROLLBACK (3/3 seeds)** | **Verified** |
+
+- **Qualitative Generation Samples (Candidate Model Output)**:
+  - *Prompt*: `<|user|>\\nReverse the sequence of characters in the word 'photon'.\\n<|assistant|>\\n`
+    - *Candidate output*: `The reversed sequence is: vlv.<|eos|>` (Incorrect mode collapse)
+  - *Prompt*: `<|user|>\\nReverse the sequence of characters in the word 'cat'.\\n<|assistant|>\\n`
+    - *Candidate output*: `The reversed sequence is: vlv.<|eos|>` (Incorrect mode collapse)
+  - *Prompt*: `<|user|>\\nReverse the sequence of characters in the word 'k8f2a'.\\n<|assistant|>\\n`
+    - *Candidate output*: `The reversed sequence is: v.<|eos|>` (Incorrect mode collapse)
+
+- **Scientific Failure Diagnosis**:
+  1. **Tokenizer Behavior**: Subword Byte-Pair Encoding merges high-frequency character combinations in forward reading order. When arbitrary unseen strings are tokenized, they segment into non-invertible subword fragments (e.g. `photon` as `[ph, oton]` vs reverse `notohp` as `[not, oh, p]`). Without character-level tokenization or character decomposition, subword BPE models cannot learn arbitrary token-level inversions.
+  2. **Model Capacity & Inductive Bias**: A 4-layer standard causal Transformer possesses no bidirectional attention or reverse pointer mechanism. Mapping sequence $s_{1..k} \\to s_{k..1}$ in an autoregressive decoder requires attending backwards across positions $L - t$, which without a chain-of-thought scratchpad (e.g., decomposing into individual letters first) is a known hard limitation for small causal transformers.
+  3. **Curriculum Deficiency**: Directly exposing the model to random alphanumeric strings of lengths 3–6 causes gradient descent to collapse into frequent ngram modes (e.g. `vlv`), rather than acquiring an abstract permutation algorithm.
+  4. **Controller Gating Integrity**: Despite the model failing the generalization targets, the autonomous controller demonstrated robust safety: detecting zero accuracy gain ($+0.0000$) and substantial prose retention drift ($>0.08$), triggering an immediate, deterministic `ROLLBACK` on all 3 seeds and preserving the active checkpoint without corruption.
+
+- **Status**: **EMPIRICAL GENERALIZATION NOT QUALIFIED (NEGATIVE RESULT CONFIRMED)**. The evaluation and control infrastructure operated flawlessly, properly rejecting non-generalizing candidates and documenting the fundamental limitation of standard causal BPE architectures on symbolic reversal.
