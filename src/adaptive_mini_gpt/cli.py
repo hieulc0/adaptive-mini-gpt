@@ -334,6 +334,26 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
         metrics["ood_extrapolation"] = arith_res["ood_extrapolation"]
         metrics["sample_predictions"] = arith_res["sample_predictions"]
 
+    if getattr(args, "m7_suite", False):
+        from adaptive_mini_gpt.evaluation.evaluator import (
+            evaluate_arithmetic_detailed,
+            evaluate_text_retention_suite,
+        )
+
+        metrics["m7_arithmetic_detailed"] = evaluate_arithmetic_detailed(
+            model=model,
+            tokenizer=tokenizer,
+            num_per_category=20,
+            device=device,
+            task_id=args.task_id,
+            bypass_moe=bypass_moe,
+        )
+        metrics["m7_prose_retention_suite"] = evaluate_text_retention_suite(
+            model=model,
+            tokenizer=tokenizer,
+            device=device,
+        )
+
     print(json.dumps(metrics, indent=None if getattr(args, "json_output", False) else 2))
     return 0
 
@@ -519,6 +539,13 @@ def build_parser() -> argparse.ArgumentParser:
         "--ood-extrapolation",
         action="store_true",
         help="Evaluate on out-of-distribution [100, 200) operands.",
+    )
+    p_eval.add_argument(
+        "--suite",
+        "--m7-suite",
+        dest="m7_suite",
+        action="store_true",
+        help="Run comprehensive M7 suite (fine-grained arithmetic + multi-domain prose).",
     )
     p_eval.add_argument("--device", type=str, default="auto", choices=["auto", "cpu", "cuda"])
     p_eval.set_defaults(func=cmd_evaluate)

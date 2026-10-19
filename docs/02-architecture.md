@@ -88,3 +88,40 @@ This ensures $\nabla_{w_g} \mathcal{L} \neq 0$, allowing task loss gradients to 
    During autoregressive evaluation and token generation, top-$k$ selection across time dimension $T$ is disabled because it would violate causality (future tokens altering past routing decisions). Instead, tokens route conditionally based on the learned local threshold:
    $$\mathcal{I}_{\text{active}} = \{ (b, t) \mid z_{b,t} \ge 0.0 \}$$
    Because $z_{b,t}$ depends strictly on causal attention outputs at positions $\le t$, causal mask mathematical independence is strictly preserved.
+
+---
+
+## 5. Autonomous Causal Domain Gating & Residual Output Adapters (M6 & M7)
+
+### Causal Domain Triggering
+To achieve unconditioned zero-forgetting without manual `--bypass-moe` flags during inference, the model tracks specialist domain presence autoregressively:
+
+$$s_{b,t} = \bigvee_{\tau \le t} \left( x_{b,\tau} \in \mathcal{T}_{\text{trigger}} \right)$$
+
+where $\mathcal{T}_{\text{trigger}} \subset \mathcal{V}$ is the set of explicit domain trigger token IDs.
+- For positions where $s_{b,t} = 0$ (clean prior domain text), MoE experts and output adapters are bypassed with zero computation, ensuring **bitwise zero drift ($\Delta = 0.000000$)** on prior domains.
+- For positions where $s_{b,t} = 1$ (specialist domain encountered at or before position $t$), MoE experts and output adapters are dynamically activated.
+- **Strict Causality:** Because $s_{b,t}$ is computed via cumulative maximum $\max_{\tau \le t}$ over time, a trigger token at position $t_2$ can never activate specialist pathways for tokens at $t_1 < t_2$.
+
+### Disentangling Representation Adaptation from Expert Routing (M7)
+In earlier versions, `trainable_token_ids` served both as the subset of embeddings updated in $W_e$ and as domain triggers. This meant prose containing numbers or dates (e.g. `"In the year 1594..."`) prematurely activated arithmetic experts.
+
+M7 decouples these concepts:
+- **`trainable_token_ids`**: The token subset in $W_e$ permitted to receive gradients during Continual Stage 2 (`0–9`, `=`, `+`, `-`).
+- **`domain_trigger_token_ids`**: The semantic trigger tokens required to activate specialist pathways (`['=']`).
+This guarantees that numerical prose retains identical representations ($\Delta \text{loss} = 0.000000 \pm 0.0$) while equations activate the specialist computational path precisely when calculation is required.
+
+### Low-Rank Residual Output Adapter (`moe_head`)
+When the primary backbone and output projection $W_{\text{head}} \in \mathbb{R}^{V \times d_{\text{model}}}$ are frozen to prevent catastrophic forgetting, newly introduced vocabulary tokens cannot be predicted if $W_{\text{head}}$ rows remain frozen at random noise.
+
+We augment the logit computation with a low-rank residual adapter:
+$$\text{logits}_{b,t} = W_{\text{head}} h_{b,t}^{(L)} + s_{b,t} \cdot W_{\text{up}}^{\text{head}} \left( \text{GELU}(W_{\text{down}}^{\text{head}} h_{b,t}^{(L)}) \right)$$
+
+where:
+- $W_{\text{down}}^{\text{head}} \in \mathbb{R}^{d_{\text{expert}} \times d_{\text{model}}}$ is initialized to $\mathcal{N}(0, 0.02)$.
+- $W_{\text{up}}^{\text{head}} \in \mathbb{R}^{V \times d_{\text{expert}}}$ is initialized to $\mathbf{0}$ (exact zeros).
+
+**Mathematical Invariants:**
+1. **Zero Logit Drift at Step 0:** Because $W_{\text{up}}^{\text{head}} = \mathbf{0}$, $\text{moe\_head}(h) = \mathbf{0}$ initially.
+2. **Bitwise Zero Forgetting on Prior Domain:** When $s_{b,t} = 0$, $s_{b,t} \cdot \text{moe\_head}(h) = \mathbf{0}$, guaranteeing exact IEEE-754 bitwise equivalence for all non-specialist prompts.
+3. **Full Output Expressivity:** Allows gradient updates to adapt logits for new task symbols without changing any frozen weights in $W_{\text{head}}$.

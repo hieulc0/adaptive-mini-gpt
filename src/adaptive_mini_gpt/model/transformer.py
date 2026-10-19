@@ -276,18 +276,21 @@ class MiniGPT(nn.Module):
         pos_emb = self.wpe(pos)
         x = self.drop(tok_emb + pos_emb)
 
-        # M6 Autonomous Causal Domain Gating:
+        # M6/M7 Autonomous Causal Domain Gating:
         # Automatically detect if specialist domain tokens appear in the causal context prefix.
         domain_token_mask: Tensor | None = None
         effective_bypass_moe = bypass_moe
+        trigger_ids = (
+            self.config.domain_trigger_token_ids
+            if self.config.domain_trigger_token_ids is not None
+            else self.config.trainable_token_ids
+        )
         if (
             not bypass_moe
             and self.config.adaptive_enabled
-            and self.config.trainable_token_ids
+            and trigger_ids
         ):
-            specialist_ids = torch.tensor(
-                self.config.trainable_token_ids, dtype=idx.dtype, device=device
-            )
+            specialist_ids = torch.tensor(trigger_ids, dtype=idx.dtype, device=device)
             is_spec = torch.isin(idx, specialist_ids)  # (B, T)
             domain_token_mask = is_spec.cumsum(dim=-1) > 0  # Causal prefix accumulation
             if not domain_token_mask.any():

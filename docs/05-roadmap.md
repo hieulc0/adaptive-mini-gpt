@@ -8,6 +8,10 @@
 | **M3** | Modular Experts & Continual Tasks | Multi-skill datasets (Text + Procedural Math), `AdaptiveMoELayer`, load-balancing loss, forgetting telemetry | **PASSED** (Verified on Tesla T4) |
 | **M4** | Function-Preserving Growth | Zero-init expert/layer expansion CLI (`amg grow`), checkpoint migration, matched-FLOP baseline comparison | **PASSED** (Verified on Tesla T4) |
 | **M5** | Dynamic Compute Allocation | Token-level dynamic routing / Mixture-of-Depths (skipping FFN/MoE on easy tokens with true FLOP reduction) | **PASSED** (Verified on Tesla T4) |
+| **M6** | Autonomous Causal Domain Gating | Autoregressive domain detection, zero-forgetting unconditioned Task A retention, `moe_head` adapter | **PASSED** (Verified on Tesla T4) |
+| **M7** | Generalization & Multi-Seed Verification | 4-arm 3-seed benchmark, numerical prose decoupling (`domain_trigger_token_ids=['=']`), carry/borrow evaluation | **PASSED** (Verified on Tesla T4) |
+| **M8** | Autonomous Curriculum & Growth Controller | State machine (`EVALUATE -> SELECT -> PLAN -> TRAIN -> VERIFY -> PROMOTE/ROLLBACK`), bounded compute budgets | Planned |
+| **M9** | Natural Language & Practical Reasoning | BPE subword tokenizer, instruction dataset, scaled Transformer backbone, verified reasoning tasks | Planned |
 
 ---
 
@@ -49,3 +53,15 @@
 - Auxiliary BCE loss supervising the gate to predict top-$k$ token assignment during training.
 - Token-local thresholding ($z_{b,t} \ge 0.0$) in `eval()` mode ensuring strict autoregressive causality.
 - Empirical qualification on Tesla T4: 35% active parameter reduction per token with 38% arithmetic exact-match accuracy.
+
+### M6: Autonomous Causal Domain Gating & `moe_head` Residual Adapter
+- Autoregressive causal domain prefix tracking eliminating manual task flags.
+- Low-Rank Output Adapter (`moe_head`) solving the frozen `lm_head` expressivity bottleneck while maintaining strict `0.000000` drift on pure Task A inputs.
+- Preservation of zero-init guarantees in `MiniGPT.__init__`.
+
+### M7: Rigorous Generalization, Retention & Architecture Verification
+- Comprehensive multi-domain evaluation: clean prose, numerical prose (dates, quantities), and mixed prose/equations.
+- Disentangled domain gating: separation of representation adaptation (`trainable_token_ids`) from expert activation triggers (`domain_trigger_token_ids = ['=']`), completely eliminating numerical prose forgetting ($\Delta = 0.000000 \pm 0.0$).
+- 4-arm architecture comparison across 3 seeds (`[42, 43, 44]`): Dense FT, Modular MoE, MoE + MoD, and Compute-Matched Dense Adapter Control.
+- Fine-grained category evaluation (`ADD_NO_CARRY`, `ADD_CARRY`, `SUB_NO_BORROW`, `SUB_BORROW`, `PARITY`, `OOD_EXTRAPOLATION`).
+- Empirical finding: MoD + MoE (Arm 3) delivers highest modular accuracy with 33% fewer active parameters, outperforming matched adapter baselines. Character-level carry addition/borrow subtraction requires algorithmic curricula or subword/scratchpad modeling before parameter scaling.

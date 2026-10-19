@@ -32,6 +32,8 @@ class ModelConfig:
     mod_capacity_factor: float = 0.5
     # Selective unseen-token adaptation mask (persisted across checkpoints)
     trainable_token_ids: list[int] | None = None
+    # Autonomous domain gating trigger tokens (if None, defaults to trainable_token_ids)
+    domain_trigger_token_ids: list[int] | None = None
 
     def __post_init__(self) -> None:
         if self.d_model <= 0:
