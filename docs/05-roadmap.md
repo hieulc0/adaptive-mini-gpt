@@ -137,3 +137,15 @@
   - Negative result confirmed: standard BPE Mini-GPT achieved 0.0% accuracy on unseen string reversal (lengths 3-6 and OOD lengths 7-8).
   - Autonomous controller demonstrated robust safety: detected zero gain (+0.0000) and excessive retention drift, triggering deterministic ROLLBACK on all 3 seeds and preserving active checkpoints without corruption.
   - Detailed diagnostic established: subword tokenization fragmentation and causal autoregressive limits without scratchpad require curriculum or architectural changes before claiming generalization.
+
+### M13: Procedural Reasoning Curriculum and Generalization (Completed)
+- **Controlled 4-Arm Experimental Study**:
+  - Implemented 4 procedural learning arms (Direct BPE, Character-Delimited, Explicit Stepwise Procedure, Progressive Curriculum) plus Experience Replay across 3 fully independent pretraining lineages (seeds 42, 43, 44).
+- **Multi-Dimensional Diagnostics**:
+  - Exact match accuracy, position-aligned per-character accuracy, answer length match accuracy, termination correctness, output diversity (mode collapse detection), and stepwise intermediate step verification.
+- **T4 Empirical Benchmark Qualification**:
+  - Benchmarked all arms across seeds 42, 43, and 44 on NVIDIA Tesla T4 GPU.
+  - Confirmed 0.0% exact match across all arms and seeds, with curriculum and stepwise providing slight per-character gains (~2.4%) but failing full transformation.
+  - Verified 15/15 autonomous rollbacks without state corruption or leakage into test splits.
+- **Empirical Negative Result Documented**:
+  - Validates that small causal transformers without recurrence or external memory cannot learn arbitrary symbolic sequence reversal in 150 adaptation steps. Directs subsequent research toward dual-path external memory and bounded reasoning/verification loops.

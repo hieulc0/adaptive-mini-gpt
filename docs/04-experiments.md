@@ -273,3 +273,52 @@
   4. **Controller Gating Integrity**: Despite the model failing the generalization targets, the autonomous controller demonstrated robust safety: detecting zero accuracy gain ($+0.0000$) and substantial prose retention drift ($>0.08$), triggering an immediate, deterministic `ROLLBACK` on all 3 seeds and preserving the active checkpoint without corruption.
 
 - **Status**: **EMPIRICAL GENERALIZATION NOT QUALIFIED (NEGATIVE RESULT CONFIRMED)**. The evaluation and control infrastructure operated flawlessly, properly rejecting non-generalizing candidates and documenting the fundamental limitation of standard causal BPE architectures on symbolic reversal.
+
+---
+
+### M13: Procedural Reasoning Curriculum and Generalization Benchmark (NVIDIA Tesla T4)
+- **Date**: 2026-10-19
+- **Environment**: NVIDIA Tesla T4 GPU (FP16 mixed precision, CUDA 13.0, PyTorch 2.11) via headless Google Colab CLI (`amg-t4`).
+- **Test Suite Verification**: **83/83 passing pytest tests** (74 existing tests + 9 new dedicated procedural curriculum, verifier strictness, and step-level diagnostic tests in `tests/test_m13_curriculum.py`).
+- **Report Artifact**: [`runs/m13_curriculum/m13_t4_report.json`](file:///home/hieulc/projects/adaptive-mini-gpt/runs/m13_curriculum/m13_t4_report.json)
+
+#### 1. Experimental Design & Independent Lineages
+Following the confirmed negative result in M12.1, M13 investigated whether Mini-GPT can acquire and generalize a reusable procedural sequence transformation under matched Tesla T4 resources across **3 fully independent pretraining lineages** (seeds 42, 43, 44), pretraining each backbone from scratch before adaptation.
+
+Five experimental arms were implemented with identical compute/parameter budgets (150 steps, batch size 16, lr 1e-3, 4 layers, 128 d_model):
+1. **Arm A (Direct BPE)**: Direct-answer reversal using subword BPE (`photon -> notohp`).
+2. **Arm B (Character-Delimited)**: Space-separated character input/output (`p h o t o n -> n o t o h p`), eliminating multi-character BPE token merges without vocabulary alterations.
+3. **Arm C (Explicit Stepwise Procedure)**: Explicit procedural decomposition with intermediate deterministic verification (`Step 1: Read characters: p, h, o, t, o, n` $\to$ `Step 2: Reverse index: 0: n, 1: o...` $\to$ `Result: notohp.`).
+4. **Arm D (Progressive Curriculum)**: Multi-stage task ordering: Identity copying (len 2–5) $\to$ 2-character swap $\to$ short reversal (len 3–4) $\to$ full reversal (len 3–6).
+5. **Arm B + Experience Replay**: Character-delimited representation with 20% experience replay data from natural language prose and factual QA.
+
+#### 2. Multi-Dimensional Diagnostics Across Arms (Tesla T4 Empirical Benchmark)
+Evaluated across 3 independent lineages (seeds 42, 43, 44) on held-out unseen inputs (0% train/val overlap):
+
+| Experimental Arm | Runs | Promotions / Rollbacks | In-Dist Exact Match (Lens 3–6) | In-Dist Per-Char Acc | Length Match Acc | Termination Acc | Output Diversity | OOD Exact Match (Lens 7–8) | OOD Per-Char Acc | Mean Max Loss Drift |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Arm A (Direct BPE)** | 3 | 0 / 3 ROLLBACK | **0.0%** | 1.89% | 10.0% | 100.0% | 0.88 | **0.0%** | 1.02% | +1.6847 |
+| **Arm B (Char Delimited)** | 3 | 0 / 3 ROLLBACK | **0.0%** | 0.12% | 0.0% | 100.0% | 0.92 | **0.0%** | 0.10% | +2.4396 |
+| **Arm C (Explicit Stepwise)** | 3 | 0 / 3 ROLLBACK | **0.0%** | 2.28% | 13.3% | 60.0% | 0.78 | **0.0%** | 1.31% | +2.5506 |
+| **Arm D (Progressive Curriculum)** | 3 | 0 / 3 ROLLBACK | **0.0%** | 2.43% | 8.89% | 100.0% | 0.80 | **0.0%** | 0.74% | +2.2817 |
+| **Arm B + Replay (20%)** | 3 | 0 / 3 ROLLBACK | **0.0%** | 0.09% | 0.0% | 66.67% | 0.61 | **0.0%** | 0.05% | +2.4396 |
+
+#### 3. Diagnostic Observations & Failure Mode Telemetry
+1. **Per-Character vs. Exact-Match Dynamics**:
+   - In Arm D (Progressive Curriculum) and Arm C (Explicit Stepwise), per-character position accuracy rose slightly above baseline (~2.3–2.4%), with partial sub-sequence matches on short strings (e.g. `57pv` $\to$ partial match `0.25`).
+   - However, exact-match accuracy remained strictly **0.0%** across all 15 candidate adaptations and all 3 independent lineages.
+2. **Character-Level Degradation (Arm B)**:
+   - Forcing space-delimited character tokens did *not* resolve the reversal bottleneck; instead, it induced long-sequence attention dilution. The model learned to repeat constant single-character runs (e.g., `3 3 3 3 3`, `a a a a`, `0 0 0 0 0`), leading to 0.0% length accuracy and lower per-character alignment (0.12%).
+3. **Stepwise Reasoning Bottleneck (Arm C)**:
+   - In Arm C, the model attempted to generate structured steps (`Step 1: Read characters... Step 2: Reverse index...`), but failed at step 1 character fidelity. It generated corrupted character lists (e.g. `Step 1: Read characters: z, d, t, z` for `hbla`), causing catastrophic error propagation to downstream index mapping and final emission.
+4. **Catastrophic Forgetting & Drift**:
+   - In all dense fine-tuning configurations, the model suffered severe forgetting on prose and prior tasks ($\Delta \text{Loss} > +1.68$).
+   - Adding 20% experience replay in Arm B prevented complete prose collapse on earlier checkpoints, but the candidate still exceeded the strict $+0.08$ safety ceiling ($\Delta \text{Loss} = +2.4396$).
+5. **Controller Safety & Gating Integrity**:
+   - The autonomous controller executed deterministic gating on every cycle: detecting $+0.0000$ target gain and excessive loss drift, it triggered **15/15 clean rollbacks**, preserving base checkpoints and version pointers without corruption.
+
+#### 4. Scientific Conclusion & Next Architecture Direction
+- **Empirical Status**: **M13 Empirically Negative on Purely Neural Generalization**. Neither subword decomposition, character spacing, intermediate step supervision, nor progressive curricula enabled a 4-layer Mini-GPT to execute arbitrary symbolic reversal in 150 adaptation steps without regression.
+- **Architectural Implication**: Pure causal self-attention without recurrence, pointer networks, or an external scratchpad memory cannot reliably execute bidirectional index inversion. As recommended in the review brief, the path forward requires **dual-path procedural reasoning**:
+  1. Decoupling algorithmic execution into explicit rule-based / external memory modules.
+  2. Introducing an explicit bounded thinking loop and external memory interface where candidate solutions are proposed, verified by symbolic interpreters, and refined iteratively.

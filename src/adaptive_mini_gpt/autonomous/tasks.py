@@ -174,6 +174,191 @@ def verify_instruction_symbolic(prompt: str, completion: str) -> bool:
     return False
 
 
+def verify_instruction_symbolic_char(prompt: str, completion: str) -> bool:
+    """Strictly verify that assistant response correctly reverses a character-delimited sequence.
+
+    Handles space-delimited character tokens (e.g. "c a t" -> "t a c").
+    Validates entire response using anchored patterns and permits only intended terminators.
+    """
+    comp_clean = completion.strip()
+    if not comp_clean:
+        return False
+
+    match = re.search(
+        r"characters(?:\s*in\s*['\"]|\s*:\s*)([a-zA-Z0-9\s]+?)(?:['\"]|\n|<\|assistant)",
+        prompt,
+        re.IGNORECASE,
+    )
+    if not match:
+        return False
+
+    chars = [c for c in match.group(1).split() if c]
+    if not chars:
+        return False
+    expected_spaced = " ".join(chars[::-1]).lower()
+    expected_plain = "".join(chars[::-1]).lower()
+
+    cleaned = comp_clean
+    if cleaned.endswith("<|eos|>"):
+        cleaned = cleaned[:-len("<|eos|>")].strip()
+
+    patterns = [
+        r"^(?:the\s+)?reversed\s+(?:sequence|string|word|characters)?\s*(?:is)?\s*:\s*([a-zA-Z0-9\s]+?)[.]?$",
+        r"^(?:the\s+)?reverse\s*(?:of\s+[^\n:]+?\s*)?(?:is)?\s*:\s*([a-zA-Z0-9\s]+?)[.]?$",
+        r"^result\s*:\s*([a-zA-Z0-9\s]+?)[.]?$",
+        r"^([a-zA-Z0-9\s]+?)[.]?$",
+    ]
+
+    for pat in patterns:
+        m = re.fullmatch(pat, cleaned, re.IGNORECASE)
+        if m:
+            extracted = m.group(1).strip().lower()
+            ext_tokens = [c for c in extracted.split() if c]
+            if " ".join(ext_tokens) == expected_spaced or "".join(ext_tokens) == expected_plain:
+                return True
+
+    return False
+
+
+def score_instruction_symbolic_stepwise(prompt: str, completion: str) -> dict[str, Any]:
+    """Score explicit procedural stepwise sequence reversal with independent step verification.
+
+    Checks:
+    - Step 1: Characters read correctly ("Step 1: Read characters: c, a, t")
+    - Step 2: Index-based reversal ("0: t\n1: a\n2: c")
+    - Result: Final reversed output ("Result: tac." or "The reversed sequence is: tac.")
+    """
+    comp_clean = completion.strip()
+    if not comp_clean:
+        return {"step1_valid": False, "step2_valid": False, "result_valid": False, "all_valid": False}
+
+    match = re.search(r"word\s*['\"]([a-zA-Z0-9]+)['\"]", prompt, re.IGNORECASE)
+    if not match:
+        match = re.search(r"word\s+([a-zA-Z0-9]+)", prompt, re.IGNORECASE)
+        if not match:
+            return {"step1_valid": False, "step2_valid": False, "result_valid": False, "all_valid": False}
+
+    target_word = match.group(1).lower()
+    expected = target_word[::-1]
+
+    # Verify Step 1: Read characters
+    m1 = re.search(
+        r"step\s*1\s*:\s*read\s+characters\s*:\s*([a-zA-Z0-9,\s]+?)(?=\n|step\s*2|$)",
+        comp_clean,
+        re.IGNORECASE,
+    )
+    step1_valid = False
+    if m1:
+        step1_chars = [c.strip().lower() for c in m1.group(1).split(",") if c.strip()]
+        step1_valid = (step1_chars == list(target_word))
+
+    # Verify Step 2: Reverse index
+    m2_block = re.search(
+        r"step\s*2\s*:\s*reverse\s+index\s*:\s*(.*?)(?=result\s*:|the\s+reversed|<\|eos\|>|$)",
+        comp_clean,
+        re.IGNORECASE | re.DOTALL,
+    )
+    step2_valid = False
+    if m2_block:
+        index_map: dict[int, str] = {}
+        for line in m2_block.group(1).splitlines():
+            line_m = re.match(r"^\s*(\d+)\s*:\s*([a-zA-Z0-9])\s*$", line.strip())
+            if line_m:
+                index_map[int(line_m.group(1))] = line_m.group(2).lower()
+        if len(index_map) == len(expected) and all(
+            index_map.get(i) == expected[i] for i in range(len(expected))
+        ):
+            step2_valid = True
+
+    # Verify Result
+    cleaned_eos = comp_clean
+    if cleaned_eos.endswith("<|eos|>"):
+        cleaned_eos = cleaned_eos[:-len("<|eos|>")].strip()
+
+    m_res = re.search(
+        r"(?:result\s*:\s*|(?:the\s+)?reversed\s+(?:sequence|string|word)?\s*(?:is)?\s*:\s*)([a-zA-Z0-9]+)[.]?$",
+        cleaned_eos,
+        re.IGNORECASE,
+    )
+    result_valid = False
+    if m_res:
+        result_valid = (m_res.group(1).lower() == expected)
+
+    all_valid = step1_valid and step2_valid and result_valid
+    return {
+        "step1_valid": step1_valid,
+        "step2_valid": step2_valid,
+        "result_valid": result_valid,
+        "all_valid": all_valid,
+    }
+
+
+def verify_instruction_symbolic_stepwise(prompt: str, completion: str) -> bool:
+    """Strictly verify stepwise procedural sequence reversal."""
+    return score_instruction_symbolic_stepwise(prompt, completion)["all_valid"]
+
+
+def verify_instruction_symbolic_curriculum(prompt: str, completion: str) -> bool:
+    """Verify progressive curriculum tasks: copying, 2-character swap, short and full reversal."""
+    comp_clean = completion.strip()
+    if not comp_clean:
+        return False
+    if comp_clean.endswith("<|eos|>"):
+        comp_clean = comp_clean[:-len("<|eos|>")].strip()
+
+    p_clean = prompt.strip().lower()
+
+    # Case 1: Copying
+    if "copy" in p_clean:
+        m = re.search(
+            r"characters(?:\s*in\s*['\"]|\s*:\s*['\"]?)([a-zA-Z0-9]+)",
+            prompt,
+            re.IGNORECASE,
+        )
+        if not m:
+            return False
+        expected = m.group(1).lower()
+        pats = [
+            r"^(?:the\s+)?copied\s+(?:sequence|string|word)?\s*(?:is)?\s*:\s*([a-zA-Z0-9]+)[.]?$",
+            r"^result\s*:\s*([a-zA-Z0-9]+)[.]?$",
+            r"^([a-zA-Z0-9]+)[.]?$",
+        ]
+        for pat in pats:
+            rm = re.fullmatch(pat, comp_clean, re.IGNORECASE)
+            if rm and rm.group(1).lower() == expected:
+                return True
+        return False
+
+    # Case 2: 2-character swap
+    elif "swap" in p_clean:
+        m = re.search(
+            r"characters(?:\s*in\s*['\"]|\s*:\s*['\"]?)([a-zA-Z0-9]\s*[a-zA-Z0-9])",
+            prompt,
+            re.IGNORECASE,
+        )
+        if not m:
+            return False
+        target = "".join(m.group(1).split())
+        expected_plain = target[::-1].lower()
+        expected_spaced = " ".join(list(target[::-1])).lower()
+        pats = [
+            r"^(?:the\s+)?swapped\s+(?:sequence|string|word|characters)?\s*(?:is)?\s*:\s*([a-zA-Z0-9\s]+?)[.]?$",
+            r"^result\s*:\s*([a-zA-Z0-9\s]+?)[.]?$",
+            r"^([a-zA-Z0-9\s]+?)[.]?$",
+        ]
+        for pat in pats:
+            rm = re.fullmatch(pat, comp_clean, re.IGNORECASE)
+            if rm:
+                ans_tokens = [c for c in rm.group(1).split() if c]
+                if "".join(ans_tokens).lower() == expected_plain or " ".join(ans_tokens).lower() == expected_spaced:
+                    return True
+        return False
+
+    # Case 3: Reversal (default)
+    else:
+        return verify_instruction_symbolic(prompt, completion)
+
+
 # Canonical Factual QA Knowledge Base (Train, Paraphrase, Unseen)
 # (regex_pattern, [acceptable_answers], category)
 QA_KNOWLEDGE_BASE: list[tuple[str, list[str], str]] = [
@@ -405,6 +590,206 @@ def generate_instruction_symbolic_data(
             f"<|assistant|>\nThe reversed sequence is: {rev}.<|eos|>\n"
         )
 
+    text = "".join(pairs)
+    fp = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+    return text, fp
+
+
+def generate_instruction_symbolic_char_data(
+    num_samples: int = 100,
+    seed: int = 42,
+    split: str = "train",
+) -> tuple[str, str]:
+    """Generate partitioned character-delimited string reversal instruction pairs (Arm B).
+
+    Input: "c a t" -> Output: "t a c"
+    """
+    rng = random.Random(seed)
+    chars = string.ascii_lowercase + string.digits
+    pairs: list[str] = []
+    generated_strings: set[str] = set()
+
+    max_attempts = num_samples * 200
+    attempts = 0
+
+    while len(pairs) < num_samples and attempts < max_attempts:
+        attempts += 1
+        if split == "test":
+            if rng.random() < 0.5:
+                length = rng.randint(7, 8)
+            else:
+                length = rng.randint(3, 6)
+        else:
+            length = rng.randint(3, 6)
+
+        w = "".join(rng.choice(chars) for _ in range(length))
+        if w in generated_strings:
+            continue
+
+        if length <= 6:
+            if get_string_split(w) != split:
+                continue
+        else:
+            if split != "test":
+                continue
+
+        generated_strings.add(w)
+        spaced_w = " ".join(list(w))
+        spaced_rev = " ".join(list(w[::-1]))
+        pairs.append(
+            f"<|user|>\nReverse the sequence of characters: {spaced_w}\n"
+            f"<|assistant|>\nThe reversed sequence is: {spaced_rev}.<|eos|>\n"
+        )
+
+    text = "".join(pairs)
+    fp = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+    return text, fp
+
+
+def generate_instruction_symbolic_stepwise_data(
+    num_samples: int = 100,
+    seed: int = 42,
+    split: str = "train",
+) -> tuple[str, str]:
+    """Generate partitioned stepwise procedural string reversal instruction pairs (Arm C).
+
+    Step 1: Read characters
+    Step 2: Reverse index
+    Result: Reversed word
+    """
+    rng = random.Random(seed)
+    chars = string.ascii_lowercase + string.digits
+    pairs: list[str] = []
+    generated_strings: set[str] = set()
+
+    max_attempts = num_samples * 200
+    attempts = 0
+
+    while len(pairs) < num_samples and attempts < max_attempts:
+        attempts += 1
+        if split == "test":
+            if rng.random() < 0.5:
+                length = rng.randint(7, 8)
+            else:
+                length = rng.randint(3, 6)
+        else:
+            length = rng.randint(3, 6)
+
+        w = "".join(rng.choice(chars) for _ in range(length))
+        if w in generated_strings:
+            continue
+
+        if length <= 6:
+            if get_string_split(w) != split:
+                continue
+        else:
+            if split != "test":
+                continue
+
+        generated_strings.add(w)
+        rev = w[::-1]
+        read_step = ", ".join(list(w))
+        index_lines = "\n".join(f"{i}: {rev[i]}" for i in range(len(rev)))
+        pairs.append(
+            f"<|user|>\nReverse the sequence of characters step-by-step for the word '{w}'.\n"
+            f"<|assistant|>\n"
+            f"Step 1: Read characters: {read_step}\n"
+            f"Step 2: Reverse index:\n{index_lines}\n"
+            f"Result: {rev}.<|eos|>\n"
+        )
+
+    text = "".join(pairs)
+    fp = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+    return text, fp
+
+
+def generate_instruction_symbolic_curriculum_data(
+    num_samples: int = 100,
+    seed: int = 42,
+    split: str = "train",
+) -> tuple[str, str]:
+    """Generate progressive curriculum instruction pairs (Arm D).
+
+    Train stages:
+    1. Copying sequence (length 2-5)
+    2. 2-character swap (length 2)
+    3. Short reversal (length 3-4)
+    4. Full reversal (length 3-6)
+
+    Val and test splits:
+    Target reversal task (lengths 3-6 for val; 3-6 + 7-8 for test) for direct comparability.
+    """
+    rng = random.Random(seed)
+    chars = string.ascii_lowercase + string.digits
+    pairs: list[str] = []
+    generated_strings: set[str] = set()
+
+    max_attempts = num_samples * 200
+    attempts = 0
+
+    if split in ("val", "test"):
+        return generate_instruction_symbolic_data(num_samples=num_samples, seed=seed, split=split)
+
+    per_stage = max(1, num_samples // 4)
+
+    # Stage 1: Copying
+    stage1_pairs: list[str] = []
+    while len(stage1_pairs) < per_stage and attempts < max_attempts:
+        attempts += 1
+        length = rng.randint(2, 5)
+        w = "".join(rng.choice(chars) for _ in range(length))
+        if w in generated_strings or get_string_split(w) != "train":
+            continue
+        generated_strings.add(w)
+        stage1_pairs.append(
+            f"<|user|>\nCopy the sequence of characters: {w}\n"
+            f"<|assistant|>\nThe copied sequence is: {w}.<|eos|>\n"
+        )
+
+    # Stage 2: 2-character swap
+    stage2_pairs: list[str] = []
+    while len(stage2_pairs) < per_stage and attempts < max_attempts:
+        attempts += 1
+        w = "".join(rng.choice(chars) for _ in range(2))
+        if w in generated_strings or get_string_split(w) != "train":
+            continue
+        generated_strings.add(w)
+        stage2_pairs.append(
+            f"<|user|>\nSwap the two characters: {w}\n"
+            f"<|assistant|>\nThe swapped sequence is: {w[::-1]}.<|eos|>\n"
+        )
+
+    # Stage 3: Short reversal (len 3-4)
+    stage3_pairs: list[str] = []
+    while len(stage3_pairs) < per_stage and attempts < max_attempts:
+        attempts += 1
+        length = rng.randint(3, 4)
+        w = "".join(rng.choice(chars) for _ in range(length))
+        if w in generated_strings or get_string_split(w) != "train":
+            continue
+        generated_strings.add(w)
+        stage3_pairs.append(
+            f"<|user|>\nReverse the sequence of characters in the word '{w}'.\n"
+            f"<|assistant|>\nThe reversed sequence is: {w[::-1]}.<|eos|>\n"
+        )
+
+    # Stage 4: Full reversal (len 3-6)
+    stage4_pairs: list[str] = []
+    target_stage4 = num_samples - len(stage1_pairs) - len(stage2_pairs) - len(stage3_pairs)
+    while len(stage4_pairs) < target_stage4 and attempts < max_attempts:
+        attempts += 1
+        length = rng.randint(3, 6)
+        w = "".join(rng.choice(chars) for _ in range(length))
+        if w in generated_strings or get_string_split(w) != "train":
+            continue
+        generated_strings.add(w)
+        stage4_pairs.append(
+            f"<|user|>\nReverse the sequence of characters in the word '{w}'.\n"
+            f"<|assistant|>\nThe reversed sequence is: {w[::-1]}.<|eos|>\n"
+        )
+
+    pairs = stage1_pairs + stage2_pairs + stage3_pairs + stage4_pairs
+    rng.shuffle(pairs)
     text = "".join(pairs)
     fp = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
     return text, fp
@@ -799,6 +1184,33 @@ TASK_REGISTRY: dict[str, TaskSpecification] = {
         verifier_fn=verify_instruction_qa,
         split_support=True,
     ),
+    "instruction_symbolic_char": TaskSpecification(
+        task_id="instruction_symbolic_char",
+        name="Instruction Symbolic Char Reversal",
+        description="Character-delimited word sequence reversal (p h o t o n -> n o t o h p)",
+        domain_trigger="<|assistant|>",
+        generator_fn=generate_instruction_symbolic_char_data,
+        verifier_fn=verify_instruction_symbolic_char,
+        split_support=True,
+    ),
+    "instruction_symbolic_stepwise": TaskSpecification(
+        task_id="instruction_symbolic_stepwise",
+        name="Instruction Symbolic Stepwise Reversal",
+        description="Explicit procedural stepwise reversal with intermediate verified steps",
+        domain_trigger="<|assistant|>",
+        generator_fn=generate_instruction_symbolic_stepwise_data,
+        verifier_fn=verify_instruction_symbolic_stepwise,
+        split_support=True,
+    ),
+    "instruction_symbolic_curriculum": TaskSpecification(
+        task_id="instruction_symbolic_curriculum",
+        name="Instruction Symbolic Curriculum Reversal",
+        description="Progressive procedural curriculum (copying -> 2-char swap -> short -> full reversal)",
+        domain_trigger="<|assistant|>",
+        generator_fn=generate_instruction_symbolic_curriculum_data,
+        verifier_fn=verify_instruction_symbolic_curriculum,
+        split_support=True,
+    ),
 }
 
 
@@ -861,7 +1273,8 @@ def evaluate_task_holdout(
                 prompt_tokens = tokenizer.encode(prompt)
                 input_tensor = torch.tensor([prompt_tokens], dtype=torch.long, device=device)
 
-                for _ in range(48):
+                max_gen_tokens = 96 if "stepwise" in task.task_id else 48
+                for _ in range(max_gen_tokens):
                     if input_tensor.size(1) >= model.config.context_length:
                         break
                     logits, _ = model(input_tensor)
@@ -1079,3 +1492,204 @@ def evaluate_symbolic_reversal_breakdown(
         model.train()
 
     return breakdown_results
+
+
+def extract_reversed_answer(completion: str, arm: str = "direct") -> str:
+    """Extract predicted reversed answer string from completion based on experimental arm."""
+    cleaned = completion.strip()
+    if cleaned.endswith("<|eos|>"):
+        cleaned = cleaned[:-len("<|eos|>")].strip()
+
+    if arm == "char":
+        pats = [
+            r"^(?:the\s+)?reversed\s+(?:sequence|string|word|characters)?\s*(?:is)?\s*:\s*([a-zA-Z0-9\s]+?)[.]?$",
+            r"^(?:the\s+)?reverse\s*(?:of\s+[^\n:]+?\s*)?(?:is)?\s*:\s*([a-zA-Z0-9\s]+?)[.]?$",
+            r"^result\s*:\s*([a-zA-Z0-9\s]+?)[.]?$",
+            r"^([a-zA-Z0-9\s]+?)[.]?$",
+        ]
+        for pat in pats:
+            m = re.fullmatch(pat, cleaned, re.IGNORECASE)
+            if m:
+                return "".join(m.group(1).split()).lower()
+        return "".join(cleaned.split()).lower()
+
+    elif arm == "stepwise":
+        m_res = re.search(
+            r"(?:result\s*:\s*|(?:the\s+)?reversed\s+(?:sequence|string|word)?\s*(?:is)?\s*:\s*)([a-zA-Z0-9]+)[.]?$",
+            cleaned,
+            re.IGNORECASE,
+        )
+        if m_res:
+            return m_res.group(1).lower()
+        m_fall = re.findall(r"[a-zA-Z0-9]+", cleaned)
+        return m_fall[-1].lower() if m_fall else ""
+
+    else:
+        # direct / curriculum
+        pats = [
+            r"^(?:the\s+)?reversed\s+(?:sequence|string|word)?\s*(?:is)?\s*:\s*([a-zA-Z0-9]+)[.]?$",
+            r"^(?:the\s+)?reverse\s*(?:of\s+['\"][a-zA-Z0-9]+['\"]\s*)?(?:is)?\s*:\s*([a-zA-Z0-9]+)[.]?$",
+            r"^result\s*:\s*([a-zA-Z0-9]+)[.]?$",
+            r"^([a-zA-Z0-9]+)[.]?$",
+        ]
+        for pat in pats:
+            m = re.fullmatch(pat, cleaned, re.IGNORECASE)
+            if m:
+                return m.group(1).lower()
+        m_fall = re.findall(r"[a-zA-Z0-9]+", cleaned)
+        return m_fall[-1].lower() if m_fall else ""
+
+
+def evaluate_symbolic_diagnostics(
+    model: MiniGPT,
+    tokenizer: Any,
+    device: torch.device,
+    arm: str = "direct",
+    num_samples_per_cat: int = 50,
+    seed: int = 9999,
+) -> dict[str, Any]:
+    """Evaluate symbolic reversal across multi-dimensional diagnostic metrics (M13).
+
+    Diagnostics:
+    - exact_match_acc: 100% full answer exact match
+    - per_char_acc: position-aligned character match ratio
+    - length_match_acc: predicted answer length == expected length
+    - termination_acc: clean termination with <|eos|> or period
+    - output_diversity: unique completions / total completions (detects degenerate modes)
+    - intermediate procedural scores: for stepwise, step1, step2, and result accuracy
+    - length breakdown: unseen in-distribution (lens 3-6) vs OOD extrapolation (lens 7-8)
+    """
+    rng = random.Random(seed)
+    eos_id = getattr(tokenizer, "eos_id", -1)
+    chars = string.ascii_lowercase + string.digits
+
+    categories = {
+        "unseen_in_distribution_len_3_6": (3, 6),
+        "ood_extrapolation_len_7_8": (7, 8),
+    }
+
+    was_training = model.training
+    model.eval()
+
+    diag_results: dict[str, Any] = {}
+
+    for cat_name, (min_len, max_len) in categories.items():
+        generated_words: list[str] = []
+        attempts = 0
+        while len(generated_words) < num_samples_per_cat and attempts < num_samples_per_cat * 200:
+            attempts += 1
+            length = rng.randint(min_len, max_len)
+            w = "".join(rng.choice(chars) for _ in range(length))
+            if w in generated_words:
+                continue
+
+            if length <= 6:
+                if get_string_split(w) != "test":
+                    continue
+            else:
+                pass  # Lengths 7-8 are strictly test
+
+            generated_words.append(w)
+
+        exact_matches = 0
+        per_char_scores: list[float] = []
+        length_matches = 0
+        terminations = 0
+        raw_completions: list[str] = []
+        step1_scores: list[bool] = []
+        step2_scores: list[bool] = []
+        sample_records: list[dict[str, Any]] = []
+
+        max_tokens = 96 if arm == "stepwise" else 48
+
+        with torch.no_grad():
+            for w in generated_words:
+                expected_rev = w[::-1].lower()
+
+                if arm == "char":
+                    spaced_w = " ".join(list(w))
+                    prompt = f"<|user|>\nReverse the sequence of characters: {spaced_w}\n<|assistant|>\n"
+                elif arm == "stepwise":
+                    prompt = f"<|user|>\nReverse the sequence of characters step-by-step for the word '{w}'.\n<|assistant|>\n"
+                else:
+                    # direct / curriculum
+                    prompt = f"<|user|>\nReverse the sequence of characters in the word '{w}'.\n<|assistant|>\n"
+
+                prompt_tokens = tokenizer.encode(prompt)
+                input_tensor = torch.tensor([prompt_tokens], dtype=torch.long, device=device)
+
+                for _ in range(max_tokens):
+                    if input_tensor.size(1) >= model.config.context_length:
+                        break
+                    logits, _ = model(input_tensor)
+                    next_token = torch.argmax(logits[:, -1, :], dim=-1, keepdim=True)
+                    input_tensor = torch.cat([input_tensor, next_token], dim=1)
+                    if next_token.item() == eos_id:
+                        break
+
+                generated_full = tokenizer.decode(input_tensor[0].tolist())
+                completion = generated_full[len(prompt) :]
+                raw_completions.append(completion.strip())
+
+                # Diagnostic metric computation
+                pred_ans = extract_reversed_answer(completion, arm=arm)
+                is_exact = (pred_ans == expected_rev)
+                if is_exact:
+                    exact_matches += 1
+
+                # Character-level position match
+                matches = sum(1 for c1, c2 in zip(expected_rev, pred_ans) if c1 == c2)
+                p_acc = matches / max(len(expected_rev), len(pred_ans), 1)
+                per_char_scores.append(p_acc)
+
+                # Length match
+                is_len = (len(pred_ans) == len(expected_rev))
+                if is_len:
+                    length_matches += 1
+
+                # Termination correctness
+                is_term = ("<|eos|>" in completion or completion.strip().endswith("."))
+                if is_term:
+                    terminations += 1
+
+                # Procedural step validation for stepwise
+                if arm == "stepwise":
+                    s_scores = score_instruction_symbolic_stepwise(prompt, completion)
+                    step1_scores.append(s_scores["step1_valid"])
+                    step2_scores.append(s_scores["step2_valid"])
+
+                if len(sample_records) < 3:
+                    sample_records.append({
+                        "word": w,
+                        "expected": expected_rev,
+                        "predicted": pred_ans,
+                        "completion_preview": completion.replace("<|eos|>", "").strip()[:80],
+                        "exact_match": is_exact,
+                        "per_char_acc": round(p_acc, 4),
+                    })
+
+        tot = len(generated_words)
+        unique_completions = len(set(raw_completions))
+        diversity = unique_completions / tot if tot > 0 else 0.0
+
+        cat_summary: dict[str, Any] = {
+            "exact_match_acc": round(exact_matches / tot, 4) if tot > 0 else 0.0,
+            "per_char_acc": round(sum(per_char_scores) / tot, 4) if tot > 0 else 0.0,
+            "length_match_acc": round(length_matches / tot, 4) if tot > 0 else 0.0,
+            "termination_acc": round(terminations / tot, 4) if tot > 0 else 0.0,
+            "output_diversity": round(diversity, 4),
+            "total_samples": tot,
+            "unique_completions": unique_completions,
+            "samples": sample_records,
+        }
+
+        if arm == "stepwise":
+            cat_summary["step1_read_acc"] = round(sum(step1_scores) / tot, 4) if tot > 0 else 0.0
+            cat_summary["step2_index_acc"] = round(sum(step2_scores) / tot, 4) if tot > 0 else 0.0
+
+        diag_results[cat_name] = cat_summary
+
+    if was_training:
+        model.train()
+
+    return diag_results

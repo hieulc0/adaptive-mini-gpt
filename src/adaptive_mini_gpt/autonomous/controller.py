@@ -20,8 +20,10 @@ import torch
 from adaptive_mini_gpt.adaptive.growth import grow_model_experts
 from adaptive_mini_gpt.autonomous.tasks import (
     TASK_REGISTRY,
+    evaluate_symbolic_diagnostics,
     evaluate_symbolic_reversal_breakdown,
     evaluate_task_holdout,
+    generate_instruction_qa_data,
 )
 from adaptive_mini_gpt.data.dataset import TokenDataset, split_data
 from adaptive_mini_gpt.evaluation.evaluator import evaluate_text_retention_suite
@@ -61,6 +63,8 @@ class LearningPlan:
     batch_size: int
     data_samples: int
     seed: int
+    strategy: str = "direct"
+    replay_ratio: float = 0.0
 
 
 @dataclass
@@ -343,6 +347,8 @@ class LearningController:
             batch_size=16,
             data_samples=5000,
             seed=self.seed + self.journal.cycle_index * 10,
+            strategy="direct",
+            replay_ratio=0.0,
         )
         self.journal.plan = asdict(plan)
         self.journal.state = ControllerState.TRAIN.value
@@ -398,19 +404,38 @@ class LearningController:
 
         # Build datasets
         if plan.task_id.startswith("instruction_") and is_bpe:
-            from adaptive_mini_gpt.data.instruction_data import InstructionDataset
+            from adaptive_mini_gpt.data.instruction_data import (
+                SEED_INSTRUCTION_EXAMPLES,
+                InstructionDataset,
+                format_instruction_pair,
+            )
 
-            tokens = tokenizer.encode(task_text)
-            split_idx = int(len(tokens) * 0.9)
+            # Support experience replay mixing to protect prior knowledge
+            if getattr(plan, "replay_ratio", 0.0) > 0.0:
+                replay_instructions = "".join(
+                    format_instruction_pair(ex["instruction"], ex["response"])
+                    for ex in SEED_INSTRUCTION_EXAMPLES
+                ) * 5
+                qa_text, _ = generate_instruction_qa_data(
+                    num_samples=20, seed=plan.seed, split="train"
+                )
+                replay_tokens = tokenizer.encode(replay_instructions + qa_text)
+                task_tokens = tokenizer.encode(task_text)
+                n_replay = int(len(task_tokens) * plan.replay_ratio)
+                combined_tokens = task_tokens + replay_tokens[:n_replay]
+            else:
+                combined_tokens = tokenizer.encode(task_text)
+
+            split_idx = int(len(combined_tokens) * 0.9)
             ds_train = InstructionDataset(
-                token_ids=tokens[:split_idx],
+                token_ids=combined_tokens[:split_idx],
                 context_length=candidate_model.config.context_length,
                 assistant_token_id=tokenizer.assistant_id,
                 eos_token_id=tokenizer.eos_id,
                 user_token_id=tokenizer.user_id,
             )
             ds_val = InstructionDataset(
-                token_ids=tokens[split_idx:],
+                token_ids=combined_tokens[split_idx:],
                 context_length=candidate_model.config.context_length,
                 assistant_token_id=tokenizer.assistant_id,
                 eos_token_id=tokenizer.eos_id,
@@ -848,11 +873,30 @@ class LearningController:
             seed=self.seed + 777,
         )
 
+        diagnostics_report: dict[str, Any] = {}
+        arm_mapping = {
+            "instruction_symbolic": "direct",
+            "instruction_symbolic_char": "char",
+            "instruction_symbolic_stepwise": "stepwise",
+            "instruction_symbolic_curriculum": "curriculum",
+        }
+        for tid, arm_name in arm_mapping.items():
+            if tid in TASK_REGISTRY:
+                diagnostics_report[tid] = evaluate_symbolic_diagnostics(
+                    model=model,
+                    tokenizer=tokenizer,
+                    device=self.device,
+                    arm=arm_name,
+                    num_samples_per_cat=30,
+                    seed=self.seed + 888,
+                )
+
         qualification_report = {
             "checkpoint": str(checkpoint_dir),
             "step": raw.get("step", 0),
             "tasks_test_split": qual_task_metrics,
             "reversal_breakdown_test_split": breakdown,
+            "diagnostics_test_split": diagnostics_report,
             "qualified_at": time.time(),
         }
 
