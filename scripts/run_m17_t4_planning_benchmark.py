@@ -98,6 +98,14 @@ def pretrain_base_lineage(
     )
     model = MiniGPT(cfg)
 
+    best_ckpt = save_dir / "best.pt"
+    if best_ckpt.exists():
+        logger.info("Found existing checkpoint %s, loading...", best_ckpt)
+        ckpt = torch.load(best_ckpt, map_location=device, weights_only=False)
+        model.load_state_dict(ckpt["model_state_dict"])
+        model.to(device)
+        return model, tokenizer, cfg
+
     tokens = tokenizer.encode(full_corpus)
     split_idx = int(len(tokens) * 0.9)
     ds_train = InstructionDataset(
@@ -154,6 +162,14 @@ def adapt_planner(
     """Adapt model to generate structured multi-step execution plans (train split only)."""
     save_dir.mkdir(parents=True, exist_ok=True)
     plan_model = copy.deepcopy(base_model)
+
+    best_ckpt = save_dir / "best.pt"
+    if best_ckpt.exists():
+        logger.info("Found existing checkpoint %s, loading...", best_ckpt)
+        ckpt = torch.load(best_ckpt, map_location=device, weights_only=False)
+        plan_model.load_state_dict(ckpt["model_state_dict"])
+        plan_model.to(device)
+        return plan_model
 
     plan_text, plan_fp = generate_multistep_instruction_corpus(
         num_samples_per_archetype=40, seed=seed, split="train", format_type=format_type

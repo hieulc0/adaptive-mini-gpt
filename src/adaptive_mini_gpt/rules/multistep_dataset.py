@@ -662,16 +662,14 @@ def generate_conversational_problems(
 
     # Generate more variations up to num_sessions
     for i in range(len(sessions), num_sessions):
-        d1 = rng.randint(60, 150)
         t1 = rng.randint(2, 3)
-        d2 = rng.randint(40, 120)
         t2 = rng.randint(2, 3)
-        tot_d = d1 + d2
         tot_t = t1 + t2
-        while tot_d % tot_t != 0:
-            d2 += 10
-            tot_d = d1 + d2
-        ans = f"{tot_d // tot_t} km/h"
+        v_tot = rng.choice([45, 50, 55, 60, 65, 70])
+        tot_d = v_tot * tot_t
+        d1 = rng.randint(20, max(21, tot_d - 20))
+        d2 = tot_d - d1
+        ans = f"{v_tot} km/h"
 
         t1_q = f"A bus travels {d1} km in {t1} hours. What is its initial average speed?"
         t1_s = {
