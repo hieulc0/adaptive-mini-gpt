@@ -1,0 +1,107 @@
+{
+  "title": "M17 Deterministic Baseline Reconciliation Audit",
+  "status": "RECONCILED_AND_VERIFIED",
+  "bug_diagnosed": "DeterministicTemplatePlanner._plan_multi_segment_speed 3-segment speed used distance d3 instead of duration t3 for step 4 (t_total)",
+  "fix": "Replaced b: d3 with b: t3 in step 4",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "mean_verified_answer_accuracy": 0.8933,
+  "mean_5step_verified_accuracy": 1.0,
+  "mean_abstention_correctness": 1.0,
+  "results_by_seed": {
+    "42": {
+      "total_standard": 50,
+      "verified_answer_accuracy": 0.96,
+      "plan_validity_rate": 1.0,
+      "plan_exact_match_rate": 0.96,
+      "total_abstention": 6,
+      "abstention_correctness": 1.0,
+      "step_breakdown": {
+        "1": {
+          "count": 10,
+          "verified_accuracy": 1.0,
+          "plan_validity_rate": 1.0
+        },
+        "2": {
+          "count": 10,
+          "verified_accuracy": 0.8,
+          "plan_validity_rate": 1.0
+        },
+        "3": {
+          "count": 20,
+          "verified_accuracy": 1.0,
+          "plan_validity_rate": 1.0
+        },
+        "5": {
+          "count": 10,
+          "verified_accuracy": 1.0,
+          "plan_validity_rate": 1.0
+        }
+      }
+    },
+    "43": {
+      "total_standard": 50,
+      "verified_answer_accuracy": 0.84,
+      "plan_validity_rate": 1.0,
+      "plan_exact_match_rate": 0.84,
+      "total_abstention": 6,
+      "abstention_correctness": 1.0,
+      "step_breakdown": {
+        "1": {
+          "count": 10,
+          "verified_accuracy": 1.0,
+          "plan_validity_rate": 1.0
+        },
+        "2": {
+          "count": 10,
+          "verified_accuracy": 0.7,
+          "plan_validity_rate": 1.0
+        },
+        "3": {
+          "count": 20,
+          "verified_accuracy": 0.75,
+          "plan_validity_rate": 1.0
+        },
+        "5": {
+          "count": 10,
+          "verified_accuracy": 1.0,
+          "plan_validity_rate": 1.0
+        }
+      }
+    },
+    "44": {
+      "total_standard": 50,
+      "verified_answer_accuracy": 0.88,
+      "plan_validity_rate": 1.0,
+      "plan_exact_match_rate": 0.88,
+      "total_abstention": 6,
+      "abstention_correctness": 1.0,
+      "step_breakdown": {
+        "1": {
+          "count": 10,
+          "verified_accuracy": 1.0,
+          "plan_validity_rate": 1.0
+        },
+        "2": {
+          "count": 10,
+          "verified_accuracy": 0.8,
+          "plan_validity_rate": 1.0
+        },
+        "3": {
+          "count": 20,
+          "verified_accuracy": 0.8,
+          "plan_validity_rate": 1.0
+        },
+        "5": {
+          "count": 10,
+          "verified_accuracy": 1.0,
+          "plan_validity_rate": 1.0
+        }
+      }
+    }
+  },
+  "timestamp": 1792446630.3129203
+}

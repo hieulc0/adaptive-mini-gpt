@@ -209,3 +209,36 @@ def test_semantic_argument_equivalence_audit() -> None:
     args_speed1 = {"distance_km": 120.0, "time_hours": 2.0}
     args_speed2 = {"distance_km": 2.0, "time_hours": 120.0}
     assert not are_arguments_semantically_equivalent("average_speed", args_speed1, args_speed2)
+
+
+def test_deterministic_template_planner_three_segment_speed_regression() -> None:
+    """Regression test for 3-segment (5-step) average speed planning with unequal distance and duration values.
+    
+    Verifies that step 4 (t_total) uses duration t3 (e.g. 1 hour) and NOT distance d3 (e.g. 80 km).
+    """
+    # Segment 1: 100 km in 2 hours
+    # Segment 2: 120 km in 3 hours
+    # Segment 3: 80 km in 1 hours
+    # Total distance = 100 + 120 + 80 = 300 km
+    # Total duration = 2 + 3 + 1 = 6 hours
+    # Overall average speed = 300 / 6 = 50 km/h
+    q = "A car travels 100 km in 2 hours, then 120 km in 3 hours, and finally 80 km in 1 hours. What is its overall average speed?"
+    plan = DeterministicTemplatePlanner.plan(q)
+    assert len(plan.steps) == 5
+    assert plan.final_var == "overall_speed"
+    
+    # Verify step 4 explicitly: t_total = add(a="$t_12", b=1.0) [h]
+    t_total_step = plan.steps[3]
+    assert t_total_step.output_var == "t_total"
+    assert t_total_step.operation == "add"
+    assert t_total_step.args["a"] == "$t_12"
+    assert t_total_step.args["b"] == 1.0, f"Expected duration 1.0 but got {t_total_step.args['b']} (distance d3 was incorrectly used!)"
+    assert t_total_step.units == "h"
+    
+    # Execute end-to-end via PlanExecutor
+    executor = PlanExecutor()
+    res = executor.execute(plan)
+    assert res.success
+    assert res.final_result == "50 km/h"
+    assert res.working_memory.variables["t_total"] == 6.0
+    assert res.working_memory.variables["d_total"] == 300.0

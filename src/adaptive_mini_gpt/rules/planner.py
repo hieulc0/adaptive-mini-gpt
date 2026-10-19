@@ -244,6 +244,8 @@ class DeterministicTemplatePlanner:
 
         # Case B: Chained Addition
         operand_keys = sorted([k for k in slots if k.startswith("operand_")], key=lambda x: int(x.split("_")[1]))
+        if len(operand_keys) > 6:
+            operand_keys = operand_keys[:6]
         if len(operand_keys) >= 2:
             steps = []
             steps.append(PlanStep(output_var="sum_1", operation="add", args={"a": f"${operand_keys[0]}", "b": f"${operand_keys[1]}"}))
@@ -312,7 +314,7 @@ class DeterministicTemplatePlanner:
             steps.append(PlanStep(output_var="d_12", operation="add", args={"a": d1, "b": d2}, units="km"))
             steps.append(PlanStep(output_var="d_total", operation="add", args={"a": "$d_12", "b": d3}, units="km"))
             steps.append(PlanStep(output_var="t_12", operation="add", args={"a": t1, "b": t2}, units="h"))
-            steps.append(PlanStep(output_var="t_total", operation="add", args={"a": "$t_12", "b": d3}, units="h"))
+            steps.append(PlanStep(output_var="t_total", operation="add", args={"a": "$t_12", "b": t3}, units="h"))
             steps.append(
                 PlanStep(
                     output_var="overall_speed",
@@ -327,10 +329,10 @@ class DeterministicTemplatePlanner:
 
     @classmethod
     def _plan_chained_addition(cls, number_matches: list[Any]) -> ExecutionPlan:
-        """Compose chained addition across 3 to 5 operands."""
+        """Compose chained addition across 3 to 6 operands (2 to 5 steps)."""
         nums = [float(m.group(0)) if "." in m.group(0) else int(m.group(0)) for m in number_matches]
-        if len(nums) > 5:
-            nums = nums[:5]
+        if len(nums) > 6:
+            nums = nums[:6]
 
         steps: list[PlanStep] = []
         steps.append(PlanStep(output_var="sum_1", operation="add", args={"a": nums[0], "b": nums[1]}))
@@ -396,3 +398,11 @@ class DeterministicTemplatePlanner:
 
         step = PlanStep(output_var="result", operation=rule, args=mem.arguments)
         return ExecutionPlan(steps=[step], final_var="result")
+
+
+from adaptive_mini_gpt.rules.grammar_planner import (
+    GrammarConstrainedPlanner,
+    PlanGrammar,
+    SearchBudgetExhaustedError,
+    TargetGoal,
+)
