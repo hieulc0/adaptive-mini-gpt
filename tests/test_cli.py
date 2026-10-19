@@ -1,7 +1,8 @@
-"""End-to-end tests for CLI commands: inspect, train, evaluate, generate."""
+"""End-to-end tests for CLI commands: inspect, train, evaluate, generate, grow."""
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -57,8 +58,9 @@ def test_cli_train_eval_generate_workflow(tmp_path: Path) -> None:
     ]
     res_inspect = subprocess.run(inspect_cmd, capture_output=True, text=True)
     assert res_inspect.returncode == 0
-    assert "Checkpoint Inspection" in res_inspect.stdout
-    assert "Step: 5" in res_inspect.stdout
+    info = json.loads(res_inspect.stdout)
+    assert info["architecture"] == "decoder_only_transformer"
+    assert info["total_params"] > 0
 
     # 3. Evaluate checkpoint
     eval_cmd = [
@@ -70,15 +72,16 @@ def test_cli_train_eval_generate_workflow(tmp_path: Path) -> None:
         str(latest_ckpt),
         "--data",
         str(data_file),
-        "--eval-steps",
+        "--max-batches",
         "2",
         "--device",
         "cpu",
     ]
     res_eval = subprocess.run(eval_cmd, capture_output=True, text=True)
     assert res_eval.returncode == 0
-    assert "Evaluation Results" in res_eval.stdout
-    assert "Loss:" in res_eval.stdout
+    eval_data = json.loads(res_eval.stdout)
+    assert "loss" in eval_data
+    assert "perplexity" in eval_data
 
     # 4. Generate from checkpoint
     gen_cmd = [
@@ -90,11 +93,76 @@ def test_cli_train_eval_generate_workflow(tmp_path: Path) -> None:
         str(latest_ckpt),
         "--prompt",
         "All the ",
-        "--max-tokens",
+        "--max-new-tokens",
         "20",
         "--device",
         "cpu",
     ]
     res_gen = subprocess.run(gen_cmd, capture_output=True, text=True)
     assert res_gen.returncode == 0
-    assert "Generated Output" in res_gen.stdout
+    gen_data = json.loads(res_gen.stdout)
+    assert "generated_text" in gen_data
+
+    # 5. Grow checkpoint with residual experts
+    grown_ckpt = save_dir / "grown.pt"
+    grow_cmd = [
+        sys.executable,
+        "-m",
+        "adaptive_mini_gpt.cli",
+        "grow",
+        "--checkpoint",
+        str(latest_ckpt),
+        "--output",
+        str(grown_ckpt),
+        "--add-experts",
+        "2",
+        "--freeze-backbone",
+    ]
+    res_grow = subprocess.run(grow_cmd, capture_output=True, text=True)
+    assert res_grow.returncode == 0, f"Grow failed: {res_grow.stderr}"
+    assert grown_ckpt.is_file()
+    grow_report = json.loads(res_grow.stdout)
+    assert grow_report["status"] == "growth_verified"
+    assert grow_report["n_experts"] == 2
+
+    # 6. Inspect grown checkpoint
+    inspect_grown_cmd = [
+        sys.executable,
+        "-m",
+        "adaptive_mini_gpt.cli",
+        "inspect",
+        "--checkpoint",
+        str(grown_ckpt),
+    ]
+    res_inspect_grown = subprocess.run(inspect_grown_cmd, capture_output=True, text=True)
+    assert res_inspect_grown.returncode == 0
+    grown_info = json.loads(res_inspect_grown.stdout)
+    assert grown_info["adaptive_enabled"] is True
+    assert grown_info["n_experts"] == 2
+
+    # 7. Continual learning stage 2 from grown checkpoint onto arithmetic
+    stage2_dir = tmp_path / "run_cli_stage2"
+    train_s2_cmd = [
+        sys.executable,
+        "-m",
+        "adaptive_mini_gpt.cli",
+        "train",
+        "--config",
+        "configs/tiny.yaml",
+        "--resume",
+        str(grown_ckpt),
+        "--data",
+        "synthetic:arithmetic",
+        "--save-dir",
+        str(stage2_dir),
+        "--allow-new-dataset",
+        "--freeze-backbone",
+        "--max-steps",
+        "3",
+        "--device",
+        "cpu",
+        "--json-output",
+    ]
+    res_s2 = subprocess.run(train_s2_cmd, capture_output=True, text=True)
+    assert res_s2.returncode == 0, f"Stage 2 continual train failed: {res_s2.stderr}"
+    assert (stage2_dir / "latest.pt").is_file()

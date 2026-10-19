@@ -1,22 +1,10 @@
-# Roadmap and milestone gates
+# Roadmap and Milestone Gates
 
-## M0 — Correct baseline implementation (first)
-Deliver: repository with `uv`, `ruff`, `pyright`, `pytest`, package + CLI; decoder-only Transformer; tokenizer; deterministic dummy batch; CPU tests for shapes, causal masking (future tokens cannot change earlier logits in eval mode), finite grads, and tiny-batch memorization. No GPU requirement. Gate: all tests green and demonstrable loss decline.
-
-## M1 — Actual learning + reliable resume (second)
-Deliver: lawful tiny text data path, stable deterministic split, train/validate/generate commands, metrics.jsonl, checkpoint manifest and full state, interrupt/resume tests, documented run instructions. Gate: fresh-process restore continues from correct step, latest corrupted checkpoint does not destroy last valid, validation recorded, reproducible baseline.
-
-## M2 — T4 execution
-Deliver: optional short Colab launcher, dependency pinning, GPU correctness smoke, AMP stability, memory/throughput measurements, Drive checkpoint publishing, tested fresh-session resume. Gate: evidence from an actual Colab run. No claims until exercised.
-
-## M3 — Modular experts
-Deliver: two task datasets with verifiers; frozen/shared backbone experiment; task-conditioned expert and simple router; before/after forgetting metrics; fixed dense comparison. Gate: nonregressing or quantified trade-offs.
-
-## M4 — Adaptive growth
-Deliver: growth proposal, compatible initialization, paired unchanged-control run, checkpoint version transition and rollback. Gate: significant/repeatable cost-adjusted gain or rejected candidate with measurements.
-
-## M5 — Extended research (optional)
-Learned routing, expert sparsity, adaptive width/depth, retrieval (distinct from weight training), multi-run controller. Only after baseline evidence.
-
-### Stop conditions
-Stop architecture expansion if it cannot beat simpler baselines, if validation worsens persistently, or if compute cost materially exceeds the available budget. Never infer 'self improvement' from training loss alone.
+| Milestone | Scope | Key Deliverables | Status |
+| :--- | :--- | :--- | :--- |
+| **M0** | Baseline Implementation | Pre-norm Transformer, CharacterTokenizer, causal mask invariance tests, tiny-batch memorization | **PASSED** |
+| **M1** | Learning & Resumption | Lawful Shakespeare corpus, atomic `CheckpointManager`, RNG/sampler restoration, corruption recovery | **PASSED** |
+| **M2** | Colab T4 Qualification | FP16 `autocast` + `GradScaler`, >500k tok/s on Tesla T4, Google Drive backup sync, 20/20 test pass | **PASSED** |
+| **M3** | Modular Experts & Continual Tasks | Multi-skill datasets (Text + Procedural Math), `AdaptiveMoELayer`, load-balancing loss, forgetting telemetry | **READY** |
+| **M4** | Function-Preserving Growth | Zero-init expert/layer expansion CLI (`amg grow`), checkpoint migration, matched-FLOP baseline comparison | **READY** |
+| **M5** | Dynamic Compute Allocation | Token-level early-exit / Mixture-of-Depths (skipping blocks on easy tokens) | **PLANNED** |

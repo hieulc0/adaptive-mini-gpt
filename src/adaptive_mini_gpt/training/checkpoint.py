@@ -226,11 +226,13 @@ class CheckpointManager:
             except Exception:
                 history = []
 
-        history.append({
-            "step": step,
-            "filename": versioned_path.name,
-            "best_val_loss": best_val_loss,
-        })
+        history.append(
+            {
+                "step": step,
+                "filename": versioned_path.name,
+                "best_val_loss": best_val_loss,
+            }
+        )
         # Keep history capped at 50 records
         history = history[-50:]
 
@@ -352,6 +354,7 @@ class CheckpointManager:
         scheduler: LRScheduler | None = None,
         strict_dataset_match: bool = True,
         auto_recover: bool = True,
+        allow_growth: bool = False,
     ) -> dict[str, Any]:
         """Restore training state and validate configuration compatibility with auto-recovery."""
         target_path = Path(checkpoint_path)
@@ -369,13 +372,34 @@ class CheckpointManager:
         config_obj = getattr(model, "config", None)
         if config_obj is not None and hasattr(config_obj, "to_dict"):
             current_config = config_obj.to_dict()
-            critical_keys = ["d_model", "n_layers", "n_heads", "d_ff", "vocab_size"]
-            for k in critical_keys:
-                if k in ckpt_model_config and ckpt_model_config[k] != current_config.get(k):
-                    raise ValueError(
-                        f"Architecture mismatch for {k}: checkpoint has {ckpt_model_config[k]}, "
-                        f"current model has {current_config.get(k)}"
+            if allow_growth:
+                critical_keys = ["d_model", "n_heads", "d_ff", "vocab_size"]
+                for k in critical_keys:
+                    if k in ckpt_model_config and ckpt_model_config[k] != current_config.get(k):
+                        msg = (
+                            f"Architecture mismatch for {k}: "
+                            f"checkpoint has {ckpt_model_config[k]}, "
+                            f"current model has {current_config.get(k)}"
+                        )
+                        raise ValueError(msg)
+                curr_layers = current_config.get("n_layers", 0)
+                ckpt_layers = ckpt_model_config.get("n_layers", 0)
+                if "n_layers" in ckpt_model_config and curr_layers < ckpt_layers:
+                    msg = (
+                        f"Architecture mismatch for n_layers: current model has fewer layers "
+                        f"({curr_layers}) than checkpoint ({ckpt_layers})"
                     )
+                    raise ValueError(msg)
+            else:
+                critical_keys = ["d_model", "n_layers", "n_heads", "d_ff", "vocab_size"]
+                for k in critical_keys:
+                    if k in ckpt_model_config and ckpt_model_config[k] != current_config.get(k):
+                        msg = (
+                            f"Architecture mismatch for {k}: "
+                            f"checkpoint has {ckpt_model_config[k]}, "
+                            f"current model has {current_config.get(k)}"
+                        )
+                        raise ValueError(msg)
 
         # 2. Validate tokenizer compatibility
         ckpt_tok_fp = checkpoint.get("tokenizer_fingerprint", "")
@@ -395,15 +419,25 @@ class CheckpointManager:
                     f"Dataset fingerprint mismatch: checkpoint has {ckpt_ds_fp}, "
                     f"current data has {dataset_fingerprint}"
                 )
-                if strict_dataset_match:
+                if strict_dataset_match and not allow_growth:
                     raise ValueError(msg)
 
         # 4. Restore model weights
-        model.load_state_dict(checkpoint["model_state_dict"])
+        model.load_state_dict(checkpoint["model_state_dict"], strict=not allow_growth)
 
         # 5. Restore optimizer state
-        if optimizer is not None and "optimizer_state_dict" in checkpoint:
-            optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+        if (
+            optimizer is not None
+            and "optimizer_state_dict" in checkpoint
+            and checkpoint["optimizer_state_dict"] is not None
+        ):
+            if allow_growth:
+                try:
+                    optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+                except Exception as e:
+                    logger.warning("Could not restore optimizer state in allow_growth mode: %s", e)
+            else:
+                optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
 
         # 6. Restore scaler state
         if scaler is not None and checkpoint.get("scaler_state_dict") is not None:
@@ -411,7 +445,13 @@ class CheckpointManager:
 
         # 7. Restore scheduler state
         if scheduler is not None and checkpoint.get("scheduler_state_dict") is not None:
-            scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
+            if allow_growth:
+                try:
+                    scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
+                except Exception as e:
+                    logger.warning("Could not restore scheduler state in allow_growth mode: %s", e)
+            else:
+                scheduler.load_state_dict(checkpoint["scheduler_state_dict"])
 
         # 8. Restore RNG states
         if "rng_states" in checkpoint:

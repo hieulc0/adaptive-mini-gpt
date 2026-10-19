@@ -180,6 +180,7 @@ def test_cpu_mixed_precision_graceful_fallback(tmp_path: Path) -> None:
     lines = metrics_file.read_text(encoding="utf-8").strip().splitlines()
     assert len(lines) >= 5
     import json
+
     rec = json.loads(lines[0])
     assert "step_time_sec" in rec
     assert "gpu_type" in rec

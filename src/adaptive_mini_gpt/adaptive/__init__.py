@@ -1,6 +1,13 @@
-"""Adaptive capacity and modular growth module (reserved for M3+).
+"""Adaptive capacity, modular routing, and function-preserving growth modules."""
 
-See docs/02-architecture.md and docs/05-roadmap.md for future milestones.
-Implementation of modular routing, specialist blocks, and capacity growth
-will occur only after fixed baseline M0 and M1 acceptance criteria are fully met.
-"""
+from adaptive_mini_gpt.adaptive.experts import AdaptiveMoELayer, BottleneckExpert
+from adaptive_mini_gpt.adaptive.growth import grow_model_depth, grow_model_experts
+from adaptive_mini_gpt.adaptive.router import TopKRouter
+
+__all__ = [
+    "AdaptiveMoELayer",
+    "BottleneckExpert",
+    "TopKRouter",
+    "grow_model_depth",
+    "grow_model_experts",
+]

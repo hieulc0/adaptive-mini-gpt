@@ -11,315 +11,561 @@ from typing import Any
 import torch
 import yaml
 
-from adaptive_mini_gpt.data.dataset import TokenDataset, load_corpus, split_data
+from adaptive_mini_gpt.adaptive.growth import grow_model_depth, grow_model_experts
+from adaptive_mini_gpt.data.dataset import (
+    TokenDataset,
+    generate_arithmetic_corpus,
+    load_corpus,
+    split_data,
+)
 from adaptive_mini_gpt.data.tokenizer import CharacterTokenizer
-from adaptive_mini_gpt.evaluation.evaluator import evaluate_dataset, generate_sample
+from adaptive_mini_gpt.evaluation.evaluator import (
+    evaluate_arithmetic_accuracy,
+    evaluate_dataset,
+    generate_sample,
+)
 from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.training.checkpoint import CheckpointManager
 from adaptive_mini_gpt.training.config import TrainingConfig
-from adaptive_mini_gpt.training.trainer import Trainer
+from adaptive_mini_gpt.training.trainer import Trainer, build_cosine_lr_schedule
 
 
-def load_yaml_config(path: str | Path) -> dict[str, Any]:
-    with open(path, encoding="utf-8") as f:
-        data = yaml.safe_load(f)
-    return data or {}
+def _load_yaml_config(path: str | Path) -> dict[str, Any]:
+    config_path = Path(path)
+    if not config_path.is_file():
+        raise FileNotFoundError(f"Configuration file not found: {config_path}")
+    with open(config_path, encoding="utf-8") as f:
+        data = yaml.safe_load(f) or {}
 
-
-def train_command(args: argparse.Namespace) -> None:
-    config_data = {}
-    if args.config and Path(args.config).is_file():
-        config_data = load_yaml_config(args.config)
-
-    # 1. Prepare raw text data and tokenizer
-    text, data_fp = load_corpus(args.data)
-    tokenizer = CharacterTokenizer()
-
-    # If resuming, we might want to check the checkpoint for tokenizer
-    resume_checkpoint_data = None
-    if args.resume:
-        resume_checkpoint_data = CheckpointManager.load_raw_checkpoint(args.resume)
-        if "tokenizer" in resume_checkpoint_data and resume_checkpoint_data["tokenizer"].get(
-            "vocab"
+    # Support nested 'adaptive' block in legacy configs/tiny.yaml
+    model_dict = dict(data.get("model", {}))
+    adaptive_dict = data.get("adaptive", {})
+    if isinstance(adaptive_dict, dict):
+        if "enabled" in adaptive_dict and "adaptive_enabled" not in model_dict:
+            model_dict["adaptive_enabled"] = bool(adaptive_dict["enabled"])
+        if "max_experts" in adaptive_dict and "n_experts" not in model_dict:
+            model_dict["n_experts"] = int(adaptive_dict["max_experts"])
+        for k in (
+            "n_experts",
+            "top_k",
+            "d_expert",
+            "routing_mode",
+            "aux_loss_weight",
+            "z_loss_weight",
         ):
-            tokenizer = CharacterTokenizer.from_dict(resume_checkpoint_data["tokenizer"])
-        else:
-            tokenizer.fit(text)
-    else:
-        tokenizer.fit(text)
+            if k in adaptive_dict and k not in model_dict:
+                model_dict[k] = adaptive_dict[k]
 
-    # 2. Build ModelConfig
-    model_raw = config_data.get("model", {})
-    model_raw["vocab_size"] = tokenizer.vocab_size
-    model_config = ModelConfig.from_dict(model_raw)
+    return {
+        "model": model_dict,
+        "training": dict(data.get("training", {})),
+    }
 
-    # 3. Build TrainingConfig
-    train_raw = config_data.get("training", {})
-    if args.save_dir:
-        train_raw["save_dir"] = args.save_dir
-    if args.backup_dir:
-        train_raw["backup_dir"] = args.backup_dir
-    if args.precision:
-        train_raw["precision"] = args.precision
+
+def _resolve_device(device_str: str) -> torch.device:
+    if device_str == "auto":
+        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    return torch.device(device_str)
+
+
+def _load_task_corpus(data_arg: str | None) -> tuple[str, str]:
+    """Load corpus from file, synthetic arithmetic ('synthetic:arithmetic'), or Shakespeare."""
+    if data_arg == "synthetic:arithmetic":
+        return generate_arithmetic_corpus(num_samples=4000, seed=42)
+    return load_corpus(data_arg)
+
+
+def cmd_train(args: argparse.Namespace) -> int:
+    cfg_data = _load_yaml_config(args.config)
+
+    # Apply CLI overrides to training config
+    train_dict = cfg_data["training"]
     if args.max_steps is not None:
-        train_raw["max_steps"] = args.max_steps
-    if args.device:
-        train_raw["device"] = args.device
-    if args.seed is not None:
-        train_raw["seed"] = args.seed
-    training_config = TrainingConfig.from_dict(train_raw)
+        train_dict["max_steps"] = args.max_steps
+    if args.save_dir is not None:
+        train_dict["save_dir"] = args.save_dir
+    if args.backup_dir is not None:
+        train_dict["backup_dir"] = args.backup_dir
+    if args.device is not None:
+        train_dict["device"] = args.device
+    if args.precision is not None:
+        train_dict["precision"] = args.precision
+    if getattr(args, "task_id", None) is not None:
+        train_dict["task_id"] = args.task_id
+    if getattr(args, "json_output", False):
+        train_dict["json_output"] = True
 
-    # 4. Tokenize and split corpus
-    all_tokens = torch.tensor(tokenizer.encode(text), dtype=torch.long)
-    train_tokens, val_tokens, _ = split_data(all_tokens, train_ratio=0.8, val_ratio=0.2)
+    training_config = TrainingConfig.from_dict(train_dict)
+    text, data_fp = _load_task_corpus(args.data)
 
-    # Ensure dataset is large enough for context length
-    if len(train_tokens) <= model_config.context_length:
-        raise ValueError(
-            f"Train tokens ({len(train_tokens)}) must be greater than context_length "
-            f"({model_config.context_length}). Provide a larger corpus or reduce context_length."
+    # If resuming or starting from a grown checkpoint, use its saved vocabulary
+    if args.resume is not None:
+        ckpt_path = CheckpointManager.find_latest_valid_checkpoint(
+            args.resume,
+            search_backup=Path(training_config.backup_dir) if training_config.backup_dir else None,
         )
+        raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_path)
+        tokenizer = CharacterTokenizer.from_dict(raw_ckpt["tokenizer"])
+        model_dict = raw_ckpt.get("model_config", cfg_data["model"])
+        model_config = ModelConfig.from_dict(model_dict)
+    else:
+        tokenizer = CharacterTokenizer(use_base_ascii=True).fit(text)
+        cfg_data["model"]["vocab_size"] = tokenizer.vocab_size
+        model_config = ModelConfig.from_dict(cfg_data["model"])
+
+    tokens = torch.tensor(tokenizer.encode(text), dtype=torch.long)
+    train_tokens, val_tokens, _ = split_data(tokens)
+
     if len(val_tokens) <= model_config.context_length:
-        # Fallback to train tokens for validation if dataset is very small
-        val_tokens = train_tokens
+        val_tokens = train_tokens if len(train_tokens) > model_config.context_length else tokens
 
-    train_dataset = TokenDataset(train_tokens, model_config.context_length)
-    val_dataset = TokenDataset(val_tokens, model_config.context_length)
+    mask_prompt = (args.data == "synthetic:arithmetic") or getattr(args, "mask_prompt", False)
+    equals_id = tokenizer.stoi.get("=")
+    newline_id = tokenizer.stoi.get("\n")
 
-    # 5. Initialize Model & Trainer
+    train_ds = TokenDataset(
+        train_tokens,
+        context_length=model_config.context_length,
+        mask_prompt_before_equals=mask_prompt,
+        equals_token_id=equals_id,
+        newline_token_id=newline_id,
+    )
+    val_ds = TokenDataset(
+        val_tokens,
+        context_length=model_config.context_length,
+        mask_prompt_before_equals=mask_prompt,
+        equals_token_id=equals_id,
+        newline_token_id=newline_id,
+    )
+
     model = MiniGPT(model_config)
+    if args.freeze_backbone:
+        model.freeze_backbone(freeze_existing_experts=args.freeze_old_experts)
+
     trainer = Trainer(
         model=model,
         model_config=model_config,
         training_config=training_config,
-        train_dataset=train_dataset,
-        val_dataset=val_dataset,
+        train_dataset=train_ds,
+        val_dataset=val_ds,
         tokenizer=tokenizer,
         dataset_fingerprint=data_fp,
     )
 
-    # 6. Resume if requested
-    if args.resume:
-        print(f"Resuming from checkpoint: {args.resume}")
-        trainer.resume_from_checkpoint(args.resume, strict_dataset_match=not args.force_resume)
+    if args.resume is not None:
+        trainer.resume_from_checkpoint(
+            args.resume,
+            strict_dataset_match=not args.allow_new_dataset,
+            allow_growth=args.allow_new_dataset,
+        )
+        # When transitioning to a new dataset/stage in continual learning:
+        if args.allow_new_dataset:
+            trainer.step = 0
+            trainer.data_position = 0
+            trainer.best_val_loss = float("inf")
+        # Re-apply freeze flags and rebuild optimizer/scheduler for trainable subset
+        if args.freeze_backbone or args.allow_new_dataset:
+            if args.freeze_backbone:
+                model.freeze_backbone(freeze_existing_experts=args.freeze_old_experts)
+            trainer.optimizer = model.configure_optimizers(
+                learning_rate=training_config.learning_rate,
+                weight_decay=training_config.weight_decay,
+            )
+            if training_config.lr_schedule == "cosine":
+                trainer.scheduler = build_cosine_lr_schedule(
+                    trainer.optimizer,
+                    warmup_steps=training_config.warmup_steps,
+                    max_steps=training_config.max_steps,
+                    min_lr_ratio=training_config.min_lr / training_config.learning_rate,
+                )
 
-    # 7. Start Training
-    result = trainer.train()
-    print(f"Training completed successfully. Checkpoint saved to: {result['save_dir']}")
+    summary = trainer.train()
+    print(json.dumps(summary, indent=None if getattr(args, "json_output", False) else 2))
+    return 0
 
 
-def evaluate_command(args: argparse.Namespace) -> None:
-    checkpoint_data = CheckpointManager.load_raw_checkpoint(args.checkpoint)
-    model_config = ModelConfig.from_dict(checkpoint_data["model_config"])
-    tokenizer = CharacterTokenizer.from_dict(checkpoint_data["tokenizer"])
+def cmd_grow(args: argparse.Namespace) -> int:
+    """Execute a function-preserving M4 growth transformation on a saved checkpoint."""
+    ckpt_path = CheckpointManager.find_latest_valid_checkpoint(args.checkpoint)
+    raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_path)
+
+    model_config = ModelConfig.from_dict(raw_ckpt["model_config"])
+    training_config = TrainingConfig.from_dict(raw_ckpt.get("training_config", {}))
+    tokenizer = CharacterTokenizer.from_dict(raw_ckpt["tokenizer"])
 
     model = MiniGPT(model_config)
-    model.load_state_dict(checkpoint_data["model_state_dict"])
+    model.load_state_dict(raw_ckpt["model_state_dict"])
+    model.eval()
 
-    device = torch.device(
-        args.device
-        if args.device != "auto"
-        else ("cuda" if torch.cuda.is_available() else "cpu")
+    # Verify function-preserving invariant on a deterministic probe batch
+    torch.manual_seed(42)
+    probe_x = torch.randint(0, model_config.vocab_size, (2, min(32, model_config.context_length)))
+    with torch.no_grad():
+        logits_before, _ = model(probe_x)
+
+    params_before = model.get_num_params()
+
+    if args.routing_mode is not None:
+        model.config.routing_mode = args.routing_mode
+
+    if args.add_experts > 0:
+        grow_model_experts(
+            model,
+            add_experts=args.add_experts,
+            freeze_backbone=args.freeze_backbone,
+            freeze_old_experts=args.freeze_old_experts,
+        )
+
+    if args.add_layers > 0:
+        grow_model_depth(model, add_layers=args.add_layers)
+
+    model.eval()
+    with torch.no_grad():
+        logits_after, _ = model(probe_x)
+
+    max_drift = (logits_before - logits_after).abs().max().item()
+    if max_drift > 1e-5:
+        raise RuntimeError(
+            f"Function-preserving growth check failed! Max logit drift: {max_drift:.2e}"
+        )
+
+    params_after = model.get_num_params()
+    trainable_after = sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+    out_path = Path(args.output)
+    out_dir = out_path.parent
+    ckpt_mgr = CheckpointManager(save_dir=out_dir)
+
+    optimizer = model.configure_optimizers(
+        learning_rate=training_config.learning_rate,
+        weight_decay=training_config.weight_decay,
     )
-    model.to(device)
 
-    text, _ = load_corpus(args.data)
+    reset_step = getattr(args, "reset_step", True)
+    step_to_save = 0 if reset_step else raw_ckpt.get("step", 0)
+    best_loss_to_save = float("inf") if reset_step else raw_ckpt.get("best_val_loss", float("inf"))
+
+    saved_path = ckpt_mgr.save_checkpoint(
+        checkpoint_name=out_path.name,
+        model=model,
+        optimizer=optimizer,
+        model_config=model.config,
+        training_config=training_config,
+        tokenizer=tokenizer,
+        dataset_fingerprint=raw_ckpt.get("dataset_fingerprint", ""),
+        step=step_to_save,
+        tokens_seen=raw_ckpt.get("tokens_seen", 0),
+        data_position=0,
+        best_val_loss=best_loss_to_save,
+        run_id=f"{raw_ckpt.get('run_id', 'run')}_grown",
+        is_best=False,
+    )
+
+    report = {
+        "status": "growth_verified",
+        "source_checkpoint": str(ckpt_path),
+        "output_checkpoint": str(saved_path),
+        "params_before": params_before,
+        "params_after": params_after,
+        "trainable_params": trainable_after,
+        "active_params_per_token": model.get_active_params_per_token(),
+        "n_layers": model.config.n_layers,
+        "n_experts": model.config.n_experts if model.config.adaptive_enabled else 0,
+        "max_logit_drift_at_boundary": max_drift,
+    }
+    print(json.dumps(report, indent=None if getattr(args, "json_output", False) else 2))
+    return 0
+
+
+def cmd_evaluate(args: argparse.Namespace) -> int:
+    device = _resolve_device(args.device)
+    ckpt_path = CheckpointManager.find_latest_valid_checkpoint(args.checkpoint)
+    raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_path)
+
+    model_config = ModelConfig.from_dict(raw_ckpt["model_config"])
+    tokenizer = CharacterTokenizer.from_dict(raw_ckpt["tokenizer"])
+
+    model = MiniGPT(model_config).to(device)
+    model.load_state_dict(raw_ckpt["model_state_dict"])
+
+    text, _ = _load_task_corpus(args.data)
     tokens = torch.tensor(tokenizer.encode(text), dtype=torch.long)
-    _, val_tokens, _ = split_data(tokens, train_ratio=0.8, val_ratio=0.2)
+    _, val_tokens, _ = split_data(tokens)
     if len(val_tokens) <= model_config.context_length:
         val_tokens = tokens
+    val_ds = TokenDataset(val_tokens, context_length=model_config.context_length)
 
-    val_dataset = TokenDataset(val_tokens, model_config.context_length)
+    bypass_moe = getattr(args, "bypass_moe", False)
     metrics = evaluate_dataset(
         model=model,
-        dataset=val_dataset,
+        dataset=val_ds,
         batch_size=args.batch_size,
         device=device,
-        max_batches=args.eval_steps,
+        max_batches=args.max_batches,
+        task_id=args.task_id,
+        bypass_moe=bypass_moe,
     )
+    if model.config.adaptive_enabled and model.last_aux_info and not bypass_moe:
+        metrics["router_entropy"] = model.last_aux_info.get("router_entropy", 0.0)
+        metrics["expert_utilization"] = model.last_aux_info.get("expert_utilization", [])
 
-    print("\n--- Evaluation Results ---")
-    print(f"Loss: {metrics['loss']:.4f}")
-    print(f"Perplexity: {metrics['perplexity']:.2f}")
-    print(f"Bits per character: {metrics['bits_per_character']:.4f}")
-    print(f"Batches evaluated: {metrics['batches_evaluated']}")
+    if getattr(args, "exact_match", False) or args.data == "synthetic:arithmetic":
+        arith_res = evaluate_arithmetic_accuracy(
+            model=model,
+            tokenizer=tokenizer,
+            num_problems=100,
+            device=device,
+            task_id=args.task_id,
+            ood_extrapolation=getattr(args, "ood_extrapolation", False),
+            bypass_moe=bypass_moe,
+        )
+        metrics["exact_match_accuracy"] = arith_res["exact_match_accuracy"]
+        metrics["exact_match_correct"] = arith_res["correct"]
+        metrics["exact_match_total"] = arith_res["total_problems"]
+        metrics["ood_extrapolation"] = arith_res["ood_extrapolation"]
+        metrics["sample_predictions"] = arith_res["sample_predictions"]
+
+    print(json.dumps(metrics, indent=None if getattr(args, "json_output", False) else 2))
+    return 0
 
 
-def generate_command(args: argparse.Namespace) -> None:
-    checkpoint_data = CheckpointManager.load_raw_checkpoint(args.checkpoint)
-    model_config = ModelConfig.from_dict(checkpoint_data["model_config"])
-    tokenizer = CharacterTokenizer.from_dict(checkpoint_data["tokenizer"])
+def cmd_generate(args: argparse.Namespace) -> int:
+    device = _resolve_device(args.device)
+    ckpt_path = CheckpointManager.find_latest_valid_checkpoint(args.checkpoint)
+    raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_path)
 
-    model = MiniGPT(model_config)
-    model.load_state_dict(checkpoint_data["model_state_dict"])
+    model_config = ModelConfig.from_dict(raw_ckpt["model_config"])
+    tokenizer = CharacterTokenizer.from_dict(raw_ckpt["tokenizer"])
 
-    device = torch.device(
-        args.device
-        if args.device != "auto"
-        else ("cuda" if torch.cuda.is_available() else "cpu")
-    )
-    model.to(device)
+    model = MiniGPT(model_config).to(device)
+    model.load_state_dict(raw_ckpt["model_state_dict"])
 
-    res = generate_sample(
+    result = generate_sample(
         model=model,
         tokenizer=tokenizer,
         prompt=args.prompt,
-        max_new_tokens=args.max_tokens,
+        max_new_tokens=args.max_new_tokens,
         temperature=args.temperature,
         top_k=args.top_k,
+        top_p=getattr(args, "top_p", None),
+        repetition_penalty=getattr(args, "repetition_penalty", 1.0),
+        stop_on_newline=getattr(args, "stop_on_newline", False),
         device=device,
+        task_id=getattr(args, "task_id", None),
+        bypass_moe=getattr(args, "bypass_moe", False),
     )
+    print(json.dumps(result, indent=None if getattr(args, "json_output", False) else 2))
+    return 0
 
-    print("\n--- Generated Output ---")
-    print(res["generated_text"])
 
-
-def inspect_command(args: argparse.Namespace) -> None:
-    if args.checkpoint:
-        ckpt = CheckpointManager.load_raw_checkpoint(args.checkpoint)
-        model_config = ModelConfig.from_dict(ckpt["model_config"])
-        model = MiniGPT(model_config)
-        info = model.inspect_architecture()
-
-        print("\n=== Checkpoint Inspection ===")
-        print(f"Run ID: {ckpt.get('run_id')}")
-        print(f"Step: {ckpt.get('step')}")
-        print(f"Tokens seen: {ckpt.get('tokens_seen')}")
-        print(f"Best Val Loss: {ckpt.get('best_val_loss')}")
-        print(f"Dataset Fingerprint: {ckpt.get('dataset_fingerprint')}")
-        print(f"Tokenizer Vocab Size: {len(ckpt.get('tokenizer', {}).get('vocab', []))}")
-        print("\n=== Model Architecture ===")
-        for k, v in info.items():
-            if k != "layers":
-                print(f"  {k}: {v}")
-        print("\n=== Layers ===")
-        for layer in info["layers"]:
-            print(f"  Layer {layer['layer']}: {layer['params']:,} parameters")
-    elif args.config:
-        cfg_data = load_yaml_config(args.config)
-        model_cfg = ModelConfig.from_dict(cfg_data.get("model", {}))
-        model = MiniGPT(model_cfg)
-        info = model.inspect_architecture()
-        print("\n=== Configuration Inspection ===")
-        print(json.dumps(cfg_data, indent=2))
-        print("\n=== Model Architecture ===")
-        for k, v in info.items():
-            if k != "layers":
-                print(f"  {k}: {v}")
-        print("\n=== Layers ===")
-        for layer in info["layers"]:
-            print(f"  Layer {layer['layer']}: {layer['params']:,} parameters")
+def cmd_inspect(args: argparse.Namespace) -> int:
+    if args.checkpoint is not None:
+        ckpt_path = CheckpointManager.find_latest_valid_checkpoint(args.checkpoint)
+        raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_path)
+        model_config = ModelConfig.from_dict(raw_ckpt["model_config"])
     else:
-        print("Please specify either --checkpoint or --config to inspect.")
-        sys.exit(1)
+        cfg_data = _load_yaml_config(args.config)
+        model_config = ModelConfig.from_dict(cfg_data["model"])
+
+    model = MiniGPT(model_config)
+    info = model.inspect_architecture()
+    print(json.dumps(info, indent=None if getattr(args, "json_output", False) else 2))
+    return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
+    common_parser = argparse.ArgumentParser(add_help=False)
+    common_parser.add_argument(
+        "--json-output",
+        "--json-log",
+        dest="json_output",
+        action="store_true",
+        help="Emit single-line machine-readable JSON telemetry.",
+    )
+
     parser = argparse.ArgumentParser(
         prog="amg",
-        description="Adaptive Mini-GPT: decoder-only transformer research platform.",
+        description="Adaptive Mini-GPT CLI for training, modular growth, and evaluation.",
+        parents=[common_parser],
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    # amg train
-    train_parser = subparsers.add_parser("train", help="Train Mini-GPT model.")
-    train_parser.add_argument(
-        "--config", type=str, default="configs/tiny.yaml", help="Path to config yaml"
+    # train
+    p_train = subparsers.add_parser(
+        "train",
+        help="Train or resume a Mini-GPT model.",
+        parents=[common_parser],
     )
-    train_parser.add_argument("--data", type=str, default=None, help="Path to text data file")
-    train_parser.add_argument(
-        "--resume", type=str, default=None, help="Path to checkpoint to resume"
+    p_train.add_argument("--config", type=str, required=True, help="Path to YAML config file.")
+    p_train.add_argument("--resume", type=str, default=None, help="Checkpoint path to resume from.")
+    p_train.add_argument(
+        "--data", type=str, default=None, help="Corpus path or 'synthetic:arithmetic'."
     )
-    train_parser.add_argument(
-        "--force-resume",
-        action="store_true",
-        help="Force resume even if dataset fingerprint differs",
+    p_train.add_argument("--max-steps", type=int, default=None, help="Override max training steps.")
+    p_train.add_argument(
+        "--save-dir", type=str, default=None, help="Override checkpoint directory."
     )
-    train_parser.add_argument(
-        "--save-dir", type=str, default=None, help="Directory to save run outputs"
-    )
-    train_parser.add_argument(
+    p_train.add_argument(
         "--backup-dir",
         type=str,
         default=None,
-        help="External backup directory (e.g. Google Drive)",
+        help="External backup directory (e.g., Drive).",
     )
-    train_parser.add_argument(
-        "--precision",
+    p_train.add_argument("--device", type=str, default=None, choices=["auto", "cpu", "cuda"])
+    p_train.add_argument("--precision", type=str, default=None, choices=["fp32", "fp16", "bf16"])
+    p_train.add_argument(
+        "--task-id", type=int, default=None, help="Task ID for task-conditioned routing."
+    )
+    p_train.add_argument(
+        "--freeze-backbone", action="store_true", help="Freeze shared dense backbone."
+    )
+    p_train.add_argument(
+        "--freeze-old-experts",
+        action="store_true",
+        help="Freeze previously trained experts.",
+    )
+    p_train.add_argument(
+        "--allow-new-dataset",
+        action="store_true",
+        help="Allow resuming a checkpoint onto a new task dataset for continual learning.",
+    )
+    p_train.add_argument(
+        "--mask-prompt",
+        action="store_true",
+        help="Mask prompt characters before '=' so only answer tokens are supervised.",
+    )
+    p_train.set_defaults(func=cmd_train)
+
+    # grow (M4)
+    p_grow = subparsers.add_parser(
+        "grow",
+        help="Function-preserving structural growth (experts or depth) on a checkpoint.",
+        parents=[common_parser],
+    )
+    p_grow.add_argument("--checkpoint", type=str, required=True, help="Input checkpoint path.")
+    p_grow.add_argument("--output", type=str, required=True, help="Output grown checkpoint path.")
+    p_grow.add_argument(
+        "--add-experts", type=int, default=0, help="Number of zero-init experts to add."
+    )
+    p_grow.add_argument(
+        "--add-layers", type=int, default=0, help="Number of identity blocks to add."
+    )
+    p_grow.add_argument("--routing-mode", type=str, default=None, choices=["learned_topk", "task"])
+    p_grow.add_argument(
+        "--freeze-backbone", action="store_true", help="Freeze shared dense weights."
+    )
+    p_grow.add_argument(
+        "--freeze-old-experts", action="store_true", help="Freeze existing experts."
+    )
+    p_grow.add_argument(
+        "--reset-step",
+        action="store_true",
+        default=True,
+        help="Reset step counter to 0 for next training stage (default True).",
+    )
+    p_grow.add_argument(
+        "--no-reset-step",
+        dest="reset_step",
+        action="store_false",
+        help="Preserve prior stage step count.",
+    )
+    p_grow.set_defaults(func=cmd_grow)
+
+    # evaluate
+    p_eval = subparsers.add_parser(
+        "evaluate",
+        help="Evaluate a checkpoint on validation split.",
+        parents=[common_parser],
+    )
+    p_eval.add_argument("--checkpoint", type=str, required=True, help="Path to checkpoint.")
+    p_eval.add_argument(
+        "--data",
         type=str,
         default=None,
-        choices=["fp32", "fp16", "bf16"],
-        help="Precision format",
+        help="Optional dataset path or 'synthetic:arithmetic'.",
     )
-    train_parser.add_argument(
-        "--max-steps", type=int, default=None, help="Override maximum training steps"
+    p_eval.add_argument("--batch-size", type=int, default=16)
+    p_eval.add_argument("--max-batches", "--eval-steps", dest="max_batches", type=int, default=20)
+    p_eval.add_argument(
+        "--task-id", type=int, default=None, help="Task ID for task-conditioned routing."
     )
-    train_parser.add_argument(
-        "--device", type=str, default=None, help="Compute device (cpu, cuda, auto)"
+    p_eval.add_argument(
+        "--bypass-moe",
+        action="store_true",
+        help="Bypass MoE layers (evaluate pure dense backbone).",
     )
-    train_parser.add_argument("--seed", type=int, default=None, help="Random seed")
+    p_eval.add_argument(
+        "--exact-match",
+        action="store_true",
+        help="Run exact-match arithmetic/parity verification.",
+    )
+    p_eval.add_argument(
+        "--ood-extrapolation",
+        action="store_true",
+        help="Evaluate on out-of-distribution [100, 200) operands.",
+    )
+    p_eval.add_argument("--device", type=str, default="auto", choices=["auto", "cpu", "cuda"])
+    p_eval.set_defaults(func=cmd_evaluate)
 
-    # amg evaluate
-    eval_parser = subparsers.add_parser("evaluate", help="Evaluate checkpoint on validation data.")
-    eval_parser.add_argument(
-        "--checkpoint", type=str, required=True, help="Path to model checkpoint"
+    # generate
+    p_gen = subparsers.add_parser(
+        "generate",
+        help="Generate text from a checkpoint.",
+        parents=[common_parser],
     )
-    eval_parser.add_argument(
-        "--data", type=str, default=None, help="Path to evaluation text data"
+    p_gen.add_argument("--checkpoint", type=str, required=True, help="Path to checkpoint.")
+    p_gen.add_argument("--prompt", type=str, default="From fairest ")
+    p_gen.add_argument(
+        "--max-new-tokens", "--max-tokens", dest="max_new_tokens", type=int, default=100
     )
-    eval_parser.add_argument(
-        "--eval-steps", type=int, default=20, help="Number of batches to evaluate"
+    p_gen.add_argument("--temperature", type=float, default=0.8)
+    p_gen.add_argument("--top-k", type=int, default=40)
+    p_gen.add_argument(
+        "--top-p", type=float, default=None, help="Top-p (nucleus) filtering threshold."
     )
-    eval_parser.add_argument(
-        "--batch-size", type=int, default=16, help="Batch size for evaluation"
+    p_gen.add_argument(
+        "--repetition-penalty",
+        type=float,
+        default=1.0,
+        help="Repetition penalty applied to context tokens.",
     )
-    eval_parser.add_argument("--device", type=str, default="auto", help="Compute device")
+    p_gen.add_argument(
+        "--stop-on-newline", action="store_true", help="Stop generation on newline character."
+    )
+    p_gen.add_argument("--device", type=str, default="auto", choices=["auto", "cpu", "cuda"])
+    p_gen.add_argument(
+        "--task-id", type=int, default=None, help="Task ID for task-conditioned routing."
+    )
+    p_gen.add_argument(
+        "--bypass-moe",
+        action="store_true",
+        help="Bypass MoE layers (generate using pure dense backbone).",
+    )
+    p_gen.set_defaults(func=cmd_generate)
 
-    # amg generate
-    gen_parser = subparsers.add_parser("generate", help="Generate text from a saved checkpoint.")
-    gen_parser.add_argument(
-        "--checkpoint", type=str, required=True, help="Path to model checkpoint"
+    # inspect
+    p_insp = subparsers.add_parser(
+        "inspect",
+        help="Inspect model architecture and parameter counts.",
+        parents=[common_parser],
     )
-    gen_parser.add_argument("--prompt", type=str, default="The ", help="Conditioning text prompt")
-    gen_parser.add_argument(
-        "--max-tokens", type=int, default=100, help="Number of tokens to generate"
-    )
-    gen_parser.add_argument(
-        "--temperature", type=float, default=0.8, help="Sampling temperature"
-    )
-    gen_parser.add_argument("--top-k", type=int, default=40, help="Top-k filtering")
-    gen_parser.add_argument("--device", type=str, default="auto", help="Compute device")
-
-    # amg inspect
-    inspect_parser = subparsers.add_parser(
-        "inspect", help="Inspect model architecture or checkpoint."
-    )
-    inspect_parser.add_argument(
-        "--checkpoint", type=str, default=None, help="Path to checkpoint to inspect"
-    )
-    inspect_parser.add_argument(
-        "--config", type=str, default=None, help="Path to config yaml to inspect"
-    )
+    p_insp.add_argument("--config", type=str, default="configs/tiny.yaml")
+    p_insp.add_argument("--checkpoint", type=str, default=None)
+    p_insp.set_defaults(func=cmd_inspect)
 
     return parser
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
-    args = parser.parse_args()
-
-    if args.command == "train":
-        train_command(args)
-    elif args.command == "evaluate":
-        evaluate_command(args)
-    elif args.command == "generate":
-        generate_command(args)
-    elif args.command == "inspect":
-        inspect_command(args)
-    else:
-        parser.print_help()
+    args = parser.parse_args(argv)
+    try:
+        return args.func(args)
+    except Exception as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

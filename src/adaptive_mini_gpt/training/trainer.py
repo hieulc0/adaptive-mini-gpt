@@ -6,13 +6,11 @@ import json
 import math
 import random
 import time
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import torch
-from torch.optim import AdamW
 from torch.optim.lr_scheduler import LambdaLR, LRScheduler
 
 from adaptive_mini_gpt.data.dataset import TokenDataset
@@ -85,36 +83,38 @@ class Trainer:
         # Set seeds
         self._set_seed(self.config.seed)
 
-        # Optimizer
-        self.optimizer = AdamW(
-            self.model.parameters(),
-            lr=self.config.learning_rate,
+        # Freeze backbone if requested (e.g. modular expert training)
+        if getattr(self.config, "freeze_backbone", False):
+            self.model.freeze_backbone()
+
+        # Decoupled weight decay optimizer (only decays >=2D weights)
+        self.optimizer = self.model.configure_optimizers(
+            learning_rate=self.config.learning_rate,
             weight_decay=self.config.weight_decay,
         )
 
-        # Scheduler
+        # Learning rate schedule
         self.scheduler: LRScheduler | None = None
         if self.config.lr_schedule == "cosine":
-            min_ratio = self.config.min_lr / self.config.learning_rate
             self.scheduler = build_cosine_lr_schedule(
                 self.optimizer,
                 warmup_steps=self.config.warmup_steps,
                 max_steps=self.config.max_steps,
-                min_lr_ratio=min_ratio,
+                min_lr_ratio=self.config.min_lr / self.config.learning_rate,
             )
 
-        # Mixed precision & GradScaler
-        self.use_amp = (self.config.precision in ("fp16", "bf16")) and (self.device.type == "cuda")
+        # Mixed precision setup
+        self.use_amp = self.config.precision in ("fp16", "bf16") and self.device.type == "cuda"
         self.amp_dtype = torch.float16 if self.config.precision == "fp16" else torch.bfloat16
-        scaler_enabled = (self.config.precision == "fp16") and (self.device.type == "cuda")
-        device_for_scaler = "cuda" if self.device.type == "cuda" else "cpu"
-        self.scaler = torch.amp.GradScaler(device_for_scaler, enabled=scaler_enabled)
+        self.scaler = torch.amp.GradScaler(
+            "cuda", enabled=(self.config.precision == "fp16" and self.device.type == "cuda")
+        )
 
-        # Checkpoint manager with optional backup dir (e.g. Google Drive)
+        # Checkpoint manager
         self.checkpoint_manager = CheckpointManager(
             save_dir=self.save_dir,
-            backup_dir=self.config.backup_dir,
             keep_last_n=self.config.keep_last_n_checkpoints,
+            backup_dir=Path(self.config.backup_dir) if self.config.backup_dir else None,
         )
 
         # State tracking
@@ -132,12 +132,16 @@ class Trainer:
             torch.cuda.manual_seed_all(seed)
 
     def _log_metric(self, record: dict[str, Any]) -> None:
-        record["timestamp"] = datetime.now(UTC).isoformat()
+        """Append a JSON record to the metrics log file."""
+        record["timestamp"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         with open(self.metrics_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(record) + "\n")
 
     def resume_from_checkpoint(
-        self, checkpoint_path: str | Path, strict_dataset_match: bool = True
+        self,
+        checkpoint_path: str | Path,
+        strict_dataset_match: bool = True,
+        allow_growth: bool = False,
     ) -> None:
         """Resume training state from a saved checkpoint with auto-recovery."""
         meta = self.checkpoint_manager.restore_checkpoint(
@@ -150,24 +154,27 @@ class Trainer:
             scheduler=self.scheduler,
             strict_dataset_match=strict_dataset_match,
             auto_recover=True,
+            allow_growth=allow_growth,
         )
         self.step = meta["step"]
         self.tokens_seen = meta["tokens_seen"]
-        self.data_position = meta["data_position"]
-        self.best_val_loss = meta["best_val_loss"]
-        self.run_id = meta["run_id"]
-        self.last_checkpoint_time = time.time()
+        self.data_position = meta.get("data_position", 0)
+        self.best_val_loss = meta.get("best_val_loss", float("inf"))
+        self.run_id = meta.get("run_id", self.run_id)
 
     @torch.no_grad()
     def evaluate(self, eval_steps: int | None = None) -> tuple[float, float]:
-        """Compute validation loss and perplexity."""
+        """Compute validation loss and perplexity without redundant wrapping."""
         self.model.eval()
-        steps = eval_steps or self.config.eval_steps
+        requested_steps = eval_steps or self.config.eval_steps
+        tokens_per_batch = self.config.batch_size * self.model_config.context_length
+        natural_batches = max(1, math.ceil(len(self.val_dataset) / tokens_per_batch))
+        steps = min(requested_steps, natural_batches)
         total_loss = 0.0
 
         for i in range(steps):
             x, y, _ = self.val_dataset.get_sequential_batch(
-                start_idx=i * self.config.batch_size * self.model_config.context_length,
+                start_idx=i * tokens_per_batch,
                 batch_size=self.config.batch_size,
                 device=self.device,
             )
@@ -176,8 +183,10 @@ class Trainer:
                 dtype=self.amp_dtype,
                 enabled=self.use_amp,
             ):
-                _, loss = self.model(x, y)
-            if loss is not None:
+                _, loss = self.model(x, y, task_id=self.config.task_id)
+            if self.model.last_aux_info.get("ce_loss", 0.0) > 0.0:
+                total_loss += self.model.last_aux_info["ce_loss"]
+            elif loss is not None:
                 total_loss += loss.item()
 
         mean_loss = total_loss / steps if steps > 0 else 0.0
@@ -206,13 +215,15 @@ class Trainer:
             is_best=is_best,
         )
         duration = time.time() - t0
-        self._log_metric({
-            "type": "checkpoint",
-            "step": self.step,
-            "checkpoint_name": checkpoint_name,
-            "checkpoint_duration_sec": round(duration, 4),
-            "backup_copied": bool(self.config.backup_dir),
-        })
+        self._log_metric(
+            {
+                "type": "checkpoint",
+                "step": self.step,
+                "checkpoint_name": checkpoint_name,
+                "checkpoint_duration_sec": round(duration, 4),
+                "backup_copied": bool(self.config.backup_dir),
+            }
+        )
         return duration
 
     def train(self) -> dict[str, Any]:
@@ -225,11 +236,25 @@ class Trainer:
             * self.config.gradient_accumulation
         )
 
-        print(
-            f"Starting training on device={self.device} ({self.gpu_name}) "
-            f"precision={self.config.precision} for {self.config.max_steps} steps "
-            f"(resumed at step {self.step})."
-        )
+        if not self.config.json_output:
+            print(
+                f"Starting training on device={self.device} ({self.gpu_name}) "
+                f"precision={self.config.precision} for {self.config.max_steps} steps "
+                f"(resumed at step {self.step})."
+            )
+        else:
+            print(
+                json.dumps(
+                    {
+                        "type": "start",
+                        "device": str(self.device),
+                        "gpu_type": self.gpu_name,
+                        "precision": self.config.precision,
+                        "max_steps": self.config.max_steps,
+                        "resumed_step": self.step,
+                    }
+                )
+            )
 
         while self.step < self.config.max_steps:
             step_start = time.time()
@@ -248,7 +273,7 @@ class Trainer:
                     dtype=self.amp_dtype,
                     enabled=self.use_amp,
                 ):
-                    _, loss = self.model(x, y)
+                    _, loss = self.model(x, y, task_id=self.config.task_id)
 
                 if loss is None:
                     continue
@@ -284,7 +309,7 @@ class Trainer:
             elapsed = time.time() - start_time
 
             # Log training metrics
-            train_record = {
+            train_record: dict[str, Any] = {
                 "type": "train",
                 "step": self.step,
                 "loss": accum_loss,
@@ -295,6 +320,11 @@ class Trainer:
                 "throughput_tokens_per_sec": round(throughput, 1),
                 "wall_clock_sec": round(elapsed, 2),
             }
+            if self.model_config.adaptive_enabled and "router_entropy" in self.model.last_aux_info:
+                train_record["router_entropy"] = self.model.last_aux_info["router_entropy"]
+                train_record["balance_loss"] = self.model.last_aux_info["balance_loss"]
+                train_record["z_loss"] = self.model.last_aux_info["z_loss"]
+
             if self.device.type == "cuda" and torch.cuda.is_available():
                 train_record["peak_vram_mb"] = round(
                     torch.cuda.max_memory_allocated(self.device) / (1024 * 1024), 2
@@ -303,6 +333,8 @@ class Trainer:
                 train_record["peak_vram_mb"] = 0.0
 
             self._log_metric(train_record)
+            if self.config.json_output:
+                print(json.dumps(train_record))
 
             # Periodic validation
             if self.step % self.config.eval_every_steps == 0 or self.step == self.config.max_steps:
@@ -311,7 +343,7 @@ class Trainer:
                 if is_best:
                     self.best_val_loss = val_loss
 
-                val_record = {
+                val_record: dict[str, Any] = {
                     "type": "val",
                     "step": self.step,
                     "val_loss": val_loss,
@@ -330,11 +362,14 @@ class Trainer:
 
                 self._log_metric(val_record)
 
-                print(
-                    f"Step {self.step:5d} | Train Loss: {accum_loss:.4f} | "
-                    f"Val Loss: {val_loss:.4f} | Val PPL: {val_ppl:.2f} | "
-                    f"Throughput: {throughput:.0f} tok/s"
-                )
+                if self.config.json_output:
+                    print(json.dumps(val_record))
+                else:
+                    print(
+                        f"Step {self.step:5d} | Train Loss: {accum_loss:.4f} | "
+                        f"Val Loss: {val_loss:.4f} | Val PPL: {val_ppl:.2f} | "
+                        f"Throughput: {throughput:.0f} tok/s"
+                    )
 
                 if is_best:
                     self._save_checkpoint_now("best.pt", is_best=True)
@@ -349,9 +384,11 @@ class Trainer:
                 self._save_checkpoint_now("latest.pt", is_best=False)
                 self.last_checkpoint_time = time.time()
 
-        print(
-            f"Training completed at step {self.step}. Final best val loss: {self.best_val_loss:.4f}"
-        )
+        if not self.config.json_output:
+            print(
+                f"Training completed at step {self.step}. "
+                f"Final best val loss: {self.best_val_loss:.4f}"
+            )
         return {
             "step": self.step,
             "tokens_seen": self.tokens_seen,

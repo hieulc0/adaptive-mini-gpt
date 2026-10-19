@@ -1,23 +1,41 @@
-# Proposal only; keys become enforced schema during M0 implementation.
 model:
   architecture: decoder_only_transformer
+  vocab_size: 256
   d_model: 128
   n_layers: 2
   n_heads: 4
   d_ff: 512
   context_length: 256
   dropout: 0.1
-  tokenizer: character
+  bias: true
+  tie_word_embeddings: false
+  # Adaptive / Modular settings (M3/M4)
+  adaptive_enabled: false
+  n_experts: 4
+  top_k: 2
+  d_expert: 128
+  routing_mode: learned_topk  # "learned_topk" or "task"
+  aux_loss_weight: 0.01
+  z_loss_weight: 0.001
+
 training:
   seed: 42
   batch_size: 16
   gradient_accumulation: 4
   learning_rate: 0.0003
-  max_steps: 5000
+  weight_decay: 0.01
+  max_steps: 1000
   eval_every_steps: 200
-  checkpoint_every_seconds: 600
+  eval_steps: 20
+  checkpoint_every_seconds: 600.0
+  checkpoint_every_steps: 500
   device: auto
   precision: fp32
-adaptive:
-  enabled: false
-  max_experts: 8
+  grad_clip: 1.0
+  save_dir: runs/exp-001
+  backup_dir: null
+  lr_schedule: cosine
+  warmup_steps: 50
+  min_lr: 0.00001
+  keep_last_n_checkpoints: 5
+  freeze_backbone: false

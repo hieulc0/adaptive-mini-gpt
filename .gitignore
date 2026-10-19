@@ -10,3 +10,5 @@ __pycache__/
 *.safetensors
 /data/
 .ipynb_checkpoints/
+project_context.txt
+.agents/

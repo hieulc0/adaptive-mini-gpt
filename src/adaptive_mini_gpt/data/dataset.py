@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import hashlib
-from pathlib import Path
 import urllib.request
+from pathlib import Path
 
 import torch
 from torch import Tensor
@@ -152,10 +152,70 @@ def load_corpus(path: str | Path | None = None) -> tuple[str, str]:
     return text, compute_fingerprint(text)
 
 
+def is_holdout_arithmetic_pair(op_type: int, a: int, b: int) -> bool:
+    """Deterministic hash partition: 10% of operand pairs are strictly reserved for holdout eval."""
+    return ((a * 131 + b * 17 + op_type) % 10) == 0
+
+
+def generate_arithmetic_corpus(num_samples: int = 2000, seed: int = 42) -> tuple[str, str]:
+    """Generate a deterministic procedural arithmetic & parity corpus (disjoint from holdout)."""
+    g = torch.Generator().manual_seed(seed)
+    lines: list[str] = []
+    while len(lines) < num_samples:
+        op_type = int(torch.randint(0, 3, (1,), generator=g).item())
+        a = int(torch.randint(0, 100, (1,), generator=g).item())
+        b = int(torch.randint(0, 100, (1,), generator=g).item())
+        if op_type == 1:
+            a, b = max(a, b), min(a, b)
+        elif op_type == 2:
+            b = 0
+        if is_holdout_arithmetic_pair(op_type, a, b):
+            continue
+        if op_type == 0:
+            lines.append(f"ADD {a}+{b}={a + b}")
+        elif op_type == 1:
+            lines.append(f"SUB {a}-{b}={a - b}")
+        else:
+            parity = "EVEN" if (a % 2 == 0) else "ODD"
+            lines.append(f"PAR {a}={parity}")
+    text = "\n".join(lines) + "\n"
+    return text, compute_fingerprint(text)
+
+
+def mask_targets_before_equals(
+    x: Tensor,
+    y: Tensor,
+    equals_token_id: int,
+    newline_token_id: int | None = None,
+) -> Tensor:
+    """Mask targets so that loss is only computed on answer tokens (after '=' up to newline)."""
+    y_masked = y.clone()
+    is_eq = x == equals_token_id
+    is_nl = (x == newline_token_id) if newline_token_id is not None else torch.zeros_like(is_eq)
+
+    b_size, t_size = x.size()
+    in_answer = torch.zeros((b_size,), dtype=torch.bool, device=x.device)
+    mask = torch.zeros((b_size, t_size), dtype=torch.bool, device=x.device)
+    for t in range(t_size):
+        in_answer = torch.where(is_eq[:, t], torch.ones_like(in_answer), in_answer)
+        mask[:, t] = in_answer
+        in_answer = torch.where(is_nl[:, t], torch.zeros_like(in_answer), in_answer)
+
+    y_masked[~mask] = -1
+    return y_masked
+
+
 class TokenDataset:
     """Dataset holding token tensor for autoregressive sequence modeling."""
 
-    def __init__(self, tokens: Tensor, context_length: int) -> None:
+    def __init__(
+        self,
+        tokens: Tensor,
+        context_length: int,
+        mask_prompt_before_equals: bool = False,
+        equals_token_id: int | None = None,
+        newline_token_id: int | None = None,
+    ) -> None:
         if tokens.dim() != 1:
             tokens = tokens.view(-1)
         if len(tokens) <= context_length:
@@ -165,9 +225,17 @@ class TokenDataset:
             )
         self.tokens = tokens
         self.context_length = context_length
+        self.mask_prompt_before_equals = mask_prompt_before_equals
+        self.equals_token_id = equals_token_id
+        self.newline_token_id = newline_token_id
 
     def __len__(self) -> int:
         return len(self.tokens) - self.context_length
+
+    def _apply_mask(self, x: Tensor, y: Tensor) -> tuple[Tensor, Tensor]:
+        if self.mask_prompt_before_equals and self.equals_token_id is not None:
+            y = mask_targets_before_equals(x, y, self.equals_token_id, self.newline_token_id)
+        return x, y
 
     def get_batch(
         self,
@@ -180,7 +248,7 @@ class TokenDataset:
         ix = torch.randint(0, max_start, (batch_size,), generator=generator)
         x = torch.stack([self.tokens[i : i + self.context_length] for i in ix]).to(device)
         y = torch.stack([self.tokens[i + 1 : i + self.context_length + 1] for i in ix]).to(device)
-        return x, y
+        return self._apply_mask(x, y)
 
     def get_sequential_batch(
         self,
@@ -198,6 +266,7 @@ class TokenDataset:
         x = torch.stack([self.tokens[i : i + self.context_length] for i in ix]).to(device)
         y = torch.stack([self.tokens[i + 1 : i + self.context_length + 1] for i in ix]).to(device)
         next_start = (start_idx + batch_size * self.context_length) % max_start
+        x, y = self._apply_mask(x, y)
         return x, y, next_start
 
 

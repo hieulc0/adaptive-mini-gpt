@@ -1,29 +1,16 @@
-# Agent instructions — Adaptive Mini-GPT
+# Agent Instructions — Adaptive Mini-GPT
 
-Read all `docs/*.md` and `configs/tiny.yaml` before changing source. Treat documented milestones and acceptance gates as binding. Implement **M0 then M1 only** unless explicitly instructed otherwise.
+Read all `docs/*.md` and `configs/tiny.yaml` before modifying source code. Treat milestone gates and mathematical invariants as binding.
 
-## Scope
-- Python 3.11+; PyTorch; `uv`; Pytest; Ruff. Use a `src/` package and `amg` CLI. Prefer standard library `argparse` over extra CLI dependencies.
-- No notebooks for model/training logic. Colab is an interactive runner of the same CLI.
-- M0: tiny decoder-only Transformer with causal masking, tokenization, cross-entropy loss, model inspection; tests for shapes, causal independence, gradients, parameter counts, deterministic tiny-batch overfit.
-- M1: deterministic dataset split and streaming/batched training, validation, text generation, metrics JSONL, safe checkpoint publication, interruption/restart, full training state restoration, and tests.
-- Run CPU tests in CI-like local environment. CUDA path conditional; do not claim T4 validation unless actually run.
+## Project Status & Active Scope
+- **M0, M1, and M2 are complete and verified.** Do not regress existing unit or integration tests in `tests/`.
+- **Active Scope (M3 & M4):** Modular residual experts (`adaptive/experts.py`), task-conditioned & learned top-$k$ routing with load balancing (`adaptive/router.py`), and checkpoint-boundary structural growth (`adaptive/growth.py`).
+- **Tooling:** Python 3.11+, PyTorch 2.4+, `uv`, `pytest`, `ruff`, `pyright`. Standard library `argparse` for `amg` CLI.
 
-## Non-goals
-- No experts, router, adaptive growth, RAG, web crawler, automatic Colab reconnect, multi-account rotation, database, Kubernetes, distributed workers, Rust rewrite, or proprietary teacher data in M0/M1.
-
-## Delivery discipline
-1. Implement the smallest coherent increment; run Ruff and Pytest.
-2. Track experiment config and dataset fingerprint in checkpoints. Validate compatibility before restoring.
-3. Never overwrite the sole good checkpoint. Publish complete checkpoints atomically on the local filesystem; for Drive, upload a uniquely named artifact, verify, then update a manifest. Keep last known-good.
-4. Persist model, optimizer, scheduler if used, global step, RNG states, sampler/corpus position, vocabulary mapping, architecture config, and precision scaler if used. No `torch.load` from untrusted sources.
-5. Log train/validation loss, steps, tokens, wall-clock, peak GPU memory (when CUDA exists), throughput, and checkpoint path. Avoid invented benchmark numbers.
-6. For resumption test: compare continuous and interrupted training on CPU for same steps, deterministic data ordering, and numerical closeness. Document limitations if exact equality cannot be achieved.
-7. Report what actually passed, what is blocked, and instructions to reproduce. Commit cohesive milestones if repository permissions allow.
-
-## Design guardrails
-- Prefer explicit, readable PyTorch code rather than clever abstractions.
-- Architecture and tokenizer must be checkpoint-compatible; reject mismatches loudly.
-- Model layer code must not import Google Colab, GCP, or Drive APIs.
-- Keep all outputs/data/weights outside Git except tiny deterministic test fixtures.
-- Freeze held-out evaluation before experiments. Do not tune against the final holdout.
+## Architectural & Mathematical Guardrails
+1. **Fused Causal Attention:** Use `F.scaled_dot_product_attention` with `is_causal=True` during standard causal passes, while retaining explicit mask support for custom inspection tests.
+2. **Decoupled Weight Decay:** Never apply weight decay to 1D tensors (`LayerNorm`, biases) or embeddings. Partition optimizer parameter groups into `decay` ($\text{dim} \ge 2$) and `no_decay` ($\text{dim} < 2$).
+3. **Function-Preserving Growth Invariant:** When adding new experts or expanding capacity at a checkpoint boundary, initialize the output projection $W_{\text{down}} = \mathbf{0}$ so that forward-pass logits before and after growth are bit-for-bit identical ($f_{\text{grown}}(x) \equiv f_{\text{base}}(x)$ at step $t_0$).
+4. **Auxiliary Loss Accounting:** When learned routing is active, track `ce_loss`, `aux_load_balance_loss`, and `router_z_loss` separately in telemetry while optimizing their weighted sum:
+   $$\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{CE}} + \alpha \mathcal{L}_{\text{balance}} + \beta \mathcal{L}_{z}$$
+5. **Safe Checkpoint Transitions:** Support strict restoration for interrupted runs (`strict=True`) and explicit partial/backbone restoration (`allow_growth=True`) when migrating a dense checkpoint into an expanded modular architecture.

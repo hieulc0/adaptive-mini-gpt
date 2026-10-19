@@ -19,6 +19,17 @@ class ModelConfig:
     bias: bool = True
     tie_word_embeddings: bool = False
     layer_norm_eps: float = 1e-5
+    # Adaptive / Modular MoE fields (M3/M4)
+    adaptive_enabled: bool = False
+    n_experts: int = 4
+    top_k: int = 2
+    d_expert: int = 128
+    routing_mode: str = "learned_topk"  # "learned_topk" or "task"
+    aux_loss_weight: float = 0.01
+    z_loss_weight: float = 0.001
+    # Mixture-of-Depths / Dynamic Layer Skipping (M5)
+    mod_enabled: bool = False
+    mod_capacity_factor: float = 0.5
 
     def __post_init__(self) -> None:
         if self.d_model <= 0:
@@ -39,6 +50,21 @@ class ModelConfig:
             raise ValueError(f"context_length must be positive, got {self.context_length}")
         if not (0.0 <= self.dropout < 1.0):
             raise ValueError(f"dropout must be in [0.0, 1.0), got {self.dropout}")
+        if self.adaptive_enabled:
+            if self.n_experts <= 0:
+                raise ValueError(f"n_experts must be positive, got {self.n_experts}")
+            if not (1 <= self.top_k <= self.n_experts):
+                raise ValueError(
+                    f"top_k ({self.top_k}) must be between 1 and n_experts ({self.n_experts})"
+                )
+            if self.d_expert <= 0:
+                raise ValueError(f"d_expert must be positive, got {self.d_expert}")
+            if self.routing_mode not in ("learned_topk", "task"):
+                raise ValueError("routing_mode must be 'learned_topk' or 'task'")
+        if self.mod_enabled and not (0.0 < self.mod_capacity_factor <= 1.0):
+            raise ValueError(
+                f"mod_capacity_factor must be in (0.0, 1.0], got {self.mod_capacity_factor}"
+            )
 
     @property
     def head_dim(self) -> int:

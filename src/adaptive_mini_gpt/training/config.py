@@ -27,6 +27,9 @@ class TrainingConfig:
     warmup_steps: int = 50
     min_lr: float = 1e-5
     keep_last_n_checkpoints: int = 5
+    freeze_backbone: bool = False
+    task_id: int | None = None
+    json_output: bool = False
 
     def __post_init__(self) -> None:
         if self.batch_size <= 0:

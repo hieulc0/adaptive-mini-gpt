@@ -40,11 +40,11 @@ def test_causal_mask_mathematical_independence() -> None:
         logits2, _ = model(x2)
 
     # 1. Past positions (0 to k - 1) MUST be identical
-    assert torch.allclose(
-        logits1[:, :k, :], logits2[:, :k, :], atol=1e-6
-    ), "Past logits changed when modifying future tokens! Causal mask violated."
+    assert torch.allclose(logits1[:, :k, :], logits2[:, :k, :], atol=1e-6), (
+        "Past logits changed when modifying future tokens! Causal mask violated."
+    )
 
     # 2. Future positions (k onward) MUST differ because the input differs
-    assert not torch.allclose(
-        logits1[:, k:, :], logits2[:, k:, :], atol=1e-4
-    ), "Future logits should reflect changed tokens."
+    assert not torch.allclose(logits1[:, k:, :], logits2[:, k:, :], atol=1e-4), (
+        "Future logits should reflect changed tokens."
+    )
