@@ -149,3 +149,18 @@
   - Verified 15/15 autonomous rollbacks without state corruption or leakage into test splits.
 - **Empirical Negative Result Documented**:
   - Validates that small causal transformers without recurrence or external memory cannot learn arbitrary symbolic sequence reversal in 150 adaptation steps. Directs subsequent research toward dual-path external memory and bounded reasoning/verification loops.
+
+### M14: Verified Rules and Reasoning Loop (Completed)
+- **Deterministic Rule Registry & Strict Sandboxing**:
+  - Implemented 4 core operations: `reverse`, `add`, `compare` (transitive reachability), and `average_speed` (kinematics).
+  - Enforced strict schema validation and independent precondition/postcondition verifiers.
+  - Strictly disallows arbitrary Python evaluation (`eval`, `exec`, shell access).
+- **Safe Rule Executor**:
+  - Bounded, deterministic execution with type coercion, error containment, and sub-millisecond execution (<0.05ms).
+- **Reasoning Controller & Verification/Retry Loop**:
+  - Implemented multi-turn feedback loop with bounded retries (`max_retries=2`) and structured error diagnosis.
+  - Multi-configuration ablation: Model Alone, Oracle-Selected Rule Engine, Mini-GPT + Rule Engine, Mini-GPT + Rules + Verification/Retry.
+- **T4 Empirical Qualification Benchmark (Seeds 42, 43, 44)**:
+  - Oracle achieved 100% verified accuracy in 0.03 ms.
+  - Mini-GPT demonstrated successful rule recognition (33.34% overall, up to 100% on addition), but isolated argument extraction as the fundamental bottleneck (0% on held-out test inputs).
+  - Quantified retry loop overhead (+50% latency) without argument recovery in small causal decoders, establishing the empirical necessity for M15 (Persistent Memory and Grounded Pointer Extraction).

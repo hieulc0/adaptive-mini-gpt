@@ -322,3 +322,51 @@ Evaluated across 3 independent lineages (seeds 42, 43, 44) on held-out unseen in
 - **Architectural Implication**: Pure causal self-attention without recurrence, pointer networks, or an external scratchpad memory cannot reliably execute bidirectional index inversion. As recommended in the review brief, the path forward requires **dual-path procedural reasoning**:
   1. Decoupling algorithmic execution into explicit rule-based / external memory modules.
   2. Introducing an explicit bounded thinking loop and external memory interface where candidate solutions are proposed, verified by symbolic interpreters, and refined iteratively.
+
+---
+
+### M14: Verified Rules and Reasoning Loop Empirical Benchmark (NVIDIA Tesla T4)
+- **Date**: 2026-10-19
+- **Environment**: NVIDIA Tesla T4 GPU (FP16 mixed precision, CUDA 13.0, PyTorch 2.11) via headless Google Colab CLI (`amg-t4`).
+- **Test Suite Verification**: **91/91 passing pytest tests** (83 existing tests + 8 new dedicated rule registry, executor safety, verifier, and reasoning loop tests in `tests/test_m14_rules.py`).
+- **Report Artifact**: [`runs/m14_rules/m14_t4_report.json`](file:///home/hieulc/projects/adaptive-mini-gpt/runs/m14_rules/m14_t4_report.json)
+
+#### 1. Components Implemented
+1. **Rule Registry (`RULE_REGISTRY`) & Safety Constraints**:
+   - Strict operation schemas for four core operations:
+     - `reverse`: $s \in \text{str} \to s[::-1]$ (verified via inverse string identity)
+     - `add`: $a, b \in \mathbb{R} \to a + b$ (verified via inverse subtraction $(a+b)-b == a$)
+     - `compare`: Transitive ordering graph over entities (verified via acyclicity and directed reachability)
+     - `average_speed`: Distance and duration $d, t \to d/t\text{ km/h}$ (verified via rate consistency $v \cdot t == d$)
+   - Complete sandboxing: strictly rejects arbitrary Python execution (`eval()`, `exec()`, shell access) and unregistered operation names.
+2. **Rule Executor (`RuleExecutor`)**:
+   - Deterministic execution with precondition type coercion and postcondition verification.
+   - Bounded execution with complete exception containment (never crashes; returns structured `RuleExecutionResult`).
+3. **Reasoning & Verification Loop (`ReasoningController`)**:
+   - Interprets natural language questions, proposes structured tool calls (`Action: rule(args...)` or JSON), verifies results, and provides structured feedback for bounded retries (`max_retries=2`).
+4. **Disjoint Partitioned Problem Generator (`generate_rule_problems`)**:
+   - 0% train/val/test input overlap via cryptographic hash partitioning.
+   - Varied natural language paraphrasing across all four operations.
+
+#### 2. Four Experimental Configurations (Tesla T4 Multi-Seed Benchmark)
+Evaluated across 3 independent lineages (seeds 42, 43, 44) on 52 held-out test problems per seed:
+
+| Configuration | Seeds | Rule-Selection Accuracy | Arg-Extraction Accuracy | Verified-Answer Accuracy | Failure Rate | Mean Latency (ms) | Mean Retries |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **1. Model Alone (Baseline)** | 3 | **0.0%** | **0.0%** | **0.0%** | 100.0% | 103.08 ms | 0.0 |
+| **2. Oracle-Selected Rule Engine** | 3 | **100.0%** | **100.0%** | **100.0%** | **0.0%** | **0.03 ms** | 0.0 |
+| **3. Mini-GPT + Rule Engine** | 3 | **33.34%** | **0.0%** | **0.0%** | 100.0% | 100.35 ms | 0.0 |
+| **4. Mini-GPT + Rules + Verification/Retry** | 3 | **32.69%** | **0.0%** | **0.0%** | 100.0% | 150.82 ms | 2.0 |
+
+#### 3. Deep Failure Mode Ablation & Scientific Findings
+1. **Deterministic Execution is Flawless (Oracle: 100% Verified, 0.03 ms)**:
+   - When rule selection and argument extraction are correct, the deterministic rule engine solves 100% of arithmetic, reversal, transitive comparison, and kinematics problems in **0.03 milliseconds** ($>3000\times$ faster than neural generation).
+2. **Rule Recognition Emerges First (33.34% overall, up to 100% on Addition)**:
+   - Mini-GPT reliably learned semantic task classification: on addition questions (e.g. *"What is 116 plus 722?"*), Mini-GPT selected `Action: add(...)` with **100.0% rule-selection accuracy** on Seeds 42 and 43.
+3. **The Core Bottleneck is Argument Extraction (0.0% on Unfamiliar Inputs)**:
+   - While the model recognized the required tool, extracting precise tokens/arguments from unfamiliar test questions failed. The 4-layer Transformer hallucinated argument values (e.g. extracting `a=888, b=0` instead of `a=116, b=722` or omitting arguments for complex transitive comparisons).
+4. **Retry Loop Overhead vs. Recovery Utility**:
+   - The feedback loop added **+50.47 ms latency** (+50% increase), but did not rescue argument extraction errors. A 4-layer model at 150 steps does not possess sufficient in-context reasoning capacity to parse structured error messages and correct extracted entities without explicit pointer/attention grounding.
+5. **Scientific Conclusion & Direct Connection to M15**:
+   - M14 establishes the clear boundaries of tool-assisted problem solving in small language models: **neural rule selection succeeds, but neural argument extraction on ungrounded text fails**.
+   - This motivates **M15 (Persistent Memory and Grounded Pointer Attention)**: replacing raw unconstrained subword extraction with explicit slot-filling pointers and structured entity memory.
