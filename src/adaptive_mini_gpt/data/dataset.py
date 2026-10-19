@@ -205,6 +205,25 @@ def mask_targets_before_equals(
     return y_masked
 
 
+def build_1d_answer_mask(
+    tokens: Tensor,
+    equals_token_id: int,
+    newline_token_id: int | None = None,
+) -> Tensor:
+    """Precompute a 1D boolean mask over the corpus where True = target is part of an answer."""
+    n = tokens.size(0)
+    mask = torch.zeros(n, dtype=torch.bool, device=tokens.device)
+    in_ans = False
+    tok_list = tokens.tolist()
+    for i, tok in enumerate(tok_list):
+        if tok == equals_token_id:
+            in_ans = True
+        elif newline_token_id is not None and tok == newline_token_id:
+            in_ans = False
+        mask[i] = in_ans
+    return mask
+
+
 class TokenDataset:
     """Dataset holding token tensor for autoregressive sequence modeling."""
 
@@ -229,13 +248,18 @@ class TokenDataset:
         self.equals_token_id = equals_token_id
         self.newline_token_id = newline_token_id
 
+        # Precompute masked target tensor once at initialization (zero per-step overhead)
+        self.targets = tokens.clone()
+        if self.mask_prompt_before_equals and self.equals_token_id is not None:
+            ans_mask = build_1d_answer_mask(
+                tokens, self.equals_token_id, self.newline_token_id
+            )
+            valid_target_positions = torch.zeros_like(ans_mask)
+            valid_target_positions[1:] = ans_mask[:-1]
+            self.targets[~valid_target_positions] = -1
+
     def __len__(self) -> int:
         return len(self.tokens) - self.context_length
-
-    def _apply_mask(self, x: Tensor, y: Tensor) -> tuple[Tensor, Tensor]:
-        if self.mask_prompt_before_equals and self.equals_token_id is not None:
-            y = mask_targets_before_equals(x, y, self.equals_token_id, self.newline_token_id)
-        return x, y
 
     def get_batch(
         self,
@@ -247,8 +271,8 @@ class TokenDataset:
         max_start = len(self.tokens) - self.context_length
         ix = torch.randint(0, max_start, (batch_size,), generator=generator)
         x = torch.stack([self.tokens[i : i + self.context_length] for i in ix]).to(device)
-        y = torch.stack([self.tokens[i + 1 : i + self.context_length + 1] for i in ix]).to(device)
-        return self._apply_mask(x, y)
+        y = torch.stack([self.targets[i + 1 : i + self.context_length + 1] for i in ix]).to(device)
+        return x, y
 
     def get_sequential_batch(
         self,
@@ -256,17 +280,12 @@ class TokenDataset:
         batch_size: int,
         device: torch.device | str = "cpu",
     ) -> tuple[Tensor, Tensor, int]:
-        """Get a deterministic sequential batch starting from start_idx with wrapping.
-
-        Returns:
-            Tuple of (x, y, next_start_idx).
-        """
+        """Get a deterministic sequential batch starting from start_idx with wrapping."""
         max_start = len(self.tokens) - self.context_length
         ix = [(start_idx + i * self.context_length) % max_start for i in range(batch_size)]
         x = torch.stack([self.tokens[i : i + self.context_length] for i in ix]).to(device)
-        y = torch.stack([self.tokens[i + 1 : i + self.context_length + 1] for i in ix]).to(device)
+        y = torch.stack([self.targets[i + 1 : i + self.context_length + 1] for i in ix]).to(device)
         next_start = (start_idx + batch_size * self.context_length) % max_start
-        x, y = self._apply_mask(x, y)
         return x, y, next_start
 
 

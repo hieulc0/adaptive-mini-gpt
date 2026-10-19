@@ -57,3 +57,34 @@ Structural growth is executed as a **verified checkpoint transformation** $\math
    **Invariant:** Because $W_{\text{down}, j} = \mathbf{0}$, $E_j(u) = \mathbf{0}$ at initialization, preserving exact forward trajectories while permitting non-zero gradients $\nabla_{W_{\text{down}, j}} \mathcal{L} \neq 0$ immediately on step $t+1$.
 2. **Adding Depth (`grow_layers`):**
    Insert a new `TransformerBlock` where both `attn.c_proj` and `mlp.c_proj` weights and biases are initialized to $\mathbf{0}$, making the new block an exact identity operator $x + 0 = x$ at step $t_0$.
+
+---
+
+## 4. Mixture-of-Depths (M5): Dynamic Compute Allocation
+
+Following Raposo et al. (2024), **Mixture-of-Depths (MoD)** dynamically allocates sub-layer FLOPs across sequence positions by routing only a fraction of tokens through the heavy $\text{FFN}(\cdot)$ and $\text{AdaptiveMoE}(\cdot)$ sub-layers, allowing easy tokens to bypass computation via the residual stream.
+
+### Capacity Factor & True FLOP Reduction
+A scalar capacity factor $C \in (0.0, 1.0]$ defines the total token quota per sequence:
+$$k = \max(1, \lfloor C \cdot T \rceil)$$
+
+Rather than using wasteful post-compute masking (`torch.where` after full FFN evaluation), the implementation **physically gathers** only the $N_{\text{active}}$ selected token vectors before dispatch:
+$$u_{\text{active}} = u[\mathcal{I}_{\text{active}}] \in \mathbb{R}^{N_{\text{active}} \times 1 \times d_{\text{model}}}$$
+This reduces actual forward and backward FLOPs through FFN and MoE by exactly $(1 - C)$, saving $50\%$ of parameter activations when $C = 0.5$.
+
+### Differentiable Router & Gating
+A linear router $w_g \in \mathbb{R}^{d_{\text{model}}}$ computes scalar routing logits:
+$$z_{b,t} = w_g^\top u_{b,t}, \quad g_{b,t} = \sigma(z_{b,t})$$
+
+The residual sub-layer output is scaled by the continuous gate weight $g_{b,t}$ before scatter-adding into the residual stream:
+$$\Delta h_{b,t} = g_{b,t} \cdot \text{SubLayer}(u_{b,t})$$
+This ensures $\nabla_{w_g} \mathcal{L} \neq 0$, allowing task loss gradients to flow directly into the gating parameters.
+
+### Auxiliary Predictor Loss & Causal Inference
+1. **Training Mode (Top-$k$ + Auxiliary BCE):**
+   Tokens are ranked per-sequence via $\text{TopK}(z_{b, \cdot}, k)$. An auxiliary binary cross-entropy loss trains the router logits to predict top-$k$ set membership:
+   $$\mathcal{L}_{\text{mod}} = \text{BCEWithLogits}(z_{b,t}, y_{b,t}^{\text{top-}k})$$
+2. **Causal Inference Mode (Token-Local Thresholding):**
+   During autoregressive evaluation and token generation, top-$k$ selection across time dimension $T$ is disabled because it would violate causality (future tokens altering past routing decisions). Instead, tokens route conditionally based on the learned local threshold:
+   $$\mathcal{I}_{\text{active}} = \{ (b, t) \mid z_{b,t} \ge 0.0 \}$$
+   Because $z_{b,t}$ depends strictly on causal attention outputs at positions $\le t$, causal mask mathematical independence is strictly preserved.

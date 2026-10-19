@@ -1,13 +1,15 @@
-"""Automated M3/M4 Continual Learning & Adaptive Growth Benchmark Runner.
+"""Automated M3/M4/M5 Continual Learning, Adaptive Growth & Mixture-of-Depths Benchmark.
 
 Compares:
   - Baseline A (Dense Fine-Tuning): Fine-tunes all dense parameters on Task B.
-  - Candidate D (M4 Grown Experts + Frozen Backbone): Spawns zero-init residual experts
-    and trains on Task B while protecting Task A backbone representations.
+  - Candidate D (M4 Grown Experts + Selective Symbol Masking): Spawns zero-init residual
+    experts and trains on Task B while strictly protecting Task A backbone & vocabulary.
+  - Candidate E (M5 Grown Experts + Mixture-of-Depths): Adds dynamic token-level sub-layer
+    skipping (capacity_factor=0.5) to reduce active FLOPs/params per token.
 
 Usage:
     uv run python scripts/run_m3_m4_experiment.py \
-        --steps-stage1 300 --steps-stage2 300 --device auto
+        --steps-stage1 500 --steps-stage2 500 --device auto --precision fp16
 """
 
 from __future__ import annotations
@@ -20,7 +22,7 @@ from pathlib import Path
 
 import torch
 
-from adaptive_mini_gpt.adaptive.growth import grow_model_experts
+from adaptive_mini_gpt.adaptive.growth import enable_model_mod, grow_model_experts
 from adaptive_mini_gpt.data.dataset import (
     TokenDataset,
     generate_arithmetic_corpus,
@@ -44,12 +46,12 @@ def build_unified_tokenizer(text_a: str, text_b: str) -> CharacterTokenizer:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run M3/M4 Continual Growth Ablation")
+    parser = argparse.ArgumentParser(description="Run M3/M4/M5 Continual Growth & MoD Ablation")
     parser.add_argument(
-        "--steps-stage1", type=int, default=300, help="Steps on Task A (Shakespeare)"
+        "--steps-stage1", type=int, default=500, help="Steps on Task A (Shakespeare)"
     )
     parser.add_argument(
-        "--steps-stage2", type=int, default=300, help="Steps on Task B (Arithmetic)"
+        "--steps-stage2", type=int, default=500, help="Steps on Task B (Arithmetic)"
     )
     parser.add_argument("--device", type=str, default="auto", choices=["auto", "cpu", "cuda"])
     parser.add_argument("--precision", type=str, default="fp32", choices=["fp32", "fp16", "bf16"])
@@ -72,6 +74,9 @@ def main() -> None:
 
     tokens_a = torch.tensor(tokenizer.encode(text_a), dtype=torch.long)
     tokens_b = torch.tensor(tokenizer.encode(text_b), dtype=torch.long)
+
+    # Identify new domain symbols in Task B that never appeared in Task A
+    unseen_token_ids = sorted(set(tokens_b.tolist()) - set(tokens_a.tolist()))
 
     train_a, val_a, _ = split_data(tokens_a)
     train_b, val_b, _ = split_data(tokens_b)
@@ -174,24 +179,24 @@ def main() -> None:
         dense_ft_model, tokenizer, num_problems=100, device=device, ood_extrapolation=True
     )
 
-    # 4. Arm 2 (Adaptive Growth): Spawn Zero-Init Experts + Freeze Backbone on Task B
-    print("\n=== Arm 2 (M4 Adaptive Growth): Zero-Init Experts + Frozen Backbone on Task B ===")
+    # 4. Arm 2 (M4 Adaptive Growth): Zero-Init Experts + Protected Backbone
+    print("\n=== Arm 2 (M4 Adaptive Growth): Zero-Init Experts + Protected Backbone ===")
     grown_model = copy.deepcopy(base_model)
     grow_model_experts(
         grown_model,
         add_experts=4,
         freeze_backbone=True,
         freeze_old_experts=False,
+        trainable_token_ids=unseen_token_ids,
     )
 
-    # Verify zero-forgetting on Task A immediately at growth boundary
     eval_boundary_task_a = evaluate_dataset(grown_model, ds_val_a, batch_size=16, device=device)
 
     arm2_train_cfg = TrainingConfig(
         seed=42,
         batch_size=16,
         gradient_accumulation=2,
-        learning_rate=1e-3,  # Bottleneck residual adapters benefit from slightly higher LR
+        learning_rate=1e-3,
         max_steps=args.steps_stage2,
         eval_every_steps=max(1, args.steps_stage2 // 3),
         device=args.device,
@@ -217,19 +222,62 @@ def main() -> None:
     arith_arm2_ood = evaluate_arithmetic_accuracy(
         grown_model, tokenizer, num_problems=100, device=device, ood_extrapolation=True
     )
-    router_telemetry = dict(grown_model.last_aux_info)
+    router_telemetry_arm2 = dict(grown_model.last_aux_info)
 
-    # Unconditioned vs MoE-bypassed (task-conditioned backbone) forgetting
     forgetting_dense = eval_arm1_task_a["loss"] - eval_s1_task_a["loss"]
     eval_arm2_task_a = evaluate_dataset(grown_model, ds_val_a, batch_size=16, device=device)
     forgetting_grown_unconditioned = eval_arm2_task_a["loss"] - eval_s1_task_a["loss"]
-
-    # Measure exact task-conditioned backbone performance by bypassing newly added experts
     eval_arm2_task_a_bypassed = evaluate_dataset(
         grown_model, ds_val_a, batch_size=16, device=device, bypass_moe=True
     )
     task_conditioned_backbone_forgetting = (
         eval_arm2_task_a_bypassed["loss"] - eval_s1_task_a["loss"]
+    )
+
+    # 5. Arm 3 (M5 Mixture-of-Depths + Grown Experts): Dynamic 50% Token Skipping
+    print("\n=== Arm 3 (M5 Mixture-of-Depths + MoE): 50% Dynamic Sub-Layer Capacity ===")
+    mod_model = copy.deepcopy(base_model)
+    grow_model_experts(
+        mod_model,
+        add_experts=4,
+        freeze_backbone=False,
+    )
+    enable_model_mod(mod_model, capacity_factor=0.5)
+    mod_model.freeze_backbone(
+        freeze_existing_experts=False,
+        trainable_token_ids=unseen_token_ids,
+    )
+
+    arm3_train_cfg = TrainingConfig(
+        seed=42,
+        batch_size=16,
+        gradient_accumulation=2,
+        learning_rate=1e-3,
+        max_steps=args.steps_stage2,
+        eval_every_steps=max(1, args.steps_stage2 // 3),
+        device=args.device,
+        precision=args.precision,
+        save_dir=str(out_root / "arm3_m5_mod"),
+        backup_dir=str(Path(args.backup_dir) / "arm3_m5_mod") if args.backup_dir else None,
+    )
+    trainer_arm3 = Trainer(
+        model=mod_model,
+        model_config=mod_model.config,
+        training_config=arm3_train_cfg,
+        train_dataset=ds_train_b,
+        val_dataset=ds_val_b,
+        tokenizer=tokenizer,
+        dataset_fingerprint=fp_b,
+    )
+    trainer_arm3.train()
+
+    eval_arm3_task_b = evaluate_dataset(mod_model, ds_val_b, batch_size=16, device=device)
+    arith_arm3 = evaluate_arithmetic_accuracy(
+        mod_model, tokenizer, num_problems=100, device=device, ood_extrapolation=False
+    )
+    telemetry_arm3 = dict(mod_model.last_aux_info)
+    eval_arm3_task_a_bypassed = evaluate_dataset(
+        mod_model, ds_val_a, batch_size=16, device=device, bypass_moe=True
     )
 
     report = {
@@ -248,6 +296,7 @@ def main() -> None:
             "task_b_val_loss": round(eval_arm1_task_b["loss"], 4),
             "task_b_val_ppl": round(eval_arm1_task_b["perplexity"], 2),
             "task_b_exact_match_accuracy": arith_arm1["exact_match_accuracy"],
+            "task_b_accuracy_by_op": arith_arm1.get("accuracy_by_op", {}),
             "task_b_ood_exact_match_accuracy": arith_arm1_ood["exact_match_accuracy"],
             "task_a_val_loss_after": round(eval_arm1_task_a["loss"], 4),
             "catastrophic_forgetting_delta_loss": round(forgetting_dense, 4),
@@ -256,19 +305,35 @@ def main() -> None:
             "total_params": grown_model.get_num_params(),
             "active_params_per_token": grown_model.get_active_params_per_token(),
             "trainable_params": sum(p.numel() for p in grown_model.parameters() if p.requires_grad),
+            "unseen_domain_tokens_adapted": len(unseen_token_ids),
             "boundary_task_a_loss_drift": round(
                 abs(eval_boundary_task_a["loss"] - eval_s1_task_a["loss"]), 6
             ),
             "task_b_val_loss": round(eval_arm2_task_b["loss"], 4),
             "task_b_val_ppl": round(eval_arm2_task_b["perplexity"], 2),
             "task_b_exact_match_accuracy": arith_arm2["exact_match_accuracy"],
+            "task_b_accuracy_by_op": arith_arm2.get("accuracy_by_op", {}),
             "task_b_ood_exact_match_accuracy": arith_arm2_ood["exact_match_accuracy"],
             "task_a_val_loss_unconditioned": round(eval_arm2_task_a["loss"], 4),
             "unconditioned_forgetting_delta_loss": round(forgetting_grown_unconditioned, 4),
             "task_conditioned_backbone_loss": round(eval_arm2_task_a_bypassed["loss"], 4),
             "task_conditioned_backbone_forgetting": round(task_conditioned_backbone_forgetting, 6),
-            "router_entropy": round(router_telemetry.get("router_entropy", 0.0), 4),
-            "expert_utilization": router_telemetry.get("expert_utilization", []),
+            "router_entropy": round(router_telemetry_arm2.get("router_entropy", 0.0), 4),
+            "expert_utilization": router_telemetry_arm2.get("expert_utilization", []),
+        },
+        "arm3_m5_mixture_of_depths": {
+            "total_params": mod_model.get_num_params(),
+            "active_params_per_token": mod_model.get_active_params_per_token(),
+            "mod_capacity_factor": mod_model.config.mod_capacity_factor,
+            "mod_active_fraction_eval": telemetry_arm3.get("mod_active_fraction", 0.5),
+            "task_b_val_loss": round(eval_arm3_task_b["loss"], 4),
+            "task_b_val_ppl": round(eval_arm3_task_b["perplexity"], 2),
+            "task_b_exact_match_accuracy": arith_arm3["exact_match_accuracy"],
+            "task_b_accuracy_by_op": arith_arm3.get("accuracy_by_op", {}),
+            "task_conditioned_backbone_forgetting": round(
+                eval_arm3_task_a_bypassed["loss"] - eval_s1_task_a["loss"], 6
+            ),
+            "router_entropy": round(telemetry_arm3.get("router_entropy", 0.0), 4),
         },
     }
 
@@ -280,7 +345,7 @@ def main() -> None:
         (backup_out / "ablation_report.json").write_text(
             json.dumps(report, indent=2), encoding="utf-8"
         )
-    print("\n=== M3/M4 Ablation Summary ===")
+    print("\n=== M3/M4/M5 Ablation Summary ===")
     print(json.dumps(report, indent=2))
     print(f"\nSaved full experiment report to {report_path}")
 

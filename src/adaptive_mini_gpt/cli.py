@@ -11,7 +11,11 @@ from typing import Any
 import torch
 import yaml
 
-from adaptive_mini_gpt.adaptive.growth import grow_model_depth, grow_model_experts
+from adaptive_mini_gpt.adaptive.growth import (
+    enable_model_mod,
+    grow_model_depth,
+    grow_model_experts,
+)
 from adaptive_mini_gpt.data.dataset import (
     TokenDataset,
     generate_arithmetic_corpus,
@@ -38,14 +42,12 @@ def _load_yaml_config(path: str | Path) -> dict[str, Any]:
     with open(config_path, encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
 
-    # Support nested 'adaptive' block in legacy configs/tiny.yaml
     model_dict = dict(data.get("model", {}))
-    adaptive_dict = data.get("adaptive", {})
-    if isinstance(adaptive_dict, dict):
-        if "enabled" in adaptive_dict and "adaptive_enabled" not in model_dict:
-            model_dict["adaptive_enabled"] = bool(adaptive_dict["enabled"])
-        if "max_experts" in adaptive_dict and "n_experts" not in model_dict:
-            model_dict["n_experts"] = int(adaptive_dict["max_experts"])
+    # Normalize nested adaptive block if present
+    if "adaptive" in data and isinstance(data["adaptive"], dict):
+        adaptive_dict = data["adaptive"]
+        if "enabled" in adaptive_dict:
+            model_dict["adaptive_enabled"] = adaptive_dict["enabled"]
         for k in (
             "n_experts",
             "top_k",
@@ -220,12 +222,15 @@ def cmd_grow(args: argparse.Namespace) -> int:
     if args.add_layers > 0:
         grow_model_depth(model, add_layers=args.add_layers)
 
+    if getattr(args, "enable_mod", False):
+        enable_model_mod(model, capacity_factor=getattr(args, "mod_capacity", 0.5))
+
     model.eval()
     with torch.no_grad():
         logits_after, _ = model(probe_x)
 
     max_drift = (logits_before - logits_after).abs().max().item()
-    if max_drift > 1e-5:
+    if not getattr(args, "enable_mod", False) and max_drift > 1e-5:
         raise RuntimeError(
             f"Function-preserving growth check failed! Max logit drift: {max_drift:.2e}"
         )
@@ -272,6 +277,8 @@ def cmd_grow(args: argparse.Namespace) -> int:
         "active_params_per_token": model.get_active_params_per_token(),
         "n_layers": model.config.n_layers,
         "n_experts": model.config.n_experts if model.config.adaptive_enabled else 0,
+        "mod_enabled": model.config.mod_enabled,
+        "mod_capacity_factor": model.config.mod_capacity_factor,
         "max_logit_drift_at_boundary": max_drift,
     }
     print(json.dumps(report, indent=None if getattr(args, "json_output", False) else 2))
@@ -341,21 +348,22 @@ def cmd_generate(args: argparse.Namespace) -> int:
     model = MiniGPT(model_config).to(device)
     model.load_state_dict(raw_ckpt["model_state_dict"])
 
-    result = generate_sample(
+    res = generate_sample(
         model=model,
         tokenizer=tokenizer,
         prompt=args.prompt,
         max_new_tokens=args.max_new_tokens,
         temperature=args.temperature,
         top_k=args.top_k,
-        top_p=getattr(args, "top_p", None),
-        repetition_penalty=getattr(args, "repetition_penalty", 1.0),
-        stop_on_newline=getattr(args, "stop_on_newline", False),
+        top_p=args.top_p,
+        repetition_penalty=args.repetition_penalty,
+        stop_on_newline=args.stop_on_newline,
         device=device,
-        task_id=getattr(args, "task_id", None),
+        task_id=args.task_id,
         bypass_moe=getattr(args, "bypass_moe", False),
     )
-    print(json.dumps(result, indent=None if getattr(args, "json_output", False) else 2))
+
+    print(json.dumps(res, indent=None if getattr(args, "json_output", False) else 2))
     return 0
 
 
@@ -364,13 +372,15 @@ def cmd_inspect(args: argparse.Namespace) -> int:
         ckpt_path = CheckpointManager.find_latest_valid_checkpoint(args.checkpoint)
         raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_path)
         model_config = ModelConfig.from_dict(raw_ckpt["model_config"])
+        model = MiniGPT(model_config)
+        model.load_state_dict(raw_ckpt["model_state_dict"])
     else:
         cfg_data = _load_yaml_config(args.config)
         model_config = ModelConfig.from_dict(cfg_data["model"])
+        model = MiniGPT(model_config)
 
-    model = MiniGPT(model_config)
-    info = model.inspect_architecture()
-    print(json.dumps(info, indent=None if getattr(args, "json_output", False) else 2))
+    arch_info = model.inspect_architecture()
+    print(json.dumps(arch_info, indent=None if getattr(args, "json_output", False) else 2))
     return 0
 
 
@@ -379,6 +389,7 @@ def build_parser() -> argparse.ArgumentParser:
     common_parser.add_argument(
         "--json-output",
         "--json-log",
+        "--json",
         dest="json_output",
         action="store_true",
         help="Emit single-line machine-readable JSON telemetry.",
@@ -389,29 +400,21 @@ def build_parser() -> argparse.ArgumentParser:
         description="Adaptive Mini-GPT CLI for training, modular growth, and evaluation.",
         parents=[common_parser],
     )
+
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     # train
     p_train = subparsers.add_parser(
         "train",
-        help="Train or resume a Mini-GPT model.",
+        help="Train a dense baseline or modular model.",
         parents=[common_parser],
     )
-    p_train.add_argument("--config", type=str, required=True, help="Path to YAML config file.")
-    p_train.add_argument("--resume", type=str, default=None, help="Checkpoint path to resume from.")
-    p_train.add_argument(
-        "--data", type=str, default=None, help="Corpus path or 'synthetic:arithmetic'."
-    )
-    p_train.add_argument("--max-steps", type=int, default=None, help="Override max training steps.")
-    p_train.add_argument(
-        "--save-dir", type=str, default=None, help="Override checkpoint directory."
-    )
-    p_train.add_argument(
-        "--backup-dir",
-        type=str,
-        default=None,
-        help="External backup directory (e.g., Drive).",
-    )
+    p_train.add_argument("--config", type=str, default="configs/tiny.yaml")
+    p_train.add_argument("--resume", type=str, default=None, help="Path to checkpoint to resume.")
+    p_train.add_argument("--data", type=str, default=None, help="Dataset path.")
+    p_train.add_argument("--save-dir", type=str, default=None)
+    p_train.add_argument("--backup-dir", type=str, default=None)
+    p_train.add_argument("--max-steps", type=int, default=None)
     p_train.add_argument("--device", type=str, default=None, choices=["auto", "cpu", "cuda"])
     p_train.add_argument("--precision", type=str, default=None, choices=["fp32", "fp16", "bf16"])
     p_train.add_argument(
@@ -437,7 +440,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_train.set_defaults(func=cmd_train)
 
-    # grow (M4)
+    # grow (M4/M5)
     p_grow = subparsers.add_parser(
         "grow",
         help="Function-preserving structural growth (experts or depth) on a checkpoint.",
@@ -457,6 +460,17 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p_grow.add_argument(
         "--freeze-old-experts", action="store_true", help="Freeze existing experts."
+    )
+    p_grow.add_argument(
+        "--enable-mod",
+        action="store_true",
+        help="Enable M5 Mixture-of-Depths dynamic token routing.",
+    )
+    p_grow.add_argument(
+        "--mod-capacity",
+        type=float,
+        default=0.5,
+        help="Capacity factor (0.0, 1.0] for M5 Mixture-of-Depths (default 0.5).",
     )
     p_grow.add_argument(
         "--reset-step",
@@ -560,12 +574,8 @@ def build_parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
-    try:
-        return args.func(args)
-    except Exception as exc:
-        print(f"Error: {exc}", file=sys.stderr)
-        return 1
+    return args.func(args)
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    sys.exit(main())

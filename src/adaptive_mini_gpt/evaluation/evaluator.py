@@ -75,6 +75,9 @@ def evaluate_arithmetic_accuracy(
     g = torch.Generator().manual_seed(seed)
     correct = 0
     tested = 0
+    op_names = {0: "ADD", 1: "SUB", 2: "PAR"}
+    op_totals = {"ADD": 0, "SUB": 0, "PAR": 0}
+    op_correct = {"ADD": 0, "SUB": 0, "PAR": 0}
     samples: list[dict[str, str]] = []
 
     low = 100 if ood_extrapolation else 0
@@ -114,14 +117,22 @@ def evaluate_arithmetic_accuracy(
             bypass_moe=bypass_moe,
         )
         pred = res["completion"].strip()
+        op_key = op_names[op_type]
+        op_totals[op_key] += 1
         if pred == expected:
             correct += 1
+            op_correct[op_key] += 1
         if len(samples) < 5:
             samples.append({"prompt": prompt, "expected": expected, "predicted": pred})
         tested += 1
 
+    by_op = {
+        k: round(op_correct[k] / max(1, op_totals[k]), 4) for k in ("ADD", "SUB", "PAR")
+    }
+
     return {
         "exact_match_accuracy": round(correct / max(1, num_problems), 4),
+        "accuracy_by_op": by_op,
         "correct": correct,
         "total_problems": num_problems,
         "ood_extrapolation": ood_extrapolation,

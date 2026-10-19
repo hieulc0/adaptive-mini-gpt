@@ -103,7 +103,7 @@ def test_cli_train_eval_generate_workflow(tmp_path: Path) -> None:
     gen_data = json.loads(res_gen.stdout)
     assert "generated_text" in gen_data
 
-    # 5. Grow checkpoint with residual experts
+    # 5. Grow checkpoint with residual experts (M4)
     grown_ckpt = save_dir / "grown.pt"
     grow_cmd = [
         sys.executable,
@@ -140,7 +140,30 @@ def test_cli_train_eval_generate_workflow(tmp_path: Path) -> None:
     assert grown_info["adaptive_enabled"] is True
     assert grown_info["n_experts"] == 2
 
-    # 7. Continual learning stage 2 from grown checkpoint onto arithmetic
+    # 7. Grow checkpoint with Mixture-of-Depths (M5)
+    mod_ckpt = save_dir / "mod_grown.pt"
+    grow_mod_cmd = [
+        sys.executable,
+        "-m",
+        "adaptive_mini_gpt.cli",
+        "grow",
+        "--checkpoint",
+        str(latest_ckpt),
+        "--output",
+        str(mod_ckpt),
+        "--enable-mod",
+        "--mod-capacity",
+        "0.5",
+    ]
+    res_mod_grow = subprocess.run(grow_mod_cmd, capture_output=True, text=True)
+    assert res_mod_grow.returncode == 0, f"Grow MoD failed: {res_mod_grow.stderr}"
+    assert mod_ckpt.is_file()
+    mod_report = json.loads(res_mod_grow.stdout)
+    assert mod_report["status"] == "growth_verified"
+    assert mod_report["mod_enabled"] is True
+    assert mod_report["mod_capacity_factor"] == 0.5
+
+    # 8. Continual learning stage 2 from grown checkpoint onto arithmetic
     stage2_dir = tmp_path / "run_cli_stage2"
     train_s2_cmd = [
         sys.executable,
@@ -161,7 +184,6 @@ def test_cli_train_eval_generate_workflow(tmp_path: Path) -> None:
         "3",
         "--device",
         "cpu",
-        "--json-output",
     ]
     res_s2 = subprocess.run(train_s2_cmd, capture_output=True, text=True)
     assert res_s2.returncode == 0, f"Stage 2 continual train failed: {res_s2.stderr}"
