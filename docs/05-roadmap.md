@@ -85,3 +85,11 @@
 - `InstructionDataset` with loss masking on prompt tokens (supervising only assistant responses with cross-entropy `ignore_index=-1`).
 - Language evaluation suite measuring instruction-following format compliance and held-out reasoning answer accuracy.
 - T4-compatible scaling configuration: `configs/m9_language.yaml` (512 subword vocab, 4 layers, 128 d_model, 512 d_ff).
+
+### M10: Unified Autonomous Learning Qualification
+- Lineage-aware checkpoint loading: dynamically rehydrates and validates `BPETokenizer` and `CharacterTokenizer` matching exact SHA-256 fingerprints and vocabulary sizes.
+- Strict non-regressive promotion gate: candidate must not regress against baseline (`cand_acc >= base_acc - 1e-6`) and must satisfy progress criteria (`acc_gain >= min_improvement` or non-regressed mastery) and multi-domain retention (`clean_prose`, `numerical_prose`, `mixed_prose_math`).
+- Crash-safe atomic publication: verified immutable candidate publication (`published/v_XXXX_.../checkpoint.pt`) and atomic `.tmp` swap on `active_model/latest.pt` and `active_model/manifest.json`.
+- Multi-cycle chaining: seamless consecutive autonomous cycles (`amg auto-learn --max-cycles N`) with automatic base model updating and persistent cumulative history.
+- Compute budget accounting: explicit tracking of cumulative steps, tokens, and GPU seconds with hard cap enforcement.
+- Real T4 empirical qualification: demonstrated rejection of non-improving task, successful sequential learning and promotion of parity (+84% gain, $\Delta = 0.000000$ drift), and safe rejection with checkpoint preservation on forced regression test.

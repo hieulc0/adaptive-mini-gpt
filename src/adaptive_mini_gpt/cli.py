@@ -409,11 +409,13 @@ def cmd_inspect(args: argparse.Namespace) -> int:
 
 
 def cmd_auto_learn(args: argparse.Namespace) -> int:
-    """Execute autonomous learning controller cycle (M8)."""
+    """Execute autonomous learning controller cycle (M8/M10)."""
+    max_budget = getattr(args, "max_budget_steps", 2000)
     controller = LearningController(
         base_checkpoint_dir=args.checkpoint_dir,
         output_dir=args.output_dir,
         budget_steps=args.budget_steps,
+        max_budget_steps=max_budget,
         min_improvement=args.min_improvement,
         max_regression_tolerance=args.max_regression,
         target_accuracy_threshold=args.target_threshold,
@@ -423,7 +425,10 @@ def cmd_auto_learn(args: argparse.Namespace) -> int:
         precision=args.precision,
         seed=args.seed,
     )
-    result = controller.run_cycle()
+    if getattr(args, "max_cycles", 1) > 1:
+        result: Any = controller.run_cycles(max_cycles=args.max_cycles)
+    else:
+        result = controller.run_cycle()
     print(json.dumps(result, indent=None if getattr(args, "json_output", False) else 2))
     return 0
 
@@ -679,6 +684,18 @@ def build_parser() -> argparse.ArgumentParser:
     p_auto.add_argument("--device", type=str, default="auto", choices=["auto", "cpu", "cuda"])
     p_auto.add_argument("--precision", type=str, default="fp16", choices=["fp32", "fp16", "bf16"])
     p_auto.add_argument("--seed", type=int, default=42)
+    p_auto.add_argument(
+        "--max-cycles",
+        type=int,
+        default=1,
+        help="Maximum consecutive learning cycles to run.",
+    )
+    p_auto.add_argument(
+        "--max-budget-steps",
+        type=int,
+        default=2000,
+        help="Total maximum compute budget steps across all cycles.",
+    )
     p_auto.set_defaults(func=cmd_auto_learn)
 
     return parser

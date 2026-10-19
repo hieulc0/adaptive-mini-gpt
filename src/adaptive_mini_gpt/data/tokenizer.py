@@ -76,6 +76,14 @@ class CharacterTokenizer:
     def eos_id(self) -> int:
         return self.stoi.get("<eos>", 0)
 
+    def get_token_id(self, token: str | bytes) -> int | None:
+        """Retrieve token ID for string representation."""
+        if isinstance(token, bytes):
+            s = token.decode("utf-8", errors="replace")
+        else:
+            s = token
+        return self.stoi.get(s)
+
     def fit(self, text: str, strict_chars_only: bool = False) -> CharacterTokenizer:
         """Fit tokenizer vocabulary on text corpus (plus base ASCII unless strict_chars_only)."""
         unique_chars = list(set(text))

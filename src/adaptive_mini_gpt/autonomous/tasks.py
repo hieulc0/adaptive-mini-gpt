@@ -1,4 +1,4 @@
-"""Procedural task definitions, generators, and independent external verifiers (M8)."""
+"""Procedural task definitions, generators, and independent external verifiers (M8/M10)."""
 
 from __future__ import annotations
 
@@ -7,10 +7,10 @@ import random
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Any
 
 import torch
 
-from adaptive_mini_gpt.data.tokenizer import CharacterTokenizer
 from adaptive_mini_gpt.model.transformer import MiniGPT
 
 
@@ -86,7 +86,30 @@ def verify_reverse(prompt: str, completion: str) -> bool:
     return comp_clean == expected or comp_clean.startswith(expected)
 
 
+def verify_instruction_reasoning(prompt: str, completion: str) -> bool:
+    """Verify that assistant response follows formatting and contains expected answer."""
+    comp_clean = completion.strip()
+    if not comp_clean:
+        return False
+    match = re.search(r"(\d+)\s*([\+\-])\s*(\d+)", prompt)
+    if match:
+        a = int(match.group(1))
+        op = match.group(2)
+        b = int(match.group(3))
+        expected = (a + b) if op == "+" else (a - b)
+        nums = [int(s) for s in re.findall(r"\b\d+\b", comp_clean)]
+        return expected in nums
+    return len(comp_clean) > 0
+
+
 # --- Procedural Task Generators ---
+
+
+def generate_instruction_data(num_samples: int = 100, seed: int = 42) -> tuple[str, str]:
+    """Generate curated instruction pairs with scratchpad reasoning."""
+    from adaptive_mini_gpt.data.instruction_data import generate_curated_instruction_corpus
+
+    return generate_curated_instruction_corpus(num_synthetic_reasoning=num_samples, seed=seed)
 
 
 def generate_addition_data(num_samples: int = 1000, seed: int = 42) -> tuple[str, str]:
@@ -196,12 +219,20 @@ TASK_REGISTRY: dict[str, TaskSpecification] = {
         generator_fn=generate_reverse_data,
         verifier_fn=verify_reverse,
     ),
+    "instruction_reasoning": TaskSpecification(
+        task_id="instruction_reasoning",
+        name="Instruction Reasoning",
+        description="Instruction-following and scratchpad arithmetic reasoning",
+        domain_trigger="<|assistant|>",
+        generator_fn=generate_instruction_data,
+        verifier_fn=verify_instruction_reasoning,
+    ),
 }
 
 
 def evaluate_task_holdout(
     model: MiniGPT,
-    tokenizer: CharacterTokenizer,
+    tokenizer: Any,
     task: TaskSpecification,
     device: torch.device,
     num_samples: int = 100,
@@ -209,41 +240,75 @@ def evaluate_task_holdout(
 ) -> dict[str, float]:
     """Evaluate model on a clean holdout test set using the task's independent verifier."""
     text, _ = task.generator_fn(num_samples, seed)
-    lines = [line.strip() for line in text.strip().split("\n") if line.strip()]
-
     was_training = model.training
     model.eval()
 
     correct = 0
-    total = len(lines)
+    total = 0
+
+    newline_id = (
+        tokenizer.get_token_id("\n")
+        if hasattr(tokenizer, "get_token_id")
+        else (
+            tokenizer.stoi.get(b"\n")
+            if hasattr(tokenizer, "stoi") and b"\n" in tokenizer.stoi
+            else getattr(tokenizer, "stoi", {}).get("\n", -1)
+        )
+    )
+    eos_id = getattr(tokenizer, "eos_id", -1)
+    stop_ids = {newline_id, eos_id} - {None, -1}
 
     with torch.no_grad():
-        for line in lines:
-            if "=" not in line:
-                continue
-            prompt = line.split("=")[0] + "="
-            expected_ans = line.split("=")[1].strip()
+        if task.task_id == "instruction_reasoning":
+            chunks = text.split("<|user|>")
+            for chunk in chunks:
+                if not chunk.strip() or "<|assistant|>" not in chunk:
+                    continue
+                parts = chunk.split("<|assistant|>")
+                prompt = f"<|user|>{parts[0]}<|assistant|>"
+                prompt_tokens = tokenizer.encode(prompt)
+                input_tensor = torch.tensor([prompt_tokens], dtype=torch.long, device=device)
 
-            prompt_tokens = tokenizer.encode(prompt)
-            input_tensor = torch.tensor([prompt_tokens], dtype=torch.long, device=device)
+                for _ in range(64):
+                    if input_tensor.size(1) >= model.config.context_length:
+                        break
+                    logits, _ = model(input_tensor)
+                    next_token = torch.argmax(logits[:, -1, :], dim=-1, keepdim=True)
+                    input_tensor = torch.cat([input_tensor, next_token], dim=1)
+                    if next_token.item() in stop_ids:
+                        break
 
-            # Autoregressively generate next tokens up to length of expected answer + 2
-            gen_len = len(expected_ans) + 2
-            for _ in range(gen_len):
-                if input_tensor.size(1) >= model.config.context_length:
-                    break
-                logits, _ = model(input_tensor)
-                next_token = torch.argmax(logits[:, -1, :], dim=-1, keepdim=True)
-                input_tensor = torch.cat([input_tensor, next_token], dim=1)
-                # Break on newline
-                if next_token.item() == tokenizer.stoi.get("\n", -1):
-                    break
+                generated_full = tokenizer.decode(input_tensor[0].tolist())
+                completion = generated_full[len(prompt) :]
+                total += 1
+                if task.verifier_fn(prompt, completion):
+                    correct += 1
+        else:
+            lines = [line.strip() for line in text.strip().split("\n") if line.strip()]
+            for line in lines:
+                if "=" not in line:
+                    continue
+                prompt = line.split("=")[0] + "="
+                expected_ans = line.split("=")[1].strip()
 
-            generated_full = tokenizer.decode(input_tensor[0].tolist())
-            completion = generated_full[len(prompt) :]
+                prompt_tokens = tokenizer.encode(prompt)
+                input_tensor = torch.tensor([prompt_tokens], dtype=torch.long, device=device)
 
-            if task.verifier_fn(prompt, completion):
-                correct += 1
+                gen_len = len(expected_ans) + 2
+                for _ in range(gen_len):
+                    if input_tensor.size(1) >= model.config.context_length:
+                        break
+                    logits, _ = model(input_tensor)
+                    next_token = torch.argmax(logits[:, -1, :], dim=-1, keepdim=True)
+                    input_tensor = torch.cat([input_tensor, next_token], dim=1)
+                    if next_token.item() in stop_ids:
+                        break
+
+                generated_full = tokenizer.decode(input_tensor[0].tolist())
+                completion = generated_full[len(prompt) :]
+                total += 1
+                if task.verifier_fn(prompt, completion):
+                    correct += 1
 
     if was_training:
         model.train()

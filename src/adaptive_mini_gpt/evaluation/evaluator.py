@@ -298,7 +298,7 @@ def evaluate_arithmetic_detailed(
 @torch.no_grad()
 def evaluate_text_retention_suite(
     model: MiniGPT,
-    tokenizer: CharacterTokenizer,
+    tokenizer: Any,
     device: torch.device | str = "cpu",
     max_batches: int = 20,
 ) -> dict[str, Any]:

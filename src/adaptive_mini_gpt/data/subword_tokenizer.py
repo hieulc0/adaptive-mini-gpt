@@ -95,6 +95,14 @@ class BPETokenizer:
     def system_id(self) -> int:
         return self.stoi[b"<|system|>"]
 
+    def get_token_id(self, token: str | bytes) -> int | None:
+        """Retrieve token ID for string or byte representation."""
+        if isinstance(token, str):
+            b = token.encode("utf-8")
+        else:
+            b = token
+        return self.stoi.get(b)
+
     def train(self, text: str, target_vocab_size: int = 512) -> BPETokenizer:
         """Train BPE merges on input corpus up to target_vocab_size."""
         base_count = len(self.special_tokens) + 256

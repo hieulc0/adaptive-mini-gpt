@@ -259,6 +259,50 @@ class CheckpointManager:
         os.replace(temp_manifest, manifest_file)
 
     @classmethod
+    def load_tokenizer(
+        cls,
+        raw_checkpoint: dict[str, Any],
+        model_config: Any | None = None,
+    ) -> Any:
+        """Instantiate and validate tokenizer from checkpoint, supporting Character and BPE."""
+        tok_dict = raw_checkpoint.get("tokenizer")
+        if tok_dict and (tok_dict.get("tokenizer_type") == "bpe" or "merges" in tok_dict):
+            from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
+
+            tokenizer = BPETokenizer.from_dict(tok_dict)
+        elif tok_dict:
+            from adaptive_mini_gpt.data.tokenizer import CharacterTokenizer
+
+            tokenizer = CharacterTokenizer.from_dict(tok_dict)
+        elif raw_checkpoint.get("tokenizer_vocab"):
+            from adaptive_mini_gpt.data.tokenizer import CharacterTokenizer
+
+            tokenizer = CharacterTokenizer.from_dict({"vocab": raw_checkpoint["tokenizer_vocab"]})
+        else:
+            from adaptive_mini_gpt.data.tokenizer import CharacterTokenizer
+
+            tokenizer = CharacterTokenizer(use_base_ascii=True).fit("")
+
+        expected_fp = raw_checkpoint.get("tokenizer_fingerprint")
+        if expected_fp and hasattr(tokenizer, "get_fingerprint"):
+            actual_fp = tokenizer.get_fingerprint()
+            if actual_fp != expected_fp:
+                raise ValueError(
+                    f"Tokenizer fingerprint mismatch! Checkpoint recorded '{expected_fp}', "
+                    f"but rehydrated tokenizer produced '{actual_fp}'."
+                )
+
+        if model_config is not None:
+            v_size = getattr(model_config, "vocab_size", None)
+            if v_size is not None and tokenizer.vocab_size != v_size:
+                raise ValueError(
+                    f"Lineage Mismatch: Checkpoint vocabulary size ({v_size}) "
+                    f"does not match tokenizer vocabulary size ({tokenizer.vocab_size})."
+                )
+
+        return tokenizer
+
+    @classmethod
     def load_raw_checkpoint(cls, checkpoint_path: str | Path) -> dict[str, Any]:
         """Safely load raw checkpoint dictionary from disk."""
         path = Path(checkpoint_path)
