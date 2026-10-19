@@ -41,10 +41,10 @@ def grow_model_experts(
 ) -> MiniGPT:
     """Enable or expand modular experts across all Transformer blocks in-place.
 
-    Because newly added experts have W_down = 0, the model's forward logits are
-    preserved at the exact step of growth.
+    Because newly added experts and moe_head have W_down = 0, the model's forward logits
+    are preserved with exact bitwise equality at the step of growth.
     """
-    from adaptive_mini_gpt.model.transformer import TransformerBlock
+    from adaptive_mini_gpt.model.transformer import LowRankOutputAdapter, TransformerBlock
 
     if not model.config.adaptive_enabled:
         model.config.adaptive_enabled = True
@@ -61,6 +61,15 @@ def grow_model_experts(
             if block.moe is not None:
                 block.moe.add_experts(add_experts, freeze_existing=freeze_old_experts)
         model.config.n_experts += add_experts
+
+    if getattr(model, "moe_head", None) is None:
+        device = next(model.parameters()).device
+        dtype = next(model.parameters()).dtype
+        model.moe_head = LowRankOutputAdapter(
+            model.config.d_model,
+            model.config.d_expert,
+            model.config.vocab_size,
+        ).to(device=device, dtype=dtype)
 
     if freeze_backbone:
         model.freeze_backbone(

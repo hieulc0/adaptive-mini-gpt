@@ -34,6 +34,21 @@ class FeedForward(nn.Module):
         return x
 
 
+class LowRankOutputAdapter(nn.Module):
+    """Zero-initialized residual output head adapter for continual skill acquisition."""
+
+    def __init__(self, d_model: int, d_bottleneck: int, vocab_size: int) -> None:
+        super().__init__()
+        self.w_up = nn.Linear(d_model, d_bottleneck, bias=False)
+        self.act = nn.GELU()
+        self.w_down = nn.Linear(d_bottleneck, vocab_size, bias=False)
+        nn.init.normal_(self.w_up.weight, mean=0.0, std=0.02)
+        nn.init.zeros_(self.w_down.weight)
+
+    def forward(self, x: Tensor) -> Tensor:
+        return self.w_down(self.act(self.w_up(x)))
+
+
 class TransformerBlock(nn.Module):
     """Pre-norm Transformer decoder block with Modular Residual Experts & Mixture-of-Depths."""
 
@@ -134,6 +149,12 @@ class MiniGPT(nn.Module):
         if config.tie_word_embeddings:
             self.lm_head.weight = self.wte.weight
 
+        self.moe_head: LowRankOutputAdapter | None = None
+        if config.adaptive_enabled:
+            self.moe_head = LowRankOutputAdapter(
+                config.d_model, config.d_expert, config.vocab_size
+            )
+
         self.apply(self._init_weights)
         for pn, p in self.named_parameters():
             if pn.endswith("c_proj.weight"):
@@ -141,6 +162,7 @@ class MiniGPT(nn.Module):
 
         self.last_aux_info: dict[str, Any] = {}
         self._embedding_grad_mask: Tensor | None = None
+        self._wte_hook_registered: bool = False
 
     def _init_weights(self, module: nn.Module) -> None:
         if isinstance(module, nn.Linear):
@@ -158,15 +180,20 @@ class MiniGPT(nn.Module):
         freeze_existing_experts: bool = False,
         trainable_token_ids: list[int] | None = None,
     ) -> None:
-        """Freeze shared dense backbone parameters so only modular experts/routers/MoD train.
+        """Freeze shared dense backbone so only modular experts/routers/MoD/moe_head train.
 
-        If `trainable_token_ids` is provided, only those specific token rows in `wte` (input
-        embeddings) are allowed to update via gradient masking. Keeping `lm_head` frozen
-        eliminates softmax denominator drift on prior tasks, guaranteeing 0.000000 forgetting
-        on all seen vocabulary tokens when `bypass_moe=True`.
+        If `trainable_token_ids` is provided (or persisted in `self.config.trainable_token_ids`),
+        only those specific token rows in `wte` (input embeddings) are allowed to update via
+        gradient masking. Keeping `lm_head` frozen while allowing zero-initialized `moe_head` to
+        learn ensures strictly 0.000000 forgetting when `bypass_moe=True`, while allowing
+        sharp output predictions on new tasks when `bypass_moe=False`.
         """
+        if trainable_token_ids is not None:
+            self.config.trainable_token_ids = list(trainable_token_ids)
+        active_token_ids = self.config.trainable_token_ids
+
         for name, param in self.named_parameters():
-            if ".moe." in name or ".mod_router." in name:
+            if ".moe." in name or ".mod_router." in name or "moe_head." in name:
                 if freeze_existing_experts and ".experts." in name:
                     param.requires_grad = False
                 else:
@@ -174,11 +201,11 @@ class MiniGPT(nn.Module):
             else:
                 param.requires_grad = False
 
-        if trainable_token_ids:
+        if active_token_ids:
             mask = torch.zeros(
                 self.config.vocab_size, 1, dtype=torch.bool, device=self.wte.weight.device
             )
-            for tid in trainable_token_ids:
+            for tid in active_token_ids:
                 if 0 <= tid < self.config.vocab_size:
                     mask[tid, 0] = True
             self._embedding_grad_mask = mask
@@ -189,7 +216,9 @@ class MiniGPT(nn.Module):
                 return grad * self._embedding_grad_mask.to(grad.device, dtype=grad.dtype)
 
             self.wte.weight.requires_grad = True
-            self.wte.weight.register_hook(_mask_grad)
+            if not getattr(self, "_wte_hook_registered", False):
+                self.wte.weight.register_hook(_mask_grad)
+                self._wte_hook_registered = True
 
     def configure_optimizers(
         self,
@@ -259,6 +288,8 @@ class MiniGPT(nn.Module):
 
         x = self.ln_f(x)
         logits = self.lm_head(x)
+        if self.moe_head is not None and not bypass_moe:
+            logits = logits + self.moe_head(x)
 
         loss: Tensor | None = None
         ce_loss_val = 0.0
@@ -422,6 +453,7 @@ class MiniGPT(nn.Module):
             "mod_capacity_factor": (
                 self.config.mod_capacity_factor if self.config.mod_enabled else 1.0
             ),
+            "moe_head_enabled": self.moe_head is not None,
             "total_params": self.get_num_params(non_embedding=False),
             "active_params_per_token": self.get_active_params_per_token(),
             "trainable_params": sum(p.numel() for p in self.parameters() if p.requires_grad),

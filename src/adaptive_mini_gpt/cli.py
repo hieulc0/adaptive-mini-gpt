@@ -328,6 +328,7 @@ def cmd_evaluate(args: argparse.Namespace) -> int:
             bypass_moe=bypass_moe,
         )
         metrics["exact_match_accuracy"] = arith_res["exact_match_accuracy"]
+        metrics["accuracy_by_op"] = arith_res.get("accuracy_by_op", {})
         metrics["exact_match_correct"] = arith_res["correct"]
         metrics["exact_match_total"] = arith_res["total_problems"]
         metrics["ood_extrapolation"] = arith_res["ood_extrapolation"]

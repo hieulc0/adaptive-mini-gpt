@@ -119,6 +119,59 @@ def test_selective_unseen_token_embedding_mask() -> None:
     assert not torch.equal(wte_before[30:], wte_after[30:])
 
 
+def test_moe_output_adapter_and_zero_drift_bypass() -> None:
+    """moe_head must initialize to zero, train on new tasks, and keep exact logits when bypassed."""
+    torch.manual_seed(42)
+    cfg = ModelConfig(
+        vocab_size=32,
+        d_model=16,
+        n_layers=1,
+        n_heads=2,
+        d_ff=32,
+        context_length=8,
+        adaptive_enabled=False,
+    )
+    model = MiniGPT(cfg)
+    model.eval()
+
+    probe_x = torch.randint(0, 30, (2, 8))
+    with torch.no_grad():
+        logits_base, _ = model(probe_x)
+
+    grow_model_experts(
+        model,
+        add_experts=2,
+        freeze_backbone=True,
+        trainable_token_ids=[30, 31],
+    )
+    assert model.moe_head is not None
+    assert model.config.trainable_token_ids == [30, 31]
+
+    # Verify zero boundary drift at growth
+    with torch.no_grad():
+        logits_grown, _ = model(probe_x)
+    assert torch.equal(logits_base, logits_grown)
+
+    # Train moe_head and experts on new domain data
+    model.train()
+    opt = model.configure_optimizers(learning_rate=1e-2, weight_decay=0.01)
+    x_train = torch.tensor([[1, 2, 3, 4, 30, 31, 5, 6]])
+    y_train = torch.tensor([[2, 3, 4, 30, 31, 5, 6, 7]])
+    opt.zero_grad()
+    _, loss = model(x_train, y_train)
+    assert loss is not None
+    loss.backward()
+    assert model.moe_head.w_up.weight.grad is not None
+    assert model.moe_head.w_down.weight.grad is not None
+    opt.step()
+
+    # When evaluating with bypass_moe=True on seen vocabulary, logits MUST be bitwise identical
+    model.eval()
+    with torch.no_grad():
+        logits_bypassed, _ = model(probe_x, bypass_moe=True)
+    assert torch.equal(logits_base, logits_bypassed), "Softmax leak! Bypassed logits drifted!"
+
+
 def test_vectorized_dataset_masking() -> None:
     """Vectorized 1D target mask must match expected prompt and answer positions."""
     tok = CharacterTokenizer(use_base_ascii=True).fit("ADD 12+34=46\n")
