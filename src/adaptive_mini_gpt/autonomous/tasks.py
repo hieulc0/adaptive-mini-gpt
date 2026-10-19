@@ -1,4 +1,4 @@
-"""Procedural task definitions, generators, and independent external verifiers (M8/M10)."""
+"""Procedural and instruction task definitions, generators, and independent verifiers (M8-M11)."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from adaptive_mini_gpt.model.transformer import MiniGPT
 
 @dataclass
 class TaskSpecification:
-    """Specification of a machine-verifiable procedural task."""
+    """Specification of a machine-verifiable procedural or instruction task."""
 
     task_id: str
     name: str
@@ -102,7 +102,38 @@ def verify_instruction_reasoning(prompt: str, completion: str) -> bool:
     return len(comp_clean) > 0
 
 
-# --- Procedural Task Generators ---
+def verify_instruction_symbolic(prompt: str, completion: str) -> bool:
+    """Verify that assistant response correctly executes string transformation."""
+    comp_clean = completion.strip().lower()
+    match = re.search(r"word '([a-zA-Z0-9]+)'", prompt)
+    if not match:
+        return False
+    w = match.group(1).lower()
+    expected = w[::-1]
+    return expected in comp_clean
+
+
+def verify_instruction_qa(prompt: str, completion: str) -> bool:
+    """Verify that assistant response correctly answers factual Q&A."""
+    comp_clean = completion.strip().lower()
+    qa_answers = {
+        "france": "paris",
+        "japan": "tokyo",
+        "closest to the sun": "mercury",
+        "speed of light": "300,000",
+        "boiling point": "100",
+        "romeo and juliet": "shakespeare",
+        "photosynthesis": "carbon dioxide",
+        "largest ocean": "pacific",
+    }
+    p_lower = prompt.lower()
+    for k, ans in qa_answers.items():
+        if k in p_lower:
+            return ans in comp_clean
+    return len(comp_clean) > 0
+
+
+# --- Procedural & Instruction Generators ---
 
 
 def generate_instruction_data(num_samples: int = 100, seed: int = 42) -> tuple[str, str]:
@@ -110,6 +141,77 @@ def generate_instruction_data(num_samples: int = 100, seed: int = 42) -> tuple[s
     from adaptive_mini_gpt.data.instruction_data import generate_curated_instruction_corpus
 
     return generate_curated_instruction_corpus(num_synthetic_reasoning=num_samples, seed=seed)
+
+
+def generate_instruction_symbolic_data(
+    num_samples: int = 100, seed: int = 42
+) -> tuple[str, str]:
+    """Generate curated string reversal and transformation instruction pairs."""
+    rng = random.Random(seed)
+    words = [
+        "quantum",
+        "gravity",
+        "tensor",
+        "matrix",
+        "vector",
+        "entropy",
+        "gradient",
+        "neuron",
+        "synapse",
+        "circuit",
+        "photon",
+        "boson",
+        "fermion",
+        "hadron",
+    ]
+    pairs: list[str] = []
+    for _ in range(num_samples):
+        w = rng.choice(words)
+        rev = w[::-1]
+        pairs.append(
+            f"<|user|>\nReverse the sequence of characters in the word '{w}'.\n"
+            f"<|assistant|>\nThe reversed sequence is: {rev}.<|eos|>\n"
+        )
+    text = "".join(pairs)
+    fp = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+    return text, fp
+
+
+def generate_instruction_qa_data(num_samples: int = 100, seed: int = 42) -> tuple[str, str]:
+    """Generate factual Q&A instruction pairs."""
+    rng = random.Random(seed)
+    qa_bank = [
+        ("What is the capital of France?", "The capital of France is Paris."),
+        ("What is the capital of Japan?", "The capital of Japan is Tokyo."),
+        ("Which planet is closest to the Sun?", "Mercury is the closest planet to the Sun."),
+        (
+            "What is the speed of light in vacuum approximately?",
+            "The speed of light in vacuum is approximately 300,000 km/s.",
+        ),
+        (
+            "What is the boiling point of water in Celsius?",
+            "Water boils at 100 degrees Celsius under standard atmospheric pressure.",
+        ),
+        (
+            "Who wrote the play Romeo and Juliet?",
+            "Romeo and Juliet was written by William Shakespeare.",
+        ),
+        (
+            "What gas do green plants absorb during photosynthesis?",
+            "Green plants absorb carbon dioxide during photosynthesis.",
+        ),
+        (
+            "What is the largest ocean on Earth?",
+            "The Pacific Ocean is the largest and deepest ocean on Earth.",
+        ),
+    ]
+    pairs: list[str] = []
+    for _ in range(num_samples):
+        q, a = rng.choice(qa_bank)
+        pairs.append(f"<|user|>\n{q}\n<|assistant|>\n{a}<|eos|>\n")
+    text = "".join(pairs)
+    fp = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+    return text, fp
 
 
 def generate_addition_data(num_samples: int = 1000, seed: int = 42) -> tuple[str, str]:
@@ -227,6 +329,22 @@ TASK_REGISTRY: dict[str, TaskSpecification] = {
         generator_fn=generate_instruction_data,
         verifier_fn=verify_instruction_reasoning,
     ),
+    "instruction_symbolic": TaskSpecification(
+        task_id="instruction_symbolic",
+        name="Instruction Symbolic Reversal",
+        description="Instruction-based word sequence reversal in chat format",
+        domain_trigger="<|assistant|>",
+        generator_fn=generate_instruction_symbolic_data,
+        verifier_fn=verify_instruction_symbolic,
+    ),
+    "instruction_qa": TaskSpecification(
+        task_id="instruction_qa",
+        name="Instruction Factual QA",
+        description="Instruction-based factual question answering in chat format",
+        domain_trigger="<|assistant|>",
+        generator_fn=generate_instruction_qa_data,
+        verifier_fn=verify_instruction_qa,
+    ),
 }
 
 
@@ -259,23 +377,23 @@ def evaluate_task_holdout(
     stop_ids = {newline_id, eos_id} - {None, -1}
 
     with torch.no_grad():
-        if task.task_id == "instruction_reasoning":
+        if task.task_id.startswith("instruction_"):
             chunks = text.split("<|user|>")
             for chunk in chunks:
                 if not chunk.strip() or "<|assistant|>" not in chunk:
                     continue
                 parts = chunk.split("<|assistant|>")
-                prompt = f"<|user|>{parts[0]}<|assistant|>"
+                prompt = f"<|user|>{parts[0]}<|assistant|>\n"
                 prompt_tokens = tokenizer.encode(prompt)
                 input_tensor = torch.tensor([prompt_tokens], dtype=torch.long, device=device)
 
-                for _ in range(64):
+                for _ in range(48):
                     if input_tensor.size(1) >= model.config.context_length:
                         break
                     logits, _ = model(input_tensor)
                     next_token = torch.argmax(logits[:, -1, :], dim=-1, keepdim=True)
                     input_tensor = torch.cat([input_tensor, next_token], dim=1)
-                    if next_token.item() in stop_ids:
+                    if next_token.item() == eos_id:
                         break
 
                 generated_full = tokenizer.decode(input_tensor[0].tolist())

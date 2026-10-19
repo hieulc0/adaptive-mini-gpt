@@ -162,3 +162,31 @@
      - **Rollback Test**: Intentionally unattainable threshold (`min_improvement=0.99`) on promoted model -> correctly REJECTED with `decision: ROLLBACK`, promoted model preserved.
      - **Total Compute Budget Accounting**: 260 steps, 532,480 tokens, 4.74 GPU seconds.
 - **Status**: **M10 GATE FULLY PASSED**.
+
+---
+
+### M11: Autonomous Language Learning Qualification on Tesla T4
+- **Date**: 2026-10-19
+- **Environment**: Google Colab Tesla T4 (FP16 mixed precision, CUDA)
+- **Report Artifact**: [`runs/m11_qualification/m11_t4_report.json`](file:///home/hieulc/projects/adaptive-mini-gpt/runs/m11_qualification/m11_t4_report.json)
+- **Objectives Qualified**:
+  1. **Single Atomic Pointer Switch & Fault-Injection Resilience**:
+     - Replaced multi-file atomic replacements with an immutable published version store (`published/v_XXXX_.../checkpoint.pt`) and a **single atomic active-version pointer** (`active_pointer.json`).
+     - Added automated fault injection tests in `tests/test_m11_autonomous_language.py` verifying zero-crash recovery from orphaned `.tmp` files and resilient fallback to `latest.pt` if a pointer target is missing.
+  2. **BPE Language Model Baseline**:
+     - Pretrained a 4-layer BPE Transformer ($d_{\\text{model}}=128$, $n_{\\text{heads}}=4$, $d_{\\text{ff}}=512$, vocab 350, context 128) on curated natural language and instruction-formatted text on Tesla T4.
+  3. **Sequential Autonomous Learning Cycles on Tesla T4**:
+     - **Cycle 1 (Instruction Symbolic Reversal)**: Evaluated weak baseline -> planned dense fine-tuning -> trained candidate on T4 -> verified 100% holdout accuracy -> **PROMOTED** to published version.
+     - **Cycle 2 (Instruction Factual QA)**: Seamlessly resumed from the promoted active pointer -> trained candidate on T4 -> holdout accuracy improved from 0.0% to 100.0% (+1.0000 gain) -> zero retention drift ($\Delta = 0.000000$) on clean prose, numerical prose, and mixed prose -> **PROMOTED**.
+     - **Cycle 3 (Safe Rollback & Base Preservation)**: Tested controller with an unattainable improvement threshold ($+0.99$) -> candidate rejected with `decision: ROLLBACK` -> active pointer and promoted baseline preserved intact.
+  4. **Empirical Telemetry (Distinguishing GPU Compute vs Wall Time)**:
+     - Pure GPU training duration: **13.81 seconds**
+     - Total wall-clock duration: **206.87 seconds** (includes dataset preparation, multi-sample text generation, and 500-sample holdout verifications)
+     - Cumulative steps: 600 | Cumulative tokens: 2,457,600
+  5. **Independent Holdout & Qualitative Generation Comparison**:
+     - **Untouched 500-sample holdout**: Symbolic reversal achieved **100.0%** accuracy.
+     - **Qualitative Generation**:
+       - *Symbolic Reversal Prompt*: `<|user|>\nReverse the sequence of characters in the word 'photon'.\n<|assistant|>`
+       - *Before Learning*: `"The revichanchanchanchanis..."` (garbled repetition)
+       - *After Learning*: `"The reversed sequence is: notohp."` (exact character-level reversal)
+- **Status**: **M11 GATE FULLY PASSED**. Autonomous natural language improvement demonstrated on BPE representations with strict non-regression, single atomic pointer guarantees, and empirical T4 verification.

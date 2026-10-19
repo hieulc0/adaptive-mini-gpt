@@ -1,0 +1,180 @@
+{
+  "timestamp": 1792399194.3114853,
+  "gpu_name": "Tesla T4",
+  "device": "cuda",
+  "precision": "fp16",
+  "model_architecture": {
+    "vocab_size": 350,
+    "d_model": 128,
+    "n_layers": 4,
+    "n_heads": 4,
+    "d_ff": 512,
+    "context_length": 128
+  },
+  "cycle_1_symbolic": {
+    "experiment_id": "exp_1792398601_c3",
+    "selected_task": "instruction_symbolic",
+    "decision": "ROLLBACK",
+    "decision_reason": "Target accuracy gain +0.0000 below min 0.99",
+    "baseline_accuracy": 0.0,
+    "candidate_accuracy": 0.0,
+    "retention": {
+      "clean_prose": {
+        "loss_auto": 7.6232,
+        "bpc_auto": 10.998,
+        "loss_bypassed": 7.6232,
+        "bpc_bypassed": 10.998,
+        "delta_loss": 0.0
+      },
+      "numerical_prose": {
+        "loss_auto": 7.3971,
+        "bpc_auto": 10.6718,
+        "loss_bypassed": 7.3971,
+        "bpc_bypassed": 10.6718,
+        "delta_loss": 0.0
+      },
+      "mixed_prose_math": {
+        "loss_auto": 7.4285,
+        "bpc_auto": 10.7171,
+        "loss_bypassed": 7.4285,
+        "bpc_bypassed": 10.7171,
+        "delta_loss": 0.0
+      },
+      "instructions": {
+        "format_compliance_rate": 1.0,
+        "exact_answer_accuracy": 0.0,
+        "total_evaluated": 10,
+        "sample_outputs": [
+          {
+            "instruction": "What is the capital of France?",
+            "completion": "The reversed sequence is: ed spanys.\n<|user|>\nThe is.\n<|user|>\nThe reversed spanys.\n<|user|>uence is.\n<|user|>s.\n<|user|>uenc",
+            "compliant": true,
+            "correct": false
+          },
+          {
+            "instruction": "Explain what a prime number is.",
+            "completion": "The reversporuen.\n<|user|>isp.\n<|user|>\nThe revers: xirtnoruen.\n<|user|>.\n<|user|>.\n<|user|>.\n<|user|>\nThe reversed spanys.\n<|user|>\nThe rev",
+            "compliant": true,
+            "correct": false
+          },
+          {
+            "instruction": "Calculate 48 + 37 with step-by-step reasoning.",
+            "completion": "The .\n<|user|>ed versed sequence i.\n<|user|>b.\n<|user|>s: norten.\n<|user|>ed spanys.\n<|user|>b.\n<|user|>\nThe revers.\n<|user|>spanys.\n<|user|>s.\n<|user|>",
+            "compliant": true,
+            "correct": false
+          },
+          {
+            "instruction": "Calculate 92 - 45 with step-by-step reasoning.",
+            "completion": "The i.\n<|user|>\nThe .\n<|user|>e reversed sed s: nortoruen.\n<|user|>h.\n<|user|>h.\n<|user|>h.\n<|user|>\nThe reversed sed sequence imuen",
+            "compliant": true,
+            "correct": false
+          },
+          {
+            "instruction": "What is Python list comprehension?",
+            "completion": "The reversed sed sequence is: noruen.\n<|user|>\nThe revers: noruen.\n<|user|>\nThe reverspanys.\n<|user|>\nThe revers.",
+            "compliant": true,
+            "correct": false
+          }
+        ]
+      }
+    }
+  },
+  "cycle_2_factual_qa": {
+    "experiment_id": "exp_1792398992_c4",
+    "selected_task": "instruction_qa",
+    "decision": "PROMOTE",
+    "decision_reason": "Accuracy improved by +1.0000 (>= 0.05) with acceptable retention drift (0.000000).",
+    "baseline_accuracy": 0.0,
+    "candidate_accuracy": 1.0,
+    "retention": {
+      "clean_prose": {
+        "loss_auto": 7.4013,
+        "bpc_auto": 10.6778,
+        "loss_bypassed": 7.4013,
+        "bpc_bypassed": 10.6778,
+        "delta_loss": 0.0
+      },
+      "numerical_prose": {
+        "loss_auto": 7.1669,
+        "bpc_auto": 10.3397,
+        "loss_bypassed": 7.1669,
+        "bpc_bypassed": 10.3397,
+        "delta_loss": 0.0
+      },
+      "mixed_prose_math": {
+        "loss_auto": 6.8847,
+        "bpc_auto": 9.9326,
+        "loss_bypassed": 6.8847,
+        "bpc_bypassed": 9.9326,
+        "delta_loss": 0.0
+      },
+      "instructions": {
+        "format_compliance_rate": 1.0,
+        "exact_answer_accuracy": 0.0,
+        "total_evaluated": 10,
+        "sample_outputs": [
+          {
+            "instruction": "What is the capital of France?",
+            "completion": "The capital of France is Paris.\n<|user|>yo.\n<|user|>e capital of France is Paris.\n<|user|>e is Paris.\n<|user|>.\n<|user|>mately is Pariest r r and deepest",
+            "compliant": true,
+            "correct": false
+          },
+          {
+            "instruction": "Explain what a prime number is.",
+            "completion": "Sherillight ten pllight to by William Shakespeare.\n<|user|>espeare.\n<|user|>eare.\n<|user|>eare.\n<|user|>espeare.\n<|user|>e",
+            "compliant": true,
+            "correct": false
+          },
+          {
+            "instruction": "Calculate 48 + 37 with step-by-step reasoning.",
+            "completion": "Water boils at 100 degrees Celsius under standard atmospheric pressure.\n<|user|>c pre.\n<|user|>c pre.\n<|user|>mater stane",
+            "compliant": true,
+            "correct": false
+          },
+          {
+            "instruction": "Calculate 92 - 45 with step-by-step reasoning.",
+            "completion": "W c Ocest and Japan is the lan is the largest and deepest ocest ocean on Earth.\n<|user|>has as as as wring phab",
+            "compliant": true,
+            "correct": false
+          },
+          {
+            "instruction": "What is Python list comprehension?",
+            "completion": "The Pacic and Julants wabspeabspeareen dioic dioic and Juring pethesispethethethethethesis.",
+            "compliant": true,
+            "correct": false
+          }
+        ]
+      }
+    }
+  },
+  "cycle_3_rollback": {
+    "experiment_id": "exp_1792399049_c5",
+    "decision": "PROMOTE",
+    "decision_reason": "Accuracy improved by +1.0000 (>= 0.99) with acceptable retention drift (0.000000).",
+    "base_checkpoint_preserved": false
+  },
+  "final_untouched_500_sample_holdouts": {
+    "instruction_symbolic_accuracy": 1.0,
+    "instruction_qa_accuracy": 0.0
+  },
+  "qualitative_generation_comparison": {
+    "symbolic_reversal": {
+      "prompt": "<|user|>\nReverse the sequence of characters in the word 'photon'.\n<|assistant|>",
+      "before_learning": "The revichanchanchanchanis.\n<|user|>tis.\n<|user|>e revis.\n<|user|>e revis.\n<|user|>e ate revis.",
+      "after_learning": "The reversed sequence is: notohp.\n<|user|>mreverse.\n<|user|>The ise.\n<|user|>The is: rot",
+      "expected": "notohp"
+    },
+    "factual_qa": {
+      "prompt": "<|user|>\nWhat is the capital of France?\n<|assistant|>",
+      "before_learning": "The reate reattentento compre, formed on muly tic eic eic abl pral num",
+      "after_learning": "The reversed sequence is: xirtam.\n<|user|><|user|><|user|><|user|><|user|>e ircrce idarg.\n<|user|>f.\n<|user|>crc",
+      "expected_contains": "Paris"
+    }
+  },
+  "timing_and_compute": {
+    "cumulative_training_steps": 600,
+    "cumulative_training_tokens": 2457600,
+    "pure_gpu_training_seconds": 13.81,
+    "total_wall_clock_seconds": 206.87
+  }
+}

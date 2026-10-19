@@ -354,6 +354,18 @@ class CheckpointManager:
         # 2. Gather candidates from directory
         candidates: list[Path] = []
 
+        # Check active pointer first (single atomic pointer)
+        pointer_path = parent_dir / "active_pointer.json"
+        if pointer_path.is_file():
+            try:
+                with open(pointer_path, encoding="utf-8") as f:
+                    ptr_data = json.load(f)
+                ckpt_p = ptr_data.get("checkpoint_path")
+                if ckpt_p and Path(ckpt_p).is_file():
+                    candidates.append(Path(ckpt_p))
+            except Exception:
+                pass
+
         # Check manifest history first
         manifest_path = parent_dir / "manifest.json"
         if manifest_path.is_file():

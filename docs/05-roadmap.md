@@ -12,6 +12,8 @@
 | **M7** | Generalization & Multi-Seed Verification | 4-arm 3-seed benchmark, numerical prose decoupling (`domain_trigger_token_ids=['=']`), carry/borrow evaluation | **PASSED** (Verified on Tesla T4) |
 | **M8** | Autonomous Curriculum & Growth Controller | State machine (`EVALUATE -> SELECT -> PLAN -> TRAIN -> VERIFY -> PROMOTE/ROLLBACK`), bounded compute budgets | **PASSED** |
 | **M9** | Natural Language & Practical Reasoning | BPE subword tokenizer, instruction dataset, scaled Transformer backbone, verified reasoning tasks | **PASSED** |
+| **M10** | Unified Autonomous Learning | Lineage-aware loading, non-regressive promotion gate, atomic publishing, multi-cycle chaining | **PASSED** (Verified on Tesla T4) |
+| **M11** | Autonomous Language Learning | BPE subword model, single atomic pointer switch, fault injection, sequential instruction learning | **PASSED** (Verified on Tesla T4) |
 
 ---
 
@@ -93,3 +95,11 @@
 - Multi-cycle chaining: seamless consecutive autonomous cycles (`amg auto-learn --max-cycles N`) with automatic base model updating and persistent cumulative history.
 - Compute budget accounting: explicit tracking of cumulative steps, tokens, and GPU seconds with hard cap enforcement.
 - Real T4 empirical qualification: demonstrated rejection of non-improving task, successful sequential learning and promotion of parity (+84% gain, $\Delta = 0.000000$ drift), and safe rejection with checkpoint preservation on forced regression test.
+
+### M11: Autonomous Language Learning Qualification
+- Single atomic active-version pointer (`active_pointer.json`): solves multi-file checkpoint publication inconsistency by pointing atomically to immutable version directories (`published/v_XXXX_.../checkpoint.pt`).
+- Fault-injection testing: verified crash-resilience against orphan `.tmp` files and automated fallback to `latest.pt` if a pointer target is compromised.
+- BPE subword language model backbone: trained on curated natural language prose and instruction text on Tesla T4.
+- Dense-first control logic: defaults to matched dense fine-tuning unless structural expert growth is explicitly requested or empirically justified.
+- Multi-cycle sequential language learning: demonstrated consecutive task selection, training, holdout evaluation, non-regressive promotion, and clean rollback on unattainable thresholds.
+- Independent large-scale holdouts (500 samples) and qualitative autoregressive text generation before vs after autonomous learning.

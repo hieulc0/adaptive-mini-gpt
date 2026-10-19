@@ -348,7 +348,7 @@ class LearningController:
             candidate_model.to(self.device)
 
         # Build datasets
-        if plan.task_id == "instruction_reasoning" and is_bpe:
+        if plan.task_id.startswith("instruction_") and is_bpe:
             from adaptive_mini_gpt.data.instruction_data import InstructionDataset
 
             tokens = tokenizer.encode(task_text)
@@ -584,33 +584,46 @@ class LearningController:
         with open(published_dir / "manifest.json", "w", encoding="utf-8") as f:
             json.dump(manifest_data, f, indent=2)
 
-        # 2. Atomic update to active_model pointer directory
+        # 2. Single Atomic Active Pointer Switch
         active_dir = self.output_dir / "active_model"
         active_dir.mkdir(parents=True, exist_ok=True)
+        pointer_target = active_dir / "active_pointer.json"
+        pointer_temp = active_dir / "active_pointer.json.tmp"
+
+        pointer_data = {
+            "version_index": version_idx,
+            "experiment_id": self.journal.experiment_id,
+            "selected_task": self.journal.selected_task,
+            "published_dir": str(published_dir),
+            "checkpoint_path": str(pub_target),
+            "published_path": str(pub_target),
+            "step": raw.get("step", 0),
+            "tokens_seen": raw.get("tokens_seen", 0),
+            "tokenizer_fingerprint": raw.get("tokenizer_fingerprint", ""),
+            "timestamp": time.time(),
+        }
+        with open(pointer_temp, "w", encoding="utf-8") as f:
+            json.dump(pointer_data, f, indent=2)
+
+        # Smoke test target referenced by pointer before switching
+        CheckpointManager.load_raw_checkpoint(pub_target)
+        os.replace(pointer_temp, pointer_target)  # Single atomic pointer switch!
+
+        # Also write latest.pt and manifest.json for tool backward-compatibility
         active_target = active_dir / "latest.pt"
         active_temp = active_dir / "latest.pt.tmp"
-
         torch.save(raw, active_temp)
-        CheckpointManager.load_raw_checkpoint(active_temp)  # Smoke test
-        os.replace(active_temp, active_target)  # Atomic POSIX replacement
+        os.replace(active_temp, active_target)
 
         manifest_temp = active_dir / "manifest.json.tmp"
         with open(manifest_temp, "w", encoding="utf-8") as f:
             json.dump(manifest_data, f, indent=2)
         os.replace(manifest_temp, active_dir / "manifest.json")
 
-        version_ptr_temp = active_dir / "active_version.json.tmp"
-        with open(version_ptr_temp, "w", encoding="utf-8") as f:
-            json.dump(
-                {
-                    "version_index": version_idx,
-                    "published_path": str(pub_target),
-                    "timestamp": time.time(),
-                },
-                f,
-                indent=2,
-            )
-        os.replace(version_ptr_temp, active_dir / "active_version.json")
+        version_temp = active_dir / "active_version.json.tmp"
+        with open(version_temp, "w", encoding="utf-8") as f:
+            json.dump(pointer_data, f, indent=2)
+        os.replace(version_temp, active_dir / "active_version.json")
 
         # 3. Update controller state & cumulative history
         record = {
