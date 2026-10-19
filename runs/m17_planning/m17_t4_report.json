@@ -1,0 +1,2543 @@
+{
+  "title": "M17 \u2014 Hybrid Neural-Structural Planning and Grounded Slot Binding Qualification",
+  "device": "cuda",
+  "precision": "fp16",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "configurations": [
+    "1. Arm A: Deterministic Template Planner (Baseline)",
+    "2. Arm B: Neural Plan with Generated Literals (M16 Baseline)",
+    "3. Arm C: Neural Plan with Deterministic Slot Injection",
+    "4. Arm D: Neural Plan with Slot Injection + Bounded Retry",
+    "5. Arm E: Oracle Plan with Deterministic Slot Injection"
+  ],
+  "lineage_runs": {
+    "seed_42": {
+      "deterministic_template": {
+        "configuration": "1. Arm A: Deterministic Template Planner (Baseline)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 1.0,
+        "plan_exact_match_rate": 0.96,
+        "verified_answer_accuracy": 0.76,
+        "failure_rate": 0.24,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 0.22,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.8,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "sample_prediction": {
+          "question": "A car travels 120 km in 3 hours, then 150 km in 2 hours. What is its overall average speed?",
+          "ground_truth_rule": "deterministic_plan",
+          "expected_answer": "54 km/h",
+          "mode": "deterministic_template",
+          "status": "success",
+          "final_answer": "54 km/h",
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": true,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": {
+            "operation": null,
+            "arguments": {},
+            "provenance": {},
+            "variables": {
+              "d_total": 270.0,
+              "t_total": 5.0,
+              "overall_speed": "54 km/h"
+            },
+            "step_provenance": {
+              "d_total": {
+                "var_name": "d_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": 120.0,
+                  "b": 150.0
+                },
+                "resolved_args": {
+                  "a": 120.0,
+                  "b": 150.0
+                },
+                "result": 270.0,
+                "units": "km",
+                "step_index": 1,
+                "verified": true
+              },
+              "t_total": {
+                "var_name": "t_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": 3.0,
+                  "b": 2.0
+                },
+                "resolved_args": {
+                  "a": 3.0,
+                  "b": 2.0
+                },
+                "result": 5.0,
+                "units": "h",
+                "step_index": 2,
+                "verified": true
+              },
+              "overall_speed": {
+                "var_name": "overall_speed",
+                "operation": "average_speed",
+                "raw_args": {
+                  "distance_km": "$d_total",
+                  "time_hours": "$t_total"
+                },
+                "resolved_args": {
+                  "distance_km": 270.0,
+                  "time_hours": 5.0
+                },
+                "result": "54 km/h",
+                "units": "km/h",
+                "step_index": 3,
+                "verified": true
+              }
+            },
+            "step_units": {
+              "d_total": "km",
+              "t_total": "h",
+              "overall_speed": "km/h"
+            },
+            "slots": {},
+            "verified": true,
+            "result": "54 km/h",
+            "status": "verified",
+            "error": null,
+            "metadata": {}
+          },
+          "plan": {
+            "steps": [
+              {
+                "output_var": "d_total",
+                "operation": "add",
+                "args": {
+                  "a": 120.0,
+                  "b": 150.0
+                },
+                "units": "km",
+                "step_index": 1
+              },
+              {
+                "output_var": "t_total",
+                "operation": "add",
+                "args": {
+                  "a": 3.0,
+                  "b": 2.0
+                },
+                "units": "h",
+                "step_index": 2
+              },
+              {
+                "output_var": "overall_speed",
+                "operation": "average_speed",
+                "args": {
+                  "distance_km": "$d_total",
+                  "time_hours": "$t_total"
+                },
+                "units": "km/h",
+                "step_index": 3
+              }
+            ],
+            "final_var": "overall_speed",
+            "num_steps": 3
+          },
+          "plan_valid": true,
+          "plan_exact_match": true,
+          "num_steps": 3,
+          "step_results": {
+            "d_total": 270.0,
+            "t_total": 5.0,
+            "overall_speed": "54 km/h"
+          },
+          "total_retries": 0,
+          "latency_ms": 0.96,
+          "num_attempts": 1
+        }
+      },
+      "neural_literals": {
+        "configuration": "2. Arm B: Neural Plan with Generated Literals (M16 Baseline)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.68,
+        "plan_exact_match_rate": 0.32,
+        "verified_answer_accuracy": 0.0,
+        "failure_rate": 0.48,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 213.77,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.4
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.75
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.7
+          }
+        },
+        "sample_prediction": {
+          "question": "A car travels 120 km in 3 hours, then 150 km in 2 hours. What is its overall average speed?",
+          "ground_truth_rule": "model_plan",
+          "expected_answer": "54 km/h",
+          "mode": "neural_literals",
+          "status": "success",
+          "final_answer": "4.0",
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": false,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": {
+            "operation": null,
+            "arguments": {},
+            "provenance": {},
+            "variables": {
+              "d_total": 240.0,
+              "t_total": 4.0
+            },
+            "step_provenance": {
+              "d_total": {
+                "var_name": "d_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": 120.0,
+                  "b": 120.0
+                },
+                "resolved_args": {
+                  "a": 120.0,
+                  "b": 120.0
+                },
+                "result": 240.0,
+                "units": "km",
+                "step_index": 1,
+                "verified": true
+              },
+              "t_total": {
+                "var_name": "t_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": 2.0,
+                  "b": 2.0
+                },
+                "resolved_args": {
+                  "a": 2.0,
+                  "b": 2.0
+                },
+                "result": 4.0,
+                "units": "h",
+                "step_index": 2,
+                "verified": true
+              }
+            },
+            "step_units": {
+              "d_total": "km",
+              "t_total": "h"
+            },
+            "slots": {},
+            "verified": true,
+            "result": 4.0,
+            "status": "verified",
+            "error": null,
+            "metadata": {}
+          },
+          "plan": {
+            "steps": [
+              {
+                "output_var": "d_total",
+                "operation": "add",
+                "args": {
+                  "a": 120.0,
+                  "b": 120.0
+                },
+                "units": "km",
+                "step_index": 1
+              },
+              {
+                "output_var": "t_total",
+                "operation": "add",
+                "args": {
+                  "a": 2.0,
+                  "b": 2.0
+                },
+                "units": "h",
+                "step_index": 2
+              }
+            ],
+            "final_var": "t_total",
+            "num_steps": 2
+          },
+          "plan_valid": true,
+          "plan_exact_match": false,
+          "num_steps": 2,
+          "step_results": {
+            "d_total": 240.0,
+            "t_total": 4.0
+          },
+          "total_retries": 0,
+          "latency_ms": 318.15,
+          "num_attempts": 1
+        }
+      },
+      "neural_slots": {
+        "configuration": "3. Arm C: Neural Plan with Deterministic Slot Injection",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.82,
+        "plan_exact_match_rate": 0.24,
+        "verified_answer_accuracy": 0.14,
+        "failure_rate": 0.26,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 185.86,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.7,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.95
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "sample_prediction": {
+          "question": "A car travels 120 km in 3 hours, then 150 km in 2 hours. What is its overall average speed?",
+          "ground_truth_rule": "model_plan",
+          "expected_answer": "54 km/h",
+          "mode": "neural_slots",
+          "status": "success",
+          "final_answer": "5.0",
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": false,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": {
+            "operation": null,
+            "arguments": {},
+            "provenance": {},
+            "variables": {
+              "d_total": 270.0,
+              "t_total": 5.0
+            },
+            "step_provenance": {
+              "d_total": {
+                "var_name": "d_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$distance_1",
+                  "b": "$distance_2"
+                },
+                "resolved_args": {
+                  "a": 120.0,
+                  "b": 150.0
+                },
+                "result": 270.0,
+                "units": "km",
+                "step_index": 1,
+                "verified": true
+              },
+              "t_total": {
+                "var_name": "t_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$duration_1",
+                  "b": "$duration_2"
+                },
+                "resolved_args": {
+                  "a": 3.0,
+                  "b": 2.0
+                },
+                "result": 5.0,
+                "units": "h",
+                "step_index": 2,
+                "verified": true
+              }
+            },
+            "step_units": {
+              "d_total": "km",
+              "t_total": "h"
+            },
+            "slots": {
+              "distance_1": {
+                "slot_id": "distance_1",
+                "value": 120.0,
+                "unit": "km",
+                "source_text": "120 km",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "duration_1": {
+                "slot_id": "duration_1",
+                "value": 3.0,
+                "unit": "h",
+                "source_text": "3 hours",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "distance_2": {
+                "slot_id": "distance_2",
+                "value": 150.0,
+                "unit": "km",
+                "source_text": "150 km",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "duration_2": {
+                "slot_id": "duration_2",
+                "value": 2.0,
+                "unit": "h",
+                "source_text": "2 hours",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              }
+            },
+            "verified": true,
+            "result": 5.0,
+            "status": "verified",
+            "error": null,
+            "metadata": {}
+          },
+          "plan": {
+            "steps": [
+              {
+                "output_var": "d_total",
+                "operation": "add",
+                "args": {
+                  "a": "$distance_1",
+                  "b": "$distance_2"
+                },
+                "units": "km",
+                "step_index": 1
+              },
+              {
+                "output_var": "t_total",
+                "operation": "add",
+                "args": {
+                  "a": "$duration_1",
+                  "b": "$duration_2"
+                },
+                "units": "h",
+                "step_index": 2
+              }
+            ],
+            "final_var": "t_total",
+            "num_steps": 2
+          },
+          "plan_valid": true,
+          "plan_exact_match": false,
+          "num_steps": 2,
+          "step_results": {
+            "d_total": 270.0,
+            "t_total": 5.0
+          },
+          "total_retries": 0,
+          "latency_ms": 216.21,
+          "num_attempts": 1
+        }
+      },
+      "neural_slots_retry": {
+        "configuration": "4. Arm D: Neural Plan with Slot Injection + Bounded Retry",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.82,
+        "plan_exact_match_rate": 0.24,
+        "verified_answer_accuracy": 0.14,
+        "failure_rate": 0.26,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 243.16,
+        "mean_retries": 0.52,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.7,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.95
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "sample_prediction": {
+          "question": "A car travels 120 km in 3 hours, then 150 km in 2 hours. What is its overall average speed?",
+          "ground_truth_rule": "model_plan",
+          "expected_answer": "54 km/h",
+          "mode": "neural_slots_retry",
+          "status": "success",
+          "final_answer": "5.0",
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": false,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": {
+            "operation": null,
+            "arguments": {},
+            "provenance": {},
+            "variables": {
+              "d_total": 270.0,
+              "t_total": 5.0
+            },
+            "step_provenance": {
+              "d_total": {
+                "var_name": "d_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$distance_1",
+                  "b": "$distance_2"
+                },
+                "resolved_args": {
+                  "a": 120.0,
+                  "b": 150.0
+                },
+                "result": 270.0,
+                "units": "km",
+                "step_index": 1,
+                "verified": true
+              },
+              "t_total": {
+                "var_name": "t_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$duration_1",
+                  "b": "$duration_2"
+                },
+                "resolved_args": {
+                  "a": 3.0,
+                  "b": 2.0
+                },
+                "result": 5.0,
+                "units": "h",
+                "step_index": 2,
+                "verified": true
+              }
+            },
+            "step_units": {
+              "d_total": "km",
+              "t_total": "h"
+            },
+            "slots": {
+              "distance_1": {
+                "slot_id": "distance_1",
+                "value": 120.0,
+                "unit": "km",
+                "source_text": "120 km",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "duration_1": {
+                "slot_id": "duration_1",
+                "value": 3.0,
+                "unit": "h",
+                "source_text": "3 hours",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "distance_2": {
+                "slot_id": "distance_2",
+                "value": 150.0,
+                "unit": "km",
+                "source_text": "150 km",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "duration_2": {
+                "slot_id": "duration_2",
+                "value": 2.0,
+                "unit": "h",
+                "source_text": "2 hours",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              }
+            },
+            "verified": true,
+            "result": 5.0,
+            "status": "verified",
+            "error": null,
+            "metadata": {}
+          },
+          "plan": {
+            "steps": [
+              {
+                "output_var": "d_total",
+                "operation": "add",
+                "args": {
+                  "a": "$distance_1",
+                  "b": "$distance_2"
+                },
+                "units": "km",
+                "step_index": 1
+              },
+              {
+                "output_var": "t_total",
+                "operation": "add",
+                "args": {
+                  "a": "$duration_1",
+                  "b": "$duration_2"
+                },
+                "units": "h",
+                "step_index": 2
+              }
+            ],
+            "final_var": "t_total",
+            "num_steps": 2
+          },
+          "plan_valid": true,
+          "plan_exact_match": false,
+          "num_steps": 2,
+          "step_results": {
+            "d_total": 270.0,
+            "t_total": 5.0
+          },
+          "total_retries": 0,
+          "latency_ms": 200.54,
+          "num_attempts": 1
+        }
+      },
+      "oracle_slots": {
+        "configuration": "5. Arm E: Oracle Plan with Deterministic Slot Injection",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 1.0,
+        "plan_exact_match_rate": 1.0,
+        "verified_answer_accuracy": 1.0,
+        "failure_rate": 0.0,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 0.12,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "sample_prediction": {
+          "question": "A car travels 120 km in 3 hours, then 150 km in 2 hours. What is its overall average speed?",
+          "ground_truth_rule": "oracle_plan",
+          "expected_answer": "54 km/h",
+          "mode": "oracle_slots",
+          "status": "success",
+          "final_answer": "54 km/h",
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": true,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": {
+            "operation": null,
+            "arguments": {},
+            "provenance": {},
+            "variables": {
+              "d_total": 270.0,
+              "t_total": 5.0,
+              "overall_speed": "54 km/h"
+            },
+            "step_provenance": {
+              "d_total": {
+                "var_name": "d_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$distance_1",
+                  "b": "$distance_2"
+                },
+                "resolved_args": {
+                  "a": 120.0,
+                  "b": 150.0
+                },
+                "result": 270.0,
+                "units": "km",
+                "step_index": 1,
+                "verified": true
+              },
+              "t_total": {
+                "var_name": "t_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$duration_1",
+                  "b": "$duration_2"
+                },
+                "resolved_args": {
+                  "a": 3.0,
+                  "b": 2.0
+                },
+                "result": 5.0,
+                "units": "h",
+                "step_index": 2,
+                "verified": true
+              },
+              "overall_speed": {
+                "var_name": "overall_speed",
+                "operation": "average_speed",
+                "raw_args": {
+                  "distance_km": "$d_total",
+                  "time_hours": "$t_total"
+                },
+                "resolved_args": {
+                  "distance_km": 270.0,
+                  "time_hours": 5.0
+                },
+                "result": "54 km/h",
+                "units": "km/h",
+                "step_index": 3,
+                "verified": true
+              }
+            },
+            "step_units": {
+              "d_total": "km",
+              "t_total": "h",
+              "overall_speed": "km/h"
+            },
+            "slots": {
+              "distance_1": {
+                "slot_id": "distance_1",
+                "value": 120.0,
+                "unit": "km",
+                "source_text": "120 km",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "duration_1": {
+                "slot_id": "duration_1",
+                "value": 3.0,
+                "unit": "h",
+                "source_text": "3 hours",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "distance_2": {
+                "slot_id": "distance_2",
+                "value": 150.0,
+                "unit": "km",
+                "source_text": "150 km",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "duration_2": {
+                "slot_id": "duration_2",
+                "value": 2.0,
+                "unit": "h",
+                "source_text": "2 hours",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              }
+            },
+            "verified": true,
+            "result": "54 km/h",
+            "status": "verified",
+            "error": null,
+            "metadata": {}
+          },
+          "plan": {
+            "steps": [
+              {
+                "output_var": "d_total",
+                "operation": "add",
+                "args": {
+                  "a": "$distance_1",
+                  "b": "$distance_2"
+                },
+                "units": "km",
+                "step_index": 1
+              },
+              {
+                "output_var": "t_total",
+                "operation": "add",
+                "args": {
+                  "a": "$duration_1",
+                  "b": "$duration_2"
+                },
+                "units": "h",
+                "step_index": 2
+              },
+              {
+                "output_var": "overall_speed",
+                "operation": "average_speed",
+                "args": {
+                  "distance_km": "$d_total",
+                  "time_hours": "$t_total"
+                },
+                "units": "km/h",
+                "step_index": 3
+              }
+            ],
+            "final_var": "overall_speed",
+            "num_steps": 3
+          },
+          "plan_valid": true,
+          "plan_exact_match": true,
+          "num_steps": 3,
+          "step_results": {
+            "d_total": 270.0,
+            "t_total": 5.0,
+            "overall_speed": "54 km/h"
+          },
+          "total_retries": 0,
+          "latency_ms": 0.27,
+          "num_attempts": 1
+        }
+      },
+      "test_size": 56
+    },
+    "seed_43": {
+      "deterministic_template": {
+        "configuration": "1. Arm A: Deterministic Template Planner (Baseline)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 1.0,
+        "plan_exact_match_rate": 0.84,
+        "verified_answer_accuracy": 0.64,
+        "failure_rate": 0.36,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 0.15,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.7,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.75,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "sample_prediction": {
+          "question": "A car travels 120 km in 3 hours, then 300 km in 4 hours. What is its overall average speed?",
+          "ground_truth_rule": "deterministic_plan",
+          "expected_answer": "60 km/h",
+          "mode": "deterministic_template",
+          "status": "success",
+          "final_answer": "60 km/h",
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": true,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": {
+            "operation": null,
+            "arguments": {},
+            "provenance": {},
+            "variables": {
+              "d_total": 420.0,
+              "t_total": 7.0,
+              "overall_speed": "60 km/h"
+            },
+            "step_provenance": {
+              "d_total": {
+                "var_name": "d_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": 120.0,
+                  "b": 300.0
+                },
+                "resolved_args": {
+                  "a": 120.0,
+                  "b": 300.0
+                },
+                "result": 420.0,
+                "units": "km",
+                "step_index": 1,
+                "verified": true
+              },
+              "t_total": {
+                "var_name": "t_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": 3.0,
+                  "b": 4.0
+                },
+                "resolved_args": {
+                  "a": 3.0,
+                  "b": 4.0
+                },
+                "result": 7.0,
+                "units": "h",
+                "step_index": 2,
+                "verified": true
+              },
+              "overall_speed": {
+                "var_name": "overall_speed",
+                "operation": "average_speed",
+                "raw_args": {
+                  "distance_km": "$d_total",
+                  "time_hours": "$t_total"
+                },
+                "resolved_args": {
+                  "distance_km": 420.0,
+                  "time_hours": 7.0
+                },
+                "result": "60 km/h",
+                "units": "km/h",
+                "step_index": 3,
+                "verified": true
+              }
+            },
+            "step_units": {
+              "d_total": "km",
+              "t_total": "h",
+              "overall_speed": "km/h"
+            },
+            "slots": {},
+            "verified": true,
+            "result": "60 km/h",
+            "status": "verified",
+            "error": null,
+            "metadata": {}
+          },
+          "plan": {
+            "steps": [
+              {
+                "output_var": "d_total",
+                "operation": "add",
+                "args": {
+                  "a": 120.0,
+                  "b": 300.0
+                },
+                "units": "km",
+                "step_index": 1
+              },
+              {
+                "output_var": "t_total",
+                "operation": "add",
+                "args": {
+                  "a": 3.0,
+                  "b": 4.0
+                },
+                "units": "h",
+                "step_index": 2
+              },
+              {
+                "output_var": "overall_speed",
+                "operation": "average_speed",
+                "args": {
+                  "distance_km": "$d_total",
+                  "time_hours": "$t_total"
+                },
+                "units": "km/h",
+                "step_index": 3
+              }
+            ],
+            "final_var": "overall_speed",
+            "num_steps": 3
+          },
+          "plan_valid": true,
+          "plan_exact_match": true,
+          "num_steps": 3,
+          "step_results": {
+            "d_total": 420.0,
+            "t_total": 7.0,
+            "overall_speed": "60 km/h"
+          },
+          "total_retries": 0,
+          "latency_ms": 0.44,
+          "num_attempts": 1
+        }
+      },
+      "neural_literals": {
+        "configuration": "2. Arm B: Neural Plan with Generated Literals (M16 Baseline)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.48,
+        "plan_exact_match_rate": 0.08,
+        "verified_answer_accuracy": 0.0,
+        "failure_rate": 0.62,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 218.04,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.6
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "sample_prediction": {
+          "question": "A car travels 120 km in 3 hours, then 300 km in 4 hours. What is its overall average speed?",
+          "ground_truth_rule": "model_plan",
+          "expected_answer": "60 km/h",
+          "mode": "neural_literals",
+          "status": "success",
+          "final_answer": "4.0",
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": false,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": {
+            "operation": null,
+            "arguments": {},
+            "provenance": {},
+            "variables": {
+              "d_total": 140.0,
+              "t_total": 4.0
+            },
+            "step_provenance": {
+              "d_total": {
+                "var_name": "d_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": 120.0,
+                  "b": 20.0
+                },
+                "resolved_args": {
+                  "a": 120.0,
+                  "b": 20.0
+                },
+                "result": 140.0,
+                "units": "km",
+                "step_index": 1,
+                "verified": true
+              },
+              "t_total": {
+                "var_name": "t_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": 2.0,
+                  "b": 2.0
+                },
+                "resolved_args": {
+                  "a": 2.0,
+                  "b": 2.0
+                },
+                "result": 4.0,
+                "units": "h",
+                "step_index": 2,
+                "verified": true
+              }
+            },
+            "step_units": {
+              "d_total": "km",
+              "t_total": "h"
+            },
+            "slots": {},
+            "verified": true,
+            "result": 4.0,
+            "status": "verified",
+            "error": null,
+            "metadata": {}
+          },
+          "plan": {
+            "steps": [
+              {
+                "output_var": "d_total",
+                "operation": "add",
+                "args": {
+                  "a": 120.0,
+                  "b": 20.0
+                },
+                "units": "km",
+                "step_index": 1
+              },
+              {
+                "output_var": "t_total",
+                "operation": "add",
+                "args": {
+                  "a": 2.0,
+                  "b": 2.0
+                },
+                "units": "h",
+                "step_index": 2
+              }
+            ],
+            "final_var": "t_total",
+            "num_steps": 2
+          },
+          "plan_valid": true,
+          "plan_exact_match": false,
+          "num_steps": 2,
+          "step_results": {
+            "d_total": 140.0,
+            "t_total": 4.0
+          },
+          "total_retries": 0,
+          "latency_ms": 247.66,
+          "num_attempts": 1
+        }
+      },
+      "neural_slots": {
+        "configuration": "3. Arm C: Neural Plan with Deterministic Slot Injection",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.6,
+        "plan_exact_match_rate": 0.2,
+        "verified_answer_accuracy": 0.2,
+        "failure_rate": 0.4,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 164.2,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.0
+          }
+        },
+        "sample_prediction": {
+          "question": "A car travels 120 km in 3 hours, then 300 km in 4 hours. What is its overall average speed?",
+          "ground_truth_rule": "model_plan",
+          "expected_answer": "60 km/h",
+          "mode": "neural_slots",
+          "status": "success",
+          "final_answer": "420.0",
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": false,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": {
+            "operation": null,
+            "arguments": {},
+            "provenance": {},
+            "variables": {
+              "d_total": 420.0
+            },
+            "step_provenance": {
+              "d_total": {
+                "var_name": "d_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$distance_1",
+                  "b": "$distance_2"
+                },
+                "resolved_args": {
+                  "a": 120.0,
+                  "b": 300.0
+                },
+                "result": 420.0,
+                "units": "km",
+                "step_index": 1,
+                "verified": true
+              }
+            },
+            "step_units": {
+              "d_total": "km"
+            },
+            "slots": {
+              "distance_1": {
+                "slot_id": "distance_1",
+                "value": 120.0,
+                "unit": "km",
+                "source_text": "120 km",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "duration_1": {
+                "slot_id": "duration_1",
+                "value": 3.0,
+                "unit": "h",
+                "source_text": "3 hours",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "distance_2": {
+                "slot_id": "distance_2",
+                "value": 300.0,
+                "unit": "km",
+                "source_text": "300 km",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "duration_2": {
+                "slot_id": "duration_2",
+                "value": 4.0,
+                "unit": "h",
+                "source_text": "4 hours",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              }
+            },
+            "verified": true,
+            "result": 420.0,
+            "status": "verified",
+            "error": null,
+            "metadata": {}
+          },
+          "plan": {
+            "steps": [
+              {
+                "output_var": "d_total",
+                "operation": "add",
+                "args": {
+                  "a": "$distance_1",
+                  "b": "$distance_2"
+                },
+                "units": "km",
+                "step_index": 1
+              }
+            ],
+            "final_var": "d_total",
+            "num_steps": 1
+          },
+          "plan_valid": true,
+          "plan_exact_match": false,
+          "num_steps": 1,
+          "step_results": {
+            "d_total": 420.0
+          },
+          "total_retries": 0,
+          "latency_ms": 177.85,
+          "num_attempts": 1
+        }
+      },
+      "neural_slots_retry": {
+        "configuration": "4. Arm D: Neural Plan with Slot Injection + Bounded Retry",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.6,
+        "plan_exact_match_rate": 0.2,
+        "verified_answer_accuracy": 0.2,
+        "failure_rate": 0.4,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 228.33,
+        "mean_retries": 0.8,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.0
+          }
+        },
+        "sample_prediction": {
+          "question": "A car travels 120 km in 3 hours, then 300 km in 4 hours. What is its overall average speed?",
+          "ground_truth_rule": "model_plan",
+          "expected_answer": "60 km/h",
+          "mode": "neural_slots_retry",
+          "status": "success",
+          "final_answer": "420.0",
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": false,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": {
+            "operation": null,
+            "arguments": {},
+            "provenance": {},
+            "variables": {
+              "d_total": 420.0
+            },
+            "step_provenance": {
+              "d_total": {
+                "var_name": "d_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$distance_1",
+                  "b": "$distance_2"
+                },
+                "resolved_args": {
+                  "a": 120.0,
+                  "b": 300.0
+                },
+                "result": 420.0,
+                "units": "km",
+                "step_index": 1,
+                "verified": true
+              }
+            },
+            "step_units": {
+              "d_total": "km"
+            },
+            "slots": {
+              "distance_1": {
+                "slot_id": "distance_1",
+                "value": 120.0,
+                "unit": "km",
+                "source_text": "120 km",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "duration_1": {
+                "slot_id": "duration_1",
+                "value": 3.0,
+                "unit": "h",
+                "source_text": "3 hours",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "distance_2": {
+                "slot_id": "distance_2",
+                "value": 300.0,
+                "unit": "km",
+                "source_text": "300 km",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "duration_2": {
+                "slot_id": "duration_2",
+                "value": 4.0,
+                "unit": "h",
+                "source_text": "4 hours",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              }
+            },
+            "verified": true,
+            "result": 420.0,
+            "status": "verified",
+            "error": null,
+            "metadata": {}
+          },
+          "plan": {
+            "steps": [
+              {
+                "output_var": "d_total",
+                "operation": "add",
+                "args": {
+                  "a": "$distance_1",
+                  "b": "$distance_2"
+                },
+                "units": "km",
+                "step_index": 1
+              }
+            ],
+            "final_var": "d_total",
+            "num_steps": 1
+          },
+          "plan_valid": true,
+          "plan_exact_match": false,
+          "num_steps": 1,
+          "step_results": {
+            "d_total": 420.0
+          },
+          "total_retries": 0,
+          "latency_ms": 165.85,
+          "num_attempts": 1
+        }
+      },
+      "oracle_slots": {
+        "configuration": "5. Arm E: Oracle Plan with Deterministic Slot Injection",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 1.0,
+        "plan_exact_match_rate": 1.0,
+        "verified_answer_accuracy": 1.0,
+        "failure_rate": 0.0,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 0.14,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "sample_prediction": {
+          "question": "A car travels 120 km in 3 hours, then 300 km in 4 hours. What is its overall average speed?",
+          "ground_truth_rule": "oracle_plan",
+          "expected_answer": "60 km/h",
+          "mode": "oracle_slots",
+          "status": "success",
+          "final_answer": "60 km/h",
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": true,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": {
+            "operation": null,
+            "arguments": {},
+            "provenance": {},
+            "variables": {
+              "d_total": 420.0,
+              "t_total": 7.0,
+              "overall_speed": "60 km/h"
+            },
+            "step_provenance": {
+              "d_total": {
+                "var_name": "d_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$distance_1",
+                  "b": "$distance_2"
+                },
+                "resolved_args": {
+                  "a": 120.0,
+                  "b": 300.0
+                },
+                "result": 420.0,
+                "units": "km",
+                "step_index": 1,
+                "verified": true
+              },
+              "t_total": {
+                "var_name": "t_total",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$duration_1",
+                  "b": "$duration_2"
+                },
+                "resolved_args": {
+                  "a": 3.0,
+                  "b": 4.0
+                },
+                "result": 7.0,
+                "units": "h",
+                "step_index": 2,
+                "verified": true
+              },
+              "overall_speed": {
+                "var_name": "overall_speed",
+                "operation": "average_speed",
+                "raw_args": {
+                  "distance_km": "$d_total",
+                  "time_hours": "$t_total"
+                },
+                "resolved_args": {
+                  "distance_km": 420.0,
+                  "time_hours": 7.0
+                },
+                "result": "60 km/h",
+                "units": "km/h",
+                "step_index": 3,
+                "verified": true
+              }
+            },
+            "step_units": {
+              "d_total": "km",
+              "t_total": "h",
+              "overall_speed": "km/h"
+            },
+            "slots": {
+              "distance_1": {
+                "slot_id": "distance_1",
+                "value": 120.0,
+                "unit": "km",
+                "source_text": "120 km",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "duration_1": {
+                "slot_id": "duration_1",
+                "value": 3.0,
+                "unit": "h",
+                "source_text": "3 hours",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "distance_2": {
+                "slot_id": "distance_2",
+                "value": 300.0,
+                "unit": "km",
+                "source_text": "300 km",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              },
+              "duration_2": {
+                "slot_id": "duration_2",
+                "value": 4.0,
+                "unit": "h",
+                "source_text": "4 hours",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "float"
+              }
+            },
+            "verified": true,
+            "result": "60 km/h",
+            "status": "verified",
+            "error": null,
+            "metadata": {}
+          },
+          "plan": {
+            "steps": [
+              {
+                "output_var": "d_total",
+                "operation": "add",
+                "args": {
+                  "a": "$distance_1",
+                  "b": "$distance_2"
+                },
+                "units": "km",
+                "step_index": 1
+              },
+              {
+                "output_var": "t_total",
+                "operation": "add",
+                "args": {
+                  "a": "$duration_1",
+                  "b": "$duration_2"
+                },
+                "units": "h",
+                "step_index": 2
+              },
+              {
+                "output_var": "overall_speed",
+                "operation": "average_speed",
+                "args": {
+                  "distance_km": "$d_total",
+                  "time_hours": "$t_total"
+                },
+                "units": "km/h",
+                "step_index": 3
+              }
+            ],
+            "final_var": "overall_speed",
+            "num_steps": 3
+          },
+          "plan_valid": true,
+          "plan_exact_match": true,
+          "num_steps": 3,
+          "step_results": {
+            "d_total": 420.0,
+            "t_total": 7.0,
+            "overall_speed": "60 km/h"
+          },
+          "total_retries": 0,
+          "latency_ms": 0.28,
+          "num_attempts": 1
+        }
+      },
+      "test_size": 56
+    },
+    "seed_44": {
+      "deterministic_template": {
+        "configuration": "1. Arm A: Deterministic Template Planner (Baseline)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 1.0,
+        "plan_exact_match_rate": 0.88,
+        "verified_answer_accuracy": 0.68,
+        "failure_rate": 0.32,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 0.16,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.8,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.8,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "sample_prediction": {
+          "question": "Compute 364 plus 220 plus 139.",
+          "ground_truth_rule": "deterministic_plan",
+          "expected_answer": "723",
+          "mode": "deterministic_template",
+          "status": "failed",
+          "final_answer": "584",
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": false,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": {
+            "operation": null,
+            "arguments": {},
+            "provenance": {},
+            "variables": {
+              "result": 584
+            },
+            "step_provenance": {
+              "result": {
+                "var_name": "result",
+                "operation": "add",
+                "raw_args": {
+                  "a": 364,
+                  "b": 220
+                },
+                "resolved_args": {
+                  "a": 364,
+                  "b": 220
+                },
+                "result": 584,
+                "units": null,
+                "step_index": 1,
+                "verified": true
+              }
+            },
+            "step_units": {
+              "result": null
+            },
+            "slots": {},
+            "verified": true,
+            "result": 584,
+            "status": "verified",
+            "error": null,
+            "metadata": {}
+          },
+          "plan": {
+            "steps": [
+              {
+                "output_var": "result",
+                "operation": "add",
+                "args": {
+                  "a": 364,
+                  "b": 220
+                },
+                "units": null,
+                "step_index": 1
+              }
+            ],
+            "final_var": "result",
+            "num_steps": 1
+          },
+          "plan_valid": true,
+          "plan_exact_match": false,
+          "num_steps": 1,
+          "step_results": {
+            "result": 584
+          },
+          "total_retries": 0,
+          "latency_ms": 0.37,
+          "num_attempts": 1
+        }
+      },
+      "neural_literals": {
+        "configuration": "2. Arm B: Neural Plan with Generated Literals (M16 Baseline)",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.5,
+        "plan_exact_match_rate": 0.08,
+        "verified_answer_accuracy": 0.0,
+        "failure_rate": 0.58,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 215.61,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.6
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.4
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.9
+          }
+        },
+        "sample_prediction": {
+          "question": "Compute 364 plus 220 plus 139.",
+          "ground_truth_rule": "model_plan",
+          "expected_answer": "723",
+          "mode": "neural_literals",
+          "status": "failed",
+          "final_answer": null,
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": false,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": null,
+          "plan": null,
+          "plan_valid": false,
+          "plan_exact_match": false,
+          "num_steps": 1,
+          "step_results": {},
+          "total_retries": 0,
+          "latency_ms": 244.41,
+          "num_attempts": 1
+        }
+      },
+      "neural_slots": {
+        "configuration": "3. Arm C: Neural Plan with Deterministic Slot Injection",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.58,
+        "plan_exact_match_rate": 0.18,
+        "verified_answer_accuracy": 0.18,
+        "failure_rate": 0.42,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 163.38,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.9,
+            "plan_validity_rate": 0.9
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.0
+          }
+        },
+        "sample_prediction": {
+          "question": "Compute 364 plus 220 plus 139.",
+          "ground_truth_rule": "model_plan",
+          "expected_answer": "723",
+          "mode": "neural_slots",
+          "status": "success",
+          "final_answer": "723",
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": true,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": {
+            "operation": null,
+            "arguments": {},
+            "provenance": {},
+            "variables": {
+              "sum_1": 584,
+              "sum_2": 723
+            },
+            "step_provenance": {
+              "sum_1": {
+                "var_name": "sum_1",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$operand_1",
+                  "b": "$operand_2"
+                },
+                "resolved_args": {
+                  "a": 364,
+                  "b": 220
+                },
+                "result": 584,
+                "units": null,
+                "step_index": 1,
+                "verified": true
+              },
+              "sum_2": {
+                "var_name": "sum_2",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$sum_1",
+                  "b": "$operand_3"
+                },
+                "resolved_args": {
+                  "a": 584,
+                  "b": 139
+                },
+                "result": 723,
+                "units": null,
+                "step_index": 2,
+                "verified": true
+              }
+            },
+            "step_units": {
+              "sum_1": null,
+              "sum_2": null
+            },
+            "slots": {
+              "operand_1": {
+                "slot_id": "operand_1",
+                "value": 364,
+                "unit": null,
+                "source_text": "364",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "int"
+              },
+              "operand_2": {
+                "slot_id": "operand_2",
+                "value": 220,
+                "unit": null,
+                "source_text": "220",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "int"
+              },
+              "operand_3": {
+                "slot_id": "operand_3",
+                "value": 139,
+                "unit": null,
+                "source_text": "139",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "int"
+              }
+            },
+            "verified": true,
+            "result": 723,
+            "status": "verified",
+            "error": null,
+            "metadata": {}
+          },
+          "plan": {
+            "steps": [
+              {
+                "output_var": "sum_1",
+                "operation": "add",
+                "args": {
+                  "a": "$operand_1",
+                  "b": "$operand_2"
+                },
+                "units": null,
+                "step_index": 1
+              },
+              {
+                "output_var": "sum_2",
+                "operation": "add",
+                "args": {
+                  "a": "$sum_1",
+                  "b": "$operand_3"
+                },
+                "units": null,
+                "step_index": 2
+              }
+            ],
+            "final_var": "sum_2",
+            "num_steps": 2
+          },
+          "plan_valid": true,
+          "plan_exact_match": true,
+          "num_steps": 2,
+          "step_results": {
+            "sum_1": 584,
+            "sum_2": 723
+          },
+          "total_retries": 0,
+          "latency_ms": 213.11,
+          "num_attempts": 1
+        }
+      },
+      "neural_slots_retry": {
+        "configuration": "4. Arm D: Neural Plan with Slot Injection + Bounded Retry",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 0.58,
+        "plan_exact_match_rate": 0.18,
+        "verified_answer_accuracy": 0.18,
+        "failure_rate": 0.42,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 0.0,
+        "mean_latency_ms": 232.92,
+        "mean_retries": 0.84,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 0.9,
+            "plan_validity_rate": 0.9
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 0.0,
+            "plan_validity_rate": 0.0
+          }
+        },
+        "sample_prediction": {
+          "question": "Compute 364 plus 220 plus 139.",
+          "ground_truth_rule": "model_plan",
+          "expected_answer": "723",
+          "mode": "neural_slots_retry",
+          "status": "success",
+          "final_answer": "723",
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": true,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": {
+            "operation": null,
+            "arguments": {},
+            "provenance": {},
+            "variables": {
+              "sum_1": 584,
+              "sum_2": 723
+            },
+            "step_provenance": {
+              "sum_1": {
+                "var_name": "sum_1",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$operand_1",
+                  "b": "$operand_2"
+                },
+                "resolved_args": {
+                  "a": 364,
+                  "b": 220
+                },
+                "result": 584,
+                "units": null,
+                "step_index": 1,
+                "verified": true
+              },
+              "sum_2": {
+                "var_name": "sum_2",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$sum_1",
+                  "b": "$operand_3"
+                },
+                "resolved_args": {
+                  "a": 584,
+                  "b": 139
+                },
+                "result": 723,
+                "units": null,
+                "step_index": 2,
+                "verified": true
+              }
+            },
+            "step_units": {
+              "sum_1": null,
+              "sum_2": null
+            },
+            "slots": {
+              "operand_1": {
+                "slot_id": "operand_1",
+                "value": 364,
+                "unit": null,
+                "source_text": "364",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "int"
+              },
+              "operand_2": {
+                "slot_id": "operand_2",
+                "value": 220,
+                "unit": null,
+                "source_text": "220",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "int"
+              },
+              "operand_3": {
+                "slot_id": "operand_3",
+                "value": 139,
+                "unit": null,
+                "source_text": "139",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "int"
+              }
+            },
+            "verified": true,
+            "result": 723,
+            "status": "verified",
+            "error": null,
+            "metadata": {}
+          },
+          "plan": {
+            "steps": [
+              {
+                "output_var": "sum_1",
+                "operation": "add",
+                "args": {
+                  "a": "$operand_1",
+                  "b": "$operand_2"
+                },
+                "units": null,
+                "step_index": 1
+              },
+              {
+                "output_var": "sum_2",
+                "operation": "add",
+                "args": {
+                  "a": "$sum_1",
+                  "b": "$operand_3"
+                },
+                "units": null,
+                "step_index": 2
+              }
+            ],
+            "final_var": "sum_2",
+            "num_steps": 2
+          },
+          "plan_valid": true,
+          "plan_exact_match": true,
+          "num_steps": 2,
+          "step_results": {
+            "sum_1": 584,
+            "sum_2": 723
+          },
+          "total_retries": 0,
+          "latency_ms": 215.15,
+          "num_attempts": 1
+        }
+      },
+      "oracle_slots": {
+        "configuration": "5. Arm E: Oracle Plan with Deterministic Slot Injection",
+        "total_standard_problems": 50,
+        "plan_validity_rate": 1.0,
+        "plan_exact_match_rate": 1.0,
+        "verified_answer_accuracy": 1.0,
+        "failure_rate": 0.0,
+        "total_abstention_problems": 6,
+        "abstention_correctness": 1.0,
+        "mean_latency_ms": 0.1,
+        "mean_retries": 0.0,
+        "step_breakdown": {
+          "2": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "3": {
+            "count": 20,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          },
+          "5": {
+            "count": 10,
+            "verified_accuracy": 1.0,
+            "plan_validity_rate": 1.0
+          }
+        },
+        "sample_prediction": {
+          "question": "Compute 364 plus 220 plus 139.",
+          "ground_truth_rule": "oracle_plan",
+          "expected_answer": "723",
+          "mode": "oracle_slots",
+          "status": "success",
+          "final_answer": "723",
+          "rule_selected": null,
+          "rule_selection_correct": false,
+          "arg_extraction_correct": false,
+          "arg_semantic_correct": false,
+          "answer_correct": true,
+          "abstained": false,
+          "abstention_correct": true,
+          "working_memory": {
+            "operation": null,
+            "arguments": {},
+            "provenance": {},
+            "variables": {
+              "sum_1": 584,
+              "sum_2": 723
+            },
+            "step_provenance": {
+              "sum_1": {
+                "var_name": "sum_1",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$operand_1",
+                  "b": "$operand_2"
+                },
+                "resolved_args": {
+                  "a": 364,
+                  "b": 220
+                },
+                "result": 584,
+                "units": null,
+                "step_index": 1,
+                "verified": true
+              },
+              "sum_2": {
+                "var_name": "sum_2",
+                "operation": "add",
+                "raw_args": {
+                  "a": "$sum_1",
+                  "b": "$operand_3"
+                },
+                "resolved_args": {
+                  "a": 584,
+                  "b": 139
+                },
+                "result": 723,
+                "units": null,
+                "step_index": 2,
+                "verified": true
+              }
+            },
+            "step_units": {
+              "sum_1": null,
+              "sum_2": null
+            },
+            "slots": {
+              "operand_1": {
+                "slot_id": "operand_1",
+                "value": 364,
+                "unit": null,
+                "source_text": "364",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "int"
+              },
+              "operand_2": {
+                "slot_id": "operand_2",
+                "value": 220,
+                "unit": null,
+                "source_text": "220",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "int"
+              },
+              "operand_3": {
+                "slot_id": "operand_3",
+                "value": 139,
+                "unit": null,
+                "source_text": "139",
+                "span": [
+                  0,
+                  0
+                ],
+                "extraction_method": "deterministic",
+                "verified": true,
+                "type_name": "int"
+              }
+            },
+            "verified": true,
+            "result": 723,
+            "status": "verified",
+            "error": null,
+            "metadata": {}
+          },
+          "plan": {
+            "steps": [
+              {
+                "output_var": "sum_1",
+                "operation": "add",
+                "args": {
+                  "a": "$operand_1",
+                  "b": "$operand_2"
+                },
+                "units": null,
+                "step_index": 1
+              },
+              {
+                "output_var": "sum_2",
+                "operation": "add",
+                "args": {
+                  "a": "$sum_1",
+                  "b": "$operand_3"
+                },
+                "units": null,
+                "step_index": 2
+              }
+            ],
+            "final_var": "sum_2",
+            "num_steps": 2
+          },
+          "plan_valid": true,
+          "plan_exact_match": true,
+          "num_steps": 2,
+          "step_results": {
+            "sum_1": 584,
+            "sum_2": 723
+          },
+          "total_retries": 0,
+          "latency_ms": 0.17,
+          "num_attempts": 1
+        }
+      },
+      "test_size": 56
+    }
+  },
+  "conversational_eval": {
+    "seed_42": {
+      "num_sessions": 10,
+      "turn1_accuracy": 0.7,
+      "turn2_accuracy": 0.9,
+      "ambiguous_reference_abstention": 1.0
+    },
+    "seed_43": {
+      "num_sessions": 10,
+      "turn1_accuracy": 0.8,
+      "turn2_accuracy": 0.9,
+      "ambiguous_reference_abstention": 1.0
+    },
+    "seed_44": {
+      "num_sessions": 10,
+      "turn1_accuracy": 0.9,
+      "turn2_accuracy": 0.9,
+      "ambiguous_reference_abstention": 1.0
+    }
+  },
+  "summary": {
+    "deterministic_template": {
+      "configuration": "1. Arm A: Deterministic Template Planner (Baseline)",
+      "mean_verified_answer_accuracy": 0.6933,
+      "mean_plan_validity_rate": 1.0,
+      "mean_plan_exact_match_rate": 0.8933,
+      "mean_abstention_correctness": 1.0,
+      "mean_failure_rate": 0.3067,
+      "mean_latency_ms": 0.18,
+      "mean_retries": 0.0,
+      "step_breakdown": {
+        "2": {
+          "verified_accuracy": 0.7667
+        },
+        "3": {
+          "verified_accuracy": 0.85
+        },
+        "5": {
+          "verified_accuracy": 0.0
+        }
+      }
+    },
+    "neural_literals": {
+      "configuration": "2. Arm B: Neural Plan with Generated Literals (M16 Baseline)",
+      "mean_verified_answer_accuracy": 0.0,
+      "mean_plan_validity_rate": 0.5533,
+      "mean_plan_exact_match_rate": 0.16,
+      "mean_abstention_correctness": 0.0,
+      "mean_failure_rate": 0.56,
+      "mean_latency_ms": 215.81,
+      "mean_retries": 0.0,
+      "step_breakdown": {
+        "2": {
+          "verified_accuracy": 0.0
+        },
+        "3": {
+          "verified_accuracy": 0.0
+        },
+        "5": {
+          "verified_accuracy": 0.0
+        }
+      }
+    },
+    "neural_slots": {
+      "configuration": "3. Arm C: Neural Plan with Deterministic Slot Injection",
+      "mean_verified_answer_accuracy": 0.1733,
+      "mean_plan_validity_rate": 0.6667,
+      "mean_plan_exact_match_rate": 0.2067,
+      "mean_abstention_correctness": 0.0,
+      "mean_failure_rate": 0.36,
+      "mean_latency_ms": 171.15,
+      "mean_retries": 0.0,
+      "step_breakdown": {
+        "2": {
+          "verified_accuracy": 0.8667
+        },
+        "3": {
+          "verified_accuracy": 0.0
+        },
+        "5": {
+          "verified_accuracy": 0.0
+        }
+      }
+    },
+    "neural_slots_retry": {
+      "configuration": "4. Arm D: Neural Plan with Slot Injection + Bounded Retry",
+      "mean_verified_answer_accuracy": 0.1733,
+      "mean_plan_validity_rate": 0.6667,
+      "mean_plan_exact_match_rate": 0.2067,
+      "mean_abstention_correctness": 0.0,
+      "mean_failure_rate": 0.36,
+      "mean_latency_ms": 234.8,
+      "mean_retries": 0.72,
+      "step_breakdown": {
+        "2": {
+          "verified_accuracy": 0.8667
+        },
+        "3": {
+          "verified_accuracy": 0.0
+        },
+        "5": {
+          "verified_accuracy": 0.0
+        }
+      }
+    },
+    "oracle_slots": {
+      "configuration": "5. Arm E: Oracle Plan with Deterministic Slot Injection",
+      "mean_verified_answer_accuracy": 1.0,
+      "mean_plan_validity_rate": 1.0,
+      "mean_plan_exact_match_rate": 1.0,
+      "mean_abstention_correctness": 1.0,
+      "mean_failure_rate": 0.0,
+      "mean_latency_ms": 0.12,
+      "mean_retries": 0.0,
+      "step_breakdown": {
+        "2": {
+          "verified_accuracy": 1.0
+        },
+        "3": {
+          "verified_accuracy": 1.0
+        },
+        "5": {
+          "verified_accuracy": 1.0
+        }
+      }
+    },
+    "conversational_memory": {
+      "mean_turn1_accuracy": 0.8,
+      "mean_turn2_accuracy": 0.9,
+      "mean_ambiguous_abstention": 1.0
+    }
+  },
+  "timestamp": 1792435317.4545035
+}
