@@ -220,7 +220,18 @@
   - Conversational Working Memory: **80.0% Turn 1 accuracy**, **90.0% Turn 2 accuracy**, and **100.0% safe abstention** on ambiguous queries.
   - Proves conclusively that eliminating literal value hallucination via slot grounding unlocks end-to-end neural multi-step execution.
 
-### M18: Guided Search and Curriculum for Deep Compositional Reasoning (Planned)
-- Scaled structural plan generation for deep (>3-step) execution graphs where causal autoregressive decoders experience compounding degradation.
-- Constrained beam search / MCTS with topological grammar masking to eliminate invalid plan generation at decoding time.
-- Curriculum-guided multi-hop reasoning and step-wise supervision.
+### M18: Grammar-Constrained, Execution-Guided Planning (In-Progress)
+- **Phase 1: Deterministic Baseline Audit & Reconciliation (Completed)**:
+  - Repaired 5-step kinematics argument regression in `DeterministicTemplatePlanner._plan_multi_segment_speed` (`b: d3` -> `b: t3`).
+  - Added regression test `test_deterministic_template_planner_three_segment_speed_regression` with unequal distances and times.
+  - Re-benchmarked frozen test sets (seeds 42, 43, 44): achieved **100.0% accuracy on 5-step problems** and reconciled overall deterministic baseline to strictly **89.33%** (matching M16).
+- **Phase 2: Grammar-Constrained Planning Engine (Completed)**:
+  - `PlanGrammar`: Enforces Single Static Assignment (SSA), rejects forward/cyclic references, and filters dimensionally incompatible operations (e.g. adding km + h).
+  - `GrammarConstrainedPlanner`: Stepwise incremental search with configurable beam width and expansion budget.
+  - Isolated Branch Working Memory: Deep-copied state per branch prevents state contamination across search paths.
+  - `TargetGoal` & Semantic Verification: Decouples structural plan executability from question goal completion (dependency completeness, unit consistency, ground-truth match).
+  - Controlled Addition Depth Ladders: Isolated DAG depth across 2, 3, 4, 5 steps with identical operand distribution.
+  - Test Suite: 128/128 passing tests across full project repository.
+- **Phase 3-6: Neural Step Proposing, Bounded Search Ablations, and T4 Benchmark Qualification (Upcoming)**:
+  - Compare M17 deterministic baseline vs. monolithic neural generation vs. grammar-constrained stepwise search.
+  - Benchmark on NVIDIA Tesla T4 across 3 lineages.

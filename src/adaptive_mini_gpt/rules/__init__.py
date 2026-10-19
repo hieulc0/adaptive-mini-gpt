@@ -43,6 +43,7 @@ from adaptive_mini_gpt.rules.multistep_dataset import (
     generate_conversational_problems,
     generate_multistep_abstention_problems,
     generate_multistep_instruction_corpus,
+    generate_addition_depth_ladder,
     generate_multistep_problems,
     get_multistep_split,
 )
@@ -55,6 +56,12 @@ from adaptive_mini_gpt.rules.plan import (
     PlanStep,
     PlanValidationError,
     UnitMismatchError,
+)
+from adaptive_mini_gpt.rules.grammar_planner import (
+    GrammarConstrainedPlanner,
+    PlanGrammar,
+    SearchBudgetExhaustedError,
+    TargetGoal,
 )
 from adaptive_mini_gpt.rules.planner import (
     DeterministicTemplatePlanner,

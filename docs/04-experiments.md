@@ -571,3 +571,32 @@ Evaluated across 3 independent lineages (seeds 42, 43, 44), testing 56 held-out 
    - Cross-turn variable resolution works reliably across turns (Turn 1: 80.0%, Turn 2: 90.0%).
    - On ambiguous queries (*"Now take that value and add 10"*), the system achieved **100.0% safe abstention**, fulfilling the safety criterion.
 4. **Conclusion & Status**: **MILESTONE 17 FULLY QUALIFIED**.
+
+---
+
+### M17 Deterministic Baseline Audit & Metric Reconciliation
+- **Report Artifact**: [`runs/m17_planning/m17_deterministic_baseline_reconciliation.json`](file:///home/hieulc/projects/adaptive-mini-gpt/runs/m17_planning/m17_deterministic_baseline_reconciliation.json)
+- **Root Cause**: An argument regression was identified in `DeterministicTemplatePlanner._plan_multi_segment_speed` where step 4 (`t_total`) passed `b: d3` (distance) instead of `b: t3` (duration) for 3-segment speed problems.
+- **Regression Test**: Added `test_deterministic_template_planner_three_segment_speed_regression` in [`tests/test_m16_planning.py`](file:///home/hieulc/projects/adaptive-mini-gpt/tests/test_m16_planning.py) with unequal distances and durations.
+- **Empirical Re-evaluation on Frozen Test Set (Seeds 42, 43, 44)**:
+  - 5-step, 3-segment speed problems: **100.0% verified accuracy** (10/10 per seed, restored from 0.0%).
+  - Total valid compositional problems (50 per seed): **89.33% verified accuracy** (Seed 42: 96.0%, Seed 43: 84.0%, Seed 44: 88.0%), fully reconciling the deterministic baseline to match M16.
+  - Abstention queries (6 per seed): **100.0% abstention correctness** across all seeds.
+
+---
+
+### M18: Grammar-Constrained, Execution-Guided Planning (Phase 2 Completed)
+- **Controlled Addition Depth Ladders**:
+  - Implemented `generate_addition_depth_ladder` in [`src/adaptive_mini_gpt/rules/multistep_dataset.py`](file:///home/hieulc/projects/adaptive-mini-gpt/src/adaptive_mini_gpt/rules/multistep_dataset.py).
+  - Isolates DAG topological depth from task domain by evaluating chained addition across 2 steps (3 operands), 3 steps (4 operands), 4 steps (5 operands), and 5 steps (6 operands) with identical operand distribution ([50, 300]) and SHA-256 cryptographic train/val/test splits.
+- **Plan Grammar Engine (`PlanGrammar`)**:
+  - Strict type, unit, and SSA enforcement on candidate generation and step validation.
+  - Rejects dimensionally incompatible operations (e.g. adding km to h), cyclic dependencies, and undefined references before execution.
+- **Bounded Search Engine with Isolated Branch Memory (`GrammarConstrainedPlanner`)**:
+  - Deep-copied working memory per branch ensures rejected branches leave zero residual state in sibling branches or parent memory.
+  - Bounded frontier search (`beam_width`, `max_expansions`, `max_depth`) with loop detection and state deduplication.
+  - Explicit failure upon search budget exhaustion (`SearchBudgetExhaustedError`).
+- **Semantic Goal Verification (`TargetGoal`)**:
+  - Decouples structural plan validity (executable DAG) from semantic correctness (answering the requested question).
+  - Verifies transitive slot dependencies, required physical units, and target answer correctness.
+- **Verification**: **128/128 passing pytest tests** across full project test suite.

@@ -95,370 +95,537 @@ def get_multistep_split(key: str) -> str:
         return "test"
 
 
+DEFAULT_ARCHETYPES = (
+    "2segment_speed",
+    "3segment_speed",
+    "chained_addition_3",
+    "chained_addition_4",
+    "multi_entity_compare",
+)
+
+
 def generate_multistep_problems(
     num_samples_per_archetype: int = 25,
     seed: int = 42,
     split: str = "train",
+    archetypes: list[str] | tuple[str, ...] | None = None,
 ) -> list[MultiStepProblem]:
     """Generate balanced multi-step problems with both literal and grounded-slot execution plans."""
     rng = random.Random(seed)
     problems: list[MultiStepProblem] = []
+    active_archetypes = set(archetypes) if archetypes is not None else set(DEFAULT_ARCHETYPES)
 
     # -------------------------------------------------------------
     # Archetype 1: 2-Segment Average Speed (3 steps)
     # -------------------------------------------------------------
-    speed_templates_2seg = [
-        "A car travels {d1} km in {t1} hours, then {d2} km in {t2} hours. What is its overall average speed?",
-        "A train covers {d1} km in {t1} hours, followed by another {d2} km in {t2} hours. Calculate average speed for the whole journey.",
-        "A delivery truck drives {d1} km in {t1} hours and then travels {d2} km in {t2} hours. What is the average speed of the trip?",
-        "An express bus covers a distance of {d1} km in {t1} hours, then another {d2} km in {t2} hours. Find its overall average speed.",
-        "In the year 2024, a vehicle travels {d1} km in {t1} hours, then {d2} km in {t2} hours. What is its average speed?",  # Distractor
-    ]
-    seen_2seg = set()
-    count = 0
-    attempts = 0
-    while count < num_samples_per_archetype and attempts < num_samples_per_archetype * 200:
-        attempts += 1
-        t1 = rng.randint(2, 4)
-        t2 = rng.randint(2, 4)
-        v1 = rng.choice([40, 50, 60, 75, 80])
-        v2 = rng.choice([50, 60, 75, 80, 100])
-        d1 = v1 * t1
-        d2 = v2 * t2
-        total_d = d1 + d2
-        total_t = t1 + t2
-        if total_d % total_t != 0:
-            continue
-        expected_speed = f"{total_d // total_t} km/h"
-        key = f"2seg_{d1}_{t1}_{d2}_{t2}"
-        if key in seen_2seg or get_multistep_split(key) != split:
-            continue
-        seen_2seg.add(key)
+    if "2segment_speed" in active_archetypes:
+        # -------------------------------------------------------------
+        speed_templates_2seg = [
+            "A car travels {d1} km in {t1} hours, then {d2} km in {t2} hours. What is its overall average speed?",
+            "A train covers {d1} km in {t1} hours, followed by another {d2} km in {t2} hours. Calculate average speed for the whole journey.",
+            "A delivery truck drives {d1} km in {t1} hours and then travels {d2} km in {t2} hours. What is the average speed of the trip?",
+            "An express bus covers a distance of {d1} km in {t1} hours, then another {d2} km in {t2} hours. Find its overall average speed.",
+            "In the year 2024, a vehicle travels {d1} km in {t1} hours, then {d2} km in {t2} hours. What is its average speed?",  # Distractor
+        ]
+        seen_2seg = set()
+        count = 0
+        attempts = 0
+        while count < num_samples_per_archetype and attempts < num_samples_per_archetype * 200:
+            attempts += 1
+            t1 = rng.randint(2, 4)
+            t2 = rng.randint(2, 4)
+            v1 = rng.choice([40, 50, 60, 75, 80])
+            v2 = rng.choice([50, 60, 75, 80, 100])
+            d1 = v1 * t1
+            d2 = v2 * t2
+            total_d = d1 + d2
+            total_t = t1 + t2
+            if total_d % total_t != 0:
+                continue
+            expected_speed = f"{total_d // total_t} km/h"
+            key = f"2seg_{d1}_{t1}_{d2}_{t2}"
+            if key in seen_2seg or get_multistep_split(key) != split:
+                continue
+            seen_2seg.add(key)
 
-        tmpl = rng.choice(speed_templates_2seg)
-        q = tmpl.format(d1=d1, t1=t1, d2=d2, t2=t2)
+            tmpl = rng.choice(speed_templates_2seg)
+            q = tmpl.format(d1=d1, t1=t1, d2=d2, t2=t2)
 
-        literal_plan = ExecutionPlan(
-            steps=[
-                PlanStep(output_var="d_total", operation="add", args={"a": float(d1), "b": float(d2)}, units="km"),
-                PlanStep(output_var="t_total", operation="add", args={"a": float(t1), "b": float(t2)}, units="h"),
-                PlanStep(
-                    output_var="overall_speed",
-                    operation="average_speed",
-                    args={"distance_km": "$d_total", "time_hours": "$t_total"},
-                    units="km/h",
-                ),
-            ],
-            final_var="overall_speed",
-        )
-
-        slots = {
-            "distance_1": GroundedSlot("distance_1", float(d1), "km", f"{d1} km", 0, 0, "deterministic"),
-            "duration_1": GroundedSlot("duration_1", float(t1), "h", f"{t1} hours", 0, 0, "deterministic"),
-            "distance_2": GroundedSlot("distance_2", float(d2), "km", f"{d2} km", 0, 0, "deterministic"),
-            "duration_2": GroundedSlot("duration_2", float(t2), "h", f"{t2} hours", 0, 0, "deterministic"),
-        }
-
-        slot_plan = ExecutionPlan(
-            steps=[
-                PlanStep(output_var="d_total", operation="add", args={"a": "$distance_1", "b": "$distance_2"}, units="km"),
-                PlanStep(output_var="t_total", operation="add", args={"a": "$duration_1", "b": "$duration_2"}, units="h"),
-                PlanStep(
-                    output_var="overall_speed",
-                    operation="average_speed",
-                    args={"distance_km": "$d_total", "time_hours": "$t_total"},
-                    units="km/h",
-                ),
-            ],
-            final_var="overall_speed",
-        )
-
-        problems.append(
-            MultiStepProblem(
-                question=q,
-                expected_plan=literal_plan,
-                expected_answer=expected_speed,
-                num_steps=3,
-                archetype="2segment_speed",
-                split=split,
-                slots=slots,
-                expected_slot_plan=slot_plan,
+            literal_plan = ExecutionPlan(
+                steps=[
+                    PlanStep(output_var="d_total", operation="add", args={"a": float(d1), "b": float(d2)}, units="km"),
+                    PlanStep(output_var="t_total", operation="add", args={"a": float(t1), "b": float(t2)}, units="h"),
+                    PlanStep(
+                        output_var="overall_speed",
+                        operation="average_speed",
+                        args={"distance_km": "$d_total", "time_hours": "$t_total"},
+                        units="km/h",
+                    ),
+                ],
+                final_var="overall_speed",
             )
-        )
-        count += 1
+
+            slots = {
+                "distance_1": GroundedSlot("distance_1", float(d1), "km", f"{d1} km", 0, 0, "deterministic"),
+                "duration_1": GroundedSlot("duration_1", float(t1), "h", f"{t1} hours", 0, 0, "deterministic"),
+                "distance_2": GroundedSlot("distance_2", float(d2), "km", f"{d2} km", 0, 0, "deterministic"),
+                "duration_2": GroundedSlot("duration_2", float(t2), "h", f"{t2} hours", 0, 0, "deterministic"),
+            }
+
+            slot_plan = ExecutionPlan(
+                steps=[
+                    PlanStep(output_var="d_total", operation="add", args={"a": "$distance_1", "b": "$distance_2"}, units="km"),
+                    PlanStep(output_var="t_total", operation="add", args={"a": "$duration_1", "b": "$duration_2"}, units="h"),
+                    PlanStep(
+                        output_var="overall_speed",
+                        operation="average_speed",
+                        args={"distance_km": "$d_total", "time_hours": "$t_total"},
+                        units="km/h",
+                    ),
+                ],
+                final_var="overall_speed",
+            )
+
+            problems.append(
+                MultiStepProblem(
+                    question=q,
+                    expected_plan=literal_plan,
+                    expected_answer=expected_speed,
+                    num_steps=3,
+                    archetype="2segment_speed",
+                    split=split,
+                    slots=slots,
+                    expected_slot_plan=slot_plan,
+                )
+            )
+            count += 1
+
 
     # -------------------------------------------------------------
     # Archetype 2: 3-Segment Average Speed (5 steps)
     # -------------------------------------------------------------
-    speed_templates_3seg = [
-        "A car travels {d1} km in {t1} hours, then {d2} km in {t2} hours, and finally {d3} km in {t3} hours. What is its overall average speed?",
-        "A train covers {d1} km in {t1} hours, another {d2} km in {t2} hours, then {d3} km in {t3} hours. Calculate average speed for the whole journey.",
-    ]
-    seen_3seg = set()
-    count = 0
-    attempts = 0
-    while count < num_samples_per_archetype and attempts < num_samples_per_archetype * 200:
-        attempts += 1
-        t1, t2, t3 = rng.randint(1, 3), rng.randint(1, 3), rng.randint(1, 3)
-        v = rng.choice([50, 60, 75, 80, 90, 100])
-        total_t = t1 + t2 + t3
-        total_d = v * total_t
-        d1 = rng.randint(40, 120)
-        d2 = rng.randint(40, 120)
-        d3 = total_d - (d1 + d2)
-        if d3 < 20 or d3 % 10 != 0:
-            continue
+    if "3segment_speed" in active_archetypes:
+        speed_templates_3seg = [
+            "A car travels {d1} km in {t1} hours, then {d2} km in {t2} hours, and finally {d3} km in {t3} hours. What is its overall average speed?",
+            "A train covers {d1} km in {t1} hours, another {d2} km in {t2} hours, then {d3} km in {t3} hours. Calculate average speed for the whole journey.",
+        ]
+        seen_3seg = set()
+        count = 0
+        attempts = 0
+        while count < num_samples_per_archetype and attempts < num_samples_per_archetype * 200:
+            attempts += 1
+            t1, t2, t3 = rng.randint(1, 3), rng.randint(1, 3), rng.randint(1, 3)
+            v = rng.choice([50, 60, 75, 80, 90, 100])
+            total_t = t1 + t2 + t3
+            total_d = v * total_t
+            d1 = rng.randint(40, 120)
+            d2 = rng.randint(40, 120)
+            d3 = total_d - (d1 + d2)
+            if d3 < 20 or d3 % 10 != 0:
+                continue
 
-        key = f"3seg_{d1}_{t1}_{d2}_{t2}_{d3}_{t3}"
-        if key in seen_3seg or get_multistep_split(key) != split:
-            continue
-        seen_3seg.add(key)
+            key = f"3seg_{d1}_{t1}_{d2}_{t2}_{d3}_{t3}"
+            if key in seen_3seg or get_multistep_split(key) != split:
+                continue
+            seen_3seg.add(key)
 
-        tmpl = rng.choice(speed_templates_3seg)
-        q = tmpl.format(d1=d1, t1=t1, d2=d2, t2=t2, d3=d3, t3=t3)
-        expected_speed = f"{v} km/h"
+            tmpl = rng.choice(speed_templates_3seg)
+            q = tmpl.format(d1=d1, t1=t1, d2=d2, t2=t2, d3=d3, t3=t3)
+            expected_speed = f"{v} km/h"
 
-        literal_plan = ExecutionPlan(
-            steps=[
-                PlanStep(output_var="d_12", operation="add", args={"a": float(d1), "b": float(d2)}, units="km"),
-                PlanStep(output_var="d_total", operation="add", args={"a": "$d_12", "b": float(d3)}, units="km"),
-                PlanStep(output_var="t_12", operation="add", args={"a": float(t1), "b": float(t2)}, units="h"),
-                PlanStep(output_var="t_total", operation="add", args={"a": "$t_12", "b": float(t3)}, units="h"),
-                PlanStep(
-                    output_var="overall_speed",
-                    operation="average_speed",
-                    args={"distance_km": "$d_total", "time_hours": "$t_total"},
-                    units="km/h",
-                ),
-            ],
-            final_var="overall_speed",
-        )
-
-        slots = {
-            "distance_1": GroundedSlot("distance_1", float(d1), "km", f"{d1} km", 0, 0, "deterministic"),
-            "duration_1": GroundedSlot("duration_1", float(t1), "h", f"{t1} hours", 0, 0, "deterministic"),
-            "distance_2": GroundedSlot("distance_2", float(d2), "km", f"{d2} km", 0, 0, "deterministic"),
-            "duration_2": GroundedSlot("duration_2", float(t2), "h", f"{t2} hours", 0, 0, "deterministic"),
-            "distance_3": GroundedSlot("distance_3", float(d3), "km", f"{d3} km", 0, 0, "deterministic"),
-            "duration_3": GroundedSlot("duration_3", float(t3), "h", f"{t3} hours", 0, 0, "deterministic"),
-        }
-
-        slot_plan = ExecutionPlan(
-            steps=[
-                PlanStep(output_var="d_12", operation="add", args={"a": "$distance_1", "b": "$distance_2"}, units="km"),
-                PlanStep(output_var="d_total", operation="add", args={"a": "$d_12", "b": "$distance_3"}, units="km"),
-                PlanStep(output_var="t_12", operation="add", args={"a": "$duration_1", "b": "$duration_2"}, units="h"),
-                PlanStep(output_var="t_total", operation="add", args={"a": "$t_12", "b": "$duration_3"}, units="h"),
-                PlanStep(
-                    output_var="overall_speed",
-                    operation="average_speed",
-                    args={"distance_km": "$d_total", "time_hours": "$t_total"},
-                    units="km/h",
-                ),
-            ],
-            final_var="overall_speed",
-        )
-
-        problems.append(
-            MultiStepProblem(
-                question=q,
-                expected_plan=literal_plan,
-                expected_answer=expected_speed,
-                num_steps=5,
-                archetype="3segment_speed",
-                split=split,
-                slots=slots,
-                expected_slot_plan=slot_plan,
+            literal_plan = ExecutionPlan(
+                steps=[
+                    PlanStep(output_var="d_12", operation="add", args={"a": float(d1), "b": float(d2)}, units="km"),
+                    PlanStep(output_var="d_total", operation="add", args={"a": "$d_12", "b": float(d3)}, units="km"),
+                    PlanStep(output_var="t_12", operation="add", args={"a": float(t1), "b": float(t2)}, units="h"),
+                    PlanStep(output_var="t_total", operation="add", args={"a": "$t_12", "b": float(t3)}, units="h"),
+                    PlanStep(
+                        output_var="overall_speed",
+                        operation="average_speed",
+                        args={"distance_km": "$d_total", "time_hours": "$t_total"},
+                        units="km/h",
+                    ),
+                ],
+                final_var="overall_speed",
             )
-        )
-        count += 1
+
+            slots = {
+                "distance_1": GroundedSlot("distance_1", float(d1), "km", f"{d1} km", 0, 0, "deterministic"),
+                "duration_1": GroundedSlot("duration_1", float(t1), "h", f"{t1} hours", 0, 0, "deterministic"),
+                "distance_2": GroundedSlot("distance_2", float(d2), "km", f"{d2} km", 0, 0, "deterministic"),
+                "duration_2": GroundedSlot("duration_2", float(t2), "h", f"{t2} hours", 0, 0, "deterministic"),
+                "distance_3": GroundedSlot("distance_3", float(d3), "km", f"{d3} km", 0, 0, "deterministic"),
+                "duration_3": GroundedSlot("duration_3", float(t3), "h", f"{t3} hours", 0, 0, "deterministic"),
+            }
+
+            slot_plan = ExecutionPlan(
+                steps=[
+                    PlanStep(output_var="d_12", operation="add", args={"a": "$distance_1", "b": "$distance_2"}, units="km"),
+                    PlanStep(output_var="d_total", operation="add", args={"a": "$d_12", "b": "$distance_3"}, units="km"),
+                    PlanStep(output_var="t_12", operation="add", args={"a": "$duration_1", "b": "$duration_2"}, units="h"),
+                    PlanStep(output_var="t_total", operation="add", args={"a": "$t_12", "b": "$duration_3"}, units="h"),
+                    PlanStep(
+                        output_var="overall_speed",
+                        operation="average_speed",
+                        args={"distance_km": "$d_total", "time_hours": "$t_total"},
+                        units="km/h",
+                    ),
+                ],
+                final_var="overall_speed",
+            )
+
+            problems.append(
+                MultiStepProblem(
+                    question=q,
+                    expected_plan=literal_plan,
+                    expected_answer=expected_speed,
+                    num_steps=5,
+                    archetype="3segment_speed",
+                    split=split,
+                    slots=slots,
+                    expected_slot_plan=slot_plan,
+                )
+            )
+            count += 1
+
 
     # -------------------------------------------------------------
     # Archetype 3: Chained Addition - 3 Operands (2 steps)
     # -------------------------------------------------------------
-    add_templates_3ops = [
-        "Calculate the sum of {a}, {b}, and {c}.",
-        "What is the total of {a}, {b}, and {c}?",
-        "Add {a}, {b}, and {c} together.",
-        "Compute {a} plus {b} plus {c}.",
-    ]
-    seen_3ops = set()
-    count = 0
-    attempts = 0
-    while count < num_samples_per_archetype and attempts < num_samples_per_archetype * 200:
-        attempts += 1
-        a = rng.randint(100, 500)
-        b = rng.randint(100, 500)
-        c = rng.randint(100, 500)
-        key = f"add3_{a}_{b}_{c}"
-        if key in seen_3ops or get_multistep_split(key) != split:
-            continue
-        seen_3ops.add(key)
+    if "chained_addition_3" in active_archetypes:
+        add_templates_3ops = [
+            "Calculate the sum of {a}, {b}, and {c}.",
+            "What is the total of {a}, {b}, and {c}?",
+            "Add {a}, {b}, and {c} together.",
+            "Compute {a} plus {b} plus {c}.",
+        ]
+        seen_3ops = set()
+        count = 0
+        attempts = 0
+        while count < num_samples_per_archetype and attempts < num_samples_per_archetype * 200:
+            attempts += 1
+            a = rng.randint(100, 500)
+            b = rng.randint(100, 500)
+            c = rng.randint(100, 500)
+            key = f"add3_{a}_{b}_{c}"
+            if key in seen_3ops or get_multistep_split(key) != split:
+                continue
+            seen_3ops.add(key)
 
-        tmpl = rng.choice(add_templates_3ops)
-        q = tmpl.format(a=a, b=b, c=c)
-        expected_ans = str(a + b + c)
+            tmpl = rng.choice(add_templates_3ops)
+            q = tmpl.format(a=a, b=b, c=c)
+            expected_ans = str(a + b + c)
 
-        literal_plan = ExecutionPlan(
-            steps=[
-                PlanStep(output_var="sum_1", operation="add", args={"a": a, "b": b}),
-                PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": c}),
-            ],
-            final_var="sum_2",
-        )
-
-        slots = {
-            "operand_1": GroundedSlot("operand_1", a, None, str(a), 0, 0, "deterministic", type_name="int"),
-            "operand_2": GroundedSlot("operand_2", b, None, str(b), 0, 0, "deterministic", type_name="int"),
-            "operand_3": GroundedSlot("operand_3", c, None, str(c), 0, 0, "deterministic", type_name="int"),
-        }
-
-        slot_plan = ExecutionPlan(
-            steps=[
-                PlanStep(output_var="sum_1", operation="add", args={"a": "$operand_1", "b": "$operand_2"}),
-                PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": "$operand_3"}),
-            ],
-            final_var="sum_2",
-        )
-
-        problems.append(
-            MultiStepProblem(
-                question=q,
-                expected_plan=literal_plan,
-                expected_answer=expected_ans,
-                num_steps=2,
-                archetype="chained_addition_3",
-                split=split,
-                slots=slots,
-                expected_slot_plan=slot_plan,
+            literal_plan = ExecutionPlan(
+                steps=[
+                    PlanStep(output_var="sum_1", operation="add", args={"a": a, "b": b}),
+                    PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": c}),
+                ],
+                final_var="sum_2",
             )
-        )
-        count += 1
+
+            slots = {
+                "operand_1": GroundedSlot("operand_1", a, None, str(a), 0, 0, "deterministic", type_name="int"),
+                "operand_2": GroundedSlot("operand_2", b, None, str(b), 0, 0, "deterministic", type_name="int"),
+                "operand_3": GroundedSlot("operand_3", c, None, str(c), 0, 0, "deterministic", type_name="int"),
+            }
+
+            slot_plan = ExecutionPlan(
+                steps=[
+                    PlanStep(output_var="sum_1", operation="add", args={"a": "$operand_1", "b": "$operand_2"}),
+                    PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": "$operand_3"}),
+                ],
+                final_var="sum_2",
+            )
+
+            problems.append(
+                MultiStepProblem(
+                    question=q,
+                    expected_plan=literal_plan,
+                    expected_answer=expected_ans,
+                    num_steps=2,
+                    archetype="chained_addition_3",
+                    split=split,
+                    slots=slots,
+                    expected_slot_plan=slot_plan,
+                )
+            )
+            count += 1
+
 
     # -------------------------------------------------------------
     # Archetype 4: Chained Addition - 4 Operands (3 steps)
     # -------------------------------------------------------------
-    add_templates_4ops = [
-        "Find the total sum of {a}, {b}, {c}, and {d}.",
-        "What is {a} plus {b} plus {c} plus {d}?",
-        "Calculate the sum of {a}, {b}, {c}, and {d} together.",
-    ]
-    seen_4ops = set()
-    count = 0
-    attempts = 0
-    while count < num_samples_per_archetype and attempts < num_samples_per_archetype * 200:
-        attempts += 1
-        a = rng.randint(50, 300)
-        b = rng.randint(50, 300)
-        c = rng.randint(50, 300)
-        d = rng.randint(50, 300)
-        key = f"add4_{a}_{b}_{c}_{d}"
-        if key in seen_4ops or get_multistep_split(key) != split:
-            continue
-        seen_4ops.add(key)
+    if "chained_addition_4" in active_archetypes:
+        add_templates_4ops = [
+            "Find the total sum of {a}, {b}, {c}, and {d}.",
+            "What is {a} plus {b} plus {c} plus {d}?",
+            "Calculate the sum of {a}, {b}, {c}, and {d} together.",
+        ]
+        seen_4ops = set()
+        count = 0
+        attempts = 0
+        while count < num_samples_per_archetype and attempts < num_samples_per_archetype * 200:
+            attempts += 1
+            a = rng.randint(50, 300)
+            b = rng.randint(50, 300)
+            c = rng.randint(50, 300)
+            d = rng.randint(50, 300)
+            key = f"add4_{a}_{b}_{c}_{d}"
+            if key in seen_4ops or get_multistep_split(key) != split:
+                continue
+            seen_4ops.add(key)
 
-        tmpl = rng.choice(add_templates_4ops)
-        q = tmpl.format(a=a, b=b, c=c, d=d)
-        expected_ans = str(a + b + c + d)
+            tmpl = rng.choice(add_templates_4ops)
+            q = tmpl.format(a=a, b=b, c=c, d=d)
+            expected_ans = str(a + b + c + d)
 
-        literal_plan = ExecutionPlan(
-            steps=[
-                PlanStep(output_var="sum_1", operation="add", args={"a": a, "b": b}),
-                PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": c}),
-                PlanStep(output_var="sum_3", operation="add", args={"a": "$sum_2", "b": d}),
-            ],
-            final_var="sum_3",
-        )
-
-        slots = {
-            "operand_1": GroundedSlot("operand_1", a, None, str(a), 0, 0, "deterministic", type_name="int"),
-            "operand_2": GroundedSlot("operand_2", b, None, str(b), 0, 0, "deterministic", type_name="int"),
-            "operand_3": GroundedSlot("operand_3", c, None, str(c), 0, 0, "deterministic", type_name="int"),
-            "operand_4": GroundedSlot("operand_4", d, None, str(d), 0, 0, "deterministic", type_name="int"),
-        }
-
-        slot_plan = ExecutionPlan(
-            steps=[
-                PlanStep(output_var="sum_1", operation="add", args={"a": "$operand_1", "b": "$operand_2"}),
-                PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": "$operand_3"}),
-                PlanStep(output_var="sum_3", operation="add", args={"a": "$sum_2", "b": "$operand_4"}),
-            ],
-            final_var="sum_3",
-        )
-
-        problems.append(
-            MultiStepProblem(
-                question=q,
-                expected_plan=literal_plan,
-                expected_answer=expected_ans,
-                num_steps=3,
-                archetype="chained_addition_4",
-                split=split,
-                slots=slots,
-                expected_slot_plan=slot_plan,
+            literal_plan = ExecutionPlan(
+                steps=[
+                    PlanStep(output_var="sum_1", operation="add", args={"a": a, "b": b}),
+                    PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": c}),
+                    PlanStep(output_var="sum_3", operation="add", args={"a": "$sum_2", "b": d}),
+                ],
+                final_var="sum_3",
             )
-        )
-        count += 1
 
-    # -------------------------------------------------------------
-    # Archetype 5: Transitive Comparison Chains (4 Entities)
-    # -------------------------------------------------------------
-    name_pool = [
-        "Anna", "Ben", "Chris", "David", "Emma", "Frank", "Grace", "Henry",
-        "Ivy", "Jack", "Kate", "Liam", "Mia", "Noah", "Olivia", "Paul",
-    ]
-    seen_compare4 = set()
-    count = 0
-    attempts = 0
-    while count < num_samples_per_archetype and attempts < num_samples_per_archetype * 200:
-        attempts += 1
-        e = tuple(rng.sample(name_pool, 4))
-        key = f"cmp4_{e[0]}_{e[1]}_{e[2]}_{e[3]}"
-        if key in seen_compare4 or get_multistep_split(key) != split:
-            continue
-        seen_compare4.add(key)
+            slots = {
+                "operand_1": GroundedSlot("operand_1", a, None, str(a), 0, 0, "deterministic", type_name="int"),
+                "operand_2": GroundedSlot("operand_2", b, None, str(b), 0, 0, "deterministic", type_name="int"),
+                "operand_3": GroundedSlot("operand_3", c, None, str(c), 0, 0, "deterministic", type_name="int"),
+                "operand_4": GroundedSlot("operand_4", d, None, str(d), 0, 0, "deterministic", type_name="int"),
+            }
 
-        q = (
-            f"If {e[0]} is taller than {e[1]}, {e[1]} is taller than {e[2]}, "
-            f"and {e[2]} is taller than {e[3]}, who is taller, {e[0]} or {e[3]}?"
-        )
-        expected_ans = e[0]
+            slot_plan = ExecutionPlan(
+                steps=[
+                    PlanStep(output_var="sum_1", operation="add", args={"a": "$operand_1", "b": "$operand_2"}),
+                    PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": "$operand_3"}),
+                    PlanStep(output_var="sum_3", operation="add", args={"a": "$sum_2", "b": "$operand_4"}),
+                ],
+                final_var="sum_3",
+            )
 
-        literal_plan = ExecutionPlan(
-            steps=[
-                PlanStep(
-                    output_var="comparison_result",
-                    operation="compare",
-                    args={
-                        "entity_a": e[0],
-                        "entity_b": e[3],
-                        "relations": [f"{e[0]} > {e[1]}", f"{e[1]} > {e[2]}", f"{e[2]} > {e[3]}"],
-                    },
+            problems.append(
+                MultiStepProblem(
+                    question=q,
+                    expected_plan=literal_plan,
+                    expected_answer=expected_ans,
+                    num_steps=3,
+                    archetype="chained_addition_4",
+                    split=split,
+                    slots=slots,
+                    expected_slot_plan=slot_plan,
                 )
-            ],
-            final_var="comparison_result",
-        )
-
-        slots = {
-            "entity_1": GroundedSlot("entity_1", e[0], None, e[0], 0, 0, "deterministic", type_name="str"),
-            "entity_2": GroundedSlot("entity_2", e[1], None, e[1], 0, 0, "deterministic", type_name="str"),
-            "entity_3": GroundedSlot("entity_3", e[2], None, e[2], 0, 0, "deterministic", type_name="str"),
-            "entity_4": GroundedSlot("entity_4", e[3], None, e[3], 0, 0, "deterministic", type_name="str"),
-        }
-
-        problems.append(
-            MultiStepProblem(
-                question=q,
-                expected_plan=literal_plan,
-                expected_answer=expected_ans,
-                num_steps=1,
-                archetype="multi_entity_compare",
-                split=split,
-                slots=slots,
-                expected_slot_plan=literal_plan,
             )
-        )
-        count += 1
+            count += 1
+
+
+    # -------------------------------------------------------------
+    # Archetype: Chained Addition - 5 Operands (4 steps)
+    # -------------------------------------------------------------
+    if "chained_addition_5" in active_archetypes:
+        add_templates_5ops = [
+            "Find the total sum of {a}, {b}, {c}, {d}, and {e}.",
+            "What is {a} plus {b} plus {c} plus {d} plus {e}?",
+            "Calculate the sum of {a}, {b}, {c}, {d}, and {e} together.",
+            "Add {a}, {b}, {c}, {d}, and {e} together.",
+        ]
+        seen_5ops = set()
+        count = 0
+        attempts = 0
+        while count < num_samples_per_archetype and attempts < num_samples_per_archetype * 200:
+            attempts += 1
+            a = rng.randint(50, 300)
+            b = rng.randint(50, 300)
+            c = rng.randint(50, 300)
+            d = rng.randint(50, 300)
+            e = rng.randint(50, 300)
+            key = f"add5_{a}_{b}_{c}_{d}_{e}"
+            if key in seen_5ops or get_multistep_split(key) != split:
+                continue
+            seen_5ops.add(key)
+
+            tmpl = rng.choice(add_templates_5ops)
+            q = tmpl.format(a=a, b=b, c=c, d=d, e=e)
+            expected_ans = str(a + b + c + d + e)
+
+            literal_plan = ExecutionPlan(
+                steps=[
+                    PlanStep(output_var="sum_1", operation="add", args={"a": a, "b": b}),
+                    PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": c}),
+                    PlanStep(output_var="sum_3", operation="add", args={"a": "$sum_2", "b": d}),
+                    PlanStep(output_var="sum_4", operation="add", args={"a": "$sum_3", "b": e}),
+                ],
+                final_var="sum_4",
+            )
+
+            slots = {
+                "operand_1": GroundedSlot("operand_1", a, None, str(a), 0, 0, "deterministic", type_name="int"),
+                "operand_2": GroundedSlot("operand_2", b, None, str(b), 0, 0, "deterministic", type_name="int"),
+                "operand_3": GroundedSlot("operand_3", c, None, str(c), 0, 0, "deterministic", type_name="int"),
+                "operand_4": GroundedSlot("operand_4", d, None, str(d), 0, 0, "deterministic", type_name="int"),
+                "operand_5": GroundedSlot("operand_5", e, None, str(e), 0, 0, "deterministic", type_name="int"),
+            }
+
+            slot_plan = ExecutionPlan(
+                steps=[
+                    PlanStep(output_var="sum_1", operation="add", args={"a": "$operand_1", "b": "$operand_2"}),
+                    PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": "$operand_3"}),
+                    PlanStep(output_var="sum_3", operation="add", args={"a": "$sum_2", "b": "$operand_4"}),
+                    PlanStep(output_var="sum_4", operation="add", args={"a": "$sum_3", "b": "$operand_5"}),
+                ],
+                final_var="sum_4",
+            )
+
+            problems.append(
+                MultiStepProblem(
+                    question=q,
+                    expected_plan=literal_plan,
+                    expected_answer=expected_ans,
+                    num_steps=4,
+                    archetype="chained_addition_5",
+                    split=split,
+                    slots=slots,
+                    expected_slot_plan=slot_plan,
+                )
+            )
+            count += 1
+
+    # -------------------------------------------------------------
+    # Archetype: Chained Addition - 6 Operands (5 steps)
+    # -------------------------------------------------------------
+    if "chained_addition_6" in active_archetypes:
+        add_templates_6ops = [
+            "Find the total sum of {a}, {b}, {c}, {d}, {e}, and {f}.",
+            "What is {a} plus {b} plus {c} plus {d} plus {e} plus {f}?",
+            "Calculate the sum of {a}, {b}, {c}, {d}, {e}, and {f} together.",
+            "Add {a}, {b}, {c}, {d}, {e}, and {f} together.",
+        ]
+        seen_6ops = set()
+        count = 0
+        attempts = 0
+        while count < num_samples_per_archetype and attempts < num_samples_per_archetype * 200:
+            attempts += 1
+            a = rng.randint(50, 300)
+            b = rng.randint(50, 300)
+            c = rng.randint(50, 300)
+            d = rng.randint(50, 300)
+            e = rng.randint(50, 300)
+            f_val = rng.randint(50, 300)
+            key = f"add6_{a}_{b}_{c}_{d}_{e}_{f_val}"
+            if key in seen_6ops or get_multistep_split(key) != split:
+                continue
+            seen_6ops.add(key)
+
+            tmpl = rng.choice(add_templates_6ops)
+            q = tmpl.format(a=a, b=b, c=c, d=d, e=e, f=f_val)
+            expected_ans = str(a + b + c + d + e + f_val)
+
+            literal_plan = ExecutionPlan(
+                steps=[
+                    PlanStep(output_var="sum_1", operation="add", args={"a": a, "b": b}),
+                    PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": c}),
+                    PlanStep(output_var="sum_3", operation="add", args={"a": "$sum_2", "b": d}),
+                    PlanStep(output_var="sum_4", operation="add", args={"a": "$sum_3", "b": e}),
+                    PlanStep(output_var="sum_5", operation="add", args={"a": "$sum_4", "b": f_val}),
+                ],
+                final_var="sum_5",
+            )
+
+            slots = {
+                "operand_1": GroundedSlot("operand_1", a, None, str(a), 0, 0, "deterministic", type_name="int"),
+                "operand_2": GroundedSlot("operand_2", b, None, str(b), 0, 0, "deterministic", type_name="int"),
+                "operand_3": GroundedSlot("operand_3", c, None, str(c), 0, 0, "deterministic", type_name="int"),
+                "operand_4": GroundedSlot("operand_4", d, None, str(d), 0, 0, "deterministic", type_name="int"),
+                "operand_5": GroundedSlot("operand_5", e, None, str(e), 0, 0, "deterministic", type_name="int"),
+                "operand_6": GroundedSlot("operand_6", f_val, None, str(f_val), 0, 0, "deterministic", type_name="int"),
+            }
+
+            slot_plan = ExecutionPlan(
+                steps=[
+                    PlanStep(output_var="sum_1", operation="add", args={"a": "$operand_1", "b": "$operand_2"}),
+                    PlanStep(output_var="sum_2", operation="add", args={"a": "$sum_1", "b": "$operand_3"}),
+                    PlanStep(output_var="sum_3", operation="add", args={"a": "$sum_2", "b": "$operand_4"}),
+                    PlanStep(output_var="sum_4", operation="add", args={"a": "$sum_3", "b": "$operand_5"}),
+                    PlanStep(output_var="sum_5", operation="add", args={"a": "$sum_4", "b": "$operand_6"}),
+                ],
+                final_var="sum_5",
+            )
+
+            problems.append(
+                MultiStepProblem(
+                    question=q,
+                    expected_plan=literal_plan,
+                    expected_answer=expected_ans,
+                    num_steps=5,
+                    archetype="chained_addition_6",
+                    split=split,
+                    slots=slots,
+                    expected_slot_plan=slot_plan,
+                )
+            )
+            count += 1
+
+    # -------------------------------------------------------------
+    # Archetype 7: Transitive Comparison Chains (4 Entities)
+    # -------------------------------------------------------------
+    if "multi_entity_compare" in active_archetypes:
+        name_pool = [
+            "Anna", "Ben", "Chris", "David", "Emma", "Frank", "Grace", "Henry",
+            "Ivy", "Jack", "Kate", "Liam", "Mia", "Noah", "Olivia", "Paul",
+        ]
+        seen_compare4 = set()
+        count = 0
+        attempts = 0
+        while count < num_samples_per_archetype and attempts < num_samples_per_archetype * 200:
+            attempts += 1
+            e = tuple(rng.sample(name_pool, 4))
+            key = f"cmp4_{e[0]}_{e[1]}_{e[2]}_{e[3]}"
+            if key in seen_compare4 or get_multistep_split(key) != split:
+                continue
+            seen_compare4.add(key)
+
+            q = (
+                f"If {e[0]} is taller than {e[1]}, {e[1]} is taller than {e[2]}, "
+                f"and {e[2]} is taller than {e[3]}, who is taller, {e[0]} or {e[3]}?"
+            )
+            expected_ans = e[0]
+
+            literal_plan = ExecutionPlan(
+                steps=[
+                    PlanStep(
+                        output_var="comparison_result",
+                        operation="compare",
+                        args={
+                            "entity_a": e[0],
+                            "entity_b": e[3],
+                            "relations": [f"{e[0]} > {e[1]}", f"{e[1]} > {e[2]}", f"{e[2]} > {e[3]}"],
+                        },
+                    )
+                ],
+                final_var="comparison_result",
+            )
+
+            slots = {
+                "entity_1": GroundedSlot("entity_1", e[0], None, e[0], 0, 0, "deterministic", type_name="str"),
+                "entity_2": GroundedSlot("entity_2", e[1], None, e[1], 0, 0, "deterministic", type_name="str"),
+                "entity_3": GroundedSlot("entity_3", e[2], None, e[2], 0, 0, "deterministic", type_name="str"),
+                "entity_4": GroundedSlot("entity_4", e[3], None, e[3], 0, 0, "deterministic", type_name="str"),
+            }
+
+            problems.append(
+                MultiStepProblem(
+                    question=q,
+                    expected_plan=literal_plan,
+                    expected_answer=expected_ans,
+                    num_steps=1,
+                    archetype="multi_entity_compare",
+                    split=split,
+                    slots=slots,
+                    expected_slot_plan=literal_plan,
+                )
+            )
+            count += 1
 
     rng.shuffle(problems)
     return problems
@@ -730,3 +897,25 @@ def generate_multistep_instruction_corpus(
     text = "".join(pairs)
     fp = hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
     return text, fp
+
+
+def generate_addition_depth_ladder(
+    num_samples_per_depth: int = 10,
+    seed: int = 42,
+    split: str = "test",
+) -> list[MultiStepProblem]:
+    """Generate controlled chained addition problems across depths: 2, 3, 4, and 5 reasoning steps.
+
+    Holds operation type (addition), operand range ([50, 300]),
+    and evaluation conditions constant across depths to isolate DAG depth from task domain:
+    - 2 steps: chained_addition_3 (3 operands)
+    - 3 steps: chained_addition_4 (4 operands)
+    - 4 steps: chained_addition_5 (5 operands)
+    - 5 steps: chained_addition_6 (6 operands)
+    """
+    return generate_multistep_problems(
+        num_samples_per_archetype=num_samples_per_depth,
+        seed=seed,
+        split=split,
+        archetypes=["chained_addition_3", "chained_addition_4", "chained_addition_5", "chained_addition_6"],
+    )
