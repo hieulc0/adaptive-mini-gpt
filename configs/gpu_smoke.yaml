@@ -1,0 +1,20 @@
+# Provider-independent, quota-friendly CLI qualification configuration.
+model:
+  d_model: 32
+  n_layers: 1
+  n_heads: 2
+  d_ff: 64
+  context_length: 32
+  dropout: 0.0
+training:
+  batch_size: 2
+  gradient_accumulation: 1
+  max_steps: 4
+  eval_every_steps: 2
+  eval_steps: 1
+  checkpoint_every_steps: 2
+  checkpoint_every_seconds: 60
+  keep_last_n_checkpoints: 2
+  lr_schedule: constant
+  device: cuda
+  precision: fp16

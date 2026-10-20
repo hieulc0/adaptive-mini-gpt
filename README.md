@@ -18,7 +18,7 @@ Under a matched compute and token budget, **function-preserving modular growth**
 
 - **Learn first, adapt later:** Verify dense baselines and deterministic resumption before activating routing or capacity growth.
 - **Function-preserving transitions:** Any structural growth operation ($M \to M'$) must satisfy $M'(x) = M(x)$ at the step of expansion via zero-initialized residual projections.
-- **Single-process CLI parity:** Identical `amg` CLI execution on local Arch Linux CPU and interactive Google Colab T4 GPUs.
+- **Single-process CLI parity:** Identical `amg` CLI execution on local Arch Linux CPU, Google Colab, and Kaggle T4 GPUs.
 - **Crash-only atomic persistence:** Checkpoints write to temporary files, pass a load verification smoke test, and atomically swap via `os.replace` alongside a versioned `manifest.json`.
 - **Reproducible evaluation:** Deterministic document/task splits, SHA-256 data and vocabulary fingerprints, and isolated holdout verification.
 
@@ -72,6 +72,29 @@ uvx --from google-colab-cli colab stop -s amg-t4
 ```
 
 See [docs/03-training-and-colab.md](docs/03-training-and-colab.md) for the full headless terminal guide and step-by-step training commands.
+
+## Kaggle Free GPU workflow
+
+Kaggle runs the existing `amg train` CLI with FP16, using a private source dataset
+and a small bootstrap script. Start with a short T4 smoke qualification:
+
+```bash
+uv tool install kaggle
+kaggle auth login
+export KAGGLE_USERNAME='your_actual_kaggle_username'
+uv run python kaggle/prepare.py --username "$KAGGLE_USERNAME" --mode smoke
+kaggle datasets create -p runs/kaggle/code
+# Wait for dataset readiness before submitting.
+kaggle kernels push -p runs/kaggle/job --accelerator NvidiaTeslaT4 --timeout 600
+kaggle kernels status "$KAGGLE_USERNAME/amg-t4-smoke"
+kaggle kernels logs "$KAGGLE_USERNAME/amg-t4-smoke" --follow --interval 10
+kaggle kernels output "$KAGGLE_USERNAME/amg-t4-smoke" -p runs/kaggle-smoke-output
+```
+
+See [the Kaggle guide](docs/06-kaggle.md) for account verification, quota, source
+updates, training, and checkpoint resume. Outputs from `/kaggle/working` must be
+explicitly attached to a later job to resume. Real Kaggle GPU qualification is
+pending. New agents should read [the backend handoff](docs/07-backend-handoff.md).
 
 ## Milestone Validation Summary
 

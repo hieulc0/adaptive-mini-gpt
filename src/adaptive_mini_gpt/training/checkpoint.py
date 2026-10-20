@@ -64,7 +64,17 @@ class CheckpointManager:
             and states["torch_cuda"] is not None
             and torch.cuda.is_available()
         ):
-            torch.cuda.set_rng_state_all(states["torch_cuda"])
+            # A checkpoint can move between a multi-GPU runtime and a single GPU.
+            # Restore matching device indices; new devices retain their seeded state.
+            cuda_states = states["torch_cuda"]
+            device_count = torch.cuda.device_count()
+            if len(cuda_states) != device_count:
+                logger.warning(
+                    "CUDA device count changed (%s -> %s); restoring matching RNG states only",
+                    len(cuda_states),
+                    device_count,
+                )
+            torch.cuda.set_rng_state_all(cuda_states[:device_count])
 
     def _smoke_test_checkpoint(self, path: Path) -> None:
         """Smoke-load the file to guarantee it is valid and non-corrupted."""

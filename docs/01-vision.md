@@ -20,7 +20,7 @@ Capacity is not knowledge: more weights don't automatically improve generalizati
 4. Adaptive growth beats fixed baselines **at matched compute/data/evaluation** or is rejected transparently.
 
 ## Constraints
-One developer, small budget, local Arch/Linux development, intermittent interactive Google Colab T4 when available, external durable checkpoints. GPU/session lengths are not guaranteed. No automation designed to bypass free-tier service restrictions.
+One developer, small budget, local Arch/Linux development, intermittent Google Colab or Kaggle Free T4 when available, external durable checkpoints. GPU/session lengths are not guaranteed. No automation designed to bypass free-tier service restrictions.
 
 ## Research questions
 - When does new capacity help more than additional updates at fixed capacity?

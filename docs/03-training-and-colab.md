@@ -1,4 +1,78 @@
-# Training, Checkpointing, and Headless Colab Operations
+# Training, Checkpointing, Colab, and Kaggle Operations
+
+## Execution environments and quick starts
+
+All environments use `amg train`. Kaggle setup, exact submission commands,
+monitoring, logs, output retrieval, and resume are in [06-kaggle.md](06-kaggle.md).
+For agent catch-up and verification status, read [07-backend-handoff.md](07-backend-handoff.md).
+
+| Environment | Main use | Precision/device | Persistence |
+| --- | --- | --- | --- |
+| Local CPU | Development, unit tests, debugging, tiny smoke runs | `--device cpu --precision fp32` | Local `runs/` persists |
+| Google Colab | Interactive notebook training and GPU qualification | CUDA FP16 on T4 | `/content` is temporary; mirror checkpoints to mounted Drive |
+| Kaggle Free GPU | Submitted batch training and opt-in GPU tests | CUDA FP16 on T4; one device used | Saved `/kaggle/working` job outputs; attach a prior output as input for resume |
+
+### Local CPU quick start
+
+```bash
+uv sync --extra dev
+uv run pytest -q
+uv run ruff check src tests scripts kaggle
+uv run amg train --config configs/gpu_smoke.yaml --device cpu --precision fp32 \
+  --data synthetic:arithmetic --save-dir runs/cpu-smoke --max-steps 2
+uv run amg train --config configs/gpu_smoke.yaml --device cpu --precision fp32 \
+  --data synthetic:arithmetic --save-dir runs/cpu-smoke \
+  --resume runs/cpu-smoke/latest.pt --max-steps 4
+```
+
+Use a small batch/context and FP32 for debugging. GPU qualification is opt-in via
+`AMG_RUN_GPU_TESTS=1`; normal local pytest skips it. `--device auto` selects CUDA
+when available and otherwise CPU. Explicit `cuda` requires working CUDA. CPU
+execution disables autocast/scaling even if a mixed precision setting is supplied.
+FP32 uses full precision; CUDA FP16 uses autocast plus GradScaler; CUDA BF16 uses
+autocast without scaling and requires appropriate hardware. T4 runs use FP16 and
+skip BF16 because it is not natively supported. The Kaggle wrapper requires CUDA
+and never chooses CPU automatically.
+
+### Interactive Colab quick start and resume
+
+Open [notebooks/colab_launcher.ipynb](../notebooks/colab_launcher.ipynb), select
+**Runtime → Change runtime type → GPU**, and check `nvidia-smi`. Run its repository
+installation and Google Drive mount cells, then launch `amg train` with local
+scratch storage plus `--backup-dir /content/drive/MyDrive/adaptive-mini-gpt-runs/exp-001`.
+On a new runtime, reinstall the same project revision and mount Drive again:
+
+```bash
+amg train --config configs/tiny.yaml --device cuda --precision fp16 \
+  --save-dir /content/runs/colab \
+  --backup-dir /content/drive/MyDrive/adaptive-mini-gpt-runs/exp-001 \
+  --resume /content/drive/MyDrive/adaptive-mini-gpt-runs/exp-001/latest.pt \
+  --max-steps 2000
+```
+
+Use the same original corpus and tokenizer. The target step is total, including
+restored steps. Only saved progress survives termination; unsaved updates are lost.
+The checkpoint manager mirrors checkpoints/manifests, not the entire metrics log;
+copy `metrics.jsonl` separately if required. Free Colab GPU type, availability, and
+session duration are not guaranteed. Save often, and release headless sessions
+immediately after work using the existing procedure below.
+
+### Kaggle quick start
+
+```bash
+uv tool install kaggle
+kaggle auth login
+export KAGGLE_USERNAME='your_actual_kaggle_username'
+uv run python kaggle/prepare.py --username "$KAGGLE_USERNAME" --mode smoke
+kaggle datasets create -p runs/kaggle/code
+# Wait for dataset readiness, then submit:
+kaggle kernels push -p runs/kaggle/job --accelerator NvidiaTeslaT4 --timeout 600
+```
+
+See the [full Kaggle guide](06-kaggle.md) before running subsequent jobs or resuming.
+Checkpoints use the same format on every provider. CUDA RNG restoration supports
+moving between one and two GPUs by restoring shared device indices; identical
+numerical trajectories across devices/precision/library versions are not guaranteed.
 
 ## 1. Development and Training Discipline
 
@@ -108,7 +182,7 @@ cd /content/adaptive-mini-gpt
 pytest -q
 ")
 ```
-*(All 40/40 tests must pass before proceeding to training).*
+*(The current test suite must pass before proceeding to training).*
 
 ### Step 5: Execute Training / Multi-Arm Benchmark
 
