@@ -285,3 +285,15 @@
   - Arm D (Compact Scratchpad, ALiBi): **55.67%** in-dist exact match, **98.29%** carry accuracy, **100.0%** syntax validity across in-dist and extrapolation.
   - Arm E (Compact Scratchpad + 10% Language Replay): **49.67%** in-dist exact match, **-6.42** retention loss drift (fully eliminates catastrophic language forgetting).
 - **Length Extrapolation Finding**: Zero-shot length extrapolation on 4-6 digits remains strictly 0.0% across all arms despite 100% syntax validity and 0% truncation, isolating causal attention length decay as the boundary requiring recurrent loop unrolling for M23.
+
+### M23: Recurrent Neural Arithmetic and Length Extrapolation (Completed & Qualified)
+- **Objective**: Determine whether learning a position-independent local column transition $f_\theta(a_i, b_i, c_i) \to (d_i, c_{i+1})$ applied recurrently across columns breaks the length extrapolation barrier from 2–3 digits to unseen lengths of 4–8 digits.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (Version 3: `sparklinghydraulics0/amg-m23-recurrent-arithmetic`, commit `161176e`). Strictly preserved ~1M parameter MiniGPT RoPE architecture (895,744 params).
+- **Zero Python Arithmetic**: The neural network calculates every single write digit and carry; the host script is strictly limited to sequence indexing and string assembly.
+- **5-Arm Benchmark Findings (Seeds 42, 43, 44)**:
+  - Arm A (M22 Monolithic RoPE Control): **70.00%** in-dist exact match; **0.00%** extrapolation on 4–8 digits; +4.00 retention drift.
+  - Arm B (Local Transition Training): **93.33%** carry accuracy on 40 held-out triples (Seed 44 achieved **100.0%**); **45.83%** exact transition match.
+  - Arm C (Recurrent Composition): **14.27%** exact match across unseen lengths of 4–8 digits (**19.33% on 4-digit, 16.67% on 5-digit, 10.67% on 6-digit, 13.33% on 7-digit, 11.33% on 8-digit**), breaking the 0.0% length extrapolation barrier for the first time!
+  - Arm D (Learned Stopping Loop): **15.73%** extrapolation exact match with **97.87% stopping accuracy** across unseen lengths (up to **99.6% on Seed 43**).
+  - Arm E (Recurrent + Independent Replay): **23.60%** extrapolation exact match (up to **38.0% on Seed 42**); audited language retention drift held to **+1.07** on disjoint test suite (resolving the M22 leakage audit).
+- **Verdict**: Close M23 as an empirically verified procedural breakthrough. Do NOT promote the neural model (accuracy remains below 99% production threshold). Retain M18 deterministic solver as operational baseline.

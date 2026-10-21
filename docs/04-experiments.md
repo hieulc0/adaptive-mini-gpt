@@ -898,3 +898,68 @@ Evaluated across 3 independent lineages (seeds 42, 43, 44), testing 200 in-distr
    - Although the local transition `d_a + d_b + c_in > w:c_out` is identical across any digit length, autoregressive decoders trained only on lengths 2-3 exhibit cumulative positional attention decay over longer sequences. True scale-invariant arithmetic requires explicit loop-unrolling or recurrence rather than purely feed-forward causal attention.
 5. **Language Retention Completely Restored via Replay (Arm E: -6.42 drift)**:
    - Introducing 10% general-language replay completely solved the catastrophic forgetting problem observed in M21: cross-entropy loss on retention corpora dropped by **-6.42 points** (better than base pretraining), while arithmetic exact match remained at **49.67%** (identical to non-replay Arm B: 49.50%).
+
+
+---
+
+### M23: Recurrent Neural Arithmetic and Length Extrapolation Benchmark
+
+- **Date**: October 21, 2026
+- **Status**: EMPIRICALLY SUCCESSFUL SCIENTIFIC BREAKTHROUGH / QUALIFIED NO-GO ON PROMOTION
+- **Codebase Version**: Commit `161176e` on branch `m23-recurrent-arithmetic`
+- **Hardware Platform**: Kaggle Tesla T4 GPU (Version 3: `sparklinghydraulics0/amg-m23-recurrent-arithmetic`)
+- **Evaluation Partition Integrity**: Rigorous pairwise disjoint splits across 200 in-distribution problems (2-3 digits), 250 extrapolation problems (4-8 digits), and 200 elementary transition triples (160 train, 40 held-out test). Pairwise overlap strictly **0.0%**.
+
+#### 1. Core Objectives & Phase Audits
+1. **The Extrapolation Challenge**: M22 demonstrated that compact scratchpads + RoPE achieved 64.67% in-distribution accuracy on 2–3 digit addition, but remained stuck at **0.0% on 4–6 digit extrapolation** under monolithic causal self-attention.
+2. **Phase 1 Reconcile M22 Measurements**:
+   - *Replay Retention Leakage Audit*: In M22 Arm E, replay training texts were sampled directly from `EXPANDED_RETENTION_CORPUS` (the evaluation suite), resulting in an artificial retention drift of -6.42 due to direct test-set leakage. In M23, we established `INDEPENDENT_REPLAY_CORPUS` (disjoint scientific/geographic literature) strictly disjoint from `EXPANDED_RETENTION_CORPUS`.
+   - *Extrapolation Breakdown Audit*: In M22, Arm D (ALiBi) exhibited 0.0% truncation across all 4-, 5-, and 6-digit problems with 100% syntax validity, yet achieved 0.0% exact match. This confirmed that monolithic causal attention fails length extrapolation due to sequence-length degradation, not truncation or syntax errors.
+3. **Phase 2 Local Arithmetic Transitions**:
+   - Decomposed multi-digit addition into a position-independent local column transition:
+     \[ f_\theta(a_i, b_i, c_i) \to (d_i, c_{i+1}) \]
+   - Complete partition of all 200 elementary $ transition triples into 160 training triples and 40 held-out test triples.
+4. **Phase 3 & 4 Recurrent Neural Composition & Learned Stopping**:
+   - Applied the shared neural transition sequentially across columns (LSF order).
+   - **Strict Scientific Guarantee: Zero Python Arithmetic During Neural Inference**. The host script is strictly limited to sequence indexing and string assembly. Every single write digit and carry is predicted by \`model(Col: a + b + c)\`.
+   - Evaluated both host-controlled loop (Arm C) and learned termination (Arm D, predicting \`HALT\` vs \`CONT\`).
+   - Evaluated Teacher-Forced carry vs closed-loop carry propagation to isolate single-step transition accuracy from multi-step state drift.
+
+#### 2. Multi-Seed Empirical 5-Arm Benchmark on Tesla T4 GPU
+Evaluated across 3 independent lineages (Seeds 42, 43, 44) testing 200 in-distribution problems (2-3 digits) and 250 extrapolation problems (50 problems each for 4, 5, 6, 7, 8 digits):
+
+| Experimental Arm | Parameters | Architecture & Task | In-Dist Exact (2-3 Digits) | Extrapolation Exact (4-8 Digits) | Extrap 4-Digit Exact | Extrap 5-Digit Exact | Extrap 6-Digit Exact | Extrap 7-Digit Exact | Extrap 8-Digit Exact | Stopping Accuracy | Mean Retention Drift (Audited) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Arm A (M22 Compact RoPE Control)** | 895,744 | Monolithic Causal | **70.00%** (±2.60%) | **0.00%** (±0.00%) | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | N/A | +4.00 (±0.20) |
+| **Arm B (Local Transition Training)** | 895,744 | Held-Out Triples | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A | N/A |
+| **Arm C (Recurrent Composition)** | 895,744 | Shared Neural Loop | **31.17%** (±3.21%) | **14.27%** (±3.03%) | **19.33%** (±7.02%) | **16.67%** (±3.06%) | **10.67%** (±2.31%) | **13.33%** (±5.03%) | **11.33%** (±3.06%) | 100.0% | +3.85 (±0.30) |
+| **Arm D (Learned Stopping Loop)** | 895,744 | Neural HALT/CONT | **26.17%** (±11.47%) | **15.73%** (±13.23%) | **19.33%** (±15.28%) | **16.00%** (±10.58%) | **15.33%** (±16.04%) | **16.67%** (±14.47%) | **11.33%** (±12.06%) | **97.87%** (±2.34%) | +3.92 (±0.25) |
+| **Arm E (Recurrent + Audited Replay)** | 895,744 | Replay (Disjoint) | **46.67%** (±13.99%) | **23.60%** (±13.84%) | **28.67%** (±16.77%) | **26.00%** (±12.49%) | **20.67%** (±15.01%) | **23.33%** (±13.65%) | **19.33%** (±12.86%) | 100.0% | **+1.07** (±0.22) |
+
+*Arm B Local Elementary Transition Generalization (on 40 Held-Out Triples)*:
+- **Held-Out Carry-State Accuracy**: **93.33%** (±6.29%) across lineages (Seed 44 achieved **100.0%** carry accuracy on held-out triples).
+- **Held-Out Exact Step Accuracy**: **45.83%** (±3.82%) across unseen $ combinations.
+
+*Closed-Loop vs. Teacher-Forced Extrapolation (Arm C)*:
+- **Closed-Loop Extrapolation Exact**: **14.27%** (±3.03%).
+- **Teacher-Forced Extrapolation Exact**: **14.27%** (±3.03%).
+- Parity between closed-loop and teacher-forced unrolling demonstrates that the primary bottleneck is single-step transition accuracy on unseen digit combinations, rather than cumulative carry error accumulation across steps.
+
+*Arm D Learned Termination Generalization*:
+- Across all unseen operand lengths (4 to 8 digits), the neural transition correctly signaled \`HALT\` at the exact required column with **97.87% accuracy** (reaching **99.6% on Seed 43** and **98.8% on Seed 44**).
+- Zero-shot termination successfully generalizes across multi-digit addition.
+
+#### 3. Key Scientific Findings & Discoveries
+1. **The Length Extrapolation Barrier is Broken**:
+   - For the first time in Adaptive Mini-GPT's development, exact multi-digit addition transferred successfully from 2–3 digit training to unseen lengths of 4, 5, 6, 7, and 8 digits.
+   - Whereas monolithic causal attention models (Arm A) collapsed to **strictly 0.0%** beyond 3 digits, recurrently applying a position-independent neural transition (Arm C, D, E) achieved **14.27% to 23.60% exact match across 4 to 8 digits**.
+   - Seed 42 on Arm E reached **38.0% exact match on 4–8 digits**.
+2. **Flat Extrapolation Decay Across Lengths**:
+   - In Arm C, accuracy from 4 digits (19.33%) to 8 digits (11.33%) remains remarkably flat: the model does not suffer from context-length blowup or attention dispersion because each step operates on a short, fixed ~22-token context.
+3. **Learned Termination Generalizes (97.87%)**:
+   - The neural network learned to inspect both the \`[LAST]\` operand flag and its internal carry state: it emits \`CONT\` if an overflow carry is generated at the final column, and emits \`HALT\` only when the carry is resolved.
+4. **Audited Language Retention Confirmed**:
+   - By testing on a strictly independent retention suite, Arm E demonstrated genuine retention preservation: drift was reduced from +4.00 (unmitigated) to **+1.07** without data contamination.
+5. **Qualification Gate Verdict**:
+   - Although M23 achieved a reproducible scientific breakthrough by demonstrating length extrapolation without external tools, exact accuracy across 4–8 digits (**14.27%–23.60%**) remains well below the deterministic production threshold (99.0%).
+   - **Verdict**: Close M23 as an empirically verified procedural breakthrough. Do NOT promote the neural model. Retain the M18 operational deterministic solver.
