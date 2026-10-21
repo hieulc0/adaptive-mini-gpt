@@ -70,7 +70,7 @@ from adaptive_mini_gpt.rules.reliable_transition import (
     ElementaryTransition,
     ElementaryTransitionDataset,
     audit_elementary_transition_space,
-    build_exhaustive_elementary_transitions,
+    get_all_200_transitions,
     collate_elementary_batch,
 )
 from adaptive_mini_gpt.training.checkpoint import CheckpointManager
@@ -537,7 +537,7 @@ def main() -> None:
     logic_test = generate_logic_samples_for_split(BenchmarkSplit.TEST, count_per_category=10, include_unseen_structures=True)
     benchmark.register_samples(logic_train + logic_val + logic_test)
 
-    arith_exhaustive = build_exhaustive_elementary_transitions()
+    arith_exhaustive = get_all_200_transitions()
     logger.info(
         "Registered Partitions: Language (Train=%d, Val=%d, Test=%d) | Logic (Train=%d, Val=%d, Test=%d)",
         len(lang_train),
