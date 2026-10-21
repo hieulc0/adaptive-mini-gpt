@@ -115,6 +115,7 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 | **M21** | Digit-Level Arithmetic & Procedural Scratchpad | Procedural scratchpad unlocks neural addition: **35.17%** unaided exact match, **88.07%** carry accuracy (vs 0.0% standard text) |
 | **M22** | Compact Scratchpads, RoPE, ALiBi & Length Generalization | Compact scratchpad + RoPE reaches **64.67%** exact match and **98.96%** carry accuracy; language replay achieves **-6.42** drift |
 | **M23** | Recurrent Neural Arithmetic & Length Extrapolation | Position-independent neural transition breaks extrapolation barrier: **14.27%–23.60% exact match across unseen 4–8 digits** (vs 0.0% monolithic), **97.87%** learned stopping accuracy |
+| **M24** | Reliable Neural Transitions & Deep Extrapolation | Balanced elementary curriculum triples extrapolation to **44.67%** (up to **60.4%** on Seed 44); unrolls to **16 digits (38%)** and **32 digits (14%)** with **99.5%** carry accuracy |
 
 ## Directory Structure
 
