@@ -265,3 +265,15 @@
   - Objective B: Structured procedural supervision with intermediate calculations, variable dependencies, and final answers without tools.
 - **Matched Tokens vs Matched Compute Protocols**: 10 epochs (matched tokens) vs 37 epochs for 1M (matched compute at 3.694x).
 - **Unaided Neural Evaluation**: Exact final-answer accuracy, depth ladder (2 to 5 steps), unseen cascading carries, unseen 5-step kinematics, and multi-corpus language retention across 3 independent lineages (seeds 42, 43, 44).
+
+### M21: Digit-Level Neural Arithmetic and Procedural Scratchpad (In Progress)
+- **Objective**: Determine whether algorithmic representation and procedural scratchpad supervision enable the ~1M-parameter Mini-GPT to learn a reusable addition algorithm without external tools.
+- **4 Representation Ablations**:
+  - Arm A (Standard Text): `127 + 386 = 513`
+  - Arm B (Digit-Level MSD): `1 2 7 + 3 8 6 = 5 1 3` (character-level digits)
+  - Arm C (Procedural Scratchpad): Column-by-column carry decomposition (`col i: d1 + d2 + c_in = sum | write w | carry c_out`)
+  - Arm D (Digit-Level LSD): `7 2 1 + 6 8 3 = 3 1 5` (least-significant-digit first)
+- **Sealed Test Partitions**:
+  - In-distribution (2 & 3 digits) across balanced carry counts (0, 1, 2, 3+ carries).
+  - Length extrapolation (4 & 5 digits) to test generalization beyond trained lengths.
+- **Evaluation**: Neural-only exact final-answer accuracy without tools, per-digit accuracy, carry prediction accuracy, and language retention drift across 3 independent lineages (seeds 42, 43, 44).

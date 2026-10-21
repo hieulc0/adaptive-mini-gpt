@@ -758,3 +758,26 @@ Frozen Artifacts:
    - **NO-GO for neural promotion**. Retain M18 deterministic planner as the operational baseline.
    - Follow-up 10M scaling is not justified under this paradigm.
    - Close M20 as a completed scientific experiment.
+
+
+---
+
+### M21: Digit-Level Neural Arithmetic and Procedural Generalization
+- **Starting Point**: M20 commit `6075050` and the completed M20 scaling report.
+- **Core Hypothesis**: Parameter capacity alone did not solve arithmetic in M20 because standard tokenization chunks multi-digit numbers unpredictably and obscures column-by-column carry dependencies. Digit-level representation and procedural scratchpads enable the ~1M-parameter Mini-GPT to acquire the addition algorithm.
+- **Experimental Arms**:
+  1. **Arm A (Standard Text)**: Baseline standard arithmetic strings (`127 + 386 = 513`).
+  2. **Arm B (Digit-Level MSD)**: Space-separated digits preventing BPE multi-digit chunking (`1 2 7 + 3 8 6 = 5 1 3`).
+  3. **Arm C (Procedural Scratchpad)**: Column-by-column arithmetic with explicit intermediate carries (`col 0 (units): 7 + 6 + 0 = 13 | write 3 | carry 1`, etc.).
+  4. **Arm D (Digit-Level LSD)**: Least-significant-digit first (`7 2 1 + 6 8 3 = 3 1 5`), aligning autoregressive generation with the natural direction of carry propagation.
+- **Data Partitions & Fingerprints**:
+  - 1,200 unique training problems (lengths 2, 3 digits; balanced across 0, 1, 2, 3+ carries).
+  - 200 validation problems (disjoint from train).
+  - 200 sealed in-distribution test problems (lengths 2, 3 digits).
+  - 100 sealed extrapolation test problems (lengths 4, 5 digits).
+- **Evaluation Metrics**:
+  - Neural-only exact final-answer accuracy (no tools).
+  - Per-digit accuracy.
+  - Intermediate carry prediction correctness.
+  - Length breakdown and carry breakdown.
+  - Multi-corpus prior language retention.

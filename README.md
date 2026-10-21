@@ -12,6 +12,7 @@ An experimental, **CLI-first Python/PyTorch** research framework studying **adap
 - **M18 (Grammar-Constrained Planning & Execution Guidance):** Passed (100% on addition ladders & 5-step kinematics)
 - **M19 (Learned Action Selection & Representation Adaptation):** Closed (No-go on neural promotion; M18 baseline preserved)
 - **M20 (Controlled Neural Scaling & Procedural Generalization):** Completed (1M vs 3M scaling; No-go on promotion; M18 baseline preserved)
+- **M21 (Digit-Level Neural Arithmetic & Procedural Scratchpad):** In Progress (Testing representation ablations and carry scratchpads)
 
 ## Research Hypothesis
 
