@@ -62,6 +62,7 @@ from adaptive_mini_gpt.evaluation.multi_domain import (
     MultiDomainBenchmark,
     MultiDomainReport,
 )
+from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.rules.arithmetic_dataset import generate_controlled_addition_dataset
 from adaptive_mini_gpt.rules.reliable_transition import (
@@ -417,8 +418,15 @@ def main() -> None:
 
         raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_path)
         tokenizer = CheckpointManager.load_tokenizer(raw_ckpt)
-        base_model = MiniGPT(raw_ckpt["model_config"]).to(device)
-        base_model.load_state_dict(raw_ckpt["model_state_dict"])
+        base_cfg_dict = raw_ckpt.get("model_config", {})
+        if not isinstance(base_cfg_dict, dict):
+            base_cfg_dict = base_cfg_dict.to_dict()
+        cfg_dict = dict(base_cfg_dict)
+        cfg_dict["pos_encoding"] = "rope"
+        cfg = ModelConfig(**cfg_dict)
+        base_model = MiniGPT(cfg)
+        base_model.load_state_dict(raw_ckpt["model_state_dict"], strict=False)
+        base_model.to(device)
         base_model.eval()
 
         param_count = sum(p.numel() for p in base_model.parameters())
@@ -428,7 +436,7 @@ def main() -> None:
         # Step 2.1: Baseline Evaluation (Zero-shot unadapted base)
         logger.info("Evaluating Base Lineage seed_%d...", seed)
         base_retention = evaluate_retention_loss(base_model, tokenizer, device)
-        base_arith = audit_elementary_transition_space(base_model, tokenizer, all_200_transitions, format_type="canonical_state", device=device)
+        base_arith = audit_elementary_transition_space(base_model, tokenizer, device, format_type="canonical_state")
         base_lang = benchmark.evaluate_generation_task(
             model=base_model,
             tokenizer=tokenizer,
@@ -483,7 +491,7 @@ def main() -> None:
             verify_fn=verify_logic_answer,
             device=device,
         )
-        cand_b_arith = audit_elementary_transition_space(lang_cand, tokenizer, all_200_transitions, format_type="canonical_state", device=device)
+        cand_b_arith = audit_elementary_transition_space(lang_cand, tokenizer, device, format_type="canonical_state")
         cand_b_ret = evaluate_retention_loss(lang_cand, tokenizer, device)
         drift_b = round(cand_b_ret["prose_original"] - base_retention["prose_original"], 4)
         logger.info("Candidate M25-B (Language) - Lang: %.2f%% (Abstain: %.2f%%), Logic: %.2f%%, Retention Drift: %+.4f",
@@ -519,7 +527,7 @@ def main() -> None:
             verify_fn=verify_language_answer,
             device=device,
         )
-        cand_c_arith = audit_elementary_transition_space(logic_cand, tokenizer, all_200_transitions, format_type="canonical_state", device=device)
+        cand_c_arith = audit_elementary_transition_space(logic_cand, tokenizer, device, format_type="canonical_state")
         cand_c_ret = evaluate_retention_loss(logic_cand, tokenizer, device)
         drift_c = round(cand_c_ret["prose_original"] - base_retention["prose_original"], 4)
         logger.info("Candidate M25-C (Logic) - Logic: %.2f%% (Abstain: %.2f%%), Lang: %.2f%%, Retention Drift: %+.4f",
@@ -539,7 +547,7 @@ def main() -> None:
             batch_size=args.batch_size,
             seed=seed,
         )
-        cand_d_arith = audit_elementary_transition_space(continual_cand, tokenizer, all_200_transitions, format_type="canonical_state", device=device)
+        cand_d_arith = audit_elementary_transition_space(continual_cand, tokenizer, device, format_type="canonical_state")
         cand_d_lang = benchmark.evaluate_generation_task(
             model=continual_cand,
             tokenizer=tokenizer,
