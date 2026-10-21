@@ -348,10 +348,15 @@ def run_seed_pipeline(
     checkpoint_path = checkpoints_dir / relative
     raw = CheckpointManager.load_raw_checkpoint(checkpoint_path)
 
-    base_model = MiniGPT(ModelConfig(**raw["model_config"]))
-    base_model.load_state_dict(raw["model_state_dict"])
-    base_model = expand_model_vocabulary(base_model, new_vocab_size=1024)
-    base_model.to(device)
+    base_tok = CheckpointManager.load_tokenizer(raw)
+    state_dict = raw.get("model_state_dict", raw.get("model_state"))
+    base_model_400 = MiniGPT(ModelConfig(**raw["model_config"]))
+    base_model_400.load_state_dict(state_dict)
+    base_model = expand_model_vocabulary(
+        model=base_model_400,
+        old_tokenizer=base_tok,
+        new_tokenizer=tokenizer,
+    ).to(device)
     param_count = sum(p.numel() for p in base_model.parameters())
 
     # 2. Phase 1 Failure Diagnostic Audit of all 200 Elementary States
