@@ -27,19 +27,6 @@ except ImportError:
         def decorator(f):
             return f
         return decorator
-try:
-    import torch
-    import torch.nn as nn
-    from adaptive_mini_gpt.model.transformer import MiniGPT
-    _no_grad = torch.no_grad
-except ImportError:
-    torch = None  # type: ignore
-    nn = None  # type: ignore
-    MiniGPT = None  # type: ignore
-    def _no_grad():
-        def decorator(f):
-            return f
-        return decorator
 
 from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
 
@@ -76,8 +63,24 @@ class BenchmarkSample:
 
 
 @dataclass
+class SamplePrediction:
+    """Prediction result and evaluation telemetry for a single benchmark sample."""
+
+    sample_id: str
+    domain: DomainType
+    prompt: str
+    raw_completion: str
+    parsed_answer: str
+    is_correct: bool
+    is_abstained: bool
+    is_format_compliant: bool
+    error_type: str | None = None
+    latency_ms: float = 0.0
+
+
+@dataclass
 class DomainResult:
-    """Standardized performance report for a single capability domain."""
+    """Domain-level evaluation outcome with fine-grained sub-metrics."""
 
     domain: str
     split: str
@@ -85,51 +88,53 @@ class DomainResult:
     exact_accuracy: float
     abstention_accuracy: float
     format_compliance_rate: float
-    grounded_accuracy: float = 0.0
-    retention_drift_nats: float = 0.0
     mean_latency_ms: float = 0.0
+    carry_accuracy: float | None = None
+    grounded_accuracy: float | None = None
+    loss: float | None = None
+    bpc: float | None = None
     sub_metrics: dict[str, float] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
 
 
 @dataclass
 class MultiDomainReport:
-    """Comprehensive evaluation report across all evaluated domains."""
+    """Comprehensive evaluation record covering all active domains and retention drift."""
 
+    benchmark_version: str
+    model_id: str
+    checkpoint_sha256: str
+    tokenizer_fingerprint: str
+    param_count: int
+    device: str
     timestamp: str
-    model_lineage: str
-    checkpoint_step: int
-    domains: dict[str, DomainResult] = field(default_factory=dict)
-    summary_score: float = 0.0
-    passed_all_gates: bool = False
+    domain_results: dict[str, DomainResult]
+    retention_drift: dict[str, float] = field(default_factory=dict)
+    summary: dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        return {
-            "timestamp": self.timestamp,
-            "model_lineage": self.model_lineage,
-            "checkpoint_step": self.checkpoint_step,
-            "summary_score": self.summary_score,
-            "passed_all_gates": self.passed_all_gates,
-            "domains": {k: asdict(v) for k, v in self.domains.items()},
-        }
+        data = asdict(self)
+        return data
 
 
 class MultiDomainBenchmark:
     """Central harness coordinating multi-domain evaluation without leakage."""
 
-    def __init__(self) -> None:
+    def __init__(self, version: str = "m27-v1") -> None:
+        self.version = version
         self.samples: dict[DomainType, dict[BenchmarkSplit, list[BenchmarkSample]]] = {
-            d: {s: [] for s in BenchmarkSplit} for d in DomainType
+            domain: {split: [] for split in BenchmarkSplit}
+            for domain in DomainType
         }
         self.custom_evaluators: dict[DomainType, Callable[..., DomainResult]] = {}
 
+    def register_sample(self, sample: BenchmarkSample) -> None:
+        """Register a single benchmark problem into its designated domain and split."""
+        self.samples[sample.domain][sample.split].append(sample)
+
     def register_samples(
-        self,
-        domain: DomainType,
-        split: BenchmarkSplit,
-        samples: list[BenchmarkSample],
-    ) -> None:
-        """Register benchmark samples for a domain and split."""
-        self.samples[domain][split].extend(    def register_samples(
         self,
         samples_or_domain: list[BenchmarkSample] | DomainType,
         split: BenchmarkSplit | None = None,
@@ -156,7 +161,7 @@ class MultiDomainBenchmark:
         """Retrieve all samples registered for a specific domain and split."""
         return list(self.samples[domain][split])
 
-    @_no_grad_no_grad()
+    @_no_grad()
     def evaluate_generation_task(
         self,
         model: MiniGPT,
@@ -166,22 +171,29 @@ class MultiDomainBenchmark:
         parse_fn: Callable[[str], tuple[str, bool, bool]],
         verify_fn: Callable[[str, BenchmarkSample], bool],
         verify_grounded_fn: Callable[[str, BenchmarkSample], bool] | None = None,
-        device: Any = "cuda",
+        device: torch.device | str = "cuda",
         max_new_tokens: int = 32,
     ) -> DomainResult:
         """Standardized neural generation evaluation loop for textual QA/reasoning tasks."""
         if torch is None:
             raise RuntimeError("PyTorch is required for neural model evaluation")
 
+        model.eval()
         samples = self.get_samples(domain, split)
         if not samples:
-            raise ValueError(f"No samples registered for domain {domain.value} split {split.value}")
+            return DomainResult(
+                domain=domain.value,
+                split=split.value,
+                total_samples=0,
+                exact_accuracy=0.0,
+                abstention_accuracy=0.0,
+                format_compliance_rate=0.0,
+            )
 
-        model.eval()
         correct_count = 0
         grounded_count = 0
-        abstain_total = 0
         abstain_correct = 0
+        abstain_total = 0
         compliant_count = 0
         latencies: list[float] = []
 
@@ -190,6 +202,7 @@ class MultiDomainBenchmark:
 
         for s in samples:
             prompt_ids = tokenizer.encode(s.prompt)
+            # Guard against exceeding context length
             if len(prompt_ids) >= model.config.context_length:
                 prompt_ids = prompt_ids[-(model.config.context_length - max_new_tokens - 1) :]
 
@@ -269,7 +282,7 @@ class MultiDomainBenchmark:
         model: MiniGPT,
         tokenizer: BPETokenizer,
         split: BenchmarkSplit = BenchmarkSplit.TEST,
-        device: Any = "cuda",
+        device: torch.device | str = "cuda",
         **kwargs: Any,
     ) -> DomainResult:
         """Evaluate a single capability domain using registered evaluator or defaults."""
@@ -282,5 +295,6 @@ class MultiDomainBenchmark:
                 **kwargs,
             )
         raise NotImplementedError(
-            f"No evaluator registered for domain {domain.value}. Use register_evaluator() or evaluate_generation_task()."
+            f"No evaluator registered for domain {domain.value}. "
+            f"Register an evaluator using register_evaluator()."
         )
