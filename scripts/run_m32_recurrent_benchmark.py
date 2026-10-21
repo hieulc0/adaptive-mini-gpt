@@ -372,15 +372,23 @@ def run_seed_pipeline(
     logic_suites = build_deep_logic_suite(seed=2000 + seed)
 
     # 4. Construct Practice Curricula
+    arith_suite = build_arithmetic_reasoning_suite(seed=1000 + seed)
+    logic_suite = build_logic_reasoning_suite(seed=2000 + seed)
+    lang_suite = build_language_reasoning_suite()
+
     # Curriculum A: Original Balanced Training (M31 style)
-    curriculum_a = build_arithmetic_reasoning_suite()
-    curriculum_a.extend(build_logic_reasoning_suite())
-    curriculum_a.extend(build_language_reasoning_suite())
+    curriculum_a = (
+        arith_suite["practice_128"]
+        + logic_suite["practice_64"]
+        + lang_suite["practice_24"]
+    )
 
     # Curriculum B & C: Failure-Targeted Practice (Focused on ripple carries, double carries, cascading carries)
-    curriculum_bc = build_failure_targeted_recurrent_practice(target_sample_count=72, seed=3000 + seed)
-    curriculum_bc.extend(build_logic_reasoning_suite())
-    curriculum_bc.extend(build_language_reasoning_suite())
+    curriculum_bc = (
+        build_failure_targeted_recurrent_practice(target_sample_count=128, seed=3000 + seed)
+        + logic_suite["practice_64"]
+        + lang_suite["practice_24"]
+    )
 
     # 5. Train Arms
     logger.info(f"--- [Seed {seed}] Training Arm A: Original Balanced ---")
