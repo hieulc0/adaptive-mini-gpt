@@ -1,15 +1,15 @@
-"""Language Comprehension and Instruction-Following Benchmark Dataset (M25-B).
+"""Language Comprehension and Instruction-Following Benchmark Dataset (M25-B / M26).
 
 Implements reproducible neural language comprehension with strictly disjoint
 train, validation, and sealed-test document partitions.
 
 Features:
-  - Reading short factual passages.
+  - Reading short factual passages across diverse scientific and historical domains.
   - Extracting evidence-backed information.
   - Recognizing unanswerable questions (safe abstention).
   - Paraphrased query robustness.
-  - Token loss masking on prompt tokens (assistant-only supervision).
-  - Document-level split isolation (0% fact or document overlap).
+  - Token loss masking on prompt tokens (assistant-only supervision with ignore_index=-100).
+  - Document-level split isolation (0% fact or document overlap between splits).
 """
 
 from __future__ import annotations
@@ -134,6 +134,112 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
             ("Why do airplane wings produce lift?", "Differences in air pressure", ["pressure differences", "air pressure"]),
         ],
     ),
+    # Expanded Diverse Training Documents (M26)
+    DocumentPassage(
+        doc_id="train_doc_05_microprocessors",
+        topic="Semiconductor Technology",
+        text="Microprocessors are fabricated on silicon wafers using optical photolithography. Billions of field-effect transistors act as electronic switches to execute arithmetic logic operations.",
+        answerable_pairs=[
+            ("What semiconductor substrate is used to fabricate microprocessors?", "Silicon wafers", ["silicon", "silicon wafer"]),
+            ("Which optical manufacturing process creates microprocessor circuits?", "Photolithography", ["optical photolithography"]),
+            ("What electronic components act as switches in microprocessors?", "Field-effect transistors", ["transistors", "field-effect transistor switches"]),
+        ],
+        unanswerable_questions=[
+            ("What is the exact clock frequency of the first Intel 4004 chip?",),
+            ("What is the gate dielectric thickness in modern 3nm transistors?",),
+        ],
+        paraphrase_pairs=[
+            ("On which material are microprocessors manufactured?", "Silicon wafers", ["silicon"]),
+            ("Name the technique used to pattern microprocessor circuits.", "Photolithography", ["optical photolithography"]),
+        ],
+    ),
+    DocumentPassage(
+        doc_id="train_doc_06_rainforest_ecology",
+        topic="Ecology",
+        text="Tropical rainforest canopies absorb high solar radiation and generate localized rainfall through plant transpiration. Epiphytic orchids grow directly upon tree branches to capture canopy moisture.",
+        answerable_pairs=[
+            ("Through which biological process do rainforest canopies produce rainfall?", "Plant transpiration", ["transpiration"]),
+            ("Where do epiphytic orchids grow in the rainforest?", "Directly upon tree branches", ["tree branches", "on branches"]),
+        ],
+        unanswerable_questions=[
+            ("How many tree species exist per hectare in the Amazon basin?",),
+            ("What is the annual biomass turnover rate in tropical rainforest soils?",),
+        ],
+        paraphrase_pairs=[
+            ("What botanical mechanism drives rainfall in tropical rainforests?", "Plant transpiration", ["transpiration"]),
+        ],
+    ),
+    DocumentPassage(
+        doc_id="train_doc_07_neuroscience_memory",
+        topic="Neuroscience",
+        text="The hippocampus consolidates short-term neural signals into stable long-term memories in the cerebral cortex. Synaptic plasticity enables persistent signal strengthening known as long-term potentiation.",
+        answerable_pairs=[
+            ("Which brain structure consolidates short-term memories?", "The hippocampus", ["hippocampus"]),
+            ("Where are long-term memories permanently stored?", "Cerebral cortex", ["the cerebral cortex", "cortex"]),
+            ("What synaptic mechanism enables persistent signal strengthening?", "Long-term potentiation", ["LTP", "long term potentiation"]),
+        ],
+        unanswerable_questions=[
+            ("How many action potentials can a pyramidal neuron fire per second?",),
+            ("Which neurotransmitter receptor subtype binds glutamate in memory retrieval?",),
+        ],
+        paraphrase_pairs=[
+            ("Name the anatomical brain region that consolidates memories.", "The hippocampus", ["hippocampus"]),
+            ("In which tissue are permanent memories preserved?", "Cerebral cortex", ["cortex"]),
+        ],
+    ),
+    DocumentPassage(
+        doc_id="train_doc_08_geodesic_architecture",
+        topic="Architecture",
+        text="Architect Buckminster Fuller popularized the geodesic dome, which utilizes spherical networks of interconnected triangles. The structure distributes mechanical stress omnidirectionally through tensegrity.",
+        answerable_pairs=[
+            ("Who popularized the geodesic dome?", "Buckminster Fuller", ["Fuller", "R. Buckminster Fuller"]),
+            ("What geometric shape forms the network of geodesic domes?", "Interconnected triangles", ["triangles", "interconnected triangle network"]),
+            ("How does a geodesic dome distribute mechanical stress?", "Omnidirectionally through tensegrity", ["omnidirectionally", "through tensegrity"]),
+        ],
+        unanswerable_questions=[
+            ("What was the construction diameter of the Montreal Biosphere dome?",),
+            ("What alloy formed the outer struts of Fuller's prototype dome?",),
+        ],
+        paraphrase_pairs=[
+            ("Which architect is famous for designing geodesic domes?", "Buckminster Fuller", ["Fuller"]),
+        ],
+    ),
+    DocumentPassage(
+        doc_id="train_doc_09_meteorology_cyclones",
+        topic="Meteorology",
+        text="Tropical cyclones form over warm ocean waters exceeding 26 degrees Celsius. The Coriolis force imparts rotational spin, creating a calm low-pressure central eye surrounded by eyewall cloud bands.",
+        answerable_pairs=[
+            ("What minimum water temperature is required for tropical cyclones?", "26 degrees Celsius", ["26 C", "exceeding 26 degrees Celsius"]),
+            ("What physical force imparts rotational spin to cyclones?", "Coriolis force", ["the Coriolis force", "Coriolis"]),
+            ("What is the calm central region of a tropical cyclone called?", "The eye", ["low-pressure eye", "central eye", "eye"]),
+        ],
+        unanswerable_questions=[
+            ("What was the lowest atmospheric pressure ever recorded in Typhoon Tip?",),
+            ("How many nautical miles wide can hurricane storm surges reach?",),
+        ],
+        paraphrase_pairs=[
+            ("Which natural effect causes cyclone rotation?", "Coriolis force", ["Coriolis"]),
+            ("Name the tranquil center of a tropical cyclone.", "The eye", ["central eye", "eye"]),
+        ],
+    ),
+    DocumentPassage(
+        doc_id="train_doc_10_graphene_materials",
+        topic="Materials Science",
+        text="Graphene is a single atomic monolayer of carbon atoms bonded in a hexagonal honeycomb lattice. It demonstrates extraordinary electrical conductivity and ballistic electron transport at room temperature.",
+        answerable_pairs=[
+            ("What chemical element comprises graphene?", "Carbon", ["carbon atoms", "pure carbon"]),
+            ("What geometric lattice shape do carbon atoms form in graphene?", "Hexagonal honeycomb lattice", ["honeycomb lattice", "hexagonal lattice"]),
+            ("What electrical transport phenomenon occurs in graphene at room temperature?", "Ballistic electron transport", ["ballistic transport"]),
+        ],
+        unanswerable_questions=[
+            ("What is the Young's modulus of multilayer turbostratic graphene?",),
+            ("Who first synthesized suspended graphene on copper foils?",),
+        ],
+        paraphrase_pairs=[
+            ("Which element is graphene composed of?", "Carbon", ["carbon atoms"]),
+            ("Describe the lattice geometry of graphene.", "Hexagonal honeycomb lattice", ["honeycomb lattice"]),
+        ],
+    ),
 ]
 
 VAL_DOCUMENTS: list[DocumentPassage] = [
@@ -171,6 +277,40 @@ VAL_DOCUMENTS: list[DocumentPassage] = [
         paraphrase_pairs=[
             ("Which type of lens converges parallel rays?", "Convex lens", ["convex"]),
             ("Which lens diverges incoming light rays?", "Concave lens", ["concave"]),
+        ],
+    ),
+    # Expanded Validation Documents (M26)
+    DocumentPassage(
+        doc_id="val_doc_03_black_holes",
+        topic="Astrophysics",
+        text="A black hole is bounded by an event horizon from which no matter or electromagnetic radiation can escape. At its mathematical center lies a gravitational singularity of infinite density.",
+        answerable_pairs=[
+            ("What boundary marks the point of no return around a black hole?", "Event horizon", ["the event horizon"]),
+            ("What exists at the center of a black hole?", "Gravitational singularity", ["singularity", "a singularity"]),
+        ],
+        unanswerable_questions=[
+            ("What is the Hawking radiation temperature of Cygnus X-1?",),
+            ("How fast does the accretion disk of Sagittarius A* rotate?",),
+        ],
+        paraphrase_pairs=[
+            ("Name the perimeter beyond which light cannot escape a black hole.", "Event horizon", ["the event horizon"]),
+        ],
+    ),
+    DocumentPassage(
+        doc_id="val_doc_04_photovoltaics",
+        topic="Renewable Energy",
+        text="Photovoltaic solar cells convert sunlight into electricity via the photoelectric effect within a semiconductor p-n junction. When photons strike the cell, electrons are energized into the conduction band.",
+        answerable_pairs=[
+            ("Which physical effect converts sunlight to electricity in solar cells?", "Photoelectric effect", ["the photoelectric effect"]),
+            ("What semiconductor junction structure is used inside photovoltaic cells?", "p-n junction", ["a p-n junction", "semiconductor p-n junction"]),
+            ("Where are electrons excited into when struck by photons?", "Conduction band", ["the conduction band"]),
+        ],
+        unanswerable_questions=[
+            ("What is the record laboratory efficiency of perovskite tandem cells?",),
+            ("What chemical dopant is added to n-type silicon wafers?",),
+        ],
+        paraphrase_pairs=[
+            ("Which phenomenon generates electric current in solar panels?", "Photoelectric effect", ["the photoelectric effect"]),
         ],
     ),
 ]
@@ -257,10 +397,15 @@ def parse_language_completion(completion: str) -> tuple[str, bool, bool]:
         return "", False, False
 
     first_line = cleaned.split("\n")[0].strip()
-    # Normalize punctuation and case for abstention check
     normalized = re.sub(r"[^\w\s]", "", first_line.lower()).strip()
 
-    is_abstained = any(abstain in normalized for abstain in ["insufficient information", "unanswerable", "not mentioned", "unknown", "cannot be determined"])
+    is_abstained = any(abstain in normalized for abstain in [
+        "insufficient information",
+        "unanswerable",
+        "not mentioned",
+        "unknown",
+        "cannot be determined",
+    ])
     is_compliant = len(first_line) > 0
 
     return first_line, is_compliant, is_abstained
@@ -275,7 +420,13 @@ def verify_language_answer(parsed_answer: str, sample: BenchmarkSample) -> bool:
 
     # Case 1: Sample is unanswerable from the passage (must abstain)
     if sample.is_unanswerable:
-        return any(abstain in norm_parsed for abstain in ["insufficient information", "unanswerable", "not mentioned", "unknown", "cannot be determined"])
+        return any(abstain in norm_parsed for abstain in [
+            "insufficient information",
+            "unanswerable",
+            "not mentioned",
+            "unknown",
+            "cannot be determined",
+        ])
 
     # If the model abstained on an answerable question, it is incorrect
     if any(abstain in norm_parsed for abstain in ["insufficient information", "unanswerable", "not mentioned", "unknown"]):

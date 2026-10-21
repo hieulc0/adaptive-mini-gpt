@@ -1,4 +1,4 @@
-"""Symbolic Logic and Procedural Reasoning Benchmark Dataset (M25-C).
+"""Symbolic Logic and Procedural Reasoning Benchmark Dataset (M25-C / M26).
 
 Implements reproducible neural reasoning with strictly disjoint variable names,
 entities, and rule compositions across train, validation, and sealed-test splits.
@@ -10,6 +10,7 @@ Features:
   - Variable binding across 2-step and 3-step deductive chains.
   - Contradiction detection and safe abstention on undetermined queries.
   - Strict disjoint variable names to guarantee out-of-distribution evaluation.
+  - Explicit separation between unseen variable names and genuinely unseen logical compositions (M26).
 """
 
 from __future__ import annotations
@@ -53,6 +54,16 @@ class LogicTaskCategory(str, Enum):
     DEDUCTION_MODUS_PONENS = "modus_ponens"
     CHAINED_COMPOSITION = "chained_composition"
     CONTRADICTION = "contradiction_abstention"
+    # Unseen logical compositions (M26)
+    MODUS_TOLLENS = "modus_tollens"
+    DISJUNCTIVE_SYLLOGISM = "disjunctive_syllogism"
+    BICONDITIONAL = "biconditional_equivalence"
+
+
+class LogicGeneralizationType(str, Enum):
+    UNSEEN_VARIABLES = "unseen_variables"
+    UNSEEN_STRUCTURES = "unseen_structures"
+    CONTRADICTION_ABSTENTION = "contradiction_abstention"
 
 
 # =====================================================================
@@ -146,6 +157,7 @@ def generate_logic_samples_for_split(
     split: BenchmarkSplit,
     count_per_category: int = 10,
     seed: int = 42,
+    include_unseen_structures: bool = True,
 ) -> list[BenchmarkSample]:
     """Deterministically generate logic problems strictly using partitioned variables & entities."""
     if split == BenchmarkSplit.TRAIN:
@@ -192,7 +204,11 @@ def generate_logic_samples_for_split(
                 expected_answer=expected,
                 allowed_answers=[expected],
                 is_unanswerable=False,
-                metadata={"category": LogicTaskCategory.BOOLEAN.value, "operation": op},
+                metadata={
+                    "category": LogicTaskCategory.BOOLEAN.value,
+                    "generalization_type": LogicGeneralizationType.UNSEEN_VARIABLES.value,
+                    "operation": op,
+                },
             )
         )
 
@@ -203,7 +219,6 @@ def generate_logic_samples_for_split(
         is_transitive_query = (i % 3 != 2)
 
         if is_transitive_query:
-            # A > B and B > C
             premises = [f"{v1} is greater than {v2}.", f"{v2} is greater than {v3}."]
             if i % 2 == 0:
                 q = f"Is {v1} greater than {v3}?"
@@ -213,13 +228,14 @@ def generate_logic_samples_for_split(
                 q = f"Is {v3} greater than {v1}?"
                 expected = "No"
                 is_unans = False
+            gen_type = LogicGeneralizationType.UNSEEN_VARIABLES.value
         else:
-            # Unconnected: A > B and C > D -> Is A > C? -> Undetermined
             v4 = sampled[3]
             premises = [f"{v1} is greater than {v2}.", f"{v3} is greater than {v4}."]
             q = f"Is {v1} greater than {v3}?"
             expected = LOGIC_ABSTENTION_TARGET
             is_unans = True
+            gen_type = LogicGeneralizationType.CONTRADICTION_ABSTENTION.value
 
         prompt = format_logic_prompt(premises, q)
         samples.append(
@@ -231,7 +247,10 @@ def generate_logic_samples_for_split(
                 expected_answer=expected,
                 allowed_answers=[expected],
                 is_unanswerable=is_unans,
-                metadata={"category": LogicTaskCategory.COMPARISON.value},
+                metadata={
+                    "category": LogicTaskCategory.COMPARISON.value,
+                    "generalization_type": gen_type,
+                },
             )
         )
 
@@ -263,7 +282,10 @@ def generate_logic_samples_for_split(
                 expected_answer=expected,
                 allowed_answers=[expected],
                 is_unanswerable=is_unans,
-                metadata={"category": LogicTaskCategory.DEDUCTION_MODUS_PONENS.value},
+                metadata={
+                    "category": LogicTaskCategory.DEDUCTION_MODUS_PONENS.value,
+                    "generalization_type": LogicGeneralizationType.UNSEEN_VARIABLES.value,
+                },
             )
         )
 
@@ -302,7 +324,11 @@ def generate_logic_samples_for_split(
                 expected_answer=expected,
                 allowed_answers=[expected],
                 is_unanswerable=False,
-                metadata={"category": LogicTaskCategory.CHAINED_COMPOSITION.value, "depth": depth},
+                metadata={
+                    "category": LogicTaskCategory.CHAINED_COMPOSITION.value,
+                    "generalization_type": LogicGeneralizationType.UNSEEN_VARIABLES.value,
+                    "depth": depth,
+                },
             )
         )
 
@@ -313,13 +339,11 @@ def generate_logic_samples_for_split(
         other_prop = rng.choice([p for p in p_pool if p != prop])
 
         if i % 2 == 0:
-            # Contradiction: Item X is red and Item X is not red.
             premises = [f"Item {var} is {prop}.", f"Item {var} is not {prop}."]
             q = f"Is Item {var} {other_prop}?"
             expected = CONTRADICTION_TARGET
             is_unans = True
         else:
-            # Irrelevant premise: All orbs are heavy. Item X is blue. -> Is Item X heavy?
             ent = rng.choice(e_pool)
             premises = [f"Every {ent} is {prop}.", f"Item {var} is {other_prop}."]
             q = f"Is Item {var} {prop}?"
@@ -336,9 +360,96 @@ def generate_logic_samples_for_split(
                 expected_answer=expected,
                 allowed_answers=list(LOGIC_ABSTAIN_TERMS),
                 is_unanswerable=is_unans,
-                metadata={"category": LogicTaskCategory.CONTRADICTION.value},
+                metadata={
+                    "category": LogicTaskCategory.CONTRADICTION.value,
+                    "generalization_type": LogicGeneralizationType.CONTRADICTION_ABSTENTION.value,
+                },
             )
         )
+
+    # 6. Genuinely Unseen Logical Compositions (M26: Disjunctive Syllogism, Modus Tollens, Biconditional)
+    # Generated for TEST (and optionally VAL) to measure structural generalization beyond variable substitution
+    if include_unseen_structures and split in {BenchmarkSplit.VAL, BenchmarkSplit.TEST}:
+        unseen_count = count_per_category // 2
+        for i in range(unseen_count):
+            # A. Modus Tollens (contrapositive reasoning)
+            prop_a = rng.choice(p_pool)
+            prop_b = rng.choice([p for p in p_pool if p != prop_a])
+            var = rng.choice(v_pool)
+            premises = [
+                f"If Item {var} is {prop_a}, then Item {var} is {prop_b}.",
+                f"Item {var} is not {prop_b}.",
+            ]
+            q = f"Is Item {var} {prop_a}?"
+            expected = "No"
+            prompt = format_logic_prompt(premises, q)
+            samples.append(
+                BenchmarkSample(
+                    sample_id=f"{split.value}_unseen_tollens_{i}",
+                    domain=DomainType.LOGIC,
+                    split=split,
+                    prompt=prompt,
+                    expected_answer=expected,
+                    allowed_answers=[expected],
+                    is_unanswerable=False,
+                    metadata={
+                        "category": LogicTaskCategory.MODUS_TOLLENS.value,
+                        "generalization_type": LogicGeneralizationType.UNSEEN_STRUCTURES.value,
+                    },
+                )
+            )
+
+            # B. Disjunctive Syllogism (P OR Q; NOT P -> Q)
+            var_x = rng.choice(v_pool)
+            var_y = rng.choice([v for v in v_pool if v != var_x])
+            premises = [
+                f"Either {var_x} is True or {var_y} is True.",
+                f"{var_x} is False.",
+            ]
+            q = f"Is {var_y} True?"
+            expected = "Yes"
+            prompt = format_logic_prompt(premises, q)
+            samples.append(
+                BenchmarkSample(
+                    sample_id=f"{split.value}_unseen_disjunctive_{i}",
+                    domain=DomainType.LOGIC,
+                    split=split,
+                    prompt=prompt,
+                    expected_answer=expected,
+                    allowed_answers=[expected],
+                    is_unanswerable=False,
+                    metadata={
+                        "category": LogicTaskCategory.DISJUNCTIVE_SYLLOGISM.value,
+                        "generalization_type": LogicGeneralizationType.UNSEEN_STRUCTURES.value,
+                    },
+                )
+            )
+
+            # C. Biconditional Equivalence (P <-> Q)
+            var_p = rng.choice(v_pool)
+            var_q = rng.choice([v for v in v_pool if v != var_p])
+            premises = [
+                f"{var_p} is equivalent to {var_q}.",
+                f"{var_p} is True.",
+            ]
+            q = f"Is {var_q} True?"
+            expected = "Yes"
+            prompt = format_logic_prompt(premises, q)
+            samples.append(
+                BenchmarkSample(
+                    sample_id=f"{split.value}_unseen_bicond_{i}",
+                    domain=DomainType.LOGIC,
+                    split=split,
+                    prompt=prompt,
+                    expected_answer=expected,
+                    allowed_answers=[expected],
+                    is_unanswerable=False,
+                    metadata={
+                        "category": LogicTaskCategory.BICONDITIONAL.value,
+                        "generalization_type": LogicGeneralizationType.UNSEEN_STRUCTURES.value,
+                    },
+                )
+            )
 
     return samples
 
