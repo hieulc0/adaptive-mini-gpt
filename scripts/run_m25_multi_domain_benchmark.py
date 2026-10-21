@@ -457,7 +457,7 @@ def main() -> None:
         )
 
         logger.info("Base Lineage (Unadapted) - Arith: %.2f%%, Lang: %.2f%%, Logic: %.2f%%",
-                    base_arith["elementary_exact_match_accuracy"] * 100,
+                    base_arith.get("overall_exact_acc", 0.0),
                     base_lang.exact_accuracy * 100,
                     base_logic.exact_accuracy * 100)
 
@@ -569,7 +569,7 @@ def main() -> None:
         cand_d_ret = evaluate_retention_loss(continual_cand, tokenizer, device)
         drift_d = round(cand_d_ret["prose_original"] - base_retention["prose_original"], 4)
         logger.info("Candidate M25-D (Continual) - Arith: %.2f%%, Lang: %.2f%%, Logic: %.2f%%, Retention Drift: %+.4f",
-                    cand_d_arith["elementary_exact_match_accuracy"] * 100,
+                    cand_d_arith.get("overall_exact_acc", 0.0),
                     cand_d_lang.exact_accuracy * 100,
                     cand_d_logic.exact_accuracy * 100,
                     drift_d)
@@ -615,7 +615,7 @@ def main() -> None:
 
     summary = {
         "seeds": args.seeds,
-        "base_arith_exact": compute_stats([lineage_results[s]["base"]["arithmetic"]["elementary_exact_match_accuracy"] for s in args.seeds]),
+        "base_arith_exact": compute_stats([lineage_results[s]["base"]["arithmetic"].get("overall_exact_acc", 0.0) / 100.0 for s in args.seeds]),
         "base_lang_exact": compute_stats([lineage_results[s]["base"]["language"]["exact_accuracy"] for s in args.seeds]),
         "base_logic_exact": compute_stats([lineage_results[s]["base"]["logic"]["exact_accuracy"] for s in args.seeds]),
         "cand_b_lang_exact": compute_stats([lineage_results[s]["cand_b_language"]["language"]["exact_accuracy"] for s in args.seeds]),
@@ -624,7 +624,7 @@ def main() -> None:
         "cand_c_logic_exact": compute_stats([lineage_results[s]["cand_c_logic"]["logic"]["exact_accuracy"] for s in args.seeds]),
         "cand_c_logic_abstain": compute_stats([lineage_results[s]["cand_c_logic"]["logic"]["abstention_accuracy"] for s in args.seeds]),
         "cand_c_retention_drift": compute_stats([lineage_results[s]["cand_c_logic"]["retention_drift"] for s in args.seeds]),
-        "cand_d_arith_exact": compute_stats([lineage_results[s]["cand_d_continual"]["arithmetic"]["elementary_exact_match_accuracy"] for s in args.seeds]),
+        "cand_d_arith_exact": compute_stats([lineage_results[s]["cand_d_continual"]["arithmetic"].get("overall_exact_acc", 0.0) / 100.0 for s in args.seeds]),
         "cand_d_lang_exact": compute_stats([lineage_results[s]["cand_d_continual"]["language"]["exact_accuracy"] for s in args.seeds]),
         "cand_d_logic_exact": compute_stats([lineage_results[s]["cand_d_continual"]["logic"]["exact_accuracy"] for s in args.seeds]),
         "cand_d_retention_drift": compute_stats([lineage_results[s]["cand_d_continual"]["retention_drift"] for s in args.seeds]),
