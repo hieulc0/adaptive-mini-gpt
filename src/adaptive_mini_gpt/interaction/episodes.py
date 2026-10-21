@@ -74,7 +74,8 @@ EPISODE_A_FRESH_TEST_RAW = [
 
 
 def build_episode_a_language() -> EpisodeData:
-    """Build Episode A: Unfamiliar factual concept learning."""    practice: list[BenchmarkSample] = []
+    """Build Episode A: Unfamiliar factual concept learning."""
+    practice: list[BenchmarkSample] = []
     for i, (q, a) in enumerate(EPISODE_A_PRACTICE_RAW):
         prompt = format_qa_prompt(passage=EPISODE_A_REFERENCE_DOC, question=q)
         practice.append(BenchmarkSample(
@@ -119,7 +120,8 @@ def build_episode_a_language() -> EpisodeData:
 # Episode B: Logic — Unfamiliar 3-Step Chained Implication with Negation
 # =====================================================================
 def build_episode_b_logic(seed: int = 42) -> EpisodeData:
-    """Build Episode B: Unfamiliar rule combination with disjoint variable sets."""    rng = random.Random(seed)
+    """Build Episode B: Unfamiliar rule combination with disjoint variable sets."""
+    rng = random.Random(seed)
 
     # Disjoint variable sets
     train_vars = [
@@ -185,7 +187,8 @@ def build_episode_b_logic(seed: int = 42) -> EpisodeData:
 # Episode C: Arithmetic — Double Carry Transition Error (9+9+carry=1 & 9+0+carry=1)
 # =====================================================================
 def build_episode_c_arithmetic() -> EpisodeData:
-    """Build Episode C: Repeated elementary transition error practice and test."""    practice_specs = [
+    """Build Episode C: Repeated elementary transition error practice and test."""
+    practice_specs = [
         (9, 9, 1, 9, 1),
         (9, 0, 1, 0, 1),
         (0, 9, 1, 0, 1),
