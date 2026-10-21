@@ -752,13 +752,13 @@ def run_m23_benchmark(
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="M23 Recurrent Neural Arithmetic Benchmark")
-    parser.add_argument("--base_checkpoints_dir", type=Path, default=Path("checkpoints"))
-    parser.add_argument("--output_dir", type=Path, default=Path("runs/m23_recurrent_arithmetic"))
+    parser.add_argument("--base_checkpoints_dir", "--checkpoints-dir", type=Path, default=Path("checkpoints"), dest="base_checkpoints_dir")
+    parser.add_argument("--output_dir", "--output-dir", type=Path, default=Path("runs/m23_recurrent_arithmetic"), dest="output_dir")
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--seeds", type=int, nargs="+", default=[42, 43, 44])
     parser.add_argument("--epochs", type=int, default=10)
     parser.add_argument("--lr", type=float, default=5e-4)
-    parser.add_argument("--batch_size", type=int, default=16)
+    parser.add_argument("--batch_size", "--batch-size", type=int, default=16, dest="batch_size")
 
     args = parser.parse_args()
     run_m23_benchmark(
