@@ -176,6 +176,7 @@ def pretrain_base_lineage(
         train_dataset=ds_train,
         val_dataset=ds_val,
         tokenizer=tokenizer,
+        dataset_fingerprint=f"pretrain_3m_{seed}",
     )
     trainer.train()
     model.to(device)
