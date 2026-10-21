@@ -78,7 +78,7 @@ def build_episode_a_language() -> EpisodeData:
     """Build Episode A: Unfamiliar factual concept learning."""
     practice: list[BenchmarkSample] = []
     for i, (q, a) in enumerate(EPISODE_A_PRACTICE_RAW):
-        prompt = format_qa_prompt(context=EPISODE_A_REFERENCE_DOC, question=q)
+        prompt = format_qa_prompt(passage=EPISODE_A_REFERENCE_DOC, question=q)
         completion = format_qa_completion(a)
         practice.append(BenchmarkSample(
             sample_id=f"epA_train_{i:02d}",
@@ -93,7 +93,7 @@ def build_episode_a_language() -> EpisodeData:
 
     test: list[BenchmarkSample] = []
     for i, (q, a) in enumerate(EPISODE_A_FRESH_TEST_RAW):
-        prompt = format_qa_prompt(context=EPISODE_A_REFERENCE_DOC, question=q)
+        prompt = format_qa_prompt(passage=EPISODE_A_REFERENCE_DOC, question=q)
         completion = format_qa_completion(a)
         test.append(BenchmarkSample(
             sample_id=f"epA_test_{i:02d}",
