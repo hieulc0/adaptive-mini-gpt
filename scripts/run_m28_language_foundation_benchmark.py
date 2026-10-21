@@ -742,6 +742,12 @@ def main() -> None:
             "raw_runs": runs,
         }
 
+    # Compute retention drift relative to M27 control baseline
+    control_ret_loss = aggregated_arms.get("arm1_m27_control", {}).get("mean_metrics", {}).get("retention_loss_mean", 0.0)
+    for arm_name, data in aggregated_arms.items():
+        cur_ret_loss = data["mean_metrics"].get("retention_loss_mean", 0.0)
+        data["mean_metrics"]["retention_drift"] = round(cur_ret_loss - control_ret_loss, 4)
+
     # =====================================================================
     # Phase 7: Autonomous Curriculum Proposal Pilot
     # =====================================================================
@@ -750,11 +756,11 @@ def main() -> None:
     selector_baseline = CurriculumSelector(strategy=CurriculumStrategy.ROUND_ROBIN)
     arm4_means = aggregated_arms["arm4_pretrain_1024_3m_multidomain"]["mean_metrics"]
     initial_accs = {
-        DomainType.ARITHMETIC.value: arm4_means["arithmetic_carry"],
-        DomainType.LOGIC.value: arm4_means["logic_exact"],
-        DomainType.LANGUAGE.value: arm4_means["test_exact"],
+        DomainType.ARITHMETIC.value: arm4_means.get("arithmetic_carry", 0.0),
+        DomainType.LOGIC.value: arm4_means.get("logic_exact", 0.0),
+        DomainType.LANGUAGE.value: arm4_means.get("test_exact", 0.0),
     }
-    retention_drift = arm4_means["retention_drift"]
+    retention_drift = arm4_means.get("retention_drift", 0.0)
     autonomous_proposal = selector_gap.select_next_experiment(
         cycle_index=1,
         current_metrics=initial_accs,
