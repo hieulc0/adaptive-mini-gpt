@@ -44,3 +44,30 @@
      - Symbolic Logic Gate: **PASS on Arm 4** (56.00% mean, 60.00% peak).
 - **Lineage Promotion Decision**: **NO-GO**. The stable operational baseline remains immutable until language accuracy reaches production thresholds.
 - **Next Direction (M29)**: Closed-Loop Interaction and Knowledge-Gap Driven Autonomous Learning (connect conversational queries, self-assessment of knowledge gaps, autonomous retrieval/practice, and candidate qualification).
+
+### M29: Closed-Loop Interaction and Knowledge-Gap-Driven Learning (Completed & Qualified)
+- **Objective**: Demonstrate a complete, reproducible closed-loop learning cycle initiated by real interaction or simulated user query: INTERACT → ATTEMPT → VERIFY → IDENTIFY GAP → ACQUIRE VERIFIED EVIDENCE → PRACTICE → TRAIN CANDIDATE → REEVALUATE → PROMOTE OR ROLLBACK.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m29-closed-loop-study`, commit `e5e41171afd361d5e777c583f57b68b345eb4736`). Single Python application CLI, 1024-BPE tokenizer (`1845a0a16f6ab9ff`), 1M dense backbone (1,089,280 params).
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Minimal Interactive Learner & CLI (`mini_gpt_interactive.py`)**: Terminal CLI supporting real-time user queries, autoregressive generation with token confidence, verification against ground truth/memory, gap tracking, and memory display.
+  2. **Structured Knowledge-Gap Diagnostics (`knowledge_gap.py`)**: Implemented `KnowledgeGapRecord` with deterministic 16-hex SHA-256 fingerprinting, tracking 5 distinct error categories (`INCORRECT_ANSWER`, `UNSUPPORTED_ANSWER`, `EXPLICIT_ABSTENTION`, `MISSING_INFORMATION`, `REPEATED_PROCEDURAL_FAILURE`), achieving 100% gap precision and 0.0% false confidence.
+  3. **Provenance-Aware Verified Memory (`verified_memory.py`)**: `VerifiedMemoryBank` with strict provenance whitelisting (`approved_local_doc:`, `arithmetic_oracle`, `logic_truth_table`, `verified_exercise_generator`), preventing ingestion of unverified text.
+  4. **Action Selection Policy Comparison (`action_selector.py`)**: Benchmarked 4 policies. The adaptive `GAP_DRIVEN` controller achieved **50.0% GPU training avoidance** by resolving initial encounters via verified retrieval/memory, reserving GPU candidate training strictly for repeated procedural failures.
+  5. **Three Controlled Learning Episodes (`episodes.py`)**:
+     - Episode A (Language: unfamiliar cellular ribosomes concept)
+     - Episode B (Logic: 3-step chained implication with negation)
+     - Episode C (Arithmetic: repeated double-carry column transitions)
+     Evaluated across 4 regimes on strictly held-out fresh test problems (0.0% prompt overlap).
+  6. **Catastrophic Forgetting & Replay Findings (Seeds 42, 43, 44)**:
+     - **Regime 3 (Training No Replay)**: Arithmetic carry retention collapsed to **7.06%** (0.00% in Ep A, 0.17% in Ep B, 21.00% in Ep C).
+     - **Regime 4 (Training With Replay)**: Arithmetic carry retention was solidly preserved at **90.33%** (91.50% in Ep A, 90.67% in Ep B, 88.83% in Ep C).
+     - **Regime 2 (Retrieval Only)**: Provided immediate 25.0% accuracy on matched queries with 0% forgetting risk and 0 FLOPs.
+     - **Weight Learning on Fresh Queries**: 0.00% net weight gain across all 3 seeds under 12 epochs of 1M fine-tuning, demonstrating that tiny parameter backbones require modular/adapter capacity or deeper pre-existing representations to generalize to unseen phrasings.
+  7. **Task-Specific Qualification Gates**:
+     - Operational Reasoning Gate: **PASS (100%)** (M18 deterministic solver preserved).
+     - Closed-Loop System Architecture: **PASS (QUALIFIED)** (32/32 tests passed in 9.09s on T4).
+     - Autonomous Policy Selection: **PASS (QUALIFIED)** (50% GPU training avoided, 1.0 precision).
+     - Cross-Domain Retention: **PASS on Regime 4** (90.33% carry retention).
+     - Neural Weight Generalization: **FAIL (0.00% gain on fresh reasoning problems)**.
+- **Lineage Promotion Decision**: **NO-GO**. Stable operational baseline remains active.
+- **Next Direction (M30)**: Modular Fast Adaptation, Hybrid Semantic Memory, and Multi-Scale Practice (isolate interaction updates via modular LoRA/adapter routing to eliminate replay interference, expand external memory with dense/subword similarity retrieval, scale practice curricula for conceptual generalization).
