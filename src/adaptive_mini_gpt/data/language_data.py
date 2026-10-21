@@ -374,7 +374,7 @@ class LanguageComprehensionDataset(Dataset):
         samples: list[BenchmarkSample],
         tokenizer: BPETokenizer,
         context_length: int = 256,
-        ignore_index: int = -1,
+        ignore_index: int = -100,
     ) -> None:
         self.context_length = context_length
         self.ignore_index = ignore_index
@@ -409,7 +409,7 @@ class LanguageComprehensionDataset(Dataset):
 def collate_language_batch(
     batch: list[tuple[Tensor, Tensor]],
     pad_token_id: int,
-    ignore_index: int = -1,
+    ignore_index: int = -100,
 ) -> tuple[Tensor, Tensor]:
     """Pad variable-length language comprehension samples to max sequence length in batch."""
     max_len = max(x.size(0) for x, _ in batch)

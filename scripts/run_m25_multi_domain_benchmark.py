@@ -149,7 +149,7 @@ def train_language_candidate(
         samples=train_samples,
         tokenizer=tokenizer,
         context_length=model.config.context_length,
-        ignore_index=-1,
+        ignore_index=-100,
     )
     pad_id = getattr(tokenizer, "pad_id", 0)
 
@@ -157,7 +157,7 @@ def train_language_candidate(
         dataset,
         batch_size=batch_size,
         shuffle=True,
-        collate_fn=lambda b: collate_language_batch(b, pad_token_id=pad_id, ignore_index=-1),
+        collate_fn=lambda b: collate_language_batch(b, pad_token_id=pad_id, ignore_index=-100),
     )
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
@@ -172,7 +172,7 @@ def train_language_candidate(
             loss = nn.functional.cross_entropy(
                 shift_logits.view(-1, model.config.vocab_size),
                 shift_labels.view(-1),
-                ignore_index=-1,
+                ignore_index=-100,
             )
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -201,7 +201,7 @@ def train_logic_candidate(
         samples=train_samples,
         tokenizer=tokenizer,
         context_length=model.config.context_length,
-        ignore_index=-1,
+        ignore_index=-100,
     )
     pad_id = getattr(tokenizer, "pad_id", 0)
 
@@ -209,7 +209,7 @@ def train_logic_candidate(
         dataset,
         batch_size=batch_size,
         shuffle=True,
-        collate_fn=lambda b: collate_language_batch(b, pad_token_id=pad_id, ignore_index=-1),
+        collate_fn=lambda b: collate_language_batch(b, pad_token_id=pad_id, ignore_index=-100),
     )
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
@@ -224,7 +224,7 @@ def train_logic_candidate(
             loss = nn.functional.cross_entropy(
                 shift_logits.view(-1, model.config.vocab_size),
                 shift_labels.view(-1),
-                ignore_index=-1,
+                ignore_index=-100,
             )
             loss.backward()
             nn.utils.clip_grad_norm_(model.parameters(), 1.0)
@@ -271,13 +271,13 @@ def train_continual_interleaved_candidate(
         samples=lang_samples,
         tokenizer=tokenizer,
         context_length=model.config.context_length,
-        ignore_index=-1,
+        ignore_index=-100,
     )
     loader_lang = DataLoader(
         ds_lang,
         batch_size=batch_size,
         shuffle=True,
-        collate_fn=lambda b: collate_language_batch(b, pad_token_id=pad_id, ignore_index=-1),
+        collate_fn=lambda b: collate_language_batch(b, pad_token_id=pad_id, ignore_index=-100),
     )
 
     # 3. Logic dataset
@@ -285,13 +285,13 @@ def train_continual_interleaved_candidate(
         samples=logic_samples,
         tokenizer=tokenizer,
         context_length=model.config.context_length,
-        ignore_index=-1,
+        ignore_index=-100,
     )
     loader_logic = DataLoader(
         ds_logic,
         batch_size=batch_size,
         shuffle=True,
-        collate_fn=lambda b: collate_language_batch(b, pad_token_id=pad_id, ignore_index=-1),
+        collate_fn=lambda b: collate_language_batch(b, pad_token_id=pad_id, ignore_index=-100),
     )
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)
@@ -316,7 +316,7 @@ def train_continual_interleaved_candidate(
             loss_a = nn.functional.cross_entropy(
                 logits_a[:, :-1, :].contiguous().view(-1, model.config.vocab_size),
                 y_a[:, 1:].contiguous().view(-1),
-                ignore_index=-1,
+                ignore_index=-100,
             )
             loss_a.backward()
             optimizer.step()
@@ -333,7 +333,7 @@ def train_continual_interleaved_candidate(
             loss_b = nn.functional.cross_entropy(
                 logits_b[:, :-1, :].contiguous().view(-1, model.config.vocab_size),
                 y_b[:, 1:].contiguous().view(-1),
-                ignore_index=-1,
+                ignore_index=-100,
             )
             loss_b.backward()
             optimizer.step()
@@ -350,7 +350,7 @@ def train_continual_interleaved_candidate(
             loss_c = nn.functional.cross_entropy(
                 logits_c[:, :-1, :].contiguous().view(-1, model.config.vocab_size),
                 y_c[:, 1:].contiguous().view(-1),
-                ignore_index=-1,
+                ignore_index=-100,
             )
             loss_c.backward()
             optimizer.step()

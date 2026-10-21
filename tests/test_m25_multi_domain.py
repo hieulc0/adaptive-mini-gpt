@@ -191,18 +191,18 @@ def test_language_dataset_masking(mock_tokenizer: BPETokenizer):
     samples = build_language_benchmark_samples(BenchmarkSplit.TEST)
     assert len(samples) > 0
 
-    ds = LanguageComprehensionDataset(samples[:5], mock_tokenizer, context_length=512, ignore_index=-1)
+    ds = LanguageComprehensionDataset(samples[:5], mock_tokenizer, context_length=512, ignore_index=-100)
     assert len(ds) == 5
 
     x, y = ds[0]
     assert x.size(0) == y.size(0)
     # The prompt prefix tokens must be masked with -1
-    assert y[0].item() == -1
+    assert y[0].item() == -100
     # Assistant response tokens must have valid token targets
-    assert (y != -1).any()
+    assert (y != -100).any()
 
     # Test batch collation
-    batch_x, batch_y = collate_language_batch([ds[0], ds[1]], pad_token_id=0, ignore_index=-1)
+    batch_x, batch_y = collate_language_batch([ds[0], ds[1]], pad_token_id=0, ignore_index=-100)
     assert batch_x.size(0) == 2
     assert batch_x.size(1) == max(ds[0][0].size(0), ds[1][0].size(0))
 
@@ -290,10 +290,10 @@ def test_logic_sample_generation_and_masking(mock_tokenizer: BPETokenizer):
             # Word boundary check to ensure no train variable appears
             assert f" {tv} " not in s.prompt and f"Item {tv} " not in s.prompt
 
-    ds = LogicReasoningDataset(test_samples, mock_tokenizer, context_length=256, ignore_index=-1)
+    ds = LogicReasoningDataset(test_samples, mock_tokenizer, context_length=256, ignore_index=-100)
     assert len(ds) == 25
 
     x, y = ds[0]
     assert x.size(0) == y.size(0)
-    assert y[0].item() == -1
-    assert (y != -1).any()
+    assert y[0].item() == -100
+    assert (y != -100).any()

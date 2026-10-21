@@ -351,7 +351,7 @@ class LogicReasoningDataset(Dataset):
         samples: list[BenchmarkSample],
         tokenizer: BPETokenizer,
         context_length: int = 256,
-        ignore_index: int = -1,
+        ignore_index: int = -100,
     ) -> None:
         self.context_length = context_length
         self.ignore_index = ignore_index
