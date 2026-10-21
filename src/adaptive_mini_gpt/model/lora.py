@@ -42,11 +42,14 @@ class LoRALinear(nn.Module):
         for p in self.base_linear.parameters():
             p.requires_grad = False
 
+        dev = base_linear.weight.device
+        dt = base_linear.weight.dtype
+
         if r > 0:
             # Down-projection A: in_features -> r (initialized with Gaussian)
-            self.lora_A = nn.Parameter(torch.empty(r, self.in_features))
+            self.lora_A = nn.Parameter(torch.empty(r, self.in_features, device=dev, dtype=dt))
             # Up-projection B: r -> out_features (initialized with zeros)
-            self.lora_B = nn.Parameter(torch.zeros(self.out_features, r))
+            self.lora_B = nn.Parameter(torch.zeros(self.out_features, r, device=dev, dtype=dt))
             # Initialize A with Kaiming uniform
             nn.init.kaiming_uniform_(self.lora_A, a=math.sqrt(5))
             if lora_dropout > 0.0:
@@ -102,7 +105,7 @@ def inject_lora_adapters(
                             r=r,
                             lora_alpha=lora_alpha,
                             lora_dropout=lora_dropout,
-                        )
+                        ).to(device=submodule.weight.device, dtype=submodule.weight.dtype)
                         setattr(block.attn, name, adapter)
                         injected_count += 1
 
@@ -117,7 +120,7 @@ def inject_lora_adapters(
                             r=r,
                             lora_alpha=lora_alpha,
                             lora_dropout=lora_dropout,
-                        )
+                        ).to(device=submodule.weight.device, dtype=submodule.weight.dtype)
                         setattr(block.mlp, name, adapter)
                         injected_count += 1
 

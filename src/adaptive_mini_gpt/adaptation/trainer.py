@@ -207,6 +207,7 @@ def run_fast_adaptation_regime(
             lora_alpha=lora_alpha,
             target_modules=["c_attn", "c_proj"],
         )
+        model = model.to(device)
         freeze_base_parameters(model)
         stats = get_lora_parameter_stats(model)
         # Trainable parameters are strictly LoRA parameters
