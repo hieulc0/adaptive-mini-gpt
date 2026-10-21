@@ -154,8 +154,13 @@ def train_recurrent_arm(
             b_inputs = b_inputs.to(device)
             b_labels = b_labels.to(device)
 
-            out_p = model(b_inputs, labels=b_labels)
-            loss_p = out_p[0] if isinstance(out_p, tuple) else out_p
+            out_p = model(b_inputs)
+            logits_p = out_p[0] if isinstance(out_p, tuple) else out_p
+            loss_p = nn.functional.cross_entropy(
+                logits_p[:, :-1, :].contiguous().view(-1, logits_p.size(-1)),
+                b_labels[:, 1:].contiguous().view(-1),
+                ignore_index=-100,
+            )
 
             if use_replay and iter_replay:
                 try:
@@ -165,8 +170,13 @@ def train_recurrent_arm(
                     r_inputs, r_labels = next(iter_replay)
                 r_inputs = r_inputs.to(device)
                 r_labels = r_labels.to(device)
-                out_r = model(r_inputs, labels=r_labels)
-                loss_r = out_r[0] if isinstance(out_r, tuple) else out_r
+                out_r = model(r_inputs)
+                logits_r = out_r[0] if isinstance(out_r, tuple) else out_r
+                loss_r = nn.functional.cross_entropy(
+                    logits_r[:, :-1, :].contiguous().view(-1, logits_r.size(-1)),
+                    r_labels[:, 1:].contiguous().view(-1),
+                    ignore_index=-100,
+                )
                 total_loss = loss_p + 0.5 * loss_r
             else:
                 total_loss = loss_p
@@ -233,8 +243,13 @@ def train_neural_router(
         for b_inputs, b_labels in loader:
             b_inputs = b_inputs.to(device)
             b_labels = b_labels.to(device)
-            out = model(b_inputs, labels=b_labels)
-            loss = out[0] if isinstance(out, tuple) else out
+            out = model(b_inputs)
+            logits = out[0] if isinstance(out, tuple) else out
+            loss = nn.functional.cross_entropy(
+                logits[:, :-1, :].contiguous().view(-1, logits.size(-1)),
+                b_labels[:, 1:].contiguous().view(-1),
+                ignore_index=-100,
+            )
             optimizer.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)

@@ -197,11 +197,21 @@ def run_closed_loop_recurrent_episode(
             r_inputs = r_inputs.to(device)
             r_labels = r_labels.to(device)
 
-            out_p = candidate_model(b_inputs, labels=b_labels)
-            loss_p = out_p[0] if isinstance(out_p, tuple) else out_p
+            out_p = candidate_model(b_inputs)
+            logits_p = out_p[0] if isinstance(out_p, tuple) else out_p
+            loss_p = torch.nn.functional.cross_entropy(
+                logits_p[:, :-1, :].contiguous().view(-1, logits_p.size(-1)),
+                b_labels[:, 1:].contiguous().view(-1),
+                ignore_index=-100,
+            )
 
-            out_r = candidate_model(r_inputs, labels=r_labels)
-            loss_r = out_r[0] if isinstance(out_r, tuple) else out_r
+            out_r = candidate_model(r_inputs)
+            logits_r = out_r[0] if isinstance(out_r, tuple) else out_r
+            loss_r = torch.nn.functional.cross_entropy(
+                logits_r[:, :-1, :].contiguous().view(-1, logits_r.size(-1)),
+                r_labels[:, 1:].contiguous().view(-1),
+                ignore_index=-100,
+            )
 
             total_loss = loss_p + 0.5 * loss_r
             optimizer.zero_grad()
