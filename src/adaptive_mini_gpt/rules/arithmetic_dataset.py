@@ -162,7 +162,6 @@ def format_problem(prob: ArithmeticProblem, arm: str) -> tuple[str, str]:
 
         lines: list[str] = []
         for col in prob.columns:
-            # e.g. "col 0 (units): 7 + 6 + 0 = 13 | write 3 | carry 1"
             lines.append(
                 f"col {col.col_index} ({col.name}): {col.digit_a} + {col.digit_b} + {col.carry_in} = {col.total_sum} | write {col.write_digit} | carry {col.carry_out}"
             )
@@ -250,13 +249,14 @@ def generate_controlled_addition_dataset(
     lengths: tuple[int, ...] = (2, 3),
     split: str = "train",
     target_carry_distribution: tuple[float, float, float, float] = (0.25, 0.25, 0.25, 0.25),
+    exclude_pairs: set[tuple[int, int]] | None = None,
 ) -> list[ArithmeticProblem]:
     """Generate verified, non-overlapping addition problems with controlled carry distributions.
     
     target_carry_distribution corresponds to proportions for [0 carries, 1 carry, 2 carries, 3+ carries].
     """
     rng = random.Random(seed)
-    seen_pairs: set[tuple[int, int]] = set()
+    seen_pairs: set[tuple[int, int]] = set(exclude_pairs) if exclude_pairs is not None else set()
     problems: list[ArithmeticProblem] = []
 
     # Map carry count to target bucket index: 0 -> 0, 1 -> 1, 2 -> 2, 3+ -> 3

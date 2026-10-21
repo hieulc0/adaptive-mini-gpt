@@ -122,19 +122,34 @@ def run_m21_benchmark(
     # 1. Controlled Datasets Generation (Rigorous Partition Isolation)
     logger.info("Generating controlled datasets...")
     train_problems = generate_controlled_addition_dataset(seed=1021, num_samples=1200, lengths=(2, 3), split="train")
-    val_problems = generate_controlled_addition_dataset(seed=2021, num_samples=200, lengths=(2, 3), split="val")
-    test_in_dist = generate_controlled_addition_dataset(seed=3021, num_samples=200, lengths=(2, 3), split="test")
-    test_extrap = generate_controlled_addition_dataset(seed=4021, num_samples=100, lengths=(4, 5), split="test_extrapolation")
+    train_pairs = set((min(p.a, p.b), max(p.a, p.b)) for p in train_problems)
+
+    val_problems = generate_controlled_addition_dataset(
+        seed=2021, num_samples=200, lengths=(2, 3), split="val", exclude_pairs=train_pairs
+    )
+    val_pairs = set((min(p.a, p.b), max(p.a, p.b)) for p in val_problems)
+
+    test_in_dist = generate_controlled_addition_dataset(
+        seed=3021, num_samples=200, lengths=(2, 3), split="test", exclude_pairs=train_pairs | val_pairs
+    )
+    test_id_pairs = set((min(p.a, p.b), max(p.a, p.b)) for p in test_in_dist)
+
+    test_extrap = generate_controlled_addition_dataset(
+        seed=4021,
+        num_samples=100,
+        lengths=(4, 5),
+        split="test_extrapolation",
+        exclude_pairs=train_pairs | val_pairs | test_id_pairs,
+    )
+    test_ood_pairs = set((min(p.a, p.b), max(p.a, p.b)) for p in test_extrap)
 
     # Verify zero overlap between splits
-    train_pairs = set((p.a, p.b) for p in train_problems)
-    val_pairs = set((p.a, p.b) for p in val_problems)
-    test_id_pairs = set((p.a, p.b) for p in test_in_dist)
-    test_ood_pairs = set((p.a, p.b) for p in test_extrap)
-
     assert len(train_pairs & val_pairs) == 0, "Train-val overlap detected!"
     assert len(train_pairs & test_id_pairs) == 0, "Train-test ID overlap detected!"
     assert len(train_pairs & test_ood_pairs) == 0, "Train-test OOD overlap detected!"
+    assert len(val_pairs & test_id_pairs) == 0, "Val-test ID overlap detected!"
+    assert len(val_pairs & test_ood_pairs) == 0, "Val-test OOD overlap detected!"
+    assert len(test_id_pairs & test_ood_pairs) == 0, "Test ID-OOD overlap detected!"
 
     dataset_metadata = {
         "train": {
