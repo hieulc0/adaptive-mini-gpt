@@ -139,7 +139,7 @@ class ClosedLoopInteractiveLearner:
         if domain == DomainType.LANGUAGE:
             prompt = format_qa_prompt(passage=context or "General knowledge.", question=question)
             raw_completion, confidence = self.generate_with_confidence(prompt, max_new_tokens=24)
-            predicted_answer = parse_language_completion(raw_completion)
+            predicted_answer, _, _ = parse_language_completion(raw_completion)
         else:
             prompt = f"{question.strip()}\n#### "
             raw_completion, confidence = self.generate_with_confidence(prompt, max_new_tokens=16)

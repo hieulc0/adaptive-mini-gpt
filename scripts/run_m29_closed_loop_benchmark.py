@@ -173,7 +173,7 @@ def evaluate_episode_accuracy(
             completion = full_decoded[len(prompt):].strip()
 
             if domain == DomainType.LANGUAGE:
-                pred = parse_language_completion(completion)
+                pred, _, _ = parse_language_completion(completion)
                 if normalize_text(pred) == normalize_text(s.expected_answer):
                     correct += 1
             elif domain == DomainType.LOGIC:
