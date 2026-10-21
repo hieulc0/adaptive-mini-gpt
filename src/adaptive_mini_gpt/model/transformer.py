@@ -136,14 +136,17 @@ class TransformerBlock(nn.Module):
 
 
 class MiniGPT(nn.Module):
-    """Decoder-only Transformer language model with adaptive expert and depth routing."""
+    """Decoder-only Transformer language model with adaptive expert, depth routing, and flexible position encodings."""
 
     def __init__(self, config: ModelConfig) -> None:
         super().__init__()
         self.config = config
 
         self.wte = nn.Embedding(config.vocab_size, config.d_model)
-        self.wpe = nn.Embedding(config.context_length, config.d_model)
+        if config.pos_encoding == "absolute":
+            self.wpe: nn.Embedding | None = nn.Embedding(config.context_length, config.d_model)
+        else:
+            self.wpe = None
         self.drop = nn.Dropout(config.dropout)
 
         self.blocks = nn.ModuleList([TransformerBlock(config) for _ in range(config.n_layers)])
@@ -185,35 +188,32 @@ class MiniGPT(nn.Module):
         freeze_existing_experts: bool = False,
         trainable_token_ids: list[int] | None = None,
     ) -> None:
-        """Freeze shared dense backbone parameters.
-
-        Only modular experts, routers, MoD, and moe_head remain trainable.
-        If `trainable_token_ids` is provided (or stored on `self.config`), only those specific
-        token rows in `wte` (input embeddings) are allowed to update via gradient masking.
-        Keeping `lm_head` frozen while routing output adaptation through `moe_head` eliminates
-        softmax denominator drift on prior tasks, guaranteeing 0.000000 forgetting when
-        `bypass_moe=True`.
-        """
+        """Freeze shared dense backbone parameters."""
         if trainable_token_ids is not None:
             self.config.trainable_token_ids = list(trainable_token_ids)
         active_token_ids = self.config.trainable_token_ids
 
-        for name, param in self.named_parameters():
-            if ".moe." in name or ".mod_router." in name or "moe_head." in name:
-                if freeze_existing_experts and ".experts." in name:
-                    param.requires_grad = False
+        for pn, p in self.named_parameters():
+            if "blocks" in pn:
+                if "moe" in pn or "mod_router" in pn:
+                    p.requires_grad = True
                 else:
-                    param.requires_grad = True
+                    p.requires_grad = False
+            elif "moe_head" in pn:
+                p.requires_grad = True
             else:
-                param.requires_grad = False
+                p.requires_grad = False
+
+        if freeze_existing_experts:
+            for block in self.blocks:
+                if block.moe is not None:
+                    block.moe.freeze_expert_subset()
 
         if active_token_ids:
-            mask = torch.zeros(
-                self.config.vocab_size, 1, dtype=torch.bool, device=self.wte.weight.device
-            )
+            mask = torch.zeros(self.config.vocab_size, 1, dtype=torch.float32)
             for tid in active_token_ids:
                 if 0 <= tid < self.config.vocab_size:
-                    mask[tid, 0] = True
+                    mask[tid, 0] = 1.0
             self._embedding_grad_mask = mask
 
             def _mask_grad(grad: Tensor) -> Tensor:
@@ -261,20 +261,22 @@ class MiniGPT(nn.Module):
     ) -> tuple[Tensor, Tensor | None]:
         """Forward pass through the Transformer with M6 autonomous domain gating."""
         b, t = idx.size()
-        if t > self.config.context_length:
+        if self.config.pos_encoding == "absolute" and t > self.config.context_length:
             raise ValueError(
                 f"Cannot forward sequence of length {t}, block size is {self.config.context_length}"
             )
 
         device = idx.device
-        pos = torch.arange(0, t, dtype=torch.long, device=device)
-
         tok_emb = self.wte(idx)
-        pos_emb = self.wpe(pos)
-        x = self.drop(tok_emb + pos_emb)
 
-        # M6/M7 Autonomous Causal Domain Gating:
-        # Automatically detect if specialist domain tokens appear in the causal context prefix.
+        if self.wpe is not None:
+            pos = torch.arange(0, t, dtype=torch.long, device=device)
+            pos_emb = self.wpe(pos)
+            x = self.drop(tok_emb + pos_emb)
+        else:
+            x = self.drop(tok_emb)
+
+        # M6/M7 Autonomous Causal Domain Gating
         domain_token_mask: Tensor | None = None
         effective_bypass_moe = bypass_moe
         trigger_ids = (
@@ -284,8 +286,8 @@ class MiniGPT(nn.Module):
         )
         if not bypass_moe and self.config.adaptive_enabled and trigger_ids:
             specialist_ids = torch.tensor(trigger_ids, dtype=idx.dtype, device=device)
-            is_spec = torch.isin(idx, specialist_ids)  # (B, T)
-            domain_token_mask = is_spec.cumsum(dim=-1) > 0  # Causal prefix accumulation
+            is_spec = torch.isin(idx, specialist_ids)
+            domain_token_mask = is_spec.cumsum(dim=-1) > 0
             if not domain_token_mask.any():
                 effective_bypass_moe = True
 
@@ -307,15 +309,20 @@ class MiniGPT(nn.Module):
             if aux is not None:
                 if "balance_loss" in aux:
                     total_balance_loss = total_balance_loss + aux["balance_loss"]
+                if "z_loss" in aux:
                     total_z_loss = total_z_loss + aux["z_loss"]
-                    entropies.append(aux["entropy"])
-                    utilizations.append(aux["utilization"])
-                if "mod_aux_loss" in aux:
-                    total_mod_loss = total_mod_loss + aux["mod_aux_loss"]
-                    mod_fractions.append(aux["mod_active_token_fraction"])
+                if "router_entropy" in aux:
+                    entropies.append(aux["router_entropy"])
+                if "expert_utilization" in aux:
+                    utilizations.append(aux["expert_utilization"])
+                if "mod_loss" in aux:
+                    total_mod_loss = total_mod_loss + aux["mod_loss"]
+                if "mod_routed_fraction" in aux:
+                    mod_fractions.append(aux["mod_routed_fraction"])
 
         x = self.ln_f(x)
         logits = self.lm_head(x)
+
         if self.moe_head is not None and not effective_bypass_moe:
             moe_logits = self.moe_head(x)
             if domain_token_mask is not None:
@@ -324,177 +331,31 @@ class MiniGPT(nn.Module):
                 )
             logits = logits + moe_logits
 
-        loss: Tensor | None = None
-        ce_loss_val = 0.0
+        self.last_aux_info = {
+            "balance_loss": total_balance_loss.item(),
+            "z_loss": total_z_loss.item(),
+            "mean_entropy": sum(entropies) / len(entropies) if entropies else 0.0,
+            "expert_utilization": utilizations[-1].tolist() if utilizations else [],
+            "mod_loss": total_mod_loss.item(),
+            "mean_mod_fraction": sum(mod_fractions) / len(mod_fractions) if mod_fractions else 1.0,
+        }
+
+        loss = None
         if targets is not None:
-            ce_loss = F.cross_entropy(
-                logits.view(-1, logits.size(-1)), targets.view(-1), ignore_index=-1
+            shift_logits = logits[..., :-1, :].contiguous()
+            shift_targets = targets[..., 1:].contiguous()
+            loss = F.cross_entropy(
+                shift_logits.view(-1, self.config.vocab_size),
+                shift_targets.view(-1),
+                ignore_index=-100,
             )
-            ce_loss_val = ce_loss.item()
-            total_loss: Tensor = ce_loss
-            if self.config.adaptive_enabled and len(entropies) > 0 and not effective_bypass_moe:
-                n_moe = len(entropies)
-                mean_bal = total_balance_loss / n_moe
-                mean_z = total_z_loss / n_moe
-                total_loss = (
-                    total_loss
-                    + self.config.aux_loss_weight * mean_bal
-                    + self.config.z_loss_weight * mean_z
-                )
-            if self.config.mod_enabled and len(mod_fractions) > 0 and not effective_bypass_moe:
-                mean_mod = total_mod_loss / len(mod_fractions)
-                total_loss = total_loss + 0.1 * mean_mod
-            loss = total_loss
-
-        info: dict[str, Any] = {"ce_loss": ce_loss_val}
-        if entropies and not effective_bypass_moe:
-            mean_util = torch.stack(utilizations).mean(dim=0).tolist()
-            info.update(
-                {
-                    "balance_loss": (total_balance_loss / len(entropies)).item(),
-                    "z_loss": (total_z_loss / len(entropies)).item(),
-                    "router_entropy": sum(entropies) / len(entropies),
-                    "expert_utilization": [round(u, 4) for u in mean_util],
-                }
-            )
-        if mod_fractions and not effective_bypass_moe:
-            active_frac = round(sum(mod_fractions) / len(mod_fractions), 4)
-            info.update(
-                {
-                    "mod_aux_loss": (total_mod_loss / len(mod_fractions)).item(),
-                    "mod_active_fraction": active_frac,
-                    "mod_active_token_fraction": active_frac,
-                }
-            )
-        self.last_aux_info = info
-
-        return logits, loss
-
-    @torch.no_grad()
-    def generate(
-        self,
-        idx: Tensor,
-        max_new_tokens: int,
-        temperature: float = 1.0,
-        top_k: int | None = None,
-        top_p: float | None = None,
-        repetition_penalty: float = 1.0,
-        eos_id: int | None = None,
-        task_id: int | None = None,
-        bypass_moe: bool = False,
-        **kwargs: Any,
-    ) -> Tensor:
-        """Autoregressively generate new tokens with top-k, top-p, and repetition penalty."""
-        for _ in range(max_new_tokens):
-            idx_cond = (
-                idx
-                if idx.size(1) <= self.config.context_length
-                else idx[:, -self.config.context_length :]
-            )
-            logits, _ = self(idx_cond, task_id=task_id, bypass_moe=bypass_moe, **kwargs)
-            logits = logits[:, -1, :]
-
-            if repetition_penalty != 1.0 and repetition_penalty > 0.0:
-                for b_idx in range(idx.size(0)):
-                    seen_tokens = torch.unique(idx_cond[b_idx])
-                    seen_logits = logits[b_idx, seen_tokens]
-                    logits[b_idx, seen_tokens] = torch.where(
-                        seen_logits < 0,
-                        seen_logits * repetition_penalty,
-                        seen_logits / repetition_penalty,
-                    )
-
-            if temperature <= 0.0:
-                idx_next = torch.argmax(logits, dim=-1, keepdim=True)
-            else:
-                logits = logits / max(temperature, 1e-5)
-
-                if top_k is not None and top_k > 0:
-                    v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
-                    logits[logits < v[:, [-1]]] = float("-inf")
-
-                if top_p is not None and 0.0 < top_p < 1.0:
-                    sorted_logits, sorted_indices = torch.sort(logits, descending=True, dim=-1)
-                    cumulative_probs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
-                    sorted_indices_to_remove = cumulative_probs > top_p
-                    sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
-                    sorted_indices_to_remove[..., 0] = 0
-                    indices_to_remove = sorted_indices_to_remove.scatter(
-                        1, sorted_indices, sorted_indices_to_remove
-                    )
-                    logits = logits.masked_fill(indices_to_remove, float("-inf"))
-
-                probs = F.softmax(logits, dim=-1)
-                idx_next = torch.multinomial(probs, num_samples=1)
-
-            idx = torch.cat((idx, idx_next), dim=1)
-            if eos_id is not None and (idx_next == eos_id).all():
-                break
-
-        return idx
-
-    def get_num_params(self, non_embedding: bool = False) -> int:
-        """Return total parameters in the model."""
-        n_params = sum(p.numel() for p in self.parameters())
-        if non_embedding:
-            n_params -= self.wpe.weight.numel()
-            if not self.config.tie_word_embeddings:
-                n_params -= self.wte.weight.numel()
-        return n_params
-
-    def get_active_params_per_token(self) -> int:
-        """Return average active parameters per token (accounts for Top-K MoE and M5 MoD)."""
-        total = self.get_num_params(non_embedding=False)
-        inactive = 0
-        for block in self.blocks:
-            if not isinstance(block, TransformerBlock):
-                continue
-            active_moe_params = 0
-            if block.moe is not None:
-                exp_params = (
-                    sum(p.numel() for p in block.moe.experts[0].parameters())
-                    if len(block.moe.experts) > 0
-                    else 0
-                )
-                n_inactive = max(0, block.moe.n_experts - block.moe.top_k)
-                inactive += n_inactive * exp_params
-                active_moe_params = block.moe.top_k * exp_params + sum(
-                    p.numel() for p in block.moe.router.parameters()
+            if self.config.adaptive_enabled:
+                loss = (
+                    loss
+                    + self.config.aux_loss_weight * total_balance_loss
+                    + self.config.z_loss_weight * total_z_loss
                 )
             if self.config.mod_enabled:
-                ffn_params = sum(p.numel() for p in block.mlp.parameters())
-                skippable = ffn_params + active_moe_params
-                inactive += int(round(skippable * (1.0 - self.config.mod_capacity_factor)))
-        return total - inactive
+                loss = loss + total_mod_loss
 
-    def inspect_architecture(self) -> dict[str, Any]:
-        """Return architectural details, total/trainable/active parameter counts."""
-        layer_details: list[dict[str, Any]] = []
-        for i, block in enumerate(self.blocks):
-            layer_params = sum(p.numel() for p in block.parameters())
-            layer_details.append({"layer": i, "params": layer_params})
-
-        return {
-            "architecture": self.config.architecture,
-            "d_model": self.config.d_model,
-            "n_layers": self.config.n_layers,
-            "n_heads": self.config.n_heads,
-            "head_dim": self.config.head_dim,
-            "d_ff": self.config.d_ff,
-            "context_length": self.config.context_length,
-            "vocab_size": self.config.vocab_size,
-            "tie_word_embeddings": self.config.tie_word_embeddings,
-            "adaptive_enabled": self.config.adaptive_enabled,
-            "n_experts": self.config.n_experts if self.config.adaptive_enabled else 0,
-            "top_k": self.config.top_k if self.config.adaptive_enabled else 0,
-            "mod_enabled": self.config.mod_enabled,
-            "mod_capacity_factor": (
-                self.config.mod_capacity_factor if self.config.mod_enabled else 1.0
-            ),
-            "moe_head_enabled": self.moe_head is not None,
-            "total_params": self.get_num_params(non_embedding=False),
-            "active_params_per_token": self.get_active_params_per_token(),
-            "trainable_params": sum(p.numel() for p in self.parameters() if p.requires_grad),
-            "non_embedding_params": self.get_num_params(non_embedding=True),
-            "layers": layer_details,
-        }
+        return logits, loss

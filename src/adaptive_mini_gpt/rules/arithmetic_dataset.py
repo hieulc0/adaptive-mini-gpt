@@ -1,17 +1,19 @@
-"""M21: Digit-Level Neural Arithmetic and Procedural Scratchpad Dataset Generator.
+"""M21/M22: Digit-Level Neural Arithmetic and Procedural Scratchpad Dataset Generator.
 
 Generates verified addition problems with controlled operand lengths and carry counts:
 - Arm A: Standard text (e.g. "127 + 386 = 513")
 - Arm B: Digit-level MSD (e.g. "1 2 7 + 3 8 6 = 5 1 3")
-- Arm C: Column-by-column procedural scratchpad with intermediate carries
+- Arm C: Column-by-column procedural scratchpad with intermediate carries (verbose)
 - Arm D: Digit-level LSD (e.g. "7 2 1 + 6 8 3 = 3 1 5", least-significant-digit first)
+- Arm E (M22): Compact procedural scratchpad (e.g. "7+6+0=13>3:1 | 2+8+1=11>1:1 | 1+3+1=5>5:0 | ANS: 5 1 3")
 
 Features:
 - Controlled carry distributions: 0 carries, 1 carry, 2 carries, 3+ carries
 - Disjoint train, validation, and sealed-test sets
-- Controlled length extrapolation partitions (2-3 digits train, 4-5 digits test)
+- Controlled length extrapolation partitions (2-3 digits train, 4-6 digits test)
 - Target-only cross-entropy loss masking (-100 for prompt tokens)
 - Cryptographic SHA-256 dataset fingerprinting
+- Language retention replay mixing
 """
 
 from __future__ import annotations
@@ -60,7 +62,7 @@ class ArithmeticProblem:
 
     @classmethod
     def create(cls, a: int, b: int, split: str = "train") -> ArithmeticProblem:
-        """Construct problem and compute column-by-column addition procedure."""
+        """Construct problem and compute column-by-column calculations."""
         res = a + b
         str_a = str(a)
         str_b = str(b)
@@ -68,21 +70,30 @@ class ArithmeticProblem:
         len_b = len(str_b)
         max_len = max(len_a, len_b)
 
-        # Pad with leading zeros from the left so columns align from right (units = col 0)
-        pad_a = str_a.zfill(max_len)
-        pad_b = str_b.zfill(max_len)
+        # Pad with leading zeros so columns align (from units / col 0 up to max_len - 1)
+        padded_a = str_a.zfill(max_len)
+        padded_b = str_b.zfill(max_len)
 
-        col_names = ["units", "tens", "hundreds", "thousands", "ten_thousands", "hundred_thousands"]
+        col_names = [
+            "units",
+            "tens",
+            "hundreds",
+            "thousands",
+            "ten_thousands",
+            "hundred_thousands",
+            "millions",
+        ]
+
         columns: list[ColumnCalculation] = []
         carry = 0
         total_carries = 0
 
-        # Process from right (units) to left
+        # Traverse from least significant digit (index -1) to most significant
         for i in range(max_len):
+            d_a = int(padded_a[-(i + 1)])
+            d_b = int(padded_b[-(i + 1)])
             col_name = col_names[i] if i < len(col_names) else f"col_{i}"
-            idx_from_right = max_len - 1 - i
-            d_a = int(pad_a[idx_from_right])
-            d_b = int(pad_b[idx_from_right])
+
             col_sum = d_a + d_b + carry
             w_digit = col_sum % 10
             next_carry = col_sum // 10
@@ -168,6 +179,18 @@ def format_problem(prob: ArithmeticProblem, arm: str) -> tuple[str, str]:
         lines.append(f"Answer: {spaced_res}")
         target = "\n".join(lines) + "<|eos|>\n"
 
+    elif arm == "compact_scratchpad":
+        spaced_a = " ".join(str_a)
+        spaced_b = " ".join(str_b)
+        spaced_res = " ".join(str_res)
+        prompt = f"<|user|>\nAdd: {spaced_a} + {spaced_b}\n<|assistant|>\nSteps: "
+
+        step_strs = [
+            f"{c.digit_a}+{c.digit_b}+{c.carry_in}={c.total_sum}>{c.write_digit}:{c.carry_out}"
+            for c in prob.columns
+        ]
+        target = " | ".join(step_strs) + f"\nANS: {spaced_res}<|eos|>\n"
+
     elif arm == "digit_lsd":
         # Least Significant Digit first (reversed digit sequence)
         rev_a = " ".join(reversed(str_a))
@@ -183,19 +206,25 @@ def format_problem(prob: ArithmeticProblem, arm: str) -> tuple[str, str]:
 
 
 class ArithmeticDataset(Dataset):
-    """PyTorch Dataset for causal language modeling of arithmetic with target-only loss."""
+    """PyTorch Dataset for causal language modeling of arithmetic with target-only loss and replay."""
 
     def __init__(
         self,
         problems: list[ArithmeticProblem],
         tokenizer: BPETokenizer,
-        arm: str = "digit_msd",
+        arm: str = "compact_scratchpad",
         context_length: int = 256,
+        replay_texts: list[str] | None = None,
+        replay_ratio: float = 0.0,
+        seed: int = 42,
     ) -> None:
         self.problems = problems
         self.tokenizer = tokenizer
         self.arm = arm
         self.context_length = context_length
+        self.replay_texts = replay_texts
+        self.replay_ratio = replay_ratio
+        self.seed = seed
 
         self.input_ids_list: list[Tensor] = []
         self.labels_list: list[Tensor] = []
@@ -219,6 +248,20 @@ class ArithmeticDataset(Dataset):
 
             self.input_ids_list.append(torch.tensor(full_toks, dtype=torch.long))
             self.labels_list.append(torch.tensor(labels, dtype=torch.long))
+
+        # Replay data mixing for language retention (M22 Phase 5)
+        if self.replay_texts and self.replay_ratio > 0.0:
+            rng = random.Random(self.seed)
+            num_replay = int(len(self.problems) * self.replay_ratio)
+            for _ in range(num_replay):
+                text = rng.choice(self.replay_texts)
+                toks = self.tokenizer.encode(text)
+                if len(toks) > self.context_length:
+                    toks = toks[: self.context_length]
+                if len(toks) > 1:
+                    labels = list(toks)
+                    self.input_ids_list.append(torch.tensor(toks, dtype=torch.long))
+                    self.labels_list.append(torch.tensor(labels, dtype=torch.long))
 
     def __len__(self) -> int:
         return len(self.input_ids_list)
@@ -251,17 +294,13 @@ def generate_controlled_addition_dataset(
     target_carry_distribution: tuple[float, float, float, float] = (0.25, 0.25, 0.25, 0.25),
     exclude_pairs: set[tuple[int, int]] | None = None,
 ) -> list[ArithmeticProblem]:
-    """Generate verified, non-overlapping addition problems with controlled carry distributions.
-    
-    target_carry_distribution corresponds to proportions for [0 carries, 1 carry, 2 carries, 3+ carries].
-    """
+    """Generate verified, non-overlapping addition problems with controlled carry distributions."""
     rng = random.Random(seed)
     seen_pairs: set[tuple[int, int]] = set(exclude_pairs) if exclude_pairs is not None else set()
     problems: list[ArithmeticProblem] = []
 
     # Map carry count to target bucket index: 0 -> 0, 1 -> 1, 2 -> 2, 3+ -> 3
     bucket_targets = [int(num_samples * p) for p in target_carry_distribution]
-    # Adjust remainder to sum exactly to num_samples
     bucket_targets[0] += num_samples - sum(bucket_targets)
     bucket_counts = [0, 0, 0, 0]
 
@@ -281,7 +320,6 @@ def generate_controlled_addition_dataset(
         a = rng.randint(min_a, max_a)
         b = rng.randint(min_b, max_b)
 
-        # Enforce canonical ordering (a <= b) to prevent permutation duplicates
         pair = (min(a, b), max(a, b))
         if pair in seen_pairs:
             continue
@@ -314,27 +352,35 @@ def parse_arithmetic_completion(raw_text: str, arm: str) -> dict[str, Any]:
     is_valid = False
 
     if arm in ("standard", "digit_msd", "digit_lsd"):
-        # Pattern: look for Answer: <digits>
         m = re.search(r"Answer:\s*([0-9\s]+)", cleaned, re.IGNORECASE)
         if m:
             digits_raw = m.group(1).strip()
-            # Remove whitespace
             digits_clean = re.sub(r"\s+", "", digits_raw)
             if digits_clean.isdigit():
                 if arm == "digit_lsd":
-                    # Reverse digits back to most significant first
                     predicted_answer_str = digits_clean[::-1]
                 else:
                     predicted_answer_str = digits_clean
                 is_valid = True
 
     elif arm == "scratchpad":
-        # Extract intermediate carries from scratchpad lines: "carry (\d+)"
         carry_matches = re.findall(r"carry\s+(\d+)", cleaned, re.IGNORECASE)
         predicted_carries = [int(c) for c in carry_matches]
 
-        # Extract final answer line: "Answer: <digits>"
         m = re.search(r"Answer:\s*([0-9\s]+)", cleaned, re.IGNORECASE)
+        if m:
+            digits_raw = m.group(1).strip()
+            digits_clean = re.sub(r"\s+", "", digits_raw)
+            if digits_clean.isdigit():
+                predicted_answer_str = digits_clean
+                is_valid = True
+
+    elif arm == "compact_scratchpad":
+        # Format: "7+6+0=13>3:1 | 2+8+1=11>1:1 | 1+3+1=5>5:0\nANS: 5 1 3"
+        carry_matches = re.findall(r">\s*\d+\s*:\s*(\d+)", cleaned)
+        predicted_carries = [int(c) for c in carry_matches]
+
+        m = re.search(r"ANS:\s*([0-9\s]+)", cleaned, re.IGNORECASE)
         if m:
             digits_raw = m.group(1).strip()
             digits_clean = re.sub(r"\s+", "", digits_raw)
