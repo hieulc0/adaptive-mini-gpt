@@ -441,23 +441,23 @@ def run_m23_benchmark(
 
         lineage_eval["arm_a_baseline"] = {
             "in_distribution": {
-                "exact_accuracy": eval_id_a["exact_answer_accuracy"],
-                "syntax_validity": eval_id_a["syntax_validity"],
-                "carry_accuracy": eval_id_a["carry_accuracy"],
-                "truncation_rate": eval_id_a["truncation_rate"],
+                "exact_accuracy": eval_id_a.exact_answer_accuracy,
+                "syntax_validity": eval_id_a.syntax_validity_rate,
+                "carry_accuracy": eval_id_a.carry_prediction_accuracy,
+                "truncation_rate": eval_id_a.truncation_rate,
             },
             "extrapolation": {
-                "exact_accuracy": eval_extrap_a["exact_answer_accuracy"],
-                "syntax_validity": eval_extrap_a["syntax_validity"],
-                "carry_accuracy": eval_extrap_a["carry_accuracy"],
-                "truncation_rate": eval_extrap_a["truncation_rate"],
+                "exact_accuracy": eval_extrap_a.exact_answer_accuracy,
+                "syntax_validity": eval_extrap_a.syntax_validity_rate,
+                "carry_accuracy": eval_extrap_a.carry_prediction_accuracy,
+                "truncation_rate": eval_extrap_a.truncation_rate,
                 "by_length": {
                     l: {
-                        "exact_accuracy": eval_extrap_a["length_breakdown"][l]["exact_accuracy"],
-                        "syntax_validity": eval_extrap_a["length_breakdown"][l]["syntax_validity"],
-                        "truncation_rate": eval_extrap_a["length_breakdown"][l]["truncation_rate"],
+                        "exact_accuracy": eval_extrap_a.accuracy_by_length.get(l, {}).get("exact_acc", 0.0),
+                        "syntax_validity": eval_extrap_a.accuracy_by_length.get(l, {}).get("valid_acc", 0.0),
+                        "truncation_rate": eval_extrap_a.accuracy_by_length.get(l, {}).get("trunc_acc", 0.0),
                     }
-                    for l in (4, 5, 6, 7, 8) if l in eval_extrap_a.get("length_breakdown", {})
+                    for l in (4, 5, 6, 7, 8) if l in eval_extrap_a.accuracy_by_length
                 },
             },
             "retention": {
