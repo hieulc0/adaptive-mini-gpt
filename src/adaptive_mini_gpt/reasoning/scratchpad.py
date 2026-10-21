@@ -70,7 +70,6 @@ def build_arithmetic_reasoning_sample(a: int, b: int) -> ReasoningSample:
     target_direct = f"{expected_ans}<|eos|>\n"
 
     # 2. Scratchpad Target (Column-by-column digit & carry trace)
-    # Reverse to process from least-significant column (col 0)
     rev_a = [int(d) for d in reversed(str_a)]
     rev_b = [int(d) for d in reversed(str_b)]
     max_len = max(len(rev_a), len(rev_b))
@@ -136,7 +135,6 @@ def build_logic_reasoning_sample(
     initial_fact: tuple[str, bool] = ("A", True),
 ) -> ReasoningSample:
     """Build a multi-hop chained logic deduction sample with intermediate steps."""
-    # Deduce truth values step by step
     facts: dict[str, bool] = {initial_fact[0]: initial_fact[1]}
     rules_text: list[str] = []
     steps_text: list[str] = []
@@ -260,14 +258,15 @@ def parse_reasoning_completion(
 ) -> ParsedReasoningCompletion:
     """Parse output text from model rollout across Direct, Scratchpad, and Recurrent approaches."""
     clean = raw_text.strip()
+    special_tags = ("<|eos|>", "<eos>", "<|pad|>", "<pad>", "<|endoftext|>")
 
     if approach == ApproachType.DIRECT:
-        # In direct generation, the entire first line is the final answer
         line0 = clean.split("\n")[0].strip()
-        # Strip common label prefixes if model hallucinated them
         for prefix in ("Answer:", "Final Answer:", "Result:"):
             if line0.startswith(prefix):
                 line0 = line0[len(prefix):].strip()
+        for tag in special_tags:
+            line0 = line0.replace(tag, "").strip()
         return ParsedReasoningCompletion(
             raw_text=raw_text,
             intermediate_steps=[],
@@ -297,6 +296,9 @@ def parse_reasoning_completion(
         if not final_answer and lines:
             final_answer = lines[-1].strip()
 
+        for tag in special_tags:
+            final_answer = final_answer.replace(tag, "").strip()
+
         # Check for syntax validity
         is_valid = bool(steps and final_answer and has_tag)
 
@@ -310,8 +312,9 @@ def parse_reasoning_completion(
         )
 
     if approach == ApproachType.RECURRENT:
-        # Single recurrent transition step
         line0 = clean.split("\n")[0].strip()
+        for tag in special_tags:
+            line0 = line0.replace(tag, "").strip()
         return ParsedReasoningCompletion(
             raw_text=raw_text,
             intermediate_steps=[line0],
@@ -321,11 +324,15 @@ def parse_reasoning_completion(
             first_error_step=None,
         )
 
+    ans = clean
+    for tag in special_tags:
+        ans = ans.replace(tag, "").strip()
+
     return ParsedReasoningCompletion(
         raw_text=raw_text,
         intermediate_steps=[],
-        parsed_final_answer=clean,
+        parsed_final_answer=ans,
         has_final_answer_tag=False,
-        is_valid_syntax=bool(clean),
+        is_valid_syntax=bool(ans),
         first_error_step=None,
     )

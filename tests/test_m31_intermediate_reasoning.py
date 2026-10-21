@@ -5,6 +5,7 @@ from __future__ import annotations
 import pytest
 import torch
 
+from adaptive_mini_gpt.data.bpe_scaling import train_scaled_bpe_tokenizer
 from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
 from adaptive_mini_gpt.model.capacity_migration import create_1m_control_config
 from adaptive_mini_gpt.model.transformer import MiniGPT
@@ -103,9 +104,7 @@ def test_recurrent_arithmetic_steps_structure() -> None:
 
 def test_dataset_prompt_loss_masking() -> None:
     """Verify that prompt tokens are masked with ignore_index=-100 in the dataset."""
-    tok = BPETokenizer()
-    tok.token_to_id = {"<pad>": 0, "<eos>": 1, "a": 2, "b": 3, "c": 4, "=": 5, "+": 6}
-    tok.id_to_token = {v: k for k, v in tok.token_to_id.items()}
+    tok = train_scaled_bpe_tokenizer("Add: 12 + 34 = 46 col write carry Step Final Answer", target_vocab_size=32)
 
     sample = build_arithmetic_reasoning_sample(12, 34)
     ds = MultiRepresentationReasoningDataset(
