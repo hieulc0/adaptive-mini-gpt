@@ -76,6 +76,7 @@ from adaptive_mini_gpt.model.capacity_migration import (
     estimate_training_flops_per_token,
     migrate_1m_to_3m,
 )
+from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.rules.reliable_transition import (
     ElementaryTransition,
@@ -553,7 +554,14 @@ def main() -> None:
 
     for seed in args.seeds:
         chk_path = checkpoints_dir / f"seed_{seed}/base_pretrain/best.pt"
-        base_models[seed] = CheckpointManager.load_model_from_checkpoint(chk_path, device=device)
+        raw_seed_chk = CheckpointManager.load_raw_checkpoint(chk_path)
+        cfg_dict = raw_seed_chk.get("model_config", {})
+        model_cfg = ModelConfig(**cfg_dict)
+        base_m = MiniGPT(model_cfg).to(device)
+        base_m.load_state_dict(raw_seed_chk["model_state_dict"])
+        base_m.eval()
+        base_models[seed] = base_m
+
         ret = evaluate_audited_retention(base_models[seed], tokenizer, device)
         base_retention_losses[seed] = ret["prose_original"]
         logger.info("[Seed %d] Initial Audited Retention Prose Loss: %.4f nats", seed, base_retention_losses[seed])
