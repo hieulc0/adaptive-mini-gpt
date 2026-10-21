@@ -251,3 +251,17 @@
     - Arm E (Oracle Structural Plan Upper Bound): **100.00% verified accuracy**, 0.10 ms latency.
   - Addition Depth Ladder (2, 3, 4, 5 steps): Arm B solves 100% across all depths (2 to 5 steps); Arm C solves 100% on depths 2 and 3; monolithic Arm A drops to 0% beyond depth 2.
   - Core Scientific Finding: Stepwise grammar constraints and isolated branch memory completely eliminate structural planning failures. However, under identical search budgets, unranked grammar search (Arm B) outperforms neural log-probability ranking (Arm C: 80%), demonstrating that the 4-layer Mini-GPT does not yet provide superior heuristic guidance over deterministic topological constraint satisfaction.
+
+### M19: Learned Action Selection and Representation Adaptation (Closed)
+- **Closed without neural policy promotion**; preserved M18 deterministic planner as operational baseline.
+- Familiar rollout improved from 82.5% to 100.0%, but aggregate 5-step kinematics remained flat at 23.33% and deep addition regressed from 66.67% to 50.0%.
+- Reconciled deterministic comparison discrepancy: M18 tree search (100%) vs M19.5 greedy heuristic (0%).
+- Checkpoints, test sets, and lineages frozen.
+
+### M20: Controlled Neural Scaling and Procedural Generalization (In Progress)
+- **Model Scaling**: Configuration A (1M params: 928k) vs Configuration B (3M params: 3.43M).
+- **Dual Objectives**:
+  - Objective A: Supervised action selection from verified planning traces.
+  - Objective B: Structured procedural supervision with intermediate calculations, variable dependencies, and final answers without tools.
+- **Matched Tokens vs Matched Compute Protocols**: 10 epochs (matched tokens) vs 37 epochs for 1M (matched compute at 3.694x).
+- **Unaided Neural Evaluation**: Exact final-answer accuracy, depth ladder (2 to 5 steps), unseen cascading carries, unseen 5-step kinematics, and multi-corpus language retention across 3 independent lineages (seeds 42, 43, 44).

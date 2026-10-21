@@ -9,6 +9,9 @@ An experimental, **CLI-first Python/PyTorch** research framework studying **adap
 - **M3 (Modular Residual Experts & Continual Learning):** Passed (Verified on Tesla T4)
 - **M4 (Function-Preserving Growth & Zero Forgetting):** Passed (Verified on Tesla T4)
 - **M5 (Mixture-of-Depths & Dynamic Token Compute Allocation):** Passed (Verified on Tesla T4)
+- **M18 (Grammar-Constrained Planning & Execution Guidance):** Passed (100% on addition ladders & 5-step kinematics)
+- **M19 (Learned Action Selection & Representation Adaptation):** Closed (No-go on neural promotion; M18 baseline preserved)
+- **M20 (Controlled Neural Scaling & Procedural Generalization):** In Progress (1M vs 3M controlled scaling)
 
 ## Research Hypothesis
 
@@ -19,7 +22,7 @@ Under a matched compute and token budget, **function-preserving modular growth**
 - **Learn first, adapt later:** Verify dense baselines and deterministic resumption before activating routing or capacity growth.
 - **Function-preserving transitions:** Any structural growth operation ($M \to M'$) must satisfy $M'(x) = M(x)$ at the step of expansion via zero-initialized residual projections.
 - **Single-process CLI parity:** Identical `amg` CLI execution on local Arch Linux CPU, Google Colab, and Kaggle T4 GPUs.
-- **Crash-only atomic persistence:** Checkpoints write to temporary files, pass a load verification smoke test, and atomically swap via `os.replace` alongside a versioned `manifest.json`.
+- **Crash-only atomic persistence:** Checkpoints write to temporary files, pass a load verification smoke test, and atomically swap via `os.replace` alongside a versioned `manifest.json`.\
 - **Reproducible evaluation:** Deterministic document/task splits, SHA-256 data and vocabulary fingerprints, and isolated holdout verification.
 
 ## Quickstart & CLI Usage
@@ -105,6 +108,9 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 | **M3** | Modular Experts & Balanced Routing | High router entropy (**0.9742**), balanced expert load distribution |
 | **M4** | Function-Preserving Structural Growth & Zero Forgetting | Exact $\Delta = 0.0000$ boundary loss drift; **0.0009** backbone forgetting |
 | **M5** | Differentiable Mixture-of-Depths (MoD) | **35% active parameter reduction** per token, **38% arithmetic exact match** |
+| **M18** | Grammar-Constrained Planning & Execution Search | **100.0% verified accuracy** on addition depth ladders (2-5 steps) and 5-step kinematics |
+| **M19** | Learned Action Policy & Representation Adaptation | Closed without promotion (familiar rollout **100%**, 5-step kinematics **23.3%**; M18 baseline preserved) |
+| **M20** | Controlled Neural Scaling & Procedural Generalization | 1M vs 3M Transformer scaling under matched tokens and matched compute |
 
 ## Directory Structure
 

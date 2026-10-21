@@ -658,3 +658,69 @@ Evaluated across 3 independent lineages (seeds 42, 43, 44), testing 56 held-out 
    - Evaluating addition depth ladders confirmed that monolithic Transformer generation collapses beyond depth 2 even when operations and operand distributions are held strictly identical (Depth 2: 46.7% -> Depth 3+: 0.0%).
    - Stepwise execution-guided search maintains 100% accuracy across depths 2, 3, 4, and 5.
 4. **Conclusion & Status**: **MILESTONE 18 EMPIRICALLY QUALIFIED ON TESLA T4**.
+
+
+---
+
+### M19: Learned Action Selection and Neural Policy Exploration (Completed & Closed)
+- **Date**: 2026-10-21
+- **Hardware / Platform**: NVIDIA Tesla T4 GPU (CUDA, Kaggle GPU T4)
+- **Lineages Evaluated**: Seeds 42, 43, 44 (Base checkpoint hashes frozen from `checkpoint-manifest.json`):
+  - Seed 42: `a0ffc73b6b7e7b5faf53c9b59d351a29ee8a45e9a1a677bcbff23cf659b0d174`
+  - Seed 43: `5eec4fc2c14d4bcb4ffbfb73e92b0bc801c7039e1565f2878631e5c724d53c7e`
+  - Seed 44: `d21cd0a0d7e25aea7cef6a755f9dc5a50541993dcfb7488358e200214cd33c65`
+
+#### 1. Empirical Summary Across Lineages (M19.1 - M19.5)
+- **M19.1 & M19.2**: Action trace generation and unified action policy scoring (`ActionPolicyModel`) over valid candidates. Demonstrated frozen-backbone policy learning without representation collapse.
+- **M19.3**: Controlled representation adaptation (Frozen Backbone vs Residual Bottleneck Adapter vs Full Fine-Tuning). Fine-tuning demonstrated superior adaptation on some OOD distributions (70.4% action accuracy) while preserving core language loss via unrounded drift monitoring.
+- **M19.4**: Reasoning diagnosis engine tracking stepwise recoverability, state visitation, and unrecoverable error modes.
+- **M19.5**: Closed-loop action learning (DAgger with recoverability-aware forward search corrective labeling) compared against supervised reference traces under matched budgets:
+  - **Familiar Tasks**: Closed-loop training improved aggregate rollout success from **82.5%** (+/- 13.0%) to **100.0%** (+/- 0.0%).
+  - **Five-Step Kinematics (3-segment speed)**: No aggregate improvement (**23.33%** +/- 40.4% -> **23.33%** +/- 32.2%), despite Seed 42 improving substantially (0% -> 60%).
+  - **Deep Addition Ladders**: Aggregate rollout performance regressed from **66.67%** (+/- 28.9%) to **50.0%** (+/- 0.0%).
+
+#### 2. Reconciliation of Deterministic Baseline Inconsistency
+A key distinction is preserved in the research record regarding the 5-step kinematics results:
+- **M18 Deterministic Planner**: Achieved **100.0% accuracy** on 5-step kinematics using `GrammarConstrainedPlanner`, which employs bounded tree search (`beam_width=4`, `max_expansions=30`) with branch backtracking and postcondition goal verification.
+- **M19.5 Deterministic Rollout Heuristic**: Reported **0.0% accuracy** on 5-step kinematics because `rollout_problem(use_policy=False)` utilized an unguided greedy baseline selecting `candidates[0]` at each step without search, backtracking, or goal-directed lookahead. On combinatorial 5-step problems with multiple distractors, greedy first-candidate selection fails completely.
+- **Conclusion**: These reflect fundamentally different protocols (tree-search planning vs unguided single-path heuristic). They are kept separate in the research record.
+
+#### 3. Formal M19 Closure Verdict
+
+| Capability | Verdict | Evidence |
+| :--- | :--- | :--- |
+| Verified action-trace generation | Qualified | Standardized ActionTrace schema with topological sorting |
+| Frozen-backbone action learning | Demonstrated | Action head learns policy without catastrophic forgetting |
+| Fine-tuning improves some OOD action predictions | Demonstrated | M19.3 Arm C achieved 70.4% OOD action prediction |
+| Closed-loop learning improves familiar rollouts | Demonstrated | Familiar task rollout improved from 82.5% to 100.0% |
+| Reliable five-step neural planning | Not achieved | Aggregate rollout flat at 23.33% across regimes |
+| Reliable OOD reasoning transfer | Not achieved | Addition ladder rollout regressed from 66.67% to 50.0% |
+| **Neural Promotion Decision** | **NO-GO** | Close action-policy track; operational baseline retained as M18 deterministic planner |
+
+Frozen Artifacts:
+- Checkpoints: `runs/kaggle/m18-checkpoints/`
+- Test sets: Seeds 3001, 4001, 5001
+- Reports: `runs/m19_closed_loop/m19_5_closed_loop_report.json`
+
+---
+
+### M20: Controlled Neural Scaling and Procedural Generalization
+- **Starting Point**: Commit `516d89ec3c253a39a5dc19d12fccdb8f80a4b432`
+- **Core Scientific Question**: Does increasing Transformer model capacity from 1M to 3M parameters improve the neural model's ability to acquire and execute reusable multi-step reasoning procedures under controlled compute and token budgets?
+- **Model Configurations Evaluated**:
+  - **Configuration A (1M Control)**: `d_model=128`, `n_layers=4`, `n_heads=4`, `d_ff=512`, `context_length=256` -> **928,512 parameters** (matches M18 base checkpoints).
+  - **Configuration B (3M Scaling)**: `d_model=256`, `n_layers=4`, `n_heads=8`, `d_ff=1024`, `context_length=256` -> **3,429,888 parameters** (3.694x parameter scale).
+- **Objectives Evaluated**:
+  - **Objective A (Supervised Action Selection)**: Action ranking over valid candidate steps with external rule execution rollout.
+  - **Objective B (Structured Procedural Supervision)**: Unaided autoregressive generation of intermediate calculations, variable dependencies, and final answers without external execution tools.
+- **Evaluation Protocols**:
+  - **Protocol 1 (Matched Tokens)**: Both 1M and 3M models trained for identical token counts (10 epochs).
+  - **Protocol 2 (Matched Compute)**: 1M model trained for 3.694x epochs (37 epochs) to strictly match total FLOP budget (6 * N * T).
+- **Multi-Lineage Sealed Evaluation (Seeds 42, 43, 44)**:
+  - Neural-only exact final-answer accuracy without tools
+  - Stepwise procedural validity and intermediate arithmetic correctness
+  - Addition depth ladder breakdown (depths 2, 3, 4, 5)
+  - Unseen operands with complex cascading carries
+  - Unseen composition structures (5-step kinematics)
+  - Multi-corpus prior language retention
+  - Wall-clock training duration, per-token latency, and GPU VRAM footprint
