@@ -111,15 +111,15 @@ def train_single_step(
     device: torch.device,
     ignore_index: int = -100,
 ) -> float:
-    """Execute one optimization step."""
+    """Execute one optimization step with proper causal shift."""
     x = x.to(device)
     y = y.to(device)
     optimizer.zero_grad()
     out = model(x)
     logits = out[0] if isinstance(out, tuple) else out
     loss = nn.functional.cross_entropy(
-        logits.view(-1, logits.size(-1)),
-        y.view(-1),
+        logits[:, :-1, :].contiguous().view(-1, logits.size(-1)),
+        y[:, 1:].contiguous().view(-1),
         ignore_index=ignore_index,
     )
     loss.backward()
@@ -146,10 +146,13 @@ def evaluate_episode_accuracy(
         for s in samples:
             prompt = s.prompt
             enc = tokenizer.encode(prompt)
+            max_ctx = getattr(model.config, "context_length", 256)
+            if len(enc) > max_ctx - 16:
+                enc = enc[-(max_ctx - 16):]
             input_ids = torch.tensor([enc], dtype=torch.long, device=device)
 
             for _ in range(16):
-                out = model(input_ids)
+                out = model(input_ids[:, -max_ctx:])
                 logits = out[0] if isinstance(out, tuple) else out
                 next_id = torch.argmax(logits[0, -1, :]).item()
                 input_ids = torch.cat([input_ids, torch.tensor([[next_id]], device=device)], dim=1)

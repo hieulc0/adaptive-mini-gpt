@@ -98,12 +98,15 @@ class ClosedLoopInteractiveLearner:
         """Generate tokens autoregressively and compute average token confidence."""
         self.model.eval()
         enc = self.tokenizer.encode(prompt)
+        max_ctx = getattr(self.model.config, "context_length", 256)
+        if len(enc) > max_ctx - max_new_tokens:
+            enc = enc[-(max_ctx - max_new_tokens):]
         input_ids = torch.tensor([enc], dtype=torch.long, device=self.device)
 
         probs_list: list[float] = []
         with torch.no_grad():
             for _ in range(max_new_tokens):
-                out = self.model(input_ids)
+                out = self.model(input_ids[:, -max_ctx:])
                 logits = out[0] if isinstance(out, tuple) else out
                 next_logits = logits[0, -1, :]
                 probs = F.softmax(next_logits, dim=-1)

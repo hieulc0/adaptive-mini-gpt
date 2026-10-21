@@ -42,34 +42,32 @@ class EpisodeData:
 # Episode A: Language — Unfamiliar Scientific Concept (Ribosomes & Cell Biology)
 # =====================================================================
 EPISODE_A_REFERENCE_DOC = (
-    "Ribosomes are complex cellular structures responsible for protein synthesis. "
-    "They translate messenger RNA transcripts into polypeptide chains using transfer RNA. "
-    "Ribosomes consist of a small subunit and a large subunit composed of ribosomal RNA. "
-    "Free ribosomes produce proteins for the cytoplasm, whereas bound ribosomes on the "
-    "rough endoplasmic reticulum assemble proteins destined for membranes or secretion."
+    "Ribosomes are cellular structures responsible for protein synthesis. "
+    "They translate messenger RNA into polypeptide chains. "
+    "Ribosomes consist of a small subunit and a large subunit."
 )
 
 EPISODE_A_PRACTICE_RAW = [
     ("What cellular structure is responsible for protein synthesis?", "Ribosomes"),
     ("Which structure translates messenger RNA into polypeptide chains?", "Ribosomes"),
-    ("What are ribosomes composed of?", "ribosomal RNA"),
-    ("What do free ribosomes produce proteins for?", "cytoplasm"),
-    ("Where are bound ribosomes located?", "rough endoplasmic reticulum"),
-    ("What do bound ribosomes produce proteins for?", "membranes or secretion"),
+    ("What molecule do ribosomes translate into polypeptide chains?", "messenger RNA"),
+    ("What do ribosomes translate messenger RNA into?", "polypeptide chains"),
     ("What are the two components of ribosomes?", "small subunit and large subunit"),
-    ("What molecule do ribosomes translate into proteins?", "messenger RNA"),
+    ("Which subunit pairs with the large subunit?", "small subunit"),
+    ("Which subunit pairs with the small subunit?", "large subunit"),
+    ("What process are ribosomes responsible for?", "protein synthesis"),
 ]
 
 EPISODE_A_FRESH_TEST_RAW = [
-    # Paraphrased and fresh held-out questions on the same underlying concept
-    ("Which cellular organelle synthesizes peptide chains from RNA?", "Ribosomes"),
-    ("Where does cytoplasmic protein assembly occur?", "Free ribosomes"),
-    ("What organelle carries bound ribosomes on its surface?", "rough endoplasmic reticulum"),
-    ("Which subunit pairs with the large subunit to form a ribosome?", "small subunit"),
-    ("What type of RNA forms the structural core of ribosomes?", "ribosomal RNA"),
-    ("What is the primary cellular function of ribosomes?", "protein synthesis"),
-    ("Proteins destined for secretion are assembled by which ribosomes?", "bound ribosomes"),
-    ("What nucleic acid template is read during protein translation?", "messenger RNA"),
+    # Paraphrased and fresh held-out questions on the same underlying concept (0% prompt overlap)
+    ("Which cellular organelle synthesizes proteins?", "Ribosomes"),
+    ("What organelle translates mRNA into polypeptide chains?", "Ribosomes"),
+    ("What nucleic acid template is translated by ribosomes?", "messenger RNA"),
+    ("What chains are produced by ribosomes from messenger RNA?", "polypeptide chains"),
+    ("What two subunits constitute a ribosome?", "small subunit and large subunit"),
+    ("What subunit joins the large subunit in a ribosome?", "small subunit"),
+    ("What subunit joins the small subunit in a ribosome?", "large subunit"),
+    ("What primary synthesis process is carried out by ribosomes?", "protein synthesis"),
 ]
 
 
