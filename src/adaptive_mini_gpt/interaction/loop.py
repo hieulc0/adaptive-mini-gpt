@@ -114,7 +114,8 @@ class ClosedLoopInteractiveLearner:
                 input_ids = torch.cat([input_ids, next_id.unsqueeze(0).unsqueeze(0)], dim=1)
 
                 decoded_partial = self.tokenizer.decode(input_ids[0].tolist())
-                if "\n" in decoded_partial[len(prompt):] or token_item == self.tokenizer.eos_token_id:
+                eos_id = getattr(self.tokenizer, "eos_id", -1)
+                if "\n" in decoded_partial[len(prompt):] or token_item == eos_id:
                     break
 
         full_decoded = self.tokenizer.decode(input_ids[0].tolist())

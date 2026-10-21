@@ -165,7 +165,8 @@ def evaluate_episode_accuracy(
                 next_id = torch.argmax(logits[0, -1, :]).item()
                 input_ids = torch.cat([input_ids, torch.tensor([[next_id]], device=device)], dim=1)
                 decoded_partial = tokenizer.decode(input_ids[0].tolist())
-                if "\n" in decoded_partial[len(prompt):] or next_id == tokenizer.eos_token_id:
+                eos_id = getattr(tokenizer, "eos_id", -1)
+                if "\n" in decoded_partial[len(prompt):] or next_id == eos_id:
                     break
 
             full_decoded = tokenizer.decode(input_ids[0].tolist())
