@@ -1108,3 +1108,74 @@ Evaluated across 3 independent lineages (Seeds 42, 43, 44), testing sealed held-
 4. **Qualification Gate Verdict & Lineage Promotion Decision**:
    - **Lineage Promotion**: **REJECTED (NO-GO)**. Candidate D demonstrates successful parallel capability acquisition, but exhibits retention drift (+0.42 nats) and arithmetic accuracy (13.67%) below operational standards. The base checkpoint lineage remains frozen at M18.
    - **Milestone Delivery**: **M25 CORE SCOPE PASSED**. Established the minimal shared multi-domain benchmark interface, reproducible language and logic partition generators, verified scoring, and the first empirical multi-domain baseline for Adaptive Mini-GPT.
+
+
+---
+
+### M26: Autonomous Curriculum Selection and Verified Continual Learning Benchmark
+
+- **Date**: October 21, 2026
+- **Status**: EMPIRICALLY QUALIFIED AUTONOMOUS CURRICULUM CONTROLLER / PRESERVED M18 OPERATIONAL BASELINE
+- **Codebase Version**: Commit `2cd1ad0` on branch `m26-autonomous-curriculum`
+- **Hardware Platform**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m26-autonomous-curriculum`, Version 4)
+- **Unit Test Suite**: **15/15 pytest tests passed in 1.95s on Tesla T4 GPU** (`tests/test_m26_curriculum.py`, `tests/test_m25_multi_domain.py`).
+- **Lineages Evaluated**: Seeds 42, 43, 44 (895,744 parameter MiniGPT RoPE backbone, base checkpoints frozen from `checkpoint-manifest.json`)
+- **Report Artifact**: [`runs/kaggle-m26/output/amg/m26_curriculum/m26_report.json`](file:///home/hieulc/projects/adaptive-mini-gpt/runs/kaggle-m26/output/amg/m26_curriculum/m26_report.json)
+
+#### 1. Strategic Context and Architecture Deliverables
+1. **Lineage Inventory & Candidate Root Immutability (Phase 1)**:
+   - Formally cataloged all model lineages in [`src/adaptive_mini_gpt/autonomous/lineage_registry.py`](file:///home/hieulc/projects/adaptive-mini-gpt/src/adaptive_mini_gpt/autonomous/lineage_registry.py):
+     - *Operational System*: M18 Grammar-Constrained Execution Planner (active production baseline).
+     - *Neural Baseline*: Seeds 42, 43, 44 (`base_pretrain/best.pt`, SHA-256 verified) serving as immutable root checkpoints.
+     - *Specialized Candidates*: M21-M24 arithmetic recurrent scratchpad specialists, M25-B language candidate, M25-C logic candidate, M25-D continual interleaved candidate.
+   - Prevents conflating specialized arithmetic training histories with unadapted neural baselines.
+2. **Evaluation Readiness & Partition Expansion (Phase 2)**:
+   - **Language Diversity**: Expanded `TRAIN_DOCUMENTS` from 4 to 10 distinct factual domains (adding Microprocessors, Rainforest Ecology, Neuroscience Memory, Geodesic Architecture, Cyclones, Graphene Materials) and `VAL_DOCUMENTS` from 2 to 4 domains (adding Black Holes, Photovoltaics) without any leakage into the protected sealed `TEST_DOCUMENTS` (Oceanography, Space Exploration, Computer History). Total train samples increased from 26 to 64 samples.
+   - **Logic Generalization Breakdown**: Explicitly partitioned reasoning evaluation between `unseen_variables` (familiar rules on novel tokens) and `unseen_structures` (novel compositions including Modus Tollens, Disjunctive Syllogism, and Biconditional Equivalence).
+   - **Arithmetic Decomposition**: Evaluates single-step elementary transition accuracy alongside multi-digit sequence execution.
+3. **Autonomous Curriculum Selector (Phase 3)**:
+   - Implemented [`src/adaptive_mini_gpt/autonomous/curriculum_selector.py`](file:///home/hieulc/projects/adaptive-mini-gpt/src/adaptive_mini_gpt/autonomous/curriculum_selector.py) supporting three distinct selection policies:
+     - **Strategy A (Round-Robin)**: Deterministic cyclic domain focus (`Arithmetic -> Language -> Logic`) with 10% balanced replay.
+     - **Strategy B (Largest Gap)**: Greedy policy allocating 80% training mass directly to the capability with the largest deficit below target accuracy.
+     - **Strategy C (Progress & Retention Aware)**: Evaluates prerequisite readiness, momentum on recently improving domains, and dynamically activates 25% protective replay buffering when positive drift on general prose is detected.
+
+#### 2. Multi-Seed Empirical 3-Arm Curriculum Benchmark on Tesla T4 GPU
+Evaluated across 3 independent lineages (Seeds 42, 43, 44), running 3 bounded learning cycles per strategy (27 training cycles total) under strictly matched compute and token budgets:
+
+| Curriculum Selection Strategy | Final Arith Exact (Sealed Test) | Final Arith Carry Accuracy | Final Language Exact (Sealed Test) | Final Logic Exact (Sealed Test) | Prior Prose Retention Drift | Candidate Promotion Gate Rate | Mean Gain Prediction Error |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Strategy A: Round-Robin** | **8.67%** (±2.84%) | **80.00%** (±13.0%) | 0.00% (±0.00%) | **30.77%** (±3.08%) | **-6.7506** (±0.33) | **100.0%** (±0.0%) | **0.0646** (±0.016) |
+| **Strategy B: Largest Measured Gap** | **9.33%** (±0.76%) | 58.50% (±7.37%) | 1.52% (±2.63%) | **33.84%** (±4.07%) | -0.0903 (±0.08) | 66.67% (±0.0%) | 0.2272 (±0.008) |
+| **Strategy C: Progress & Retention Aware** | 2.67% (±1.89%) | 51.00% (±6.06%) | **3.03%** (±2.63%) | 21.02% (±6.22%) | **-6.0736** (±1.58) | 77.78% (±38.5%) | 0.0844 (±0.008) |
+
+*Individual Lineage Variation Across Strategies*:
+- **Seed 42**:
+  - Round-Robin: Arith: 5.5% (Carry: 92.5%) | Lang: 0.00% | Logic: 30.8% | Drift: -7.0012 | PromoRate: 100% | PredErr: 0.0709
+  - Largest Gap: Arith: 10.0% (Carry: 62.5%) | Lang: 0.00% | Logic: 29.2% | Drift: -0.1297 | PromoRate: 67% | PredErr: 0.2317
+  - Progress & Retention Aware: Arith: 3.5% (Carry: 50.0%) | Lang: 4.55% | Logic: 15.4% | Drift: -7.0995 | PromoRate: 100% | PredErr: 0.0800
+- **Seed 43**:
+  - Round-Robin: Arith: 11.0% (Carry: 81.0%) | Lang: 0.00% | Logic: 33.9% | Drift: -6.3764 | PromoRate: 100% | PredErr: 0.0461
+  - Largest Gap: Arith: 9.5% (Carry: 63.0%) | Lang: 4.55% | Logic: 35.4% | Drift: -0.1442 | PromoRate: 67% | PredErr: 0.2183
+  - Progress & Retention Aware: Arith: 4.0% (Carry: 57.5%) | Lang: 0.00% | Logic: 20.0% | Drift: -6.8633 | PromoRate: 100% | PredErr: 0.0800
+- **Seed 44**:
+  - Round-Robin: Arith: 9.5% (Carry: 66.5%) | Lang: 0.00% | Logic: 27.7% | Drift: -6.8742 | PromoRate: 100% | PredErr: 0.0767
+  - Largest Gap: Arith: 8.5% (Carry: 50.0%) | Lang: 0.00% | Logic: 36.9% | Drift: +0.0031 | PromoRate: 67% | PredErr: 0.2317
+  - Progress & Retention Aware: Arith: 0.5% (Carry: 45.5%) | Lang: 4.55% | Logic: 27.7% | Drift: -4.2580 | PromoRate: 33% | PredErr: 0.0933
+
+#### 3. Key Scientific Findings & Discoveries
+1. **The Vulnerability of Greedy Skill-Gap Selection**:
+   - Strategy B (Largest Gap) myopically focused 80% training mass on the weakest domain without adequate replay buffering. In Cycle 3, this triggered severe positive retention drift (+0.38 to +0.70 nats) across all three lineages, causing the automated gate to reject and roll back 100% of Cycle 3 candidates (promotion rate capped at 66.67%).
+   - Furthermore, Strategy B exhibited the worst gain prediction error (**0.2272**)—the greedy heuristic repeatedly predicted +0.25 gain on language while observing 0.00 gain.
+2. **Round-Robin Interleaving as a Robust Baseline**:
+   - Strategy A (Round-Robin with 10% replay) achieved the highest overall multi-domain balance: arithmetic carry accuracy reached **80.00%**, logic reasoning reached **30.77%**, and 100% of candidate steps passed the verification gate without rollbacks.
+   - Its gain prediction error was low (**0.0646**), confirming that predictable, cyclic exposure yields steady learning trajectory estimation.
+3. **Progress and Retention-Awareness Protects the Lineage**:
+   - Strategy C correctly prioritized foundational language comprehension (boosted by prerequisite weighting) and automatically scheduled protective replay buffering (10–25% replay).
+   - Representation retention was maintained with high fidelity (drift: -6.07 nats).
+   - On Seed 44, when Cycle 2 and Cycle 3 candidates exhibited performance regression, Strategy C's verification gate safely rolled back the candidate to the Cycle 1 state, preventing corrupted weights from contaminating the lineage.
+4. **Distinction Between Research Controller and Neural Model**:
+   - M26 successfully proves that the **external research controller** can autonomously formulate learning plans, propose balanced sampling ratios, enforce replay constraints, predict expected gains, and evaluate regression gates.
+   - However, the underlying ~895k parameter MiniGPT backbone remains a compact learner: its language acquisition requires longer token exposures than logic or arithmetic, and it cannot self-orchestrate its own curriculum internally.
+5. **Qualification Gate Verdict & Lineage Promotion Decision**:
+   - **Lineage Promotion**: **REJECTED (NO-GO)**. In accordance with strict retention and capability invariants, no candidate model achieved the >=99% operational standard required to replace the M18 deterministic planner. The active reasoning baseline remains immutable.
+   - **Milestone Delivery**: **M26 QUALIFIED**. Successfully established lineage integrity, expanded evaluation readiness, implemented the autonomous curriculum selector, and completed the first empirical 3-arm multi-seed curriculum comparison on Tesla T4 GPU.

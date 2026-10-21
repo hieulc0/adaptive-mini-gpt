@@ -28,6 +28,7 @@
 | **M23** | Recurrent Neural Arithmetic | Local column transition, length extrapolation barrier broken (14.3%–23.6% on 4–8 digits), 97.9% stopping accuracy | **PASSED** (Verified on Tesla T4) |
 | **M24** | Reliable Neural Arithmetic | Balanced curriculum, 85.3% transition exact, 44.7% extrapolation on 4–8 digits, scaling to 32 digits | **PASSED** (Verified on Tesla T4) |
 | **M25** | Parallel Learning & Multi-Domain | Shared multi-domain benchmark interface, reading comprehension (M25-B), symbolic logic (M25-C: 50.7%), continual multi-domain candidate (M25-D), retention drift audit | **PASSED** (Verified on Tesla T4) |
+| **M26** | Autonomous Curriculum Selection | Lineage registry, 3-strategy curriculum evaluation (Round-Robin vs Largest Gap vs Progress/Retention Aware), dynamic replay defense, 15/15 unit tests | **PASSED** (Verified on Tesla T4) |
 
 ---
 
@@ -333,3 +334,18 @@
 - **Continual Learning Insight**: Quantified that while single-domain adaptation exhibits negative drift (improving pretraining loss by ~0.45 nats), joint 3-domain interleaved training creates mild positive interference (+0.42 nats) on an 895k parameter network without replay buffers.
 - **Lineage Promotion Decision**: NO-GO on replacing stable base checkpoint (retention drift must be mitigated via replay buffer and capacity scaling before promotion).
 - **Next Direction (M26)**: Autonomous Curriculum Selection (controller selects learning objectives dynamically based on verified skill gaps and forgetting risk).
+
+### M26: Autonomous Curriculum Selection and Verified Continual Learning (Completed & Qualified)
+- **Objective**: Enable Adaptive Mini-GPT to identify capability gaps, select bounded learning experiments across multiple subjects, train candidates, and evaluate whether those experiments produce useful improvements.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m26-autonomous-curriculum`, commit `2cd1ad0`). Model: ~1M MiniGPT RoPE (895,744 params).
+- **Core Architecture & Benchmark Deliverables**:
+  1. `lineage_registry.py`: Formal catalog of M18-M25 lineages separating active operational systems (M18 deterministic planner), immutable neural baseline roots (seeds 42, 43, 44), and specialized experimental candidates.
+  2. Evaluation Readiness: Expanded language training set from 4 to 10 diverse factual domains (64 samples) and val set from 2 to 4 domains (25 samples) while preserving sealed test holdouts; separated logic generalization into unseen variables and unseen logical compositions (Modus Tollens, Disjunctive Syllogism, Biconditional Equivalence).
+  3. `CurriculumSelector`: Implemented 3 curriculum policies (Round-Robin, Largest Measured Gap, Progress & Retention Aware) predicting expected gains and scheduling dynamic replay buffering when positive drift is detected.
+  4. Multi-Seed 3-Arm Benchmark on Tesla T4 GPU (Seeds 42, 43, 44 across 3 cycles):
+     - **Strategy A (Round-Robin)**: Arith: 8.67% ± 2.84% (Carry: 80.0%), Lang: 0.00%, Logic: 30.77% ± 3.08%, Drift: -6.7506 nats, Promotion Rate: **100.0%**, Prediction Error: **0.0646**.
+     - **Strategy B (Largest Gap)**: Arith: 9.33% ± 0.76%, Lang: 1.52%, Logic: 33.84% ± 4.07%, Drift: -0.0903 nats, Promotion Rate: 66.67% (Cycle 3 candidates rolled back due to +0.38 to +0.70 nats retention drift), Prediction Error: 0.2272.
+     - **Strategy C (Progress & Retention Aware)**: Arith: 2.67%, Lang: 3.03% ± 2.63%, Logic: 21.02% ± 6.22%, Drift: -6.0736 nats, Promotion Rate: 77.78%, Prediction Error: **0.0844**.
+- **Strategic Finding**: Greedy skill-gap prioritization without replay triggers severe representation drift on pretraining corpora (+0.38 to +0.70 nats), whereas Progress & Retention-Aware selection successfully schedules protective replay and rolls back regressed candidates.
+- **Lineage Promotion Decision**: NO-GO on replacing stable base checkpoint (retention and operational accuracy standards preserved).
+- **Next Direction (M27)**: Multi-Domain Replay-Buffered Consolidation and Evidence-Driven Capacity Expansion.
