@@ -397,7 +397,7 @@ def main() -> None:
     # Arithmetic transitions (M24 curriculum)
     all_200_transitions = get_all_200_transitions()
     extrap_addition_problems = generate_controlled_addition_dataset(
-        lengths=[4, 5, 6, 8], count_per_length=25, seed=42
+        lengths=(4, 5, 6, 8), num_samples=100, split="test", seed=42
     )
 
     logger.info("Registered Multi-Domain Benchmark partitions:")
