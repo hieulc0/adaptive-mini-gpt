@@ -454,6 +454,9 @@ def generate_logic_samples_for_split(
     return samples
 
 
+build_logic_benchmark_samples = generate_logic_samples_for_split
+
+
 class LogicReasoningDataset(Dataset):
     """PyTorch Dataset for symbolic logic with prompt token loss masking."""
 
