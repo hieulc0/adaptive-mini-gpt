@@ -341,7 +341,7 @@ def main() -> None:
         "device": str(device),
         "gpu_name": torch.cuda.get_device_name(0) if torch.cuda.is_available() else "CPU",
         "seeds": args.seeds,
-        "parameters_1m": cfg_1m.n_layer * 128 * 128 * 12,  # approx
+        "parameters_1m": sum(p.numel() for p in base_model.parameters()),
         "mean_duration_seconds": round(sum(s["duration_seconds"] for s in seed_reports) / len(seed_reports), 2),
         "tokenizer_1024_fingerprint": tokenizer_1024.get_fingerprint(),
         "phase1_audit_summary": {
