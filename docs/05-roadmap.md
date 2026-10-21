@@ -94,3 +94,21 @@
      - Retention Gate: **PASS on Full FT with Replay** (87.5%–92.7% carry retention).
 - **Lineage Promotion Decision**: **NO-GO**. Base weights remain frozen and unpromoted.
 - **Next Direction (M31)**: Scratchpad Reasoning and Step-by-Step Chain Adaptation (introduce intermediate scratchpad tokens for arithmetic and language extraction to bridge the loss-reduction to exact-match decoding gap, combined with selective adapter routing).
+
+### M31: Verified Intermediate Reasoning and Generalizable Answer Generation (Completed & Qualified)
+- **Objective**: Determine whether Mini-GPT's generalization bottleneck in arithmetic and language can be solved by structured intermediate representations (Direct vs Structured Text Scratchpad vs Compact Recurrent State) under matched compute and tokens across Seeds 42, 43, 44 on Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m31-reasoning-study`, commit `0abe96cf60dcdba90e208271b76f5c04e8e32e50`). 1,089,280 parameters, 1024-BPE tokenizer (`1845a0a16f6ab9ff`).
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Failure Diagnosis**: 100% of tested direct decoding errors occurred at initial token generation index 0 (`reasoning_misdirection`), demonstrating that unguided autoregressive decoders drift immediately without step-by-step state guidance.
+  2. **Multi-Arm Representation Benchmark Across 3 Seeds**:
+     - **Arm A (Direct Answer Control)**: Arith 2-digit exact: 1.67%, 4/8/16-digit exact: 0.00%. Logic 3-hop: 95.83%, 4-hop: 38.89%, 5-hop: 41.67%. Carry retention: 92.33%.
+     - **Arm B (Structured Text Scratchpad)**: Arith 2/4/8/16-digit exact: 0.00% (2-digit step acc: 8.89%). Logic 3-hop: 45.83%, 4-hop: 25.00%, 5-hop: 16.67%. Compounding syntactic errors at 1M parameter scale cause first-error at step 0 in 100% of rollouts, with 10.9x higher inference latency (228ms vs 21ms).
+     - **Arm C (Compact Recurrent Procedure)**: Arith 2-digit exact: **33.33%** (Seed 42: 55.0%), 4-digit exact: **6.25%**, maintaining ~58% step accuracy across 16 digits. Logic 3-hop: 83.33%, 4-hop: **66.67%**, 5-hop: **62.50%** (outperforming Direct and Scratchpad on depth extrapolation). Carry retention: **99.17%**.
+  3. **Phase 5 Closed-Loop Interaction Integration**: Successfully detected procedural arithmetic carry deficit, isolated candidate training, evaluated on fresh holdouts, and executed clean automated candidate rejection (0.0% fresh exact) and rollback, protecting base weights.
+  4. **Task-Specific Qualification Gates**:
+     - Operational Reasoning Gate: **PASS (100%)** (M18 deterministic solver retained).
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (42/42 Pytest unit tests passed on Tesla T4; 3-seed reproducibility confirmed).
+     - Scientific Reasoning Gate: **QUALIFIED** (Recurrent procedures demonstrate clear depth and length generalization over text scratchpads).
+     - Neural Production Promotion Gate: **REJECTED (NO-GO)**. Candidate weights remain research lineages.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain frozen.
+- **Next Direction (M32)**: Hybrid Recurrent-Retrieval Architecture and Autonomous Step-Level Self-Verification (unify recurrent state transitions for procedural computation with verified memory retrieval for language grounding, adding step-level stopping and self-verification).
