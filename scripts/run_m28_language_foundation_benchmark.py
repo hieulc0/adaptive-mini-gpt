@@ -746,19 +746,27 @@ def main() -> None:
     # Phase 7: Autonomous Curriculum Proposal Pilot
     # =====================================================================
     logger.info("\nPhase 7: Running Autonomous Curriculum Selector Proposal...")
-    selector = CurriculumSelector(strategy=CurriculumStrategy.GAP_DIRECTED)
+    selector_gap = CurriculumSelector(strategy=CurriculumStrategy.LARGEST_GAP)
+    selector_baseline = CurriculumSelector(strategy=CurriculumStrategy.ROUND_ROBIN)
     arm4_means = aggregated_arms["arm4_pretrain_1024_3m_multidomain"]["mean_metrics"]
     initial_accs = {
-        "arithmetic": arm4_means["arithmetic_carry"],
-        "logic": arm4_means["logic_exact"],
-        "language": arm4_means["test_exact"],
+        DomainType.ARITHMETIC.value: arm4_means["arithmetic_carry"],
+        DomainType.LOGIC.value: arm4_means["logic_exact"],
+        DomainType.LANGUAGE.value: arm4_means["test_exact"],
     }
-    autonomous_proposal = selector.propose_curriculum(
-        domain_accuracies=initial_accs,
-        step_budget=200,
+    retention_drift = arm4_means["retention_drift"]
+    autonomous_proposal = selector_gap.select_next_experiment(
         cycle_index=1,
+        current_metrics=initial_accs,
+        retention_drift=retention_drift,
     )
-    logger.info(f"Autonomous proposal: {autonomous_proposal}")
+    baseline_proposal = selector_baseline.select_next_experiment(
+        cycle_index=1,
+        current_metrics=initial_accs,
+        retention_drift=retention_drift,
+    )
+    logger.info(f"Autonomous proposal (LARGEST_GAP): {autonomous_proposal}")
+    logger.info(f"Baseline proposal (ROUND_ROBIN): {baseline_proposal}")
 
     # =====================================================================
     # Final Report Assembly
@@ -776,7 +784,8 @@ def main() -> None:
         "tokenizer_comparison": tokenizer_comparison,
         "tokenizer_1024_fingerprint": tokenizer_1024.get_fingerprint(),
         "arms": aggregated_arms,
-        "autonomous_proposal": asdict(autonomous_proposal),
+        "autonomous_proposal": autonomous_proposal.to_dict(),
+        "baseline_proposal": baseline_proposal.to_dict(),
     }
 
     report_path = output_path / "m28_report.json"
