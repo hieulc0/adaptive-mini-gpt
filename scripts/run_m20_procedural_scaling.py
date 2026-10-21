@@ -172,7 +172,7 @@ def pretrain_base_lineage(
     trainer = Trainer(
         model=model,
         model_config=cfg,
-        train_config=train_cfg,
+        training_config=train_cfg,
         train_dataset=ds_train,
         val_dataset=ds_val,
         tokenizer=tokenizer,
