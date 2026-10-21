@@ -1,15 +1,17 @@
-"""Language Comprehension and Instruction-Following Benchmark Dataset (M25-B / M26).
+"""Language Comprehension and Instruction-Following Benchmark Dataset (M25-B / M26 / M27).
 
 Implements reproducible neural language comprehension with strictly disjoint
 train, validation, and sealed-test document partitions.
 
 Features:
   - Reading short factual passages across diverse scientific and historical domains.
-  - Extracting evidence-backed information.
-  - Recognizing unanswerable questions (safe abstention).
+  - Extracting evidence-backed information with short, canonical answers.
+  - Recognizing unanswerable questions (calibrated safe abstention).
   - Paraphrased query robustness.
+  - Prompt formatting without recency copying bias.
   - Token loss masking on prompt tokens (assistant-only supervision with ignore_index=-100).
-  - Document-level split isolation (0% fact or document overlap between splits).
+  - Document-level split isolation (0% fact, topic, or document overlap between splits).
+  - Dual evaluation metrics: exact match and grounded extraction.
 """
 
 from __future__ import annotations
@@ -66,7 +68,7 @@ class DocumentPassage:
 TRAIN_DOCUMENTS: list[DocumentPassage] = [
     DocumentPassage(
         doc_id="train_doc_01_photosynthesis",
-        topic="Biology",
+        topic="Plant Biology",
         text="Photosynthesis occurs inside chloroplasts using chlorophyll pigments. Plants absorb sunlight and carbon dioxide to synthesize glucose and release oxygen.",
         answerable_pairs=[
             ("Where does photosynthesis occur inside plant cells?", "Chloroplasts", ["in chloroplasts", "chloroplast"]),
@@ -74,11 +76,10 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
             ("What sugar is synthesized during photosynthesis?", "Glucose", ["glucose sugar"]),
         ],
         unanswerable_questions=[
-            ("What temperature is required for photosynthesis?",),
-            ("How many ATP molecules are produced during the light reaction?",),
+            "What temperature is required for the Calvin cycle?",
         ],
         paraphrase_pairs=[
-            ("Which cellular organelle hosts photosynthesis?", "Chloroplasts", ["in chloroplasts", "chloroplast"]),
+            ("Which cellular organelle hosts photosynthesis?", "Chloroplasts", ["chloroplast", "in chloroplasts"]),
             ("What byproduct gas is produced by plants during photosynthesis?", "Oxygen", ["oxygen gas", "O2"]),
         ],
     ),
@@ -89,11 +90,10 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         answerable_pairs=[
             ("Which is the largest planet in our solar system?", "Jupiter", ["planet Jupiter"]),
             ("What is the persistent storm on Jupiter called?", "Great Red Spot", ["the Great Red Spot"]),
-            ("What is Jupiter primarily composed of?", "Hydrogen and helium", ["hydrogen and helium gases", "hydrogen, helium"]),
+            ("What elements is Jupiter primarily composed of?", "Hydrogen and helium", ["hydrogen and helium gases"]),
         ],
         unanswerable_questions=[
-            ("How many moons orbit Jupiter?",),
-            ("What is the surface temperature of Jupiter's core?",),
+            "How many moons orbit Jupiter?",
         ],
         paraphrase_pairs=[
             ("Name the biggest planet in the solar system.", "Jupiter", ["planet Jupiter"]),
@@ -102,16 +102,15 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
     ),
     DocumentPassage(
         doc_id="train_doc_03_printing_press",
-        topic="History",
+        topic="European History",
         text="Johannes Gutenberg invented the movable type printing press in Mainz around 1440. His innovation dramatically accelerated the spread of books across Europe.",
         answerable_pairs=[
-            ("Who invented the movable type printing press?", "Johannes Gutenberg", ["Gutenberg", "Johannes Gutenberg in Mainz"]),
+            ("Who invented the movable type printing press?", "Johannes Gutenberg", ["Gutenberg"]),
             ("In which city was Gutenberg's press developed?", "Mainz", ["city of Mainz"]),
             ("Around what year did Gutenberg invent his press?", "1440", ["around 1440", "circa 1440"]),
         ],
         unanswerable_questions=[
-            ("How many Gutenberg Bibles were originally printed?",),
-            ("What metal alloy was used to cast Gutenberg's type?",),
+            "How many Gutenberg Bibles were originally printed?",
         ],
         paraphrase_pairs=[
             ("Which inventor created movable type printing in 1440?", "Johannes Gutenberg", ["Gutenberg"]),
@@ -120,21 +119,19 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
     ),
     DocumentPassage(
         doc_id="train_doc_04_aircraft_lift",
-        topic="Physics",
+        topic="Aerodynamics",
         text="Aircraft wings generate aerodynamic lift due to differences in air pressure above and below the airfoil. The forward thrust is provided by jet engines or propellers.",
         answerable_pairs=[
-            ("What causes aerodynamic lift on aircraft wings?", "Differences in air pressure", ["pressure difference", "air pressure differences"]),
+            ("What causes aerodynamic lift on aircraft wings?", "Differences in air pressure", ["air pressure differences", "pressure differences"]),
             ("What provides forward thrust in aircraft?", "Jet engines or propellers", ["engines or propellers", "jet engines"]),
         ],
         unanswerable_questions=[
-            ("What is the top cruising speed of a Boeing 747?",),
-            ("How much fuel does an Airbus A380 consume per hour?",),
+            "What is the top cruising speed of a Boeing 747?",
         ],
         paraphrase_pairs=[
-            ("Why do airplane wings produce lift?", "Differences in air pressure", ["pressure differences", "air pressure"]),
+            ("Why do airplane wings produce lift?", "Differences in air pressure", ["pressure differences"]),
         ],
     ),
-    # Expanded Diverse Training Documents (M26)
     DocumentPassage(
         doc_id="train_doc_05_microprocessors",
         topic="Semiconductor Technology",
@@ -142,11 +139,10 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         answerable_pairs=[
             ("What semiconductor substrate is used to fabricate microprocessors?", "Silicon wafers", ["silicon", "silicon wafer"]),
             ("Which optical manufacturing process creates microprocessor circuits?", "Photolithography", ["optical photolithography"]),
-            ("What electronic components act as switches in microprocessors?", "Field-effect transistors", ["transistors", "field-effect transistor switches"]),
+            ("What electronic components act as switches in microprocessors?", "Field-effect transistors", ["transistors"]),
         ],
         unanswerable_questions=[
-            ("What is the exact clock frequency of the first Intel 4004 chip?",),
-            ("What is the gate dielectric thickness in modern 3nm transistors?",),
+            "What is the exact clock frequency of the first Intel 4004 chip?",
         ],
         paraphrase_pairs=[
             ("On which material are microprocessors manufactured?", "Silicon wafers", ["silicon"]),
@@ -159,11 +155,10 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         text="Tropical rainforest canopies absorb high solar radiation and generate localized rainfall through plant transpiration. Epiphytic orchids grow directly upon tree branches to capture canopy moisture.",
         answerable_pairs=[
             ("Through which biological process do rainforest canopies produce rainfall?", "Plant transpiration", ["transpiration"]),
-            ("Where do epiphytic orchids grow in the rainforest?", "Directly upon tree branches", ["tree branches", "on branches"]),
+            ("Where do epiphytic orchids grow in the rainforest?", "Tree branches", ["directly upon tree branches", "on branches"]),
         ],
         unanswerable_questions=[
-            ("How many tree species exist per hectare in the Amazon basin?",),
-            ("What is the annual biomass turnover rate in tropical rainforest soils?",),
+            "How many tree species exist per hectare in the Amazon basin?",
         ],
         paraphrase_pairs=[
             ("What botanical mechanism drives rainfall in tropical rainforests?", "Plant transpiration", ["transpiration"]),
@@ -174,31 +169,28 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         topic="Neuroscience",
         text="The hippocampus consolidates short-term neural signals into stable long-term memories in the cerebral cortex. Synaptic plasticity enables persistent signal strengthening known as long-term potentiation.",
         answerable_pairs=[
-            ("Which brain structure consolidates short-term memories?", "The hippocampus", ["hippocampus"]),
+            ("Which brain structure consolidates short-term memories?", "Hippocampus", ["the hippocampus"]),
             ("Where are long-term memories permanently stored?", "Cerebral cortex", ["the cerebral cortex", "cortex"]),
-            ("What synaptic mechanism enables persistent signal strengthening?", "Long-term potentiation", ["LTP", "long term potentiation"]),
+            ("What synaptic mechanism enables persistent signal strengthening?", "Long-term potentiation", ["LTP"]),
         ],
         unanswerable_questions=[
-            ("How many action potentials can a pyramidal neuron fire per second?",),
-            ("Which neurotransmitter receptor subtype binds glutamate in memory retrieval?",),
+            "How many action potentials can a pyramidal neuron fire per second?",
         ],
         paraphrase_pairs=[
-            ("Name the anatomical brain region that consolidates memories.", "The hippocampus", ["hippocampus"]),
-            ("In which tissue are permanent memories preserved?", "Cerebral cortex", ["cortex"]),
+            ("Name the anatomical brain region that consolidates memories.", "Hippocampus", ["the hippocampus"]),
         ],
     ),
     DocumentPassage(
         doc_id="train_doc_08_geodesic_architecture",
-        topic="Architecture",
+        topic="Civil Architecture",
         text="Architect Buckminster Fuller popularized the geodesic dome, which utilizes spherical networks of interconnected triangles. The structure distributes mechanical stress omnidirectionally through tensegrity.",
         answerable_pairs=[
             ("Who popularized the geodesic dome?", "Buckminster Fuller", ["Fuller", "R. Buckminster Fuller"]),
-            ("What geometric shape forms the network of geodesic domes?", "Interconnected triangles", ["triangles", "interconnected triangle network"]),
+            ("What geometric shape forms the network of geodesic domes?", "Interconnected triangles", ["triangles"]),
             ("How does a geodesic dome distribute mechanical stress?", "Omnidirectionally through tensegrity", ["omnidirectionally", "through tensegrity"]),
         ],
         unanswerable_questions=[
-            ("What was the construction diameter of the Montreal Biosphere dome?",),
-            ("What alloy formed the outer struts of Fuller's prototype dome?",),
+            "What was the construction diameter of the Montreal Biosphere dome?",
         ],
         paraphrase_pairs=[
             ("Which architect is famous for designing geodesic domes?", "Buckminster Fuller", ["Fuller"]),
@@ -211,15 +203,14 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         answerable_pairs=[
             ("What minimum water temperature is required for tropical cyclones?", "26 degrees Celsius", ["26 C", "exceeding 26 degrees Celsius"]),
             ("What physical force imparts rotational spin to cyclones?", "Coriolis force", ["the Coriolis force", "Coriolis"]),
-            ("What is the calm central region of a tropical cyclone called?", "The eye", ["low-pressure eye", "central eye", "eye"]),
+            ("What is the calm central region of a tropical cyclone called?", "The eye", ["eye", "central eye"]),
         ],
         unanswerable_questions=[
-            ("What was the lowest atmospheric pressure ever recorded in Typhoon Tip?",),
-            ("How many nautical miles wide can hurricane storm surges reach?",),
+            "What was the lowest atmospheric pressure ever recorded in Typhoon Tip?",
         ],
         paraphrase_pairs=[
             ("Which natural effect causes cyclone rotation?", "Coriolis force", ["Coriolis"]),
-            ("Name the tranquil center of a tropical cyclone.", "The eye", ["central eye", "eye"]),
+            ("Name the tranquil center of a tropical cyclone.", "The eye", ["eye", "central eye"]),
         ],
     ),
     DocumentPassage(
@@ -232,12 +223,42 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
             ("What electrical transport phenomenon occurs in graphene at room temperature?", "Ballistic electron transport", ["ballistic transport"]),
         ],
         unanswerable_questions=[
-            ("What is the Young's modulus of multilayer turbostratic graphene?",),
-            ("Who first synthesized suspended graphene on copper foils?",),
+            "What is the Young's modulus of multilayer turbostratic graphene?",
         ],
         paraphrase_pairs=[
             ("Which element is graphene composed of?", "Carbon", ["carbon atoms"]),
-            ("Describe the lattice geometry of graphene.", "Hexagonal honeycomb lattice", ["honeycomb lattice"]),
+        ],
+    ),
+    DocumentPassage(
+        doc_id="train_doc_11_steam_engine",
+        topic="Industrial Technology",
+        text="James Watt developed the separate condenser for steam engines in Glasgow in 1765. This breakthrough drastically reduced fuel consumption and powered the Industrial Revolution.",
+        answerable_pairs=[
+            ("Who developed the separate condenser for steam engines?", "James Watt", ["Watt"]),
+            ("In what year did James Watt develop the separate condenser?", "1765", ["in 1765"]),
+            ("In which city was the separate condenser developed?", "Glasgow", ["city of Glasgow"]),
+        ],
+        unanswerable_questions=[
+            "How many pounds of coal did Newcomen engines consume per minute?",
+        ],
+        paraphrase_pairs=[
+            ("Who invented the separate condenser in 1765?", "James Watt", ["Watt"]),
+        ],
+    ),
+    DocumentPassage(
+        doc_id="train_doc_12_ocean_currents",
+        topic="Oceanography",
+        text="The Gulf Stream is a swift warm ocean current originating in the Gulf of Mexico. It carries heated water across the Atlantic Ocean toward Western Europe, moderating coastal climates.",
+        answerable_pairs=[
+            ("Where does the Gulf Stream originate?", "Gulf of Mexico", ["the Gulf of Mexico"]),
+            ("What type of ocean current is the Gulf Stream?", "Warm ocean current", ["warm current", "swift warm current"]),
+            ("Toward which continent does the Gulf Stream transport warm water?", "Western Europe", ["Europe"]),
+        ],
+        unanswerable_questions=[
+            "What is the maximum depth of the Florida Straits?",
+        ],
+        paraphrase_pairs=[
+            ("Where does the Gulf Stream begin?", "Gulf of Mexico", ["the Gulf of Mexico"]),
         ],
     ),
 ]
@@ -248,49 +269,43 @@ VAL_DOCUMENTS: list[DocumentPassage] = [
         topic="Geology",
         text="The Earth's lithosphere is divided into rigid tectonic plates that float on the ductile asthenosphere. Plate boundaries cause earthquakes and volcanic eruptions.",
         answerable_pairs=[
-            ("What rigid layer of the Earth is divided into tectonic plates?", "Lithosphere", ["the lithosphere", "Earth's lithosphere"]),
-            ("On which ductile layer do tectonic plates float?", "Asthenosphere", ["the asthenosphere", "ductile asthenosphere"]),
-            ("What geological events are caused by plate boundaries?", "Earthquakes and volcanic eruptions", ["earthquakes and volcanoes", "earthquakes"]),
+            ("What rigid layer of the Earth is divided into tectonic plates?", "Lithosphere", ["the lithosphere"]),
+            ("On which ductile layer do tectonic plates float?", "Asthenosphere", ["the asthenosphere"]),
+            ("What geological events are caused by plate boundaries?", "Earthquakes and volcanic eruptions", ["earthquakes and volcanoes"]),
         ],
         unanswerable_questions=[
-            ("How fast do the Pacific and North American plates move each year?",),
-            ("What is the depth of the Mariana Trench in kilometers?",),
+            "How fast do tectonic plates move each year in centimeters?",
         ],
         paraphrase_pairs=[
             ("Which layer of Earth is partitioned into plates?", "Lithosphere", ["the lithosphere"]),
-            ("Where do tectonic plates drift on top of?", "Asthenosphere", ["the asthenosphere"]),
         ],
     ),
     DocumentPassage(
         doc_id="val_doc_02_optics_lenses",
-        topic="Physics",
+        topic="Optics",
         text="A convex lens converges parallel rays of light toward a focal point, whereas a concave lens diverges light rays. Optical refraction depends on the refractive index of the glass.",
         answerable_pairs=[
-            ("What does a convex lens do to parallel light rays?", "Converges light rays toward a focal point", ["converges light", "converges them"]),
-            ("What does a concave lens do to light rays?", "Diverges light rays", ["diverges them", "diverges light"]),
+            ("What does a convex lens do to parallel light rays?", "Converges light rays toward a focal point", ["converges light rays", "converges light"]),
+            ("What does a concave lens do to light rays?", "Diverges light rays", ["diverges light"]),
             ("What material property determines refraction in glass?", "Refractive index", ["the refractive index"]),
         ],
         unanswerable_questions=[
-            ("What is the exact refractive index of flint glass?",),
-            ("Who first ground optical glass lenses for telescopes?",),
+            "What is the exact refractive index of crown glass?",
         ],
         paraphrase_pairs=[
             ("Which type of lens converges parallel rays?", "Convex lens", ["convex"]),
-            ("Which lens diverges incoming light rays?", "Concave lens", ["concave"]),
         ],
     ),
-    # Expanded Validation Documents (M26)
     DocumentPassage(
         doc_id="val_doc_03_black_holes",
         topic="Astrophysics",
         text="A black hole is bounded by an event horizon from which no matter or electromagnetic radiation can escape. At its mathematical center lies a gravitational singularity of infinite density.",
         answerable_pairs=[
             ("What boundary marks the point of no return around a black hole?", "Event horizon", ["the event horizon"]),
-            ("What exists at the center of a black hole?", "Gravitational singularity", ["singularity", "a singularity"]),
+            ("What exists at the center of a black hole?", "Gravitational singularity", ["singularity"]),
         ],
         unanswerable_questions=[
-            ("What is the Hawking radiation temperature of Cygnus X-1?",),
-            ("How fast does the accretion disk of Sagittarius A* rotate?",),
+            "What is the Hawking radiation temperature of Cygnus X-1?",
         ],
         paraphrase_pairs=[
             ("Name the perimeter beyond which light cannot escape a black hole.", "Event horizon", ["the event horizon"]),
@@ -302,12 +317,11 @@ VAL_DOCUMENTS: list[DocumentPassage] = [
         text="Photovoltaic solar cells convert sunlight into electricity via the photoelectric effect within a semiconductor p-n junction. When photons strike the cell, electrons are energized into the conduction band.",
         answerable_pairs=[
             ("Which physical effect converts sunlight to electricity in solar cells?", "Photoelectric effect", ["the photoelectric effect"]),
-            ("What semiconductor junction structure is used inside photovoltaic cells?", "p-n junction", ["a p-n junction", "semiconductor p-n junction"]),
+            ("What semiconductor junction structure is used inside photovoltaic cells?", "p-n junction", ["a p-n junction"]),
             ("Where are electrons excited into when struck by photons?", "Conduction band", ["the conduction band"]),
         ],
         unanswerable_questions=[
-            ("What is the record laboratory efficiency of perovskite tandem cells?",),
-            ("What chemical dopant is added to n-type silicon wafers?",),
+            "What is the record laboratory efficiency of perovskite tandem cells?",
         ],
         paraphrase_pairs=[
             ("Which phenomenon generates electric current in solar panels?", "Photoelectric effect", ["the photoelectric effect"]),
@@ -321,16 +335,15 @@ TEST_DOCUMENTS: list[DocumentPassage] = [
         topic="Marine Biology",
         text="Deep-sea hydrothermal vents emit mineral-rich fluids heated by underlying magma chambers. Chemosynthetic bacteria utilize hydrogen sulfide to produce organic matter without sunlight.",
         answerable_pairs=[
-            ("What heats the mineral-rich fluids emitted by hydrothermal vents?", "Underlying magma chambers", ["magma chambers", "magma"]),
-            ("What microorganism produces organic matter at hydrothermal vents?", "Chemosynthetic bacteria", ["bacteria", "chemosynthetic microbes"]),
+            ("What heats the mineral-rich fluids emitted by hydrothermal vents?", "Magma chambers", ["underlying magma chambers", "magma"]),
+            ("What microorganism produces organic matter at hydrothermal vents?", "Chemosynthetic bacteria", ["bacteria"]),
             ("What chemical compound do chemosynthetic bacteria utilize?", "Hydrogen sulfide", ["H2S", "hydrogen sulfide gas"]),
         ],
         unanswerable_questions=[
-            ("What is the maximum water pressure at the Mariana hydrothermal vent?",),
-            ("In what year were deep hydrothermal vents first discovered by submersible?",),
+            "What is the maximum water pressure at the Mariana hydrothermal vent?",
         ],
         paraphrase_pairs=[
-            ("What energy source heats fluids at hydrothermal vents?", "Magma chambers", ["magma", "underlying magma"]),
+            ("What energy source heats fluids at hydrothermal vents?", "Magma chambers", ["magma"]),
             ("Which chemical do vent bacteria convert into food?", "Hydrogen sulfide", ["hydrogen sulfide gas"]),
         ],
     ),
@@ -339,18 +352,17 @@ TEST_DOCUMENTS: list[DocumentPassage] = [
         topic="Space Exploration",
         text="The James Webb Space Telescope operates at the second Lagrange point, 1.5 million kilometers from Earth. Its primary mirror consists of eighteen gold-coated beryllium segments.",
         answerable_pairs=[
-            ("Where does the James Webb Space Telescope operate?", "Second Lagrange point", ["L2", "Lagrange point 2", "second Lagrange point L2"]),
-            ("How far is the James Webb Space Telescope from Earth?", "1.5 million kilometers", ["1.5 million km", "1.5 million kilometers from Earth"]),
-            ("What metal coats the eighteen beryllium segments of its mirror?", "Gold", ["gold coating", "gold-coated"]),
+            ("Where does the James Webb Space Telescope operate?", "Second Lagrange point", ["L2", "Lagrange point 2"]),
+            ("How far is the James Webb Space Telescope from Earth?", "1.5 million kilometers", ["1.5 million km"]),
+            ("What metal coats the eighteen beryllium segments of its mirror?", "Gold", ["gold coating"]),
             ("How many beryllium segments comprise its primary mirror?", "Eighteen", ["18", "eighteen segments"]),
         ],
         unanswerable_questions=[
-            ("What rocket booster launched the James Webb Space Telescope?",),
-            ("How much did the construction of the James Webb telescope cost in total?",),
+            "What rocket booster launched the James Webb Space Telescope?",
         ],
         paraphrase_pairs=[
-            ("At which orbital location is the Webb telescope stationed?", "Second Lagrange point", ["L2", "Lagrange point 2"]),
-            ("What material coats the mirror segments of the Webb telescope?", "Gold", ["gold-coated"]),
+            ("At which orbital location is the Webb telescope stationed?", "Second Lagrange point", ["L2"]),
+            ("What material coats the mirror segments of the Webb telescope?", "Gold", ["gold coating"]),
         ],
     ),
     DocumentPassage(
@@ -358,29 +370,60 @@ TEST_DOCUMENTS: list[DocumentPassage] = [
         topic="Computer History",
         text="Charles Babbage designed the mechanical Analytical Engine in London, featuring an arithmetic unit called the mill and a memory store. Ada Lovelace wrote the first published algorithm for this machine.",
         answerable_pairs=[
-            ("Who designed the mechanical Analytical Engine?", "Charles Babbage", ["Babbage", "Charles Babbage in London"]),
+            ("Who designed the mechanical Analytical Engine?", "Charles Babbage", ["Babbage"]),
             ("What was the arithmetic calculation unit of the Analytical Engine called?", "The mill", ["mill"]),
-            ("Who created the first algorithm for the Analytical Engine?", "Ada Lovelace", ["Lovelace", "Ada Lovelace in London"]),
+            ("Who created the first algorithm for the Analytical Engine?", "Ada Lovelace", ["Lovelace"]),
         ],
         unanswerable_questions=[
-            ("How many steam cylinders were intended to power the Analytical Engine?",),
-            ("What decimal precision in digits did Babbage plan for the store?",),
+            "How many steam cylinders were intended to power the Analytical Engine?",
         ],
         paraphrase_pairs=[
             ("Name the designer of the Analytical Engine.", "Charles Babbage", ["Babbage"]),
             ("Who authored the earliest published algorithm for Babbage's engine?", "Ada Lovelace", ["Lovelace"]),
         ],
     ),
+    DocumentPassage(
+        doc_id="test_doc_04_crispr_genetics",
+        topic="Molecular Genetics",
+        text="CRISPR-Cas9 is an RNA-guided gene editing tool derived from bacterial immune systems. The Cas9 endonuclease makes double-strand cuts in DNA at sequences complementary to a guide RNA.",
+        answerable_pairs=[
+            ("What biological system is CRISPR-Cas9 derived from?", "Bacterial immune systems", ["bacterial immune system"]),
+            ("What enzyme acts as an endonuclease in CRISPR-Cas9?", "Cas9", ["Cas9 endonuclease"]),
+            ("What molecule guides the Cas9 enzyme to the target DNA?", "Guide RNA", ["RNA", "a guide RNA"]),
+        ],
+        unanswerable_questions=[
+            "What year did Emmanuelle Charpentier receive the Nobel Prize in Chemistry?",
+        ],
+        paraphrase_pairs=[
+            ("Which enzyme makes cuts in DNA during CRISPR gene editing?", "Cas9", ["Cas9 endonuclease"]),
+        ],
+    ),
+    DocumentPassage(
+        doc_id="test_doc_05_superconductivity",
+        topic="Condensed Matter Physics",
+        text="Superconductivity is a quantum mechanical state characterized by zero electrical resistance and the expulsion of magnetic fields known as the Meissner effect. In conventional superconductors, electrons form Cooper pairs below a critical transition temperature.",
+        answerable_pairs=[
+            ("What effect expels magnetic fields from a superconductor?", "Meissner effect", ["the Meissner effect"]),
+            ("What paired electrons form in conventional superconductors?", "Cooper pairs", ["Cooper pair"]),
+            ("What value does electrical resistance drop to in superconductors?", "Zero", ["zero resistance", "0"]),
+        ],
+        unanswerable_questions=[
+            "What is the critical temperature of yttrium barium copper oxide?",
+        ],
+        paraphrase_pairs=[
+            ("Name the phenomenon of magnetic expulsion in superconductors.", "Meissner effect", ["the Meissner effect"]),
+        ],
+    ),
 ]
 
 
 def format_qa_prompt(passage: str, question: str) -> str:
-    """Format standardized reading comprehension prompt with reserved tokens."""
+    """Format standardized reading comprehension prompt without recency copying hazard."""
     return (
         f"<|user|>\n"
         f"Passage: {passage.strip()}\n"
         f"Question: {question.strip()}\n"
-        f"Answer concisely using only the passage above, or reply '{ABSTENTION_TARGET}' if not answerable.\n"
+        f"Instruction: Extract the short factual answer directly from the passage above. If not present in the passage, reply '{ABSTENTION_TARGET}'.\n"
         f"<|assistant|>\n"
     )
 
@@ -390,6 +433,16 @@ def format_qa_completion(answer: str) -> str:
     return f"{answer.strip()}<|eos|>\n"
 
 
+def normalize_text(text: str) -> str:
+    """Normalize text by lowercasing, removing punctuation, and stripping articles."""
+    text = text.lower()
+    text = re.sub(r"[^\w\s]", "", text)
+    # Strip leading/trailing articles
+    text = re.sub(r"^(a|an|the)\s+", "", text)
+    text = re.sub(r"\s+(a|an|the)$", "", text)
+    return " ".join(text.split())
+
+
 def parse_language_completion(completion: str) -> tuple[str, bool, bool]:
     """Parse assistant completion into (cleaned_answer, is_compliant, is_abstained)."""
     cleaned = completion.replace("<|eos|>", "").strip()
@@ -397,7 +450,7 @@ def parse_language_completion(completion: str) -> tuple[str, bool, bool]:
         return "", False, False
 
     first_line = cleaned.split("\n")[0].strip()
-    normalized = re.sub(r"[^\w\s]", "", first_line.lower()).strip()
+    normalized = normalize_text(first_line)
 
     is_abstained = any(abstain in normalized for abstain in [
         "insufficient information",
@@ -411,16 +464,16 @@ def parse_language_completion(completion: str) -> tuple[str, bool, bool]:
     return first_line, is_compliant, is_abstained
 
 
-def verify_language_answer(parsed_answer: str, sample: BenchmarkSample) -> bool:
-    """Independently verify whether parsed language answer matches expected ground truth."""
+def verify_language_exact(parsed_answer: str, sample: BenchmarkSample) -> bool:
+    """Check exact match after standard normalization and article stripping."""
     if not parsed_answer:
         return False
 
-    norm_parsed = re.sub(r"[^\w\s]", "", parsed_answer.lower()).strip()
+    norm_parsed = normalize_text(parsed_answer)
 
-    # Case 1: Sample is unanswerable from the passage (must abstain)
+    # Case 1: Unanswerable
     if sample.is_unanswerable:
-        return any(abstain in norm_parsed for abstain in [
+        return any(term in norm_parsed for term in [
             "insufficient information",
             "unanswerable",
             "not mentioned",
@@ -428,21 +481,67 @@ def verify_language_answer(parsed_answer: str, sample: BenchmarkSample) -> bool:
             "cannot be determined",
         ])
 
-    # If the model abstained on an answerable question, it is incorrect
-    if any(abstain in norm_parsed for abstain in ["insufficient information", "unanswerable", "not mentioned", "unknown"]):
+    # If abstained on answerable question -> False
+    if any(term in norm_parsed for term in ["insufficient information", "unanswerable", "not mentioned", "unknown"]):
         return False
 
-    # Case 2: Answerable question. Check exact or canonical/allowed match
-    norm_expected = re.sub(r"[^\w\s]", "", sample.expected_answer.lower()).strip()
-    if norm_expected in norm_parsed or norm_parsed in norm_expected:
+    norm_expected = normalize_text(sample.expected_answer)
+    if norm_parsed == norm_expected:
         return True
 
     for allowed in sample.allowed_answers:
-        norm_allowed = re.sub(r"[^\w\s]", "", allowed.lower()).strip()
-        if norm_allowed in norm_parsed or norm_parsed in norm_allowed:
+        if norm_parsed == normalize_text(allowed):
             return True
 
     return False
+
+
+def verify_language_grounded(parsed_answer: str, sample: BenchmarkSample) -> bool:
+    """Check grounded semantic/substring match, guarding against trivial stopword false positives."""
+    if not parsed_answer:
+        return False
+
+    norm_parsed = normalize_text(parsed_answer)
+
+    # Case 1: Unanswerable
+    if sample.is_unanswerable:
+        return any(term in norm_parsed for term in [
+            "insufficient information",
+            "unanswerable",
+            "not mentioned",
+            "unknown",
+            "cannot be determined",
+        ])
+
+    # If abstained on answerable question -> False
+    if any(term in norm_parsed for term in ["insufficient information", "unanswerable", "not mentioned", "unknown"]):
+        return False
+
+    norm_expected = normalize_text(sample.expected_answer)
+    if norm_parsed == norm_expected:
+        return True
+
+    # Meaningful substring match (require length >= 3 to avoid stopword false matches)
+    if len(norm_parsed) >= 3 and norm_parsed in norm_expected:
+        return True
+    if len(norm_expected) >= 3 and norm_expected in norm_parsed:
+        return True
+
+    for allowed in sample.allowed_answers:
+        norm_allowed = normalize_text(allowed)
+        if norm_parsed == norm_allowed:
+            return True
+        if len(norm_parsed) >= 3 and norm_parsed in norm_allowed:
+            return True
+        if len(norm_allowed) >= 3 and norm_allowed in norm_parsed:
+            return True
+
+    return False
+
+
+def verify_language_answer(parsed_answer: str, sample: BenchmarkSample) -> bool:
+    """Default verifier (evaluates grounded extraction match)."""
+    return verify_language_grounded(parsed_answer, sample)
 
 
 def build_language_benchmark_samples(
