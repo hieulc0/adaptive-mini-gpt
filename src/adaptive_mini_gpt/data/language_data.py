@@ -149,16 +149,19 @@ def verify_language_answer(parsed_answer: str, sample: BenchmarkSample) -> bool:
 def build_language_benchmark_samples(
     split: BenchmarkSplit,
     include_paraphrases: bool = True,
+    seed: int = 42,
+    doc_pool: list[DocumentPassage] | None = None,
 ) -> list[BenchmarkSample]:
     """Construct deterministic BenchmarkSample list for the designated split."""
-    if split == BenchmarkSplit.TRAIN:
-        doc_pool = TRAIN_DOCUMENTS
-    elif split == BenchmarkSplit.VAL:
-        doc_pool = VAL_DOCUMENTS
-    elif split == BenchmarkSplit.TEST:
-        doc_pool = TEST_DOCUMENTS
-    else:
-        raise ValueError(f"Unknown split: {split}")
+    if doc_pool is None:
+        if split == BenchmarkSplit.TRAIN:
+            doc_pool = TRAIN_DOCUMENTS
+        elif split == BenchmarkSplit.VAL:
+            doc_pool = VAL_DOCUMENTS
+        elif split == BenchmarkSplit.TEST:
+            doc_pool = TEST_DOCUMENTS
+        else:
+            raise ValueError(f"Unknown split: {split}")
 
     samples: list[BenchmarkSample] = []
     for doc in doc_pool:

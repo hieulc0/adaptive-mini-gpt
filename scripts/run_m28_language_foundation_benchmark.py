@@ -640,9 +640,9 @@ def main() -> None:
     logic_test_samples = build_logic_benchmark_samples(split=BenchmarkSplit.TEST, seed=42)
     benchmark.register_samples(DomainType.LOGIC, BenchmarkSplit.TEST, logic_test_samples)
 
-    train_lang_samples = build_language_benchmark_samples(BenchmarkSplit.TRAIN, include_paraphrases=True, seed=42)
-    val_lang_samples = build_language_benchmark_samples(BenchmarkSplit.VAL, include_paraphrases=True, seed=42)
-    test_lang_samples = build_language_benchmark_samples(BenchmarkSplit.TEST, include_paraphrases=True, seed=42)
+    train_lang_samples = build_language_benchmark_samples(BenchmarkSplit.TRAIN, include_paraphrases=True, doc_pool=TRAIN_QA_DOCUMENTS)
+    val_lang_samples = build_language_benchmark_samples(BenchmarkSplit.VAL, include_paraphrases=True, doc_pool=VAL_DOCUMENTS)
+    test_lang_samples = build_language_benchmark_samples(BenchmarkSplit.TEST, include_paraphrases=True, doc_pool=SEALED_TEST_QA_DOCUMENTS)
 
     logger.info(f"Registered {len(train_lang_samples)} train QA, {len(val_lang_samples)} val QA, {len(test_lang_samples)} test QA samples.")
 
