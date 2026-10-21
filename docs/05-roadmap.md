@@ -21,6 +21,13 @@
 | **M16** | Multi-Step Planning & Chained Compositional Reasoning | Typed `ExecutionPlan`, topological validation, acyclic step execution, multi-segment kinematics, intermediate working memory | **PASSED** (Verified on Tesla T4) |
 | **M17** | Hybrid Neural Planning & Grounded Slot Injection | Decouple neural structural plan synthesis from grounded variable injection, persistent working memory across turns | **PASSED** (Verified on Tesla T4) |
 | **M18** | Grammar-Constrained Execution-Guided Planning | Stepwise typed search, isolated branch working memory, runtime goal isolation, 5-arm T4 benchmark | **PASSED** (Verified on Tesla T4) |
+| **M19** | Learned Action Selection | Action ranking, rollout execution, negative result on 5-step kinematics | **CLOSED** (Deterministic Baseline Retained) |
+| **M20** | Controlled Neural Scaling | 1M vs 3M parameters, matched tokens vs matched compute, mental arithmetic scaling limit | **CLOSED** (Deterministic Baseline Retained) |
+| **M21** | Digit-Level Neural Arithmetic | Procedural scratchpad breakdown, 35.2% in-distribution, 88.1% carry accuracy | **PASSED** (Verified on Tesla T4) |
+| **M22** | Compact Arithmetic & RoPE | Compact transitions (>50% token reduction), RoPE 64.7% in-distribution, -6.42 replay retention | **PASSED** (Verified on Tesla T4) |
+| **M23** | Recurrent Neural Arithmetic | Local column transition, length extrapolation barrier broken (14.3%–23.6% on 4–8 digits), 97.9% stopping accuracy | **PASSED** (Verified on Tesla T4) |
+| **M24** | Reliable Neural Arithmetic | Balanced curriculum, 85.3% transition exact, 44.7% extrapolation on 4–8 digits, scaling to 32 digits | **PASSED** (Verified on Tesla T4) |
+| **M25** | Parallel Learning & Multi-Domain | Shared multi-domain benchmark interface, reading comprehension (M25-B), symbolic logic (M25-C: 50.7%), continual multi-domain candidate (M25-D), retention drift audit | **PASSED** (Verified on Tesla T4) |
 
 ---
 
@@ -310,3 +317,19 @@
   - Arm E (Balanced Curriculum + Audited Replay): **30.27%** on 4–8 digits; 13.33% on 16 digits; 4.00% on 32 digits; language retention drift held to **+1.37** on disjoint test suite.
 - **Diagnostic Finding**: Multi-digit failures are 92% write-digit substitution errors ( = (a+b+c) \pmod{10}$); pure carry failures were 0.0%.
 - **Verdict**: Close M24 as an empirical procedural advance. Do NOT promote the neural model (accuracy remains below 99% production threshold). Retain M18 deterministic solver as operational baseline.
+
+### M25: Parallel Learning and Multi-Domain Capability Acquisition (Completed & Qualified)
+- **Objective**: Transition Adaptive Mini-GPT from isolated arithmetic experiments into a multi-domain learning system. Establish independent language comprehension (M25-B) and symbolic logic (M25-C) baselines in parallel with arithmetic (M25-A), followed by a continual learning experiment (M25-D) on a single evolving lineage.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m25-multi-domain`, commit `4a7b5ad`). Model: ~1M MiniGPT RoPE (895,744 params).
+- **Core Architecture & Benchmark Deliverables**:
+  1. `MultiDomainBenchmark`: Minimal shared benchmark interface (`DomainType.ARITHMETIC`, `DomainType.LANGUAGE`, `DomainType.LOGIC`, `DomainType.RETENTION`), returning typed `DomainResult` and `MultiDomainReport`.
+  2. `LanguageComprehensionDataset` & Partitions: Disjoint documents, prompt loss masking (`ignore_index=-100`), grounded extraction, unanswerable safe abstention, and paraphrase robustness.
+  3. `LogicReasoningDataset` & Partitions: Disjoint variable and entity symbols, boolean logic, transitive inequalities, modus ponens syllogisms, multi-step deductions, and contradiction abstention without external tools.
+  4. Multi-Seed Benchmark across Lineages 42, 43, 44:
+     - Base Lineage: Arith: 0.33%, Lang: 0.00%, Logic: 0.00%.
+     - Candidate B (Language): Lang: 4.55% (Abstain: 16.67%), Logic: 0.00%, Arith: 0.00%, Retention Drift: -0.4565 nats.
+     - Candidate C (Logic): Logic: 50.67% (Abstain: 35.89%), Lang: 0.00%, Arith: 0.00%, Retention Drift: -0.4427 nats.
+     - Candidate D (Continual Interleaved): Arith: 13.67% (Carry: 97.5%), Lang: 3.03%, Logic: 49.33% (97.4% retention), Retention Drift: +0.4195 nats.
+- **Continual Learning Insight**: Quantified that while single-domain adaptation exhibits negative drift (improving pretraining loss by ~0.45 nats), joint 3-domain interleaved training creates mild positive interference (+0.42 nats) on an 895k parameter network without replay buffers.
+- **Lineage Promotion Decision**: NO-GO on replacing stable base checkpoint (retention drift must be mitigated via replay buffer and capacity scaling before promotion).
+- **Next Direction (M26)**: Autonomous Curriculum Selection (controller selects learning objectives dynamically based on verified skill gaps and forgetting risk).
