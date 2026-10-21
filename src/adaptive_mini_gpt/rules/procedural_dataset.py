@@ -100,7 +100,8 @@ def problem_to_procedural_example(problem: MultiStepProblem) -> ProceduralExampl
 
     for idx, step in enumerate(plan.steps, start=1):
         res_args: dict[str, Any] = {}
-        for k, v in step.args.items():
+        step_args = step.args if isinstance(step.args, dict) else {}
+        for k, v in step_args.items():
             res_args[k] = _resolve_arg_val(v, mem_vars, problem.slots)
 
         op = step.operation
@@ -168,7 +169,7 @@ def problem_to_procedural_example(problem: MultiStepProblem) -> ProceduralExampl
                 step_index=idx,
                 output_var=step.output_var,
                 operation=op,
-                args=step.args,
+                args=step_args,
                 intermediate_calc=calc_str,
                 result=result,
                 units=step.units,

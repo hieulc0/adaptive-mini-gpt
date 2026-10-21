@@ -84,8 +84,8 @@ def test_problem_to_procedural_example_conversion() -> None:
         "operand_3": GroundedSlot("operand_3", 45, None, "45", 0, 2, type_name="int"),
     }
     steps = [
-        PlanStep(1, "$step1", "add", {"a": "$operand_1", "b": "$operand_2"}, None),
-        PlanStep(2, "$step2", "add", {"a": "$step1", "b": "$operand_3"}, None),
+        PlanStep(output_var="$step1", operation="add", args={"a": "$operand_1", "b": "$operand_2"}, units=None, step_index=1),
+        PlanStep(output_var="$step2", operation="add", args={"a": "$step1", "b": "$operand_3"}, units=None, step_index=2),
     ]
     prob = MultiStepProblem(
         question="Calculate the sum of 120, 80, and 45.",
@@ -142,7 +142,7 @@ def test_target_only_loss_masking() -> None:
         "operand_1": GroundedSlot("operand_1", 10, None, "10", 0, 2, type_name="int"),
         "operand_2": GroundedSlot("operand_2", 20, None, "20", 0, 2, type_name="int"),
     }
-    steps = [PlanStep(1, "$step1", "add", {"a": "$operand_1", "b": "$operand_2"}, None)]
+    steps = [PlanStep(output_var="$step1", operation="add", args={"a": "$operand_1", "b": "$operand_2"}, units=None, step_index=1)]
     ex = ProceduralExample(
         question="Sum 10 and 20",
         slots=slots,
