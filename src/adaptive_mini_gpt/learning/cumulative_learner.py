@@ -29,12 +29,14 @@ from torch.utils.data import DataLoader, Dataset
 
 from adaptive_mini_gpt.data.language_corpus import (
     ABSTENTION_TARGET,
-    EXPANDED_RETENTION_CORPUS,
     PRETRAIN_PROSE_CORPUS,
     format_qa_prompt,
     normalize_text,
 )
-from adaptive_mini_gpt.data.retention_data import evaluate_audited_retention
+from adaptive_mini_gpt.data.retention_data import (
+    EXPANDED_RETENTION_CORPUS,
+    evaluate_audited_retention,
+)
 from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
 from adaptive_mini_gpt.learning.lineage_manager import CheckpointRecord, LineageManager
 from adaptive_mini_gpt.learning.strategy_selector import (
