@@ -358,16 +358,18 @@ class LogicReasoningDataset(Dataset):
         self.data: list[tuple[Tensor, Tensor]] = []
 
         for s in samples:
-            full_text = f"{s.prompt}{format_logic_completion(s.expected_answer)}"
-            token_ids = tokenizer.encode(full_text)
             prompt_ids = tokenizer.encode(s.prompt)
+            answer_ids = tokenizer.encode(format_logic_completion(s.expected_answer))
+            token_ids = prompt_ids + answer_ids
 
             if len(token_ids) > context_length:
-                token_ids = token_ids[:context_length]
+                token_ids = token_ids[-context_length:]
+                prompt_len = max(0, len(token_ids) - len(answer_ids))
+            else:
+                prompt_len = len(prompt_ids)
 
             input_ids = torch.tensor(token_ids, dtype=torch.long)
             target_ids = input_ids.clone()
-            prompt_len = min(len(prompt_ids), len(token_ids))
             target_ids[:prompt_len] = ignore_index
 
             self.data.append((input_ids, target_ids))

@@ -62,7 +62,7 @@ def mock_tokenizer() -> BPETokenizer:
         "red blue metallic heavy warm bright dense resonant inert fragile "
         "The quick brown fox jumps over the lazy dog. 0 1 2 3 4 5 6 7 8 9"
     )
-    tok.train(corpus, target_vocab_size=200)
+    tok.train(corpus, target_vocab_size=350)
     return tok
 
 
@@ -191,7 +191,7 @@ def test_language_dataset_masking(mock_tokenizer: BPETokenizer):
     samples = build_language_benchmark_samples(BenchmarkSplit.TEST)
     assert len(samples) > 0
 
-    ds = LanguageComprehensionDataset(samples[:5], mock_tokenizer, context_length=256, ignore_index=-1)
+    ds = LanguageComprehensionDataset(samples[:5], mock_tokenizer, context_length=512, ignore_index=-1)
     assert len(ds) == 5
 
     x, y = ds[0]
