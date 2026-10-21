@@ -421,10 +421,16 @@ def run_m23_benchmark(
         # Train monolithic compact scratchpad on lengths 2–3
         train_ds_a = ArithmeticDataset(train_problems, tokenizer, arm="compact_scratchpad", context_length=256)
         val_ds_a = ArithmeticDataset(val_problems, tokenizer, arm="compact_scratchpad", context_length=256)
-        train_loader_a = DataLoader(train_ds_a, batch_size=batch_size, shuffle=True, collate_fn=lambda b: collate_arithmetic_batch(b, pad_token_id=0))
-        val_loader_a = DataLoader(val_ds_a, batch_size=batch_size, shuffle=False, collate_fn=lambda b: collate_arithmetic_batch(b, pad_token_id=0))
 
-        model_a, hist_a = train_arithmetic_model(model_a, train_loader_a, val_loader_a, epochs=epochs, lr=lr, device=device)
+        train_metrics_a = train_arithmetic_model(
+            model=model_a,
+            train_dataset=train_ds_a,
+            val_dataset=val_ds_a,
+            device=device,
+            epochs=epochs,
+            lr=lr,
+            batch_size=batch_size,
+        )
 
         eval_id_a = evaluate_arithmetic_unaided(model_a, tokenizer, test_in_dist, arm="compact_scratchpad", device=device, max_new_tokens=150)
         eval_extrap_a = evaluate_arithmetic_unaided(model_a, tokenizer, extrap_problems, arm="compact_scratchpad", device=device, max_new_tokens=250)
