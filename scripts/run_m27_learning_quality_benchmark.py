@@ -12,7 +12,7 @@ Implements the experimental protocol for Adaptive Mini-GPT M27:
      - 3M Migrated from 1M (warm-started via dimension expansion)
   4. Phase 5: Autonomous Experiment-Selection Pilot:
      - Round-Robin baseline vs Gap-directed proposal.
-  5. Phase 6: Multi-Linage Qualification across seeds 42, 43, 44 with task-specific gates.
+  5. Phase 6: Multi-Lineage Qualification across seeds 42, 43, 44 with task-specific gates.
 """
 
 from __future__ import annotations
@@ -34,13 +34,11 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 
-from adaptive_mini_gpt.arithmetic.elementary_dataset import (
-    ElementaryTransition,
-    ElementaryTransitionDataset,
-    collate_elementary_batch,
-    generate_elementary_addition_corpus,
+from adaptive_mini_gpt.autonomous.curriculum_selector import (
+    CurriculumProposal,
+    CurriculumSelector,
+    CurriculumStrategy,
 )
-from adaptive_mini_gpt.arithmetic.recurrent_evaluator import audit_elementary_transition_space
 from adaptive_mini_gpt.data.language_data import (
     BenchmarkSample,
     BenchmarkSplit,
@@ -65,11 +63,6 @@ from adaptive_mini_gpt.data.retention_data import (
     verify_corpora_disjointness,
 )
 from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
-from adaptive_mini_gpt.evaluation.curriculum import (
-    CurriculumProposal,
-    CurriculumSelector,
-    CurriculumStrategy,
-)
 from adaptive_mini_gpt.evaluation.multi_domain import (
     DomainResult,
     DomainType,
@@ -84,6 +77,13 @@ from adaptive_mini_gpt.model.capacity_migration import (
     migrate_1m_to_3m,
 )
 from adaptive_mini_gpt.model.transformer import MiniGPT
+from adaptive_mini_gpt.rules.reliable_transition import (
+    ElementaryTransition,
+    ElementaryTransitionDataset,
+    audit_elementary_transition_space,
+    collate_elementary_batch,
+    get_all_200_transitions,
+)
 from adaptive_mini_gpt.training.checkpoint import CheckpointManager
 
 logging.basicConfig(
@@ -508,10 +508,8 @@ def main() -> None:
     logger.info("Registering Multi-Domain Benchmark Partitions...")
     benchmark = MultiDomainBenchmark(version="m27-v1")
 
-    # Domain A: Arithmetic
-    arith_train_transitions = generate_elementary_addition_corpus(
-        num_samples=120, max_digits=4, seed=42, format_type="canonical_state"
-    )
+    # Domain A: Arithmetic (all 200 elementary transitions)
+    arith_train_transitions = get_all_200_transitions()
 
     # Domain B: Language
     lang_train = build_language_benchmark_samples(BenchmarkSplit.TRAIN)
