@@ -724,3 +724,37 @@ Frozen Artifacts:
   - Unseen composition structures (5-step kinematics)
   - Multi-corpus prior language retention
   - Wall-clock training duration, per-token latency, and GPU VRAM footprint
+
+#### 1. Empirical Results Across Lineages (Tesla T4 GPU)
+- **Unit Test Suite**: 6/6 tests passed in 2.17s on Tesla T4 (`tests/test_m20_procedural_scaling.py`).
+- **Parameter Scaling**:
+  - Configuration A (1M Control): 928,512 parameters
+  - Configuration B (3M Scaling): 3,429,888 parameters (3.694x parameters)
+- **Report Artifact**: [`runs/m20_scaling/m20_scaling_report.json`](file:///home/hieulc/projects/adaptive-mini-gpt/runs/m20_scaling/m20_scaling_report.json)
+
+| Model Configuration & Protocol | Parameters | Train Compute (FLOPs) | Final Val Loss | Familiar Rollout Acc | Depth Ladder Rollout Acc | 5-Step Kinematics Rollout | Neural-Only Exact Answer Acc (No Tools) | Mean Inference Latency | Technical Prose Drift |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **1M Control (Matched Tokens, 10 ep)** | 928,512 | $6.57 \times 10^{11}$ | 0.655 | **82.50%** (+/- 13.0%) | **75.00%** (+/- 0.0%) | **33.33%** (+/- 57.7%) | **0.00%** | 233.7 ms | +0.852 |
+| **3M Scaling (Matched Tokens, 10 ep)** | 3,429,888 | $2.43 \times 10^{12}$ | 0.547 | **83.33%** (+/- 14.4%) | **75.00%** (+/- 0.0%) | **0.00%** (+/- 0.0%) | **0.00%** | 243.7 ms | **+0.036** |
+| **1M Control (Matched Compute, 37 ep)**| 928,512 | $2.43 \times 10^{12}$ | **0.529** | N/A (Procedural) | N/A (Procedural) | N/A (Procedural) | **0.00%** | 233.7 ms | N/A |
+
+*Reasoning Depth Breakdown (Objective A Rollout Success)*:
+- Depths 2 & 3 (3 & 4 operands): 100.0% across all lineages for both 1M and 3M.
+- Depths 4 & 5 (5 & 6 operands): 50.0% across all lineages for both 1M and 3M.
+- 5-step kinematics (3-segment speed): 1M achieved 33.33% aggregate (Seed 44: 100%, Seeds 42/43: 0%); 3M achieved 0.0% across all seeds.
+
+#### 2. Key Scientific Findings & Analysis
+1. **Capacity Scaling Fails to Unlock Unaided Procedural Mental Arithmetic (0.0% exact match)**:
+   - Autoregressive decoder-only Transformer generation at both 1M and 3M scale fails to perform multi-step mental arithmetic and track variable dependencies without an external execution engine.
+   - Even when procedural validation loss dropped to 0.53, token generation makes off-by-one arithmetic and hallucination errors on multi-digit numbers.
+2. **Action Policy Scaling Plateau**:
+   - In Objective A (Action policy with grammar planner and rule executor), scaling from 1M to 3M resulted in virtually identical rollout performance on familiar tasks (82.5% vs 83.3%) and depth ladders (75.0% vs 75.0%), and a regression on 5-step kinematics (33.3% -> 0.0%).
+   - This proves that parameter capacity is not the primary barrier preventing the action head from learning deep planning procedures.
+3. **Compute Efficiency vs Capacity**:
+   - Under strictly matched compute budgets ($2.43 \times 10^{12}$ FLOPs), training the 1M model longer (37 epochs) yielded a lower procedural validation loss (0.529) than the 3M model trained for 10 epochs (0.547).
+4. **Retention Improvement in 3M Model**:
+   - The 3M model demonstrated substantially better retention of prior knowledge, reducing representation drift on technical and mathematical corpora by >80% (+0.036 vs +0.852 drift).
+5. **Qualification Decision**:
+   - **NO-GO for neural promotion**. Retain M18 deterministic planner as the operational baseline.
+   - Follow-up 10M scaling is not justified under this paradigm.
+   - Close M20 as a completed scientific experiment.

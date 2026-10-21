@@ -258,7 +258,7 @@
 - Reconciled deterministic comparison discrepancy: M18 tree search (100%) vs M19.5 greedy heuristic (0%).
 - Checkpoints, test sets, and lineages frozen.
 
-### M20: Controlled Neural Scaling and Procedural Generalization (In Progress)
+### M20: Controlled Neural Scaling and Procedural Generalization (Completed & Closed)
 - **Model Scaling**: Configuration A (1M params: 928k) vs Configuration B (3M params: 3.43M).
 - **Dual Objectives**:
   - Objective A: Supervised action selection from verified planning traces.

@@ -11,7 +11,7 @@ An experimental, **CLI-first Python/PyTorch** research framework studying **adap
 - **M5 (Mixture-of-Depths & Dynamic Token Compute Allocation):** Passed (Verified on Tesla T4)
 - **M18 (Grammar-Constrained Planning & Execution Guidance):** Passed (100% on addition ladders & 5-step kinematics)
 - **M19 (Learned Action Selection & Representation Adaptation):** Closed (No-go on neural promotion; M18 baseline preserved)
-- **M20 (Controlled Neural Scaling & Procedural Generalization):** In Progress (1M vs 3M controlled scaling)
+- **M20 (Controlled Neural Scaling & Procedural Generalization):** Completed (1M vs 3M scaling; No-go on promotion; M18 baseline preserved)
 
 ## Research Hypothesis
 
