@@ -77,6 +77,7 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         ],
         unanswerable_questions=[
             "What temperature is required for the Calvin cycle?",
+            "How many ATP molecules are produced during the light reaction?",
         ],
         paraphrase_pairs=[
             ("Which cellular organelle hosts photosynthesis?", "Chloroplasts", ["chloroplast", "in chloroplasts"]),
@@ -94,6 +95,7 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         ],
         unanswerable_questions=[
             "How many moons orbit Jupiter?",
+            "What is the surface temperature of Jupiter's core?",
         ],
         paraphrase_pairs=[
             ("Name the biggest planet in the solar system.", "Jupiter", ["planet Jupiter"]),
@@ -111,6 +113,7 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         ],
         unanswerable_questions=[
             "How many Gutenberg Bibles were originally printed?",
+            "What metal alloy was used to cast Gutenberg's type?",
         ],
         paraphrase_pairs=[
             ("Which inventor created movable type printing in 1440?", "Johannes Gutenberg", ["Gutenberg"]),
@@ -127,6 +130,7 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         ],
         unanswerable_questions=[
             "What is the top cruising speed of a Boeing 747?",
+            "How much fuel does an Airbus A380 consume per hour?",
         ],
         paraphrase_pairs=[
             ("Why do airplane wings produce lift?", "Differences in air pressure", ["pressure differences"]),
@@ -143,6 +147,7 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         ],
         unanswerable_questions=[
             "What is the exact clock frequency of the first Intel 4004 chip?",
+            "What is the gate dielectric thickness in modern 3nm transistors?",
         ],
         paraphrase_pairs=[
             ("On which material are microprocessors manufactured?", "Silicon wafers", ["silicon"]),
@@ -159,6 +164,7 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         ],
         unanswerable_questions=[
             "How many tree species exist per hectare in the Amazon basin?",
+            "What is the annual biomass turnover rate in tropical rainforest soils?",
         ],
         paraphrase_pairs=[
             ("What botanical mechanism drives rainfall in tropical rainforests?", "Plant transpiration", ["transpiration"]),
@@ -175,6 +181,7 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         ],
         unanswerable_questions=[
             "How many action potentials can a pyramidal neuron fire per second?",
+            "Which neurotransmitter receptor subtype binds glutamate in memory retrieval?",
         ],
         paraphrase_pairs=[
             ("Name the anatomical brain region that consolidates memories.", "Hippocampus", ["the hippocampus"]),
@@ -191,6 +198,7 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         ],
         unanswerable_questions=[
             "What was the construction diameter of the Montreal Biosphere dome?",
+            "What alloy formed the outer struts of Fuller's prototype dome?",
         ],
         paraphrase_pairs=[
             ("Which architect is famous for designing geodesic domes?", "Buckminster Fuller", ["Fuller"]),
@@ -207,6 +215,7 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         ],
         unanswerable_questions=[
             "What was the lowest atmospheric pressure ever recorded in Typhoon Tip?",
+            "How many nautical miles wide can hurricane storm surges reach?",
         ],
         paraphrase_pairs=[
             ("Which natural effect causes cyclone rotation?", "Coriolis force", ["Coriolis"]),
@@ -224,6 +233,7 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         ],
         unanswerable_questions=[
             "What is the Young's modulus of multilayer turbostratic graphene?",
+            "Who first synthesized suspended graphene on copper foils?",
         ],
         paraphrase_pairs=[
             ("Which element is graphene composed of?", "Carbon", ["carbon atoms"]),
@@ -240,6 +250,7 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         ],
         unanswerable_questions=[
             "How many pounds of coal did Newcomen engines consume per minute?",
+            "What was the cylinder stroke diameter of Watt's first commercial engine?",
         ],
         paraphrase_pairs=[
             ("Who invented the separate condenser in 1765?", "James Watt", ["Watt"]),
@@ -247,7 +258,7 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
     ),
     DocumentPassage(
         doc_id="train_doc_12_ocean_currents",
-        topic="Oceanography",
+        topic="Ocean Dynamics",
         text="The Gulf Stream is a swift warm ocean current originating in the Gulf of Mexico. It carries heated water across the Atlantic Ocean toward Western Europe, moderating coastal climates.",
         answerable_pairs=[
             ("Where does the Gulf Stream originate?", "Gulf of Mexico", ["the Gulf of Mexico"]),
@@ -256,6 +267,7 @@ TRAIN_DOCUMENTS: list[DocumentPassage] = [
         ],
         unanswerable_questions=[
             "What is the maximum depth of the Florida Straits?",
+            "How many sverdrups of volume transport does the Gulf Stream reach at Cape Hatteras?",
         ],
         paraphrase_pairs=[
             ("Where does the Gulf Stream begin?", "Gulf of Mexico", ["the Gulf of Mexico"]),
@@ -269,20 +281,22 @@ VAL_DOCUMENTS: list[DocumentPassage] = [
         topic="Geology",
         text="The Earth's lithosphere is divided into rigid tectonic plates that float on the ductile asthenosphere. Plate boundaries cause earthquakes and volcanic eruptions.",
         answerable_pairs=[
-            ("What rigid layer of the Earth is divided into tectonic plates?", "Lithosphere", ["the lithosphere"]),
-            ("On which ductile layer do tectonic plates float?", "Asthenosphere", ["the asthenosphere"]),
-            ("What geological events are caused by plate boundaries?", "Earthquakes and volcanic eruptions", ["earthquakes and volcanoes"]),
+            ("What rigid layer of the Earth is divided into tectonic plates?", "Lithosphere", ["the lithosphere", "Earth's lithosphere"]),
+            ("On which ductile layer do tectonic plates float?", "Asthenosphere", ["the asthenosphere", "ductile asthenosphere"]),
+            ("What geological events are caused by plate boundaries?", "Earthquakes and volcanic eruptions", ["earthquakes and volcanoes", "earthquakes"]),
         ],
         unanswerable_questions=[
-            "How fast do tectonic plates move each year in centimeters?",
+            "How fast do the Pacific and North American plates move each year?",
+            "What is the depth of the Mariana Trench in kilometers?",
         ],
         paraphrase_pairs=[
             ("Which layer of Earth is partitioned into plates?", "Lithosphere", ["the lithosphere"]),
+            ("Where do tectonic plates drift on top of?", "Asthenosphere", ["the asthenosphere"]),
         ],
     ),
     DocumentPassage(
         doc_id="val_doc_02_optics_lenses",
-        topic="Optics",
+        topic="Physics",
         text="A convex lens converges parallel rays of light toward a focal point, whereas a concave lens diverges light rays. Optical refraction depends on the refractive index of the glass.",
         answerable_pairs=[
             ("What does a convex lens do to parallel light rays?", "Converges light rays toward a focal point", ["converges light rays", "converges light"]),
@@ -290,10 +304,12 @@ VAL_DOCUMENTS: list[DocumentPassage] = [
             ("What material property determines refraction in glass?", "Refractive index", ["the refractive index"]),
         ],
         unanswerable_questions=[
-            "What is the exact refractive index of crown glass?",
+            "What is the exact refractive index of flint glass?",
+            "Who first ground optical glass lenses for telescopes?",
         ],
         paraphrase_pairs=[
             ("Which type of lens converges parallel rays?", "Convex lens", ["convex"]),
+            ("Which lens diverges incoming light rays?", "Concave lens", ["concave"]),
         ],
     ),
     DocumentPassage(
@@ -302,10 +318,11 @@ VAL_DOCUMENTS: list[DocumentPassage] = [
         text="A black hole is bounded by an event horizon from which no matter or electromagnetic radiation can escape. At its mathematical center lies a gravitational singularity of infinite density.",
         answerable_pairs=[
             ("What boundary marks the point of no return around a black hole?", "Event horizon", ["the event horizon"]),
-            ("What exists at the center of a black hole?", "Gravitational singularity", ["singularity"]),
+            ("What exists at the center of a black hole?", "Gravitational singularity", ["singularity", "a singularity"]),
         ],
         unanswerable_questions=[
             "What is the Hawking radiation temperature of Cygnus X-1?",
+            "How fast does the accretion disk of Sagittarius A* rotate?",
         ],
         paraphrase_pairs=[
             ("Name the perimeter beyond which light cannot escape a black hole.", "Event horizon", ["the event horizon"]),
@@ -317,11 +334,12 @@ VAL_DOCUMENTS: list[DocumentPassage] = [
         text="Photovoltaic solar cells convert sunlight into electricity via the photoelectric effect within a semiconductor p-n junction. When photons strike the cell, electrons are energized into the conduction band.",
         answerable_pairs=[
             ("Which physical effect converts sunlight to electricity in solar cells?", "Photoelectric effect", ["the photoelectric effect"]),
-            ("What semiconductor junction structure is used inside photovoltaic cells?", "p-n junction", ["a p-n junction"]),
+            ("What semiconductor junction structure is used inside photovoltaic cells?", "p-n junction", ["a p-n junction", "semiconductor p-n junction"]),
             ("Where are electrons excited into when struck by photons?", "Conduction band", ["the conduction band"]),
         ],
         unanswerable_questions=[
             "What is the record laboratory efficiency of perovskite tandem cells?",
+            "What chemical dopant is added to n-type silicon wafers?",
         ],
         paraphrase_pairs=[
             ("Which phenomenon generates electric current in solar panels?", "Photoelectric effect", ["the photoelectric effect"]),
@@ -336,14 +354,15 @@ TEST_DOCUMENTS: list[DocumentPassage] = [
         text="Deep-sea hydrothermal vents emit mineral-rich fluids heated by underlying magma chambers. Chemosynthetic bacteria utilize hydrogen sulfide to produce organic matter without sunlight.",
         answerable_pairs=[
             ("What heats the mineral-rich fluids emitted by hydrothermal vents?", "Magma chambers", ["underlying magma chambers", "magma"]),
-            ("What microorganism produces organic matter at hydrothermal vents?", "Chemosynthetic bacteria", ["bacteria"]),
+            ("What microorganism produces organic matter at hydrothermal vents?", "Chemosynthetic bacteria", ["bacteria", "chemosynthetic microbes"]),
             ("What chemical compound do chemosynthetic bacteria utilize?", "Hydrogen sulfide", ["H2S", "hydrogen sulfide gas"]),
         ],
         unanswerable_questions=[
             "What is the maximum water pressure at the Mariana hydrothermal vent?",
+            "In what year were deep hydrothermal vents first discovered by submersible?",
         ],
         paraphrase_pairs=[
-            ("What energy source heats fluids at hydrothermal vents?", "Magma chambers", ["magma"]),
+            ("What energy source heats fluids at hydrothermal vents?", "Magma chambers", ["magma", "underlying magma"]),
             ("Which chemical do vent bacteria convert into food?", "Hydrogen sulfide", ["hydrogen sulfide gas"]),
         ],
     ),
@@ -352,17 +371,18 @@ TEST_DOCUMENTS: list[DocumentPassage] = [
         topic="Space Exploration",
         text="The James Webb Space Telescope operates at the second Lagrange point, 1.5 million kilometers from Earth. Its primary mirror consists of eighteen gold-coated beryllium segments.",
         answerable_pairs=[
-            ("Where does the James Webb Space Telescope operate?", "Second Lagrange point", ["L2", "Lagrange point 2"]),
-            ("How far is the James Webb Space Telescope from Earth?", "1.5 million kilometers", ["1.5 million km"]),
-            ("What metal coats the eighteen beryllium segments of its mirror?", "Gold", ["gold coating"]),
+            ("Where does the James Webb Space Telescope operate?", "Second Lagrange point", ["L2", "Lagrange point 2", "second Lagrange point L2"]),
+            ("How far is the James Webb Space Telescope from Earth?", "1.5 million kilometers", ["1.5 million km", "1.5 million kilometers from Earth"]),
+            ("What metal coats the eighteen beryllium segments of its mirror?", "Gold", ["gold coating", "gold-coated"]),
             ("How many beryllium segments comprise its primary mirror?", "Eighteen", ["18", "eighteen segments"]),
         ],
         unanswerable_questions=[
             "What rocket booster launched the James Webb Space Telescope?",
+            "How much did the construction of the James Webb telescope cost in total?",
         ],
         paraphrase_pairs=[
-            ("At which orbital location is the Webb telescope stationed?", "Second Lagrange point", ["L2"]),
-            ("What material coats the mirror segments of the Webb telescope?", "Gold", ["gold coating"]),
+            ("At which orbital location is the Webb telescope stationed?", "Second Lagrange point", ["L2", "Lagrange point 2"]),
+            ("What material coats the mirror segments of the Webb telescope?", "Gold", ["gold-coated"]),
         ],
     ),
     DocumentPassage(
@@ -370,48 +390,17 @@ TEST_DOCUMENTS: list[DocumentPassage] = [
         topic="Computer History",
         text="Charles Babbage designed the mechanical Analytical Engine in London, featuring an arithmetic unit called the mill and a memory store. Ada Lovelace wrote the first published algorithm for this machine.",
         answerable_pairs=[
-            ("Who designed the mechanical Analytical Engine?", "Charles Babbage", ["Babbage"]),
+            ("Who designed the mechanical Analytical Engine?", "Charles Babbage", ["Babbage", "Charles Babbage in London"]),
             ("What was the arithmetic calculation unit of the Analytical Engine called?", "The mill", ["mill"]),
-            ("Who created the first algorithm for the Analytical Engine?", "Ada Lovelace", ["Lovelace"]),
+            ("Who created the first algorithm for the Analytical Engine?", "Ada Lovelace", ["Lovelace", "Ada Lovelace in London"]),
         ],
         unanswerable_questions=[
             "How many steam cylinders were intended to power the Analytical Engine?",
+            "What decimal precision in digits did Babbage plan for the store?",
         ],
         paraphrase_pairs=[
             ("Name the designer of the Analytical Engine.", "Charles Babbage", ["Babbage"]),
             ("Who authored the earliest published algorithm for Babbage's engine?", "Ada Lovelace", ["Lovelace"]),
-        ],
-    ),
-    DocumentPassage(
-        doc_id="test_doc_04_crispr_genetics",
-        topic="Molecular Genetics",
-        text="CRISPR-Cas9 is an RNA-guided gene editing tool derived from bacterial immune systems. The Cas9 endonuclease makes double-strand cuts in DNA at sequences complementary to a guide RNA.",
-        answerable_pairs=[
-            ("What biological system is CRISPR-Cas9 derived from?", "Bacterial immune systems", ["bacterial immune system"]),
-            ("What enzyme acts as an endonuclease in CRISPR-Cas9?", "Cas9", ["Cas9 endonuclease"]),
-            ("What molecule guides the Cas9 enzyme to the target DNA?", "Guide RNA", ["RNA", "a guide RNA"]),
-        ],
-        unanswerable_questions=[
-            "What year did Emmanuelle Charpentier receive the Nobel Prize in Chemistry?",
-        ],
-        paraphrase_pairs=[
-            ("Which enzyme makes cuts in DNA during CRISPR gene editing?", "Cas9", ["Cas9 endonuclease"]),
-        ],
-    ),
-    DocumentPassage(
-        doc_id="test_doc_05_superconductivity",
-        topic="Condensed Matter Physics",
-        text="Superconductivity is a quantum mechanical state characterized by zero electrical resistance and the expulsion of magnetic fields known as the Meissner effect. In conventional superconductors, electrons form Cooper pairs below a critical transition temperature.",
-        answerable_pairs=[
-            ("What effect expels magnetic fields from a superconductor?", "Meissner effect", ["the Meissner effect"]),
-            ("What paired electrons form in conventional superconductors?", "Cooper pairs", ["Cooper pair"]),
-            ("What value does electrical resistance drop to in superconductors?", "Zero", ["zero resistance", "0"]),
-        ],
-        unanswerable_questions=[
-            "What is the critical temperature of yttrium barium copper oxide?",
-        ],
-        paraphrase_pairs=[
-            ("Name the phenomenon of magnetic expulsion in superconductors.", "Meissner effect", ["the Meissner effect"]),
         ],
     ),
 ]

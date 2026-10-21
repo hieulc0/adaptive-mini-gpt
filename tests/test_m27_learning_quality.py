@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import pytest
 import torch
+import torch.nn as nn
 
 from adaptive_mini_gpt.data.language_data import (
     ABSTENTION_TARGET,
