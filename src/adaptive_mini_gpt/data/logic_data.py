@@ -157,7 +157,7 @@ def generate_logic_samples_for_split(
     split: BenchmarkSplit,
     count_per_category: int = 10,
     seed: int = 42,
-    include_unseen_structures: bool = True,
+    include_unseen_structures: bool = False,
 ) -> list[BenchmarkSample]:
     """Deterministically generate logic problems strictly using partitioned variables & entities."""
     if split == BenchmarkSplit.TRAIN:
