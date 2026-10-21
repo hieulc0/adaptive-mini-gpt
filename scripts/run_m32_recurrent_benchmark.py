@@ -196,7 +196,6 @@ def train_neural_router(
     max_ctx = getattr(model.config, "context_length", 256)
     pad_id = getattr(tokenizer, "pad_id", 0)
 
-    # Prepare routing prompt-target dataset
     input_ids_list: list[torch.Tensor] = []
     labels_list: list[torch.Tensor] = []
 
@@ -329,6 +328,7 @@ def evaluate_logic_suite(
 def run_seed_pipeline(
     seed: int,
     checkpoints_dir: Path,
+    tokenizer: BPETokenizer,
     device: torch.device,
     epochs: int = 12,
     lr: float = 3e-4,
@@ -343,22 +343,16 @@ def run_seed_pipeline(
     random.seed(seed)
     torch.manual_seed(seed)
 
-    # 1. Load M18 Root Checkpoint & 1024-BPE Tokenizer
+    # 1. Load M18 Root Checkpoint & Expand to 1024-BPE
     relative = Path(f"seed_{seed}/base_pretrain/best.pt")
     checkpoint_path = checkpoints_dir / relative
     raw = CheckpointManager.load_raw_checkpoint(checkpoint_path)
-    base_tok = CheckpointManager.load_tokenizer(raw)
-
-    tokenizer = train_scaled_bpe_tokenizer(
-        PRETRAIN_PROSE_CORPUS,
-        target_vocab_size=1024,
-        special_tokens=["<|pad|>", "<|user|>", "<|assistant|>", "<|eos|>"],
-    )
 
     base_model = MiniGPT(ModelConfig(**raw["model_config"]))
     base_model.load_state_dict(raw["model_state_dict"])
     base_model = expand_model_vocabulary(base_model, new_vocab_size=1024)
     base_model.to(device)
+    param_count = sum(p.numel() for p in base_model.parameters())
 
     # 2. Phase 1 Failure Diagnostic Audit of all 200 Elementary States
     logger.info(f"[Seed {seed}] Running Phase 1 200-State Transition Audit...")
@@ -494,7 +488,6 @@ def run_seed_pipeline(
     logger.info(f"[Seed {seed}] Running Phase 4 Adaptive Action Routing Benchmark...")
     train_routing, eval_routing = build_routing_benchmark_dataset()
 
-    # Train minimal neural selector
     neural_router_model = train_neural_router(
         base_model=base_model,
         tokenizer=tokenizer,
@@ -555,6 +548,7 @@ def run_seed_pipeline(
     return {
         "seed": seed,
         "duration_seconds": duration,
+        "parameters_1m": param_count,
         "phase1_audit": asdict(phase1_audit),
         "arms_evaluation": arms_eval,
         "step_correction_benchmark": correction_eval,
@@ -584,11 +578,19 @@ def main() -> None:
     logger.info(f"Device: {device}, Seeds: {args.seeds}, Epochs: {args.epochs}, LR: {args.lr}")
     logger.info("======================================================================")
 
+    # 1. 1024-BPE Tokenizer (Shared across lineages)
+    all_prose = " ".join(PRETRAIN_PROSE_CORPUS)
+    tokenizer = train_scaled_bpe_tokenizer(all_prose, target_vocab_size=1024)
+    tok_path = output_dir / "bpe_1024.json"
+    tokenizer.save(tok_path)
+    logger.info(f"1024-BPE Tokenizer saved. Fingerprint: {tokenizer.get_fingerprint()}")
+
     seed_runs: list[dict[str, Any]] = []
     for seed in args.seeds:
         run_res = run_seed_pipeline(
             seed=seed,
             checkpoints_dir=checkpoints_dir,
+            tokenizer=tokenizer,
             device=device,
             epochs=args.epochs,
             lr=args.lr,
@@ -662,10 +664,7 @@ def main() -> None:
         "mean_teacher_loss": round(sum(p1_teacher_loss) / len(p1_teacher_loss), 4),
     }
 
-    # Model Parameters count
-    dummy_model = MiniGPT(ModelConfig(**raw["model_config"]))
-    dummy_model = expand_model_vocabulary(dummy_model, new_vocab_size=1024)
-    param_count = sum(p.numel() for p in dummy_model.parameters())
+    param_count = seed_runs[0]["parameters_1m"]
 
     report = {
         "milestone": "M32",

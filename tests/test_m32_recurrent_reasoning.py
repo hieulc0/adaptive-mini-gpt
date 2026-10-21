@@ -38,20 +38,10 @@ from adaptive_mini_gpt.rules.reliable_transition import ElementaryTransition
 
 @pytest.fixture
 def mock_tokenizer() -> BPETokenizer:
-    corpus = [
-        "Col: 0 + 0 + 0",
-        "Col: 7 + 6 + 1",
-        "14 > 4 : 1 | HALT",
-        "Route: Add: 487 + 596 =",
-        "RECURRENT_EXECUTION",
-        "DIRECT_ANSWER",
-        "VERIFIED_RETRIEVAL",
-        "ABSTAIN",
-    ]
+    corpus = "Col: 0 + 0 + 0 Col: 7 + 6 + 1 14 > 4 : 1 | HALT Route: Add: 487 + 596 = RECURRENT_EXECUTION DIRECT_ANSWER VERIFIED_RETRIEVAL ABSTAIN"
     return train_scaled_bpe_tokenizer(
         corpus,
         target_vocab_size=120,
-        special_tokens=["<|pad|>", "<|user|>", "<|assistant|>", "<|eos|>"],
     )
 
 
