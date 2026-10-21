@@ -135,11 +135,16 @@ def build_multiscale_episode_a(seed: int = 42) -> MultiScaleEpisode:
         "Identify: ",
         "Please specify: ",
         "Clarify: ",
+        "Briefly state: ",
+        "Precisely identify: ",
+        "From the given information, ",
     ]
     suffixes = [
         " as described in the passage?",
         " according to cell physiology?",
         " based on the provided facts?",
+        " in the cell?",
+        " during translation?",
     ]
 
     for prefix in prefixes:
