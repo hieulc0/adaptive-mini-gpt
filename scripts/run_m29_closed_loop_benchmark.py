@@ -493,10 +493,13 @@ def main() -> None:
             ckpt_file = Path(args.checkpoints_dir) / f"seed_{seed}/base_pretrain/best.pt"
             raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_file)
             state_dict = raw_ckpt.get("model_state_dict", raw_ckpt.get("model_state"))
-            # Expand vocabulary weights from 400 to 1024
+            base_model_400 = MiniGPT(ModelConfig(**raw_ckpt["model_config"]))
+            base_model_400.load_state_dict(state_dict)
+            tok_old = CheckpointManager.load_tokenizer(raw_ckpt)
             base_model = expand_model_vocabulary(
-                model=MiniGPT(ModelConfig(**raw_ckpt["model_config"])),
-                new_vocab_size=1024,
+                model=base_model_400,
+                old_tokenizer=tok_old,
+                new_tokenizer=tokenizer_1024,
             ).to(device)
             logger.info(f"Expanded checkpoint {ckpt_file.name} to 1024 vocab.")
 
