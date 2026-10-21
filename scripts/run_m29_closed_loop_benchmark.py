@@ -38,19 +38,18 @@ from adaptive_mini_gpt.data.bpe_scaling import (
 from adaptive_mini_gpt.model.capacity_migration import (
     count_parameters,
     create_1m_control_config,
-    create_3m_scaled_config,
     estimate_training_flops_per_token,
 )
-from adaptive_mini_gpt.data.elementary_data import (
+from adaptive_mini_gpt.rules.reliable_transition import (
+    ElementaryTransition,
     ElementaryTransitionDataset,
+    audit_elementary_transition_space,
     collate_elementary_batch,
     get_all_200_transitions,
 )
 from adaptive_mini_gpt.data.language_corpus import (
     ABSTENTION_TARGET,
     PRETRAIN_PROSE_CORPUS,
-    TRAIN_QA_DOCUMENTS,
-    VAL_DOCUMENTS,
     normalize_text,
     parse_language_completion,
 )
@@ -65,24 +64,17 @@ from adaptive_mini_gpt.data.logic_data import (
     LogicReasoningDataset,
     build_logic_benchmark_samples,
     parse_logic_completion,
-    verify_logic_answer,
-)
-from adaptive_mini_gpt.data.pretrain_dataset import (
-    PretrainLanguageDataset,
-    collate_pretrain_batch,
-    train_pretrain_step,
 )
 from adaptive_mini_gpt.data.retention_data import (
     INDEPENDENT_REPLAY_CORPUS,
     evaluate_audited_retention,
 )
 from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
-from adaptive_mini_gpt.evaluation.elementary_audit import audit_elementary_transition_space
-from adaptive_mini_gpt.evaluation.multi_domain import MultiDomainBenchmark
 from adaptive_mini_gpt.interaction.action_selector import (
     ActionDecision,
     AlwaysAnswerOrRetryPolicy,
     AlwaysRetrievePolicy,
+    BaseActionPolicy,
     FixedScheduledTrainingPolicy,
     InteractionActionSelector,
     LearningAction,
@@ -94,14 +86,11 @@ from adaptive_mini_gpt.interaction.episodes import (
     build_episode_c_arithmetic,
 )
 from adaptive_mini_gpt.interaction.knowledge_gap import (
-    ErrorCategory,
-    KnowledgeGapRecord,
     KnowledgeGapTracker,
 )
 from adaptive_mini_gpt.interaction.loop import ClosedLoopInteractiveLearner
 from adaptive_mini_gpt.interaction.verified_memory import (
     VerifiedMemoryBank,
-    VerifiedMemoryEntry,
 )
 from adaptive_mini_gpt.model.transformer import MiniGPT, ModelConfig
 from adaptive_mini_gpt.training.checkpoint import CheckpointManager
