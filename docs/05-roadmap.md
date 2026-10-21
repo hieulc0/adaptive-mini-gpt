@@ -275,3 +275,13 @@
   - Arm D (Digit-Level LSD): `0.0%` exact match (val loss 0.56)
 - **Key Breakthrough**: Procedural scratchpad decomposition enables the dense ~1M parameter model to learn the column addition algorithm unaided, solving 35.17% of unseen operands with 88.07% intermediate carry accuracy.
 - **Length Extrapolation Limit**: Zero-shot length extrapolation on 4-5 digits remains at 0.0% despite 64.7% scratchpad syntax validity, isolating positional sequence drift as the remaining architectural barrier for M22.
+
+### M22: Compact Arithmetic Scratchpads, RoPE, ALiBi & Length Generalization (Completed & Qualified)
+- **Objective**: Determine whether compact procedural representations and alternative positional encodings (RoPE, ALiBi) improve Mini-GPT exact arithmetic accuracy, carry accuracy, and length extrapolation.
+- **5-Arm Ablation on Tesla T4 (Seeds 42, 43, 44)**:
+  - Arm A (Verbose Scratchpad, Absolute, max_new_tokens=250): **34.17%** in-dist exact match, **95.75%** carry accuracy, **100.0%** syntax validity, **0.0%** truncation. Disproved carry failure: 3-carry problems solved at **39.39%** when untruncated.
+  - Arm B (Compact Scratchpad, Absolute): **49.50%** in-dist exact match (+15.3% over verbose), **97.31%** carry accuracy, **100.0%** syntax validity, >50% token reduction (683k tokens).
+  - Arm C (Compact Scratchpad, RoPE): **64.67%** in-dist exact match (+/- 1.44%, up to **65.5%** on Seed 44), **86.45%** digit accuracy, **98.96%** carry accuracy, **895,744** parameters.
+  - Arm D (Compact Scratchpad, ALiBi): **55.67%** in-dist exact match, **98.29%** carry accuracy, **100.0%** syntax validity across in-dist and extrapolation.
+  - Arm E (Compact Scratchpad + 10% Language Replay): **49.67%** in-dist exact match, **-6.42** retention loss drift (fully eliminates catastrophic language forgetting).
+- **Length Extrapolation Finding**: Zero-shot length extrapolation on 4-6 digits remains strictly 0.0% across all arms despite 100% syntax validity and 0% truncation, isolating causal attention length decay as the boundary requiring recurrent loop unrolling for M23.

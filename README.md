@@ -113,6 +113,7 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 | **M19** | Learned Action Policy & Representation Adaptation | Closed without promotion (familiar rollout **100%**, 5-step kinematics **23.3%**; M18 baseline preserved) |
 | **M20** | Controlled Neural Scaling & Procedural Generalization | 1M vs 3M Transformer scaling under matched tokens and matched compute |
 | **M21** | Digit-Level Arithmetic & Procedural Scratchpad | Procedural scratchpad unlocks neural addition: **35.17%** unaided exact match, **88.07%** carry accuracy (vs 0.0% standard text) |
+| **M22** | Compact Scratchpads, RoPE, ALiBi & Length Generalization | Compact scratchpad + RoPE reaches **64.67%** exact match and **98.96%** carry accuracy; language replay achieves **-6.42** drift |
 
 ## Directory Structure
 
