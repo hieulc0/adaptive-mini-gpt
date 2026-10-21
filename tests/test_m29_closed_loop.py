@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 import torch
 
-from adaptive_mini_gpt.data.bpe_scaling import create_1m_control_config
+from adaptive_mini_gpt.model.capacity_migration import create_1m_control_config
 from adaptive_mini_gpt.data.language_data import DomainType
 from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
 from adaptive_mini_gpt.interaction.action_selector import (

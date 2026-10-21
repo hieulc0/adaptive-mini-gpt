@@ -32,12 +32,14 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from adaptive_mini_gpt.data.bpe_scaling import (
+    expand_model_vocabulary,
+    train_scaled_bpe_tokenizer,
+)
+from adaptive_mini_gpt.model.capacity_migration import (
     count_parameters,
     create_1m_control_config,
     create_3m_scaled_config,
     estimate_training_flops_per_token,
-    expand_model_vocabulary,
-    train_scaled_bpe_tokenizer,
 )
 from adaptive_mini_gpt.data.elementary_data import (
     ElementaryTransitionDataset,
