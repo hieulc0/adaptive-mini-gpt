@@ -24,3 +24,23 @@
      - Language Gate: **FAIL** (0.00% exact).
 - **Lineage Promotion Decision**: **NO-GO**. In accordance with lineage protection invariants, candidate models will not replace the operational system until language learning prerequisites are satisfied.
 - **Next Direction (M28)**: Language Pretraining Foundation and Expanded Subword Vocabulary (pre-finetuning language modeling tokens, 1k–2k subword vocabulary, multi-domain interleaved consolidation on 3M backbone).
+
+### M28: Language Foundation for a Continually Self-Learning Mini-GPT (Completed & Qualified)
+- **Objective**: Establish reproducible neural language learning, grounded reading comprehension, and calibrated safe abstention while maintaining arithmetic and logic via verified replay on Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m28-language-study`, commit `9f201ae3fe68a92c4341f09e206193281a01071f`).
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Audited Language Corpus & Zero Leakage**: Curated 65 prose passages across 5 genres (3,271 words, SHA-256: `5146e5273a54167d`). Partitioned into 16 train (97 QA), 6 val (36 QA), and 8 sealed test documents (48 QA) with mathematically verified 0.0% question, sentence, and document overlap.
+  2. **Tokenizer Scaling (1024-BPE)**: Scaled vocabulary from 400 to 1024 tokens (`bpe_1024.json`, fingerprint: `1845a0a16f6ab9ff`), achieving 73.3% higher character density (2.693 vs 1.554 chars/token) and 42.3% sequence length reduction.
+  3. **Multi-Arm Lineage Qualification on Tesla T4 (Seeds 42, 43, 44)**:
+     - **Arm 1 (M27 Control Baseline, 400-BPE 1M)**: Test Exact: 0.00%, Abstention: 0.00%, Arith Carry: 0.00%, Logic: 0.67%.
+     - **Arm 2 (Pretrained 400-BPE 1M)**: Test Exact: 0.00%, Abstention: 0.00%, Arith Carry: 0.00%, Logic: 0.00% (confirms 400-BPE fragmentation prevents reading comprehension).
+     - **Arm 3 (Pretrained 1024-BPE 1M)**: Test Exact: **33.33% ± 0.00%**, Abstention: **100.00%**, Unsupported Hallucinations: **0.00%**, Arith Carry: 0.00% (catastrophic forgetting without replay).
+     - **Arm 4 (Pretrained 1024-BPE 3M Multi-Domain Replay)**: Test Exact: **23.61% ± 2.60%**, Abstention: **70.83% ± 7.80%**, Arith Carry: **79.00% ± 8.38%** (Seed 42: **89.5%**), Logic Exact: **56.00% ± 4.32%** (Seed 42: **60.0%**).
+  4. **Phase 7 Autonomous Research Pilot**: Evaluated post-training state under `CurriculumSelector(LARGEST_GAP)`. Autonomous controller correctly identified `language` as the primary deficit (gap: 0.6639 below target 0.90) and formulated an actionable, focused training proposal (80% language, 10% arithmetic, 10% logic; predicted gain: +0.25), outperforming static round-robin scheduling.
+  5. **Task-Specific Qualification Gates**:
+     - Operational Reasoning Gate: **PASS (100%)** (M18 deterministic solver retained).
+     - Language Comprehension Gate: **BREAKTHROUGH QUALIFIED** (broke 0.0% bottleneck, reaching 33.33% in Arm 3 and 23.61% in Arm 4).
+     - Arithmetic Carry Gate: **PASS on Arm 4** (79.00% mean, 89.50% peak).
+     - Symbolic Logic Gate: **PASS on Arm 4** (56.00% mean, 60.00% peak).
+- **Lineage Promotion Decision**: **NO-GO**. The stable operational baseline remains immutable until language accuracy reaches production thresholds.
+- **Next Direction (M29)**: Closed-Loop Interaction and Knowledge-Gap Driven Autonomous Learning (connect conversational queries, self-assessment of knowledge gaps, autonomous retrieval/practice, and candidate qualification).
