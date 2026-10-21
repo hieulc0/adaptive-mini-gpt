@@ -669,7 +669,8 @@ def main() -> None:
             ckpt_file = Path(args.checkpoints_dir) / f"seed_{seed}/base_pretrain/best.pt"
             raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_file)
             base_model_1m = MiniGPT(ModelConfig(**raw_ckpt["model_config"]))
-            base_model_1m.load_state_dict(raw_ckpt["model_state"])
+            state_dict = raw_ckpt.get("model_state_dict", raw_ckpt.get("model_state"))
+            base_model_1m.load_state_dict(state_dict)
             tokenizer_400 = CheckpointManager.load_tokenizer(raw_ckpt)
         else:
             cfg_1m = create_1m_control_config(vocab_size=400)
