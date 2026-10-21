@@ -66,10 +66,6 @@ from adaptive_mini_gpt.evaluation.multi_domain import (
 )
 from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.transformer import MiniGPT
-from adaptive_mini_gpt.rules.recurrent_arithmetic import (
-    evaluate_recurrent_arithmetic_model,
-    generate_controlled_addition_dataset,
-)
 from adaptive_mini_gpt.rules.reliable_transition import (
     ElementaryTransition,
     ElementaryTransitionDataset,
