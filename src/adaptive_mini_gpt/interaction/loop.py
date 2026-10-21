@@ -103,7 +103,8 @@ class ClosedLoopInteractiveLearner:
         probs_list: list[float] = []
         with torch.no_grad():
             for _ in range(max_new_tokens):
-                logits = self.model(input_ids)
+                out = self.model(input_ids)
+                logits = out[0] if isinstance(out, tuple) else out
                 next_logits = logits[0, -1, :]
                 probs = F.softmax(next_logits, dim=-1)
                 best_prob, next_id = torch.max(probs, dim=-1)

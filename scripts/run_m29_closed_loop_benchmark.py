@@ -126,7 +126,8 @@ def train_single_step(
     x = x.to(device)
     y = y.to(device)
     optimizer.zero_grad()
-    logits = model(x)
+    out = model(x)
+    logits = out[0] if isinstance(out, tuple) else out
     loss = nn.functional.cross_entropy(
         logits.view(-1, logits.size(-1)),
         y.view(-1),
@@ -159,7 +160,8 @@ def evaluate_episode_accuracy(
             input_ids = torch.tensor([enc], dtype=torch.long, device=device)
 
             for _ in range(16):
-                logits = model(input_ids)
+                out = model(input_ids)
+                logits = out[0] if isinstance(out, tuple) else out
                 next_id = torch.argmax(logits[0, -1, :]).item()
                 input_ids = torch.cat([input_ids, torch.tensor([[next_id]], device=device)], dim=1)
                 decoded_partial = tokenizer.decode(input_ids[0].tolist())
@@ -171,15 +173,15 @@ def evaluate_episode_accuracy(
 
             if domain == DomainType.LANGUAGE:
                 pred = parse_language_completion(completion)
-                if normalize_text(pred) == normalize_text(s.ground_truth):
+                if normalize_text(pred) == normalize_text(s.expected_answer):
                     correct += 1
             elif domain == DomainType.LOGIC:
                 pred = completion.split("\n")[0].strip()
-                if normalize_text(pred) == normalize_text(s.ground_truth):
+                if normalize_text(pred) == normalize_text(s.expected_answer):
                     correct += 1
             elif domain == DomainType.ARITHMETIC:
                 pred = completion.split("\n")[0].strip()
-                if normalize_text(pred) == normalize_text(s.ground_truth):
+                if normalize_text(pred) == normalize_text(s.expected_answer):
                     correct += 1
 
     return round(correct / total, 4)
@@ -232,8 +234,9 @@ def run_episode_experiment(
     # external retrieval without weight learning only succeeds if exact query matches
     retrieval_hits = 0
     for s in episode.fresh_test_samples:
-        entry = memory.retrieve(episode.domain, s.question or s.prompt)
-        if entry and normalize_text(entry.verified_fact) == normalize_text(s.ground_truth):
+        q_text = s.metadata.get("question", s.prompt)
+        entry = memory.retrieve(episode.domain, q_text)
+        if entry and normalize_text(entry.verified_fact) == normalize_text(s.expected_answer):
             retrieval_hits += 1
     regime2_acc = round(retrieval_hits / len(episode.fresh_test_samples), 4)
 
