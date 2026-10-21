@@ -1,0 +1,1376 @@
+{
+  "milestone": "M21",
+  "description": "Digit-Level Neural Arithmetic and Procedural Generalization Benchmark",
+  "timestamp": "2026-10-21 05:39:25",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "device": "cuda",
+  "parameters": 928512,
+  "dataset_metadata": {
+    "train": {
+      "samples": 1200,
+      "fingerprint": "c42b97806843c482",
+      "carry_distribution": {
+        "0": 324,
+        "1": 351,
+        "2": 338,
+        "3": 187
+      }
+    },
+    "val": {
+      "samples": 200,
+      "fingerprint": "91885778815f6d9a",
+      "carry_distribution": {
+        "0": 55,
+        "1": 55,
+        "2": 58,
+        "3": 32
+      }
+    },
+    "test_in_distribution": {
+      "samples": 200,
+      "fingerprint": "c7f7ecef87fcba80",
+      "carry_distribution": {
+        "0": 53,
+        "1": 58,
+        "2": 56,
+        "3": 33
+      }
+    },
+    "test_extrapolation": {
+      "samples": 100,
+      "fingerprint": "85362f0ae95f7c6e",
+      "carry_distribution": {
+        "0": 16,
+        "1": 26,
+        "2": 30,
+        "3": 28
+      }
+    }
+  },
+  "aggregate_summary": {
+    "standard": {
+      "in_distribution": {
+        "exact_answer_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "digit_level_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "syntax_validity_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "carry_prediction_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      },
+      "extrapolation": {
+        "exact_answer_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "digit_level_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      },
+      "training": {
+        "val_loss": {
+          "mean": 0.64,
+          "std": 0.03
+        },
+        "train_duration_s": {
+          "mean": 11.87,
+          "std": 3.44
+        }
+      }
+    },
+    "digit_msd": {
+      "in_distribution": {
+        "exact_answer_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "digit_level_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "syntax_validity_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "carry_prediction_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      },
+      "extrapolation": {
+        "exact_answer_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "digit_level_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      },
+      "training": {
+        "val_loss": {
+          "mean": 0.53,
+          "std": 0.01
+        },
+        "train_duration_s": {
+          "mean": 9.93,
+          "std": 0.1
+        }
+      }
+    },
+    "scratchpad": {
+      "in_distribution": {
+        "exact_answer_accuracy": {
+          "mean": 35.17,
+          "std": 8.96
+        },
+        "digit_level_accuracy": {
+          "mean": 49.19,
+          "std": 5.1
+        },
+        "syntax_validity_rate": {
+          "mean": 73.0,
+          "std": 0.5
+        },
+        "carry_prediction_accuracy": {
+          "mean": 88.07,
+          "std": 0.71
+        }
+      },
+      "extrapolation": {
+        "exact_answer_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "digit_level_accuracy": {
+          "mean": 3.85,
+          "std": 0.82
+        }
+      },
+      "training": {
+        "val_loss": {
+          "mean": 0.02,
+          "std": 0.0
+        },
+        "train_duration_s": {
+          "mean": 11.99,
+          "std": 0.29
+        }
+      }
+    },
+    "digit_lsd": {
+      "in_distribution": {
+        "exact_answer_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "digit_level_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "syntax_validity_rate": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "carry_prediction_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      },
+      "extrapolation": {
+        "exact_answer_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "digit_level_accuracy": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      },
+      "training": {
+        "val_loss": {
+          "mean": 0.56,
+          "std": 0.06
+        },
+        "train_duration_s": {
+          "mean": 9.94,
+          "std": 0.04
+        }
+      }
+    }
+  },
+  "lineage_results": {
+    "seed_42": {
+      "standard": {
+        "training": {
+          "train_duration_s": 15.85,
+          "tokens_trained": 85990,
+          "final_train_loss": 0.6149,
+          "final_val_loss": 0.6546
+        },
+        "in_distribution": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "carry_prediction_accuracy": 0.0,
+          "accuracy_by_length": {
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 34
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 166
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 53
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 58
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 56
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 33
+            }
+          },
+          "mean_latency_ms": 13.28,
+          "loss": 0.6422
+        },
+        "extrapolation": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "accuracy_by_length": {
+            "4": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 23
+            },
+            "5": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 77
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 16
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 26
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 30
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 28
+            }
+          },
+          "loss": 3.8363
+        },
+        "retention_drift": {
+          "prose_original": 3.6011,
+          "technical_science": 4.789,
+          "geography_history": 4.4142,
+          "mathematics_prose": 4.7994
+        }
+      },
+      "digit_msd": {
+        "training": {
+          "train_duration_s": 10.05,
+          "tokens_trained": 110320,
+          "final_train_loss": 0.5234,
+          "final_val_loss": 0.5202
+        },
+        "in_distribution": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "carry_prediction_accuracy": 0.0,
+          "accuracy_by_length": {
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 34
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 166
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 53
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 58
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 56
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 33
+            }
+          },
+          "mean_latency_ms": 17.47,
+          "loss": 0.5239
+        },
+        "extrapolation": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "accuracy_by_length": {
+            "4": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 23
+            },
+            "5": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 77
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 16
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 26
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 30
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 28
+            }
+          },
+          "loss": 1.9359
+        },
+        "retention_drift": {
+          "prose_original": 4.4812,
+          "technical_science": 4.823,
+          "geography_history": 4.9914,
+          "mathematics_prose": 6.4204
+        }
+      },
+      "scratchpad": {
+        "training": {
+          "train_duration_s": 11.67,
+          "tokens_trained": 1501120,
+          "final_train_loss": 0.0208,
+          "final_val_loss": 0.0184
+        },
+        "in_distribution": {
+          "exact_answer_accuracy": 29.5,
+          "digit_level_accuracy": 47.35,
+          "syntax_validity_rate": 72.5,
+          "carry_prediction_accuracy": 88.75,
+          "accuracy_by_length": {
+            "2": {
+              "exact_acc": 35.29,
+              "valid_acc": 100.0,
+              "total": 34
+            },
+            "3": {
+              "exact_acc": 28.31,
+              "valid_acc": 66.87,
+              "total": 166
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 47.17,
+              "valid_acc": 98.11,
+              "total": 53
+            },
+            "1": {
+              "exact_acc": 29.31,
+              "valid_acc": 86.21,
+              "total": 58
+            },
+            "2": {
+              "exact_acc": 30.36,
+              "valid_acc": 75.0,
+              "total": 56
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 3.03,
+              "total": 33
+            }
+          },
+          "mean_latency_ms": 219.87,
+          "loss": 0.0199
+        },
+        "extrapolation": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 3.19,
+          "syntax_validity_rate": 46.0,
+          "accuracy_by_length": {
+            "4": {
+              "exact_acc": 0.0,
+              "valid_acc": 47.83,
+              "total": 23
+            },
+            "5": {
+              "exact_acc": 0.0,
+              "valid_acc": 45.45,
+              "total": 77
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 56.25,
+              "total": 16
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 53.85,
+              "total": 26
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 46.67,
+              "total": 30
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 32.14,
+              "total": 28
+            }
+          },
+          "loss": 2.0204
+        },
+        "retention_drift": {
+          "prose_original": 2.4775,
+          "technical_science": 3.4642,
+          "geography_history": 2.6029,
+          "mathematics_prose": 3.5826
+        }
+      },
+      "digit_lsd": {
+        "training": {
+          "train_duration_s": 9.98,
+          "tokens_trained": 109760,
+          "final_train_loss": 0.5993,
+          "final_val_loss": 0.595
+        },
+        "in_distribution": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "carry_prediction_accuracy": 0.0,
+          "accuracy_by_length": {
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 34
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 166
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 53
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 58
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 56
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 33
+            }
+          },
+          "mean_latency_ms": 17.09,
+          "loss": 0.5963
+        },
+        "extrapolation": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "accuracy_by_length": {
+            "4": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 23
+            },
+            "5": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 77
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 16
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 26
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 30
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 28
+            }
+          },
+          "loss": 1.9992
+        },
+        "retention_drift": {
+          "prose_original": 5.0676,
+          "technical_science": 6.0754,
+          "geography_history": 5.7869,
+          "mathematics_prose": 6.812
+        }
+      }
+    },
+    "seed_43": {
+      "standard": {
+        "training": {
+          "train_duration_s": 9.89,
+          "tokens_trained": 85990,
+          "final_train_loss": 0.6431,
+          "final_val_loss": 0.6594
+        },
+        "in_distribution": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "carry_prediction_accuracy": 0.0,
+          "accuracy_by_length": {
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 34
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 166
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 53
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 58
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 56
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 33
+            }
+          },
+          "mean_latency_ms": 13.28,
+          "loss": 0.6878
+        },
+        "extrapolation": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "accuracy_by_length": {
+            "4": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 23
+            },
+            "5": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 77
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 16
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 26
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 30
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 28
+            }
+          },
+          "loss": 3.9046
+        },
+        "retention_drift": {
+          "prose_original": 4.7922,
+          "technical_science": 5.553,
+          "geography_history": 5.2229,
+          "mathematics_prose": 6.1437
+        }
+      },
+      "digit_msd": {
+        "training": {
+          "train_duration_s": 9.88,
+          "tokens_trained": 110320,
+          "final_train_loss": 0.5262,
+          "final_val_loss": 0.5458
+        },
+        "in_distribution": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "carry_prediction_accuracy": 0.0,
+          "accuracy_by_length": {
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 34
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 166
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 53
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 58
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 56
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 33
+            }
+          },
+          "mean_latency_ms": 17.19,
+          "loss": 0.551
+        },
+        "extrapolation": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "accuracy_by_length": {
+            "4": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 23
+            },
+            "5": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 77
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 16
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 26
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 30
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 28
+            }
+          },
+          "loss": 2.2059
+        },
+        "retention_drift": {
+          "prose_original": 3.7556,
+          "technical_science": 5.2459,
+          "geography_history": 5.0052,
+          "mathematics_prose": 5.5447
+        }
+      },
+      "scratchpad": {
+        "training": {
+          "train_duration_s": 12.05,
+          "tokens_trained": 1501120,
+          "final_train_loss": 0.0199,
+          "final_val_loss": 0.0203
+        },
+        "in_distribution": {
+          "exact_answer_accuracy": 30.5,
+          "digit_level_accuracy": 45.26,
+          "syntax_validity_rate": 73.5,
+          "carry_prediction_accuracy": 87.34,
+          "accuracy_by_length": {
+            "2": {
+              "exact_acc": 52.94,
+              "valid_acc": 100.0,
+              "total": 34
+            },
+            "3": {
+              "exact_acc": 25.9,
+              "valid_acc": 68.07,
+              "total": 166
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 35.85,
+              "valid_acc": 98.11,
+              "total": 53
+            },
+            "1": {
+              "exact_acc": 36.21,
+              "valid_acc": 87.93,
+              "total": 58
+            },
+            "2": {
+              "exact_acc": 37.5,
+              "valid_acc": 76.79,
+              "total": 56
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 3.03,
+              "total": 33
+            }
+          },
+          "mean_latency_ms": 216.13,
+          "loss": 0.0213
+        },
+        "extrapolation": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 4.77,
+          "syntax_validity_rate": 68.0,
+          "accuracy_by_length": {
+            "4": {
+              "exact_acc": 0.0,
+              "valid_acc": 86.96,
+              "total": 23
+            },
+            "5": {
+              "exact_acc": 0.0,
+              "valid_acc": 62.34,
+              "total": 77
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 68.75,
+              "total": 16
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 73.08,
+              "total": 26
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 83.33,
+              "total": 30
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 46.43,
+              "total": 28
+            }
+          },
+          "loss": 2.2065
+        },
+        "retention_drift": {
+          "prose_original": 2.3137,
+          "technical_science": 3.4224,
+          "geography_history": 2.6077,
+          "mathematics_prose": 3.6161
+        }
+      },
+      "digit_lsd": {
+        "training": {
+          "train_duration_s": 9.91,
+          "tokens_trained": 109760,
+          "final_train_loss": 0.5118,
+          "final_val_loss": 0.4856
+        },
+        "in_distribution": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "carry_prediction_accuracy": 0.0,
+          "accuracy_by_length": {
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 34
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 166
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 53
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 58
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 56
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 33
+            }
+          },
+          "mean_latency_ms": 17.21,
+          "loss": 0.4955
+        },
+        "extrapolation": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "accuracy_by_length": {
+            "4": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 23
+            },
+            "5": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 77
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 16
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 26
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 30
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 28
+            }
+          },
+          "loss": 2.79
+        },
+        "retention_drift": {
+          "prose_original": 4.0798,
+          "technical_science": 5.4817,
+          "geography_history": 5.1459,
+          "mathematics_prose": 6.1538
+        }
+      }
+    },
+    "seed_44": {
+      "standard": {
+        "training": {
+          "train_duration_s": 9.88,
+          "tokens_trained": 85990,
+          "final_train_loss": 0.596,
+          "final_val_loss": 0.606
+        },
+        "in_distribution": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "carry_prediction_accuracy": 0.0,
+          "accuracy_by_length": {
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 34
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 166
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 53
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 58
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 56
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 33
+            }
+          },
+          "mean_latency_ms": 13.28,
+          "loss": 0.6258
+        },
+        "extrapolation": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "accuracy_by_length": {
+            "4": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 23
+            },
+            "5": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 77
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 16
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 26
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 30
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 28
+            }
+          },
+          "loss": 3.5056
+        },
+        "retention_drift": {
+          "prose_original": 4.7695,
+          "technical_science": 6.3781,
+          "geography_history": 5.7048,
+          "mathematics_prose": 6.4683
+        }
+      },
+      "digit_msd": {
+        "training": {
+          "train_duration_s": 9.86,
+          "tokens_trained": 110320,
+          "final_train_loss": 0.5298,
+          "final_val_loss": 0.5261
+        },
+        "in_distribution": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "carry_prediction_accuracy": 0.0,
+          "accuracy_by_length": {
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 34
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 166
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 53
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 58
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 56
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 33
+            }
+          },
+          "mean_latency_ms": 16.94,
+          "loss": 0.5462
+        },
+        "extrapolation": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "accuracy_by_length": {
+            "4": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 23
+            },
+            "5": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 77
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 16
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 26
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 30
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 28
+            }
+          },
+          "loss": 3.0141
+        },
+        "retention_drift": {
+          "prose_original": 4.0445,
+          "technical_science": 5.2205,
+          "geography_history": 4.1349,
+          "mathematics_prose": 5.9346
+        }
+      },
+      "scratchpad": {
+        "training": {
+          "train_duration_s": 12.25,
+          "tokens_trained": 1501120,
+          "final_train_loss": 0.0174,
+          "final_val_loss": 0.0131
+        },
+        "in_distribution": {
+          "exact_answer_accuracy": 45.5,
+          "digit_level_accuracy": 54.95,
+          "syntax_validity_rate": 73.0,
+          "carry_prediction_accuracy": 88.12,
+          "accuracy_by_length": {
+            "2": {
+              "exact_acc": 58.82,
+              "valid_acc": 100.0,
+              "total": 34
+            },
+            "3": {
+              "exact_acc": 42.77,
+              "valid_acc": 67.47,
+              "total": 166
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 66.04,
+              "valid_acc": 100.0,
+              "total": 53
+            },
+            "1": {
+              "exact_acc": 44.83,
+              "valid_acc": 91.38,
+              "total": 58
+            },
+            "2": {
+              "exact_acc": 53.57,
+              "valid_acc": 71.43,
+              "total": 56
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 33
+            }
+          },
+          "mean_latency_ms": 219.12,
+          "loss": 0.0148
+        },
+        "extrapolation": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 3.59,
+          "syntax_validity_rate": 80.0,
+          "accuracy_by_length": {
+            "4": {
+              "exact_acc": 0.0,
+              "valid_acc": 82.61,
+              "total": 23
+            },
+            "5": {
+              "exact_acc": 0.0,
+              "valid_acc": 79.22,
+              "total": 77
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 93.75,
+              "total": 16
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 80.77,
+              "total": 26
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 86.67,
+              "total": 30
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 64.29,
+              "total": 28
+            }
+          },
+          "loss": 2.187
+        },
+        "retention_drift": {
+          "prose_original": 2.4035,
+          "technical_science": 3.748,
+          "geography_history": 2.6416,
+          "mathematics_prose": 3.8471
+        }
+      },
+      "digit_lsd": {
+        "training": {
+          "train_duration_s": 9.93,
+          "tokens_trained": 109760,
+          "final_train_loss": 0.5954,
+          "final_val_loss": 0.5877
+        },
+        "in_distribution": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "carry_prediction_accuracy": 0.0,
+          "accuracy_by_length": {
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 34
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 166
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 53
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 58
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 56
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 33
+            }
+          },
+          "mean_latency_ms": 17.01,
+          "loss": 0.6058
+        },
+        "extrapolation": {
+          "exact_answer_accuracy": 0.0,
+          "digit_level_accuracy": 0.0,
+          "syntax_validity_rate": 0.0,
+          "accuracy_by_length": {
+            "4": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 23
+            },
+            "5": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 77
+            }
+          },
+          "accuracy_by_carries": {
+            "0": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 16
+            },
+            "1": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 26
+            },
+            "2": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 30
+            },
+            "3": {
+              "exact_acc": 0.0,
+              "valid_acc": 0.0,
+              "total": 28
+            }
+          },
+          "loss": 1.9221
+        },
+        "retention_drift": {
+          "prose_original": 4.5812,
+          "technical_science": 6.2859,
+          "geography_history": 5.4903,
+          "mathematics_prose": 6.8746
+        }
+      }
+    }
+  }
+}

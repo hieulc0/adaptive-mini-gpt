@@ -1,0 +1,776 @@
+{
+  "milestone": "M20",
+  "description": "Controlled Neural Scaling and Procedural Generalization Benchmark",
+  "timestamp": "2026-10-21 04:37:56",
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "device": "cuda",
+  "parameters": {
+    "config_1m": 928512,
+    "config_3m": 3429888,
+    "ratio": 3.694
+  },
+  "protocols": {
+    "matched_tokens_epochs": 10,
+    "matched_compute_epochs_1m": 37
+  },
+  "aggregate_summary": {
+    "Objective_B_Procedural": {
+      "1M_Matched_Tokens": {
+        "familiar_exact_acc": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "ladder_exact_acc": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "unseen_carry_exact_acc": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "kinematics_exact_acc": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      },
+      "3M_Matched_Tokens": {
+        "familiar_exact_acc": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "ladder_exact_acc": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "unseen_carry_exact_acc": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "kinematics_exact_acc": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      },
+      "1M_Matched_Compute": {
+        "familiar_exact_acc": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "ladder_exact_acc": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "unseen_carry_exact_acc": {
+          "mean": 0.0,
+          "std": 0.0
+        },
+        "kinematics_exact_acc": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      }
+    },
+    "Objective_A_Action_Policy": {
+      "1M_Matched_Tokens": {
+        "familiar_rollout_acc": {
+          "mean": 82.5,
+          "std": 12.99
+        },
+        "ladder_rollout_acc": {
+          "mean": 75.0,
+          "std": 0.0
+        },
+        "kinematics_rollout_acc": {
+          "mean": 33.33,
+          "std": 57.74
+        }
+      },
+      "3M_Matched_Tokens": {
+        "familiar_rollout_acc": {
+          "mean": 83.33,
+          "std": 14.43
+        },
+        "ladder_rollout_acc": {
+          "mean": 75.0,
+          "std": 0.0
+        },
+        "kinematics_rollout_acc": {
+          "mean": 0.0,
+          "std": 0.0
+        }
+      }
+    }
+  },
+  "lineage_results": {
+    "seed_42": {
+      "parameters": {
+        "config_1m": 928512,
+        "config_3m": 3429888,
+        "compute_ratio": 3.694
+      },
+      "Objective_B_Procedural": {
+        "1M_Matched_Tokens": {
+          "training_time_s": 2.47,
+          "tokens_trained": 118070,
+          "final_val_loss": 0.6524,
+          "familiar_exact_acc": 0.0,
+          "familiar_valid_acc": 0.0,
+          "depth_ladder": {
+            "overall_exact_acc": 0.0,
+            "depth_breakdown": {
+              "2": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "3": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "5": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "4": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              }
+            }
+          },
+          "unseen_carry_exact_acc": 0.0,
+          "ood_kinematics_exact_acc": 0.0,
+          "mean_latency_ms": 236.53,
+          "retention_drift": {
+            "prose_original": -0.1683,
+            "technical_science": 1.0435,
+            "geography_history": 0.2799,
+            "mathematics_prose": 0.8416
+          }
+        },
+        "3M_Matched_Tokens": {
+          "training_time_s": 4.06,
+          "tokens_trained": 118070,
+          "final_val_loss": 0.5325,
+          "familiar_exact_acc": 0.0,
+          "familiar_valid_acc": 0.0,
+          "depth_ladder": {
+            "overall_exact_acc": 0.0,
+            "depth_breakdown": {
+              "2": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "3": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "5": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "4": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              }
+            }
+          },
+          "unseen_carry_exact_acc": 0.0,
+          "ood_kinematics_exact_acc": 0.0,
+          "mean_latency_ms": 245.53,
+          "retention_drift": {
+            "prose_original": -0.6081,
+            "technical_science": 0.1982,
+            "geography_history": -0.3688,
+            "mathematics_prose": 0.1279
+          }
+        },
+        "1M_Matched_Compute": {
+          "training_time_s": 8.73,
+          "tokens_trained": 436859,
+          "final_val_loss": 0.5268,
+          "familiar_exact_acc": 0.0,
+          "familiar_valid_acc": 0.0,
+          "depth_ladder": {
+            "overall_exact_acc": 0.0,
+            "depth_breakdown": {
+              "2": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "3": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "5": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "4": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              }
+            }
+          },
+          "unseen_carry_exact_acc": 0.0,
+          "ood_kinematics_exact_acc": 0.0,
+          "mean_latency_ms": 227.01
+        }
+      },
+      "Objective_A_Action_Policy": {
+        "1M_Matched_Tokens": {
+          "familiar": {
+            "action_acc": 100.0,
+            "rollout_acc": 75.0,
+            "latency_ms": 9.058
+          },
+          "depth_ladder": {
+            "action_acc": 78.57,
+            "rollout_acc": 75.0,
+            "positions": {
+              "1": {
+                "uniform": 100.0,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 40
+              },
+              "2": {
+                "uniform": 45.44,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 40
+              },
+              "3": {
+                "uniform": 22.45,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 30
+              },
+              "4": {
+                "uniform": 10.99,
+                "deterministic": 100.0,
+                "policy": 0.0,
+                "traces": 20
+              },
+              "5": {
+                "uniform": 4.76,
+                "deterministic": 100.0,
+                "policy": 0.0,
+                "traces": 10
+              }
+            }
+          },
+          "ood_kinematics_5step": {
+            "action_acc": 100.0,
+            "rollout_acc": 0.0
+          }
+        },
+        "3M_Matched_Tokens": {
+          "familiar": {
+            "action_acc": 100.0,
+            "rollout_acc": 100.0,
+            "latency_ms": 9.578
+          },
+          "depth_ladder": {
+            "action_acc": 78.57,
+            "rollout_acc": 75.0,
+            "positions": {
+              "1": {
+                "uniform": 100.0,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 40
+              },
+              "2": {
+                "uniform": 45.44,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 40
+              },
+              "3": {
+                "uniform": 22.45,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 30
+              },
+              "4": {
+                "uniform": 10.99,
+                "deterministic": 100.0,
+                "policy": 0.0,
+                "traces": 20
+              },
+              "5": {
+                "uniform": 4.76,
+                "deterministic": 100.0,
+                "policy": 0.0,
+                "traces": 10
+              }
+            }
+          },
+          "ood_kinematics_5step": {
+            "action_acc": 100.0,
+            "rollout_acc": 0.0
+          }
+        }
+      }
+    },
+    "seed_43": {
+      "parameters": {
+        "config_1m": 928512,
+        "config_3m": 3429888,
+        "compute_ratio": 3.694
+      },
+      "Objective_B_Procedural": {
+        "1M_Matched_Tokens": {
+          "training_time_s": 2.43,
+          "tokens_trained": 118070,
+          "final_val_loss": 0.6618,
+          "familiar_exact_acc": 0.0,
+          "familiar_valid_acc": 0.0,
+          "depth_ladder": {
+            "overall_exact_acc": 0.0,
+            "depth_breakdown": {
+              "2": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "3": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "5": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "4": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              }
+            }
+          },
+          "unseen_carry_exact_acc": 0.0,
+          "ood_kinematics_exact_acc": 0.0,
+          "mean_latency_ms": 230.72,
+          "retention_drift": {
+            "prose_original": -0.1327,
+            "technical_science": 0.7589,
+            "geography_history": 0.0036,
+            "mathematics_prose": 0.8914
+          }
+        },
+        "3M_Matched_Tokens": {
+          "training_time_s": 4.39,
+          "tokens_trained": 118070,
+          "final_val_loss": 0.5644,
+          "familiar_exact_acc": 0.0,
+          "familiar_valid_acc": 0.0,
+          "depth_ladder": {
+            "overall_exact_acc": 0.0,
+            "depth_breakdown": {
+              "2": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "3": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "5": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "4": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              }
+            }
+          },
+          "unseen_carry_exact_acc": 0.0,
+          "ood_kinematics_exact_acc": 0.0,
+          "mean_latency_ms": 242.64,
+          "retention_drift": {
+            "prose_original": -1.0513,
+            "technical_science": -0.0868,
+            "geography_history": -0.3543,
+            "mathematics_prose": 0.0227
+          }
+        },
+        "1M_Matched_Compute": {
+          "training_time_s": 9.0,
+          "tokens_trained": 436859,
+          "final_val_loss": 0.5246,
+          "familiar_exact_acc": 0.0,
+          "familiar_valid_acc": 0.0,
+          "depth_ladder": {
+            "overall_exact_acc": 0.0,
+            "depth_breakdown": {
+              "2": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "3": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "5": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "4": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              }
+            }
+          },
+          "unseen_carry_exact_acc": 0.0,
+          "ood_kinematics_exact_acc": 0.0,
+          "mean_latency_ms": 233.71
+        }
+      },
+      "Objective_A_Action_Policy": {
+        "1M_Matched_Tokens": {
+          "familiar": {
+            "action_acc": 100.0,
+            "rollout_acc": 75.0,
+            "latency_ms": 8.916
+          },
+          "depth_ladder": {
+            "action_acc": 78.57,
+            "rollout_acc": 75.0,
+            "positions": {
+              "1": {
+                "uniform": 100.0,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 40
+              },
+              "2": {
+                "uniform": 45.44,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 40
+              },
+              "3": {
+                "uniform": 22.45,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 30
+              },
+              "4": {
+                "uniform": 10.99,
+                "deterministic": 100.0,
+                "policy": 0.0,
+                "traces": 20
+              },
+              "5": {
+                "uniform": 4.76,
+                "deterministic": 100.0,
+                "policy": 0.0,
+                "traces": 10
+              }
+            }
+          },
+          "ood_kinematics_5step": {
+            "action_acc": 100.0,
+            "rollout_acc": 0.0
+          }
+        },
+        "3M_Matched_Tokens": {
+          "familiar": {
+            "action_acc": 100.0,
+            "rollout_acc": 75.0,
+            "latency_ms": 9.082
+          },
+          "depth_ladder": {
+            "action_acc": 78.57,
+            "rollout_acc": 75.0,
+            "positions": {
+              "1": {
+                "uniform": 100.0,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 40
+              },
+              "2": {
+                "uniform": 45.44,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 40
+              },
+              "3": {
+                "uniform": 22.45,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 30
+              },
+              "4": {
+                "uniform": 10.99,
+                "deterministic": 100.0,
+                "policy": 0.0,
+                "traces": 20
+              },
+              "5": {
+                "uniform": 4.76,
+                "deterministic": 100.0,
+                "policy": 0.0,
+                "traces": 10
+              }
+            }
+          },
+          "ood_kinematics_5step": {
+            "action_acc": 100.0,
+            "rollout_acc": 0.0
+          }
+        }
+      }
+    },
+    "seed_44": {
+      "parameters": {
+        "config_1m": 928512,
+        "config_3m": 3429888,
+        "compute_ratio": 3.694
+      },
+      "Objective_B_Procedural": {
+        "1M_Matched_Tokens": {
+          "training_time_s": 2.46,
+          "tokens_trained": 118070,
+          "final_val_loss": 0.6515,
+          "familiar_exact_acc": 0.0,
+          "familiar_valid_acc": 0.0,
+          "depth_ladder": {
+            "overall_exact_acc": 0.0,
+            "depth_breakdown": {
+              "2": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "3": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "5": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "4": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              }
+            }
+          },
+          "unseen_carry_exact_acc": 0.0,
+          "ood_kinematics_exact_acc": 0.0,
+          "mean_latency_ms": 233.78,
+          "retention_drift": {
+            "prose_original": -0.0972,
+            "technical_science": 0.7538,
+            "geography_history": 0.0678,
+            "mathematics_prose": 0.7446
+          }
+        },
+        "3M_Matched_Tokens": {
+          "training_time_s": 4.45,
+          "tokens_trained": 118070,
+          "final_val_loss": 0.5454,
+          "familiar_exact_acc": 0.0,
+          "familiar_valid_acc": 0.0,
+          "depth_ladder": {
+            "overall_exact_acc": 0.0,
+            "depth_breakdown": {
+              "2": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "3": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "5": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "4": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              }
+            }
+          },
+          "unseen_carry_exact_acc": 0.0,
+          "ood_kinematics_exact_acc": 0.0,
+          "mean_latency_ms": 243.01,
+          "retention_drift": {
+            "prose_original": -1.7306,
+            "technical_science": -0.0039,
+            "geography_history": -0.345,
+            "mathematics_prose": 0.1422
+          }
+        },
+        "1M_Matched_Compute": {
+          "training_time_s": 8.97,
+          "tokens_trained": 436859,
+          "final_val_loss": 0.535,
+          "familiar_exact_acc": 0.0,
+          "familiar_valid_acc": 0.0,
+          "depth_ladder": {
+            "overall_exact_acc": 0.0,
+            "depth_breakdown": {
+              "2": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "3": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "5": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              },
+              "4": {
+                "exact_acc": 0.0,
+                "valid_acc": 0.0,
+                "total": 10
+              }
+            }
+          },
+          "unseen_carry_exact_acc": 0.0,
+          "ood_kinematics_exact_acc": 0.0,
+          "mean_latency_ms": 232.42
+        }
+      },
+      "Objective_A_Action_Policy": {
+        "1M_Matched_Tokens": {
+          "familiar": {
+            "action_acc": 100.0,
+            "rollout_acc": 97.5,
+            "latency_ms": 8.994
+          },
+          "depth_ladder": {
+            "action_acc": 78.57,
+            "rollout_acc": 75.0,
+            "positions": {
+              "1": {
+                "uniform": 100.0,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 40
+              },
+              "2": {
+                "uniform": 45.44,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 40
+              },
+              "3": {
+                "uniform": 22.45,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 30
+              },
+              "4": {
+                "uniform": 10.99,
+                "deterministic": 100.0,
+                "policy": 0.0,
+                "traces": 20
+              },
+              "5": {
+                "uniform": 4.76,
+                "deterministic": 100.0,
+                "policy": 0.0,
+                "traces": 10
+              }
+            }
+          },
+          "ood_kinematics_5step": {
+            "action_acc": 100.0,
+            "rollout_acc": 100.0
+          }
+        },
+        "3M_Matched_Tokens": {
+          "familiar": {
+            "action_acc": 100.0,
+            "rollout_acc": 75.0,
+            "latency_ms": 9.069
+          },
+          "depth_ladder": {
+            "action_acc": 78.57,
+            "rollout_acc": 75.0,
+            "positions": {
+              "1": {
+                "uniform": 100.0,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 40
+              },
+              "2": {
+                "uniform": 45.44,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 40
+              },
+              "3": {
+                "uniform": 22.45,
+                "deterministic": 100.0,
+                "policy": 100.0,
+                "traces": 30
+              },
+              "4": {
+                "uniform": 10.99,
+                "deterministic": 100.0,
+                "policy": 0.0,
+                "traces": 20
+              },
+              "5": {
+                "uniform": 4.76,
+                "deterministic": 100.0,
+                "policy": 0.0,
+                "traces": 10
+              }
+            }
+          },
+          "ood_kinematics_5step": {
+            "action_acc": 100.0,
+            "rollout_acc": 0.0
+          }
+        }
+      }
+    }
+  }
+}

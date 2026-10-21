@@ -112,6 +112,7 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 | **M18** | Grammar-Constrained Planning & Execution Search | **100.0% verified accuracy** on addition depth ladders (2-5 steps) and 5-step kinematics |
 | **M19** | Learned Action Policy & Representation Adaptation | Closed without promotion (familiar rollout **100%**, 5-step kinematics **23.3%**; M18 baseline preserved) |
 | **M20** | Controlled Neural Scaling & Procedural Generalization | 1M vs 3M Transformer scaling under matched tokens and matched compute |
+| **M21** | Digit-Level Arithmetic & Procedural Scratchpad | Procedural scratchpad unlocks neural addition: **35.17%** unaided exact match, **88.07%** carry accuracy (vs 0.0% standard text) |
 
 ## Directory Structure
 
