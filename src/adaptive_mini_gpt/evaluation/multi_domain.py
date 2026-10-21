@@ -1,4 +1,4 @@
-"""Unified Multi-Domain Benchmark Interface (M25 / M27).
+"""Unified Multi-Domain Benchmark Interface (M25 / M27 / M28).
 
 Provides a minimal, reproducible, modular benchmark interface separating:
   1. Neural learning and representation acquisition.
@@ -14,6 +14,19 @@ from dataclasses import asdict, dataclass, field
 from enum import Enum
 from typing import Any, Callable
 
+try:
+    import torch
+    import torch.nn as nn
+    from adaptive_mini_gpt.model.transformer import MiniGPT
+    _no_grad = torch.no_grad
+except ImportError:
+    torch = None  # type: ignore
+    nn = None  # type: ignore
+    MiniGPT = None  # type: ignore
+    def _no_grad():
+        def decorator(f):
+            return f
+        return decorator
 try:
     import torch
     import torch.nn as nn
@@ -116,7 +129,20 @@ class MultiDomainBenchmark:
         samples: list[BenchmarkSample],
     ) -> None:
         """Register benchmark samples for a domain and split."""
-        self.samples[domain][split].extend(samples)
+        self.samples[domain][split].extend(    def register_samples(
+        self,
+        samples_or_domain: list[BenchmarkSample] | DomainType,
+        split: BenchmarkSplit | None = None,
+        samples: list[BenchmarkSample] | None = None,
+    ) -> None:
+        """Batch-register multiple benchmark problems (supports both M25 list and M28 domain/split APIs)."""
+        if isinstance(samples_or_domain, list):
+            for s in samples_or_domain:
+                self.register_sample(s)
+        elif isinstance(samples_or_domain, DomainType) and split is not None and samples is not None:
+            self.samples[samples_or_domain][split].extend(samples)
+        else:
+            raise ValueError("Invalid arguments to register_samples")
 
     def register_evaluator(
         self,
@@ -130,7 +156,7 @@ class MultiDomainBenchmark:
         """Retrieve all samples registered for a specific domain and split."""
         return list(self.samples[domain][split])
 
-    @_no_grad()
+    @_no_grad_no_grad()
     def evaluate_generation_task(
         self,
         model: MiniGPT,

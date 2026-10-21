@@ -60,7 +60,7 @@ def test_corpus_disjointness_audit() -> None:
 
 
 def test_scaled_bpe_tokenizer_training() -> None:
-    """Verify BPE scaling to 1024 tokens and roundtrip decoding."""
+    """Verify BPE scaling to 512 tokens and roundtrip decoding."""
     prose_sample = " ".join(PRETRAIN_PROSE_CORPUS[:15])
     tok = train_scaled_bpe_tokenizer(prose_sample, target_vocab_size=512)
 
@@ -140,10 +140,11 @@ def test_vocabulary_expansion_torch() -> None:
     except ImportError:
         pytest.skip("PyTorch not installed in local environment; runs exclusively on Tesla T4 GPU.")
 
+    prose = " ".join(PRETRAIN_PROSE_CORPUS)
     tok_old = BPETokenizer()
-    tok_old.train("Small baseline corpus text.", target_vocab_size=400)
+    tok_old.train(prose, target_vocab_size=400)
 
-    tok_new = train_scaled_bpe_tokenizer("Expanded corpus with diverse English text.", target_vocab_size=1024)
+    tok_new = train_scaled_bpe_tokenizer(prose, target_vocab_size=1024)
 
     cfg = create_1m_control_config(vocab_size=tok_old.vocab_size)
     model = MiniGPT(cfg)
