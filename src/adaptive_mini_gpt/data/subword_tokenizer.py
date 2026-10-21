@@ -5,9 +5,10 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from torch import Tensor
+if TYPE_CHECKING:
+    from torch import Tensor
 
 SPECIAL_TOKENS = [
     "<pad>",
@@ -208,10 +209,12 @@ class BPETokenizer:
 
     def decode(self, token_ids: list[int] | Tensor, skip_special_tokens: bool = False) -> str:
         """Decode a list or tensor of token IDs back into string."""
-        if isinstance(token_ids, Tensor):
+        if hasattr(token_ids, "flatten"):
             flat = token_ids.flatten().tolist()
+        elif hasattr(token_ids, "tolist"):
+            flat = token_ids.tolist()
         else:
-            flat = token_ids
+            flat = list(token_ids)
 
         byte_chunks: list[bytes] = []
         for tid in flat:

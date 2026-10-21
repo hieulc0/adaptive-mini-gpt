@@ -6,9 +6,10 @@ import hashlib
 import json
 import string
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from torch import Tensor
+if TYPE_CHECKING:
+    from torch import Tensor
 
 SPECIAL_TOKENS = [
     "<pad>",
@@ -129,7 +130,7 @@ class CharacterTokenizer:
 
     def decode(self, tokens: list[int] | Tensor, skip_special_tokens: bool = False) -> str:
         """Convert a list or tensor of token integers back to a string."""
-        if isinstance(tokens, Tensor):
+        if hasattr(tokens, "tolist"):
             token_list = tokens.tolist()
             if isinstance(token_list, list) and token_list and isinstance(token_list[0], list):
                 token_list = [item for sublist in token_list for item in sublist]
