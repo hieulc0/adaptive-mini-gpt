@@ -155,7 +155,7 @@ class ControlledSelfDirectedLearner:
                 set_active_domain_adapter(self.model, "arithmetic")
                 trace = rollout_recurrent_arithmetic(self.model, self.tokenizer, a, b, self.device)
                 solved = trace.is_exact_match or (str(a + b) == ans)
-                output = f"Recurrent execution trace: {a} + {b} = {trace.final_sum} (exact={trace.is_exact_match})"
+                output = f"Recurrent execution trace: {a} + {b} = {trace.final_answer} (exact={trace.is_exact_match})"
                 return output, solved, False, False
             else:
                 # Deductive logic unrolling
