@@ -107,7 +107,8 @@ class TransformerBlock(nn.Module):
         domain_mask: Tensor | None = None,
         **kwargs: Any,
     ) -> tuple[Tensor, dict[str, Any] | None]:
-        x = x + self.attn(self.ln_1(x))\n        normed = self.ln_2(x)
+        x = x + self.attn(self.ln_1(x))
+        normed = self.ln_2(x)
 
         if self.mod_router is not None and not bypass_moe:
 
