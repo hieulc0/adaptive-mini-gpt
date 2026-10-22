@@ -41,6 +41,8 @@ def _create_minimal_test_model(vocab_size: int = 300) -> MiniGPT:
 
 def _create_dummy_tokenizer() -> BPETokenizer:
     tok = BPETokenizer()
+    corpus = "Newton force mass acceleration F ma mitochondria ATP cell Alan Turing 1936 Gutenberg 1440 0 1 2 3 4 5 6 7 8 9 + = : [STATE] [OUT] d c abstain Question Answer logic Socrates mortal"
+    tok.train(corpus, target_vocab_size=280)
     return tok
 
 
