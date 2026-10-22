@@ -30,6 +30,8 @@ class LearningAction(str, enum.Enum):
 
 
 ACTION_LIST = list(LearningAction)
+ACTION_TO_IDX = {act: idx for idx, act in enumerate(ACTION_LIST)}
+IDX_TO_ACTION = {idx: act for idx, act in enumerate(ACTION_LIST)}
 
 
 @dataclass
