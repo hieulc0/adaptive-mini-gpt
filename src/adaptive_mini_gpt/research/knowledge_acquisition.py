@@ -28,6 +28,7 @@ from adaptive_mini_gpt.interaction.verified_memory import (
     VerifiedMemoryEntry,
 )
 from adaptive_mini_gpt.model.modular_adapter import (
+    MultiAdapterLinear,
     add_domain_adapter,
     compute_base_model_hash,
     get_adapter_state_dict,
@@ -172,9 +173,15 @@ class KnowledgeAcquisitionEvaluator:
     ) -> dict[str, Any]:
         """Method C: Train isolated language adapter on verified Q&A pairs."""
         logger.info(f"Training Method C language adapter on {len(verified_qa_pairs)} verified QA pairs...")
-        # Inject or activate language adapter
-        inject_multi_domain_adapters(model, r=8, target_modules=["c_attn", "c_proj", "c_fc"])
-        add_domain_adapter(model, domain_name="research_language", r=8, target_modules=["c_attn", "c_proj", "c_fc"])
+        # Check if research_language adapter exists
+        has_adapter = False
+        for m in model.modules():
+            if isinstance(m, MultiAdapterLinear) and "research_language" in m.adapters:
+                has_adapter = True
+                break
+        if not has_adapter:
+            inject_multi_domain_adapters(model, target_modules=["c_attn", "c_proj", "c_fc"], r=8)
+            add_domain_adapter(model, domain_name="research_language", r=8)
         set_active_domain_adapter(model, "research_language")
 
         # Freeze base model parameters
@@ -231,6 +238,7 @@ class KnowledgeAcquisitionEvaluator:
         device: torch.device,
     ) -> AcquisitionMethodResult:
         """Evaluate neural model on task WITHOUT external retrieval or memory."""
+        set_active_domain_adapter(model, "research_language", allow_missing=True)
         prompt = f"Question: {task.question} Answer:"
         idx = torch.tensor(tokenizer.encode(prompt), dtype=torch.long, device=device).unsqueeze(0)
 

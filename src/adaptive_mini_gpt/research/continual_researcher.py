@@ -129,9 +129,7 @@ class ContinualResearcher:
         cost = res_a.compute_cost + res_b.compute_cost
 
         # Snapshot adapter state before training
-        saved_adapter_state = None
-        if hasattr(self.model, "adapters") and "research_language" in self.model.adapters:
-            saved_adapter_state = copy.deepcopy(get_adapter_state_dict(self.model, "research_language"))
+        saved_adapter_state = copy.deepcopy(get_adapter_state_dict(self.model, "research_language"))
 
         if train_candidate_adapter and audit.is_supported and audit.selected_passage:
             cost += 0.50
@@ -156,6 +154,8 @@ class ContinualResearcher:
             if current_base_hash != self.base_hash_initial:
                 logger.error("Base parameter hash changed during adapter training! Triggering rollback.")
                 rollback = True
+                if saved_adapter_state:
+                    load_adapter_state_dict(self.model, "research_language", saved_adapter_state)
             else:
                 promoted = True
 
