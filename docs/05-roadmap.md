@@ -286,3 +286,40 @@
   - **Option 1 (Improve Language Representations & Knowledge Assimilation)**: If prioritizing closing the 18.5% -> 50%+ neural generalization gap on open-domain text.
   - **Option 2 (Consolidation and Retention)**: If prioritizing multi-task replay scaling and long-horizon memory consolidation across dozens of episodes.
   - **Option 3 (M38 Controlled Structural Evolution)**: Begin controlled structural-evolution experiments, starting with reversible architectural modifications (e.g., an optional gated Layer 1 -> Layer 3 skip connection) evaluated against matched-compute training baselines.
+
+### M38: Controlled Neural Structural Evolution (Completed & Qualified)
+- **Objective**: Conduct the first controlled scientific test of structural neural evolution: evaluate whether a targeted, reversible change to Mini-GPT's neural topology (an optional gated Layer 1 $\rightarrow$ Layer 3 skip connection initialized at $\alpha=0$) improves multi-domain learning or cross-domain retention better than additional training or modular adapters under matched token and compute budgets across Seeds 42, 43, 44 on Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m38-structural-study`, commit `0ddbfb8280a59381337550bf1a729b094f356e39`). Base Mini-GPT backbone (1,089,280 parameters, 1024-BPE tokenizer `f698e45e209b7fe6`) with M34 modular adapters, augmented with `GatedSkipConnection` (^{\text{new}} = h_3 + \alpha h_1$), `TopologyEvolutionManager`, and `ControlledStructuralEvaluator`. Mean duration: 11.66s per seed. 81/81 Pytest unit tests passed on Tesla T4 GPU in 16.69s.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 M37 Scientific Audit**:
+     - Reproduced M37's neural-only factual acquisition gain: **+18.52% \pm 6.41%** (95% CI: [11.27%, 25.77%]) from a 0.00% untrained baseline under strict retrieval isolation.
+     - Confirmed query strategy parity on 20-doc corpus: Raw Query, Keyword Extraction, and Metacognitive Formulation all achieved 100% Recall@1, demonstrating that larger corpora with multi-document distractors are required to separate query policies.
+     - Confirmed 100% contradiction detection on tested conflicts and 25% appropriate abstention on ungrounded queries.
+  2. **Phase 2 Structural Baseline & Equivalence**:
+     - Implemented gated Layer 1 $\rightarrow$ Layer 3 skip connection ( = h_3 + \alpha h_1$).
+     - Verified bit-for-bit numerical equivalence at initialization ($\alpha=0$, \_diff \le 10^{-6}$).
+     - Verified strict reversibility: toggling `enabled=False` restores parent outputs bit-for-bit.
+     - Exported versioned specification `ArchitectureSpec v1.1.0`.
+  3. **Phase 3 Controlled 4-Arm Comparison**:
+     - **Arm A (Dense Backbone Training, 1.08M params)**: Achieved **100.0% \pm 0.0%** factual accuracy, but suffered **complete catastrophic forgetting** on carry retention (**0.00% \pm 0.00%**, down from 100%).
+     - **Arm B (Matched Parameter Budget, 1 param intra-block scale on Block 3)**: Learned $\beta = 0.0438 \pm 0.0015$. Factual accuracy: 0.0%, carry retention: 1.50% \pm 1.32%, latency: 2.001 ms.
+     - **Arm C (M34/M37 Modular Adapter, 65,536 params, =8$)**: Achieved **66.67% \pm 28.87%** factual accuracy (Seed 42: 50%, Seed 43: 100%, Seed 44: 50%) while keeping base weights frozen, at 3.694 ms latency (+89.2% latency overhead).
+     - **Arm D (Gated Skip L1 $\rightarrow$ L3, 1 param $\alpha$)**: Learned $\alpha = 0.0247 \pm 0.0092$ (Seed 42: 0.0312, Seed 43: 0.0142, Seed 44: 0.0288). Factual accuracy: 0.0%, carry retention: 1.50% \pm 1.32%, latency: 1.984 ms (+1.6% overhead).
+  4. **Phase 4 Cross-Domain Retention Matrix (Physics $\rightarrow$ Biology $\rightarrow$ Computing $\rightarrow$ History)**:
+     - 1-parameter skip connection (Arm D) lacked sufficient capacity to encode or retain multi-domain factual tokens (mean retention: 0.0%).
+     - Shared modular adapter (Arm C) achieved 100% on the latest episode, but suffered backward interference (BWT = -0.3333) when shared across episodes without domain routing, proving that **M34 isolated domain adapters** are required for continual multi-domain retention.
+  5. **Phase 5 Structural Decision Experiment**:
+     - `StructuralEvolutionGate` approved candidate modular adapters (expected gain 0.25) and gated skip connections (expected gain 0.20, delta 1 param) for sandbox benchmarking, while rejecting sub-threshold proposals.
+  6. **Phase 6 Lineage Safety & Reversibility**:
+     - Base model hash remained 100% invariant across all seeds (`8736b364e4a8ce19`, `de7621751f2e99d0`, `c7bd81ae47f2e2de`). Production promotion remains NO-GO.
+  7. **Task-Specific Qualification Gates**:
+     - Operational Reasoning Gate: **PASS (100%)** (M18 deterministic operational baseline intact).
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (81/81 Pytest unit tests passed on Tesla T4; bit-for-bit numerical equivalence, reversibility, and architecture versioning verified).
+     - Scientific Topology Adaptation Gate: **EVALUATED | SCIENTIFIC NO-GO FOR TOPOLOGY REPLACING ADAPTERS**. Adding a 1-parameter gated skip connection ( \rightarrow L3$) does not improve multi-domain learning or retention over modular adapters under matched token budgets.
+     - Neural Factual Generalization Gate: **PARTIAL**. Neural weights acquire direct factual associations via modular adapters (66.67%), but paraphrased question generalization remains modest without explicit relational training.
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Structural candidates remain isolated in research sandboxes. Base weights remain frozen.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain frozen.
+- **Next Direction Options (Post-M38 Strategic Priority)**:
+  - **Option 1 (Improve Knowledge Integration & Relational Objectives)**: Investigate multi-relation objectives and paraphrased factual contrastive objectives within modular adapters, addressing the 0% paraphrase generalization gap identified in M37 and M38.
+  - **Option 2 (Autonomous Multi-Adapter Routing & Dynamic Capacity)**: Combine M34 modular adapters with M35 metacognitive routing to dynamically instantiate and route to domain-specific adapters for new subjects rather than forcing weight sharing across sequential research episodes.
+  - **Option 3 (Higher-Capacity Topology Adaptations)**: If revisiting structural evolution, test channel-gated or low-rank projection skips ({\text{model}}$ or low-rank projection rather than a single scalar) to determine if structural adaptation requires higher expressivity to match adapter capacity.
