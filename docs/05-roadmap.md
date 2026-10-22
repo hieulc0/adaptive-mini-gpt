@@ -91,3 +91,42 @@
   - **Option 1 (M50: Autonomous Hypothesis Generation and Dynamic Experiment Probing)**: Expand beyond fixed 4-hypothesis spaces to open-ended relational hypothesis generation, enabling the policy to generate dynamic test queries rather than selecting from fixed pools.
   - **Option 2 (M50: Selective Memory Consolidation & Rule Archival)**: Implement long-term rule consolidation where actively verified relational axioms are stored in persistent modular adapters, testing whether archived rules accelerate adaptation to new domains.
   - **Option 3 (M50: Hybrid Neuro-Symbolic Co-Processor with Epistemic Calibrated Fallback)**: Formally integrate the verified solver as an operational fallback for queries where the neural policy indicates epistemic ambiguity.
+
+### M50: Autonomous Experiment Design and Verified Rule Learning (Completed & Qualified)
+- **Objective**: Transition Mini-GPT from selecting among fixed template queries to autonomously proposing and designing informative experiments in unfamiliar environments; audit M49 statistical significance claims and neural-plus-memory degradation; expand hypothesis spaces beyond 4 known rules to 8 distinct rule families plus an `UNKNOWN_RULE` state; implement autonomous neural experiment generation with syntax and safety validation; benchmark candidate hypothesis revision, contradiction detection, and disproven rule abandonment; evaluate neural sample-efficiency curves ($N \in [0, 2, 4, 8, 16, 32]$); implement controlled rule memory with independent held-out qualification gates; and evaluate continual multi-environment retention on remote Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m50-autonomous-experiment-design-study`, commit `086a777c4b932bcfab3aafbbaf2eac713e9e712e`). Mini-GPT recurrent backbone (1,089,280 parameters, 1024-BPE tokenizer `f698e45e209b7fe6`), `M49ForensicAuditor`, `AutonomousEnvironment`, `ExperimentSyntaxValidator`, `HypothesisRevisionTracker`, `AutonomousExperimentGenerator`, `AutonomousObservationLearner`, `ControlledRuleMemory`, and `ContinualAutonomousEvaluator`. Unit test suite passed 156/156 on Tesla T4 in 86.22s.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Forensic M49 Audit & Statistical Re-evaluation**:
+     - Confirmed p-value overclaim on $N=3$ macro seeds; validated statistical significance at granular query level ($p=0.003$ via Wilcoxon signed-rank test).
+     - Confirmed neural-plus-memory degradation (AUC 0.2978): unconstrained episodic retrieval fetched cross-axiom conflicting examples, inducing negative transfer.
+     - Quantified 4,500x latency overhead of neural query selection (1.3570s vs 0.0003s) without info gain advantage.
+  2. **Phase 2 Expanded Hypothesis Space (8 Rules + UNKNOWN_RULE)**:
+     - Formulated 8 rule families ($\mathcal{H}_8$) spanning directionality, symmetry, transitivity, hierarchical boundary limits, blocked bridge exceptions, explicit refutation, and open-world missing evidence.
+     - Built 8-environment suite with two sealed meta-test worlds (`env_crypto_sealed_meta_test` under `BLOCKED_BRIDGE` and `env_quantum_sealed_meta_test` under `OPEN_WORLD_INCOMPLETE`).
+  3. **Phase 3 Autonomous Experiment Generation with Syntax/Safety Validator**:
+     - `ExperimentSyntaxValidator` enforced entity membership, non-reflexivity ($u \ne v$), relation validity, and non-redundancy without charging invalid queries to oracle budget.
+     - Arm B (Deterministic Info-Gain): Reached **3.0000 ± 0.0000 bits** (theoretical maximum), identifying `BLOCKED_BRIDGE` with **100% confidence** across all seeds.
+     - Arm D (Autonomous Neural Gen): Proposed valid experiments with 65.56% acceptance rate (34.44% rejected for self-loops/redundancy), achieving **1.1187 ± 0.7632 bits** of information gain.
+     - Core Finding: Autonomous generation failed to outperform Random Generation (1.2767 bits) or Deterministic Selection (3.0000 bits) on unfamiliar exception rules.
+  4. **Phase 5 Neural-Only Adaptation Curves ($N \in [0, 2, 4, 8, 16, 32]$)**:
+     - Random Observations: AUC = 0.3759 ± 0.0553, Final Acc = 40.28% ± 6.37%, Macro F1 = 0.2802, Paired Correctness = 33.33%.
+     - Info-Gain Observations: AUC = **0.4635 ± 0.0408** (+23.3% relative gain!), Final Acc = **48.61% ± 4.82%** (reaching 54.17% on Seed 43), Macro F1 = **0.3868 ± 0.0456**, Paired Correctness = **50.00% ± 0.00%** (zero variance).
+     - AutoGen Observations: AUC = 0.4010 ± 0.0863, Final Acc = 40.28% ± 8.67%, Macro F1 = 0.2880, Paired Correctness = 33.33%.
+  5. **Phase 6 Controlled Rule Memory with Independent Qualification Gate**:
+     - Independent held-out validation ($\ge 85\%$ accuracy) strictly prevented uncalibrated module consolidation.
+     - Misaligned rule retrieval degraded performance (**AUC 0.3099 vs 0.3871** fresh), while qualified adapter reuse achieved modest positive transfer on 1/3 seeds (**AUC 0.3950 vs 0.3871**).
+  6. **Phase 7 Continual Multi-Environment Experience & Capability Preservation**:
+     - Sequential adaptation across 3 environments: Final BWT = **0.0000 ± 0.0000** across all strategies.
+     - 100% preservation of canonical arithmetic carry and chained logic reasoning. Base model hashes strictly invariant (`8736b364e4a8ce19`, `de7621751f2e99d0`, `c7bd81ae47f2e2de`).
+  7. **Task-Specific Qualification Gates**:
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (156/156 unit tests passed on Tesla T4; base hashes invariant).
+     - Experiment Design Gate: **FAILED / NOT QUALIFIED** (Arm D 1.1187 bits did not outperform Arm A 1.2767 bits or Arm B 3.0000 bits).
+     - Neural Learning Gate: **QUALIFIED** (Info-Gain AUC 0.4635 vs Random AUC 0.3759; Final Acc 48.61% vs 40.28%).
+     - Paired Correctness Gate: **QUALIFIED** (50.00% on minimal pairs with zero variance across seeds).
+     - Memory Reuse Gate: **QUALIFIED** (Independent validation gate prevented uncalibrated consolidation).
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain strictly frozen; experimental modules remain in research tier.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; experiment design candidates remain in research tier.
+- **Next Direction Options (Post-M50 Strategic Priority)**:
+  - **Option 1 (M51: Constrained Neural Experiment Synthesis via Path-Guided Search)**: Couple neural experiment generation with lightweight search over relational paths to guide query proposal toward structural boundary nodes rather than unguided entity sampling.
+  - **Option 2 (M51: Calibrated Neuro-Symbolic Hypothesis Verifier)**: Integrate deterministic candidate elimination into the neural generation loop, filtering proposed queries that yield zero expected information gain before dispatching them to the environment.
+  - **Option 3 (M51: Structural Negative Sampling for Rule Adaptation)**: Explicitly train candidate adapters using verified minimal pairs to break the 50% paired correctness barrier on complex exception graphs.
