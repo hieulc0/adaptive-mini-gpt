@@ -22,17 +22,25 @@ from typing import Any
 
 import torch
 
+import numpy as np
+
+from adaptive_mini_gpt.data.bpe_scaling import (
+    expand_model_vocabulary,
+    train_scaled_bpe_tokenizer,
+)
+from adaptive_mini_gpt.data.language_corpus import PRETRAIN_PROSE_CORPUS
+from adaptive_mini_gpt.meta.audit import M41Auditor
+from adaptive_mini_gpt.meta.benchmark_suite import get_benchmark_families
+from adaptive_mini_gpt.meta.learning_policy import SelfDirectedLearningPolicy
+from adaptive_mini_gpt.meta.meta_learner import MetaLearner
+from adaptive_mini_gpt.meta.tri_state_diagnostic import TriStateDiagnostic
+from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.modular_adapter import (
     add_domain_adapter,
     compute_base_model_hash,
     inject_multi_domain_adapters,
     set_active_domain_adapter,
 )
-from adaptive_mini_gpt.meta.audit import M41Auditor
-from adaptive_mini_gpt.meta.benchmark_suite import get_benchmark_families
-from adaptive_mini_gpt.meta.learning_policy import SelfDirectedLearningPolicy
-from adaptive_mini_gpt.meta.meta_learner import MetaLearner
-from adaptive_mini_gpt.meta.tri_state_diagnostic import TriStateDiagnostic
 from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.training.checkpoint import CheckpointManager
 
@@ -43,14 +51,25 @@ logger = logging.getLogger("m42_benchmark")
 def run_seed_m42_benchmark(
     seed: int,
     base_checkpoint_path: Path,
+    tokenizer: Any,
     device: torch.device,
 ) -> dict[str, Any]:
     logger.info(f"\n{'='*70}\nExecuting M42 Learning-to-Learn Benchmark Seed {seed}\n{'='*70}")
+    torch.manual_seed(seed)
+    np.random.seed(seed)
     t_start = time.perf_counter()
 
     raw_checkpoint = CheckpointManager.load_raw_checkpoint(base_checkpoint_path)
-    base_model = CheckpointManager.load_model(raw_checkpoint).to(device)
-    tokenizer = CheckpointManager.load_tokenizer(raw_checkpoint)
+    base_tok = CheckpointManager.load_tokenizer(raw_checkpoint)
+    state_dict = raw_checkpoint.get("model_state_dict", raw_checkpoint.get("model_state"))
+    base_model_orig = MiniGPT(ModelConfig(**raw_checkpoint["model_config"]))
+    base_model_orig.load_state_dict(state_dict)
+    base_model = expand_model_vocabulary(
+        model=base_model_orig,
+        old_tokenizer=base_tok,
+        new_tokenizer=tokenizer,
+    ).to(device)
+    base_model.eval()
     initial_base_hash = compute_base_model_hash(base_model)
     logger.info(f"Base model loaded for seed {seed} (hash={initial_base_hash})")
 
@@ -422,12 +441,17 @@ def main() -> None:
     logger.info(f"Starting M42 Benchmark on device={device}, seeds={args.seeds}")
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
+    logger.info("Initializing 1024-BPE Tokenizer for M42 Benchmark...")
+    all_prose = " ".join(PRETRAIN_PROSE_CORPUS)
+    tokenizer = train_scaled_bpe_tokenizer(all_prose, target_vocab_size=1024)
+    logger.info(f"Loaded Tokenizer with fingerprint: {tokenizer.get_fingerprint()} (vocab={tokenizer.vocab_size})")
+
     seed_results: list[dict[str, Any]] = []
     for seed in args.seeds:
         ckpt_path = args.checkpoints_dir / f"seed_{seed}" / "base_pretrain" / "best.pt"
         if not ckpt_path.exists():
             raise FileNotFoundError(f"Checkpoint for seed {seed} not found at {ckpt_path}")
-        res = run_seed_m42_benchmark(seed, ckpt_path, device)
+        res = run_seed_m42_benchmark(seed, ckpt_path, tokenizer, device)
         seed_results.append(res)
 
     logger.info(f"\n{'='*70}\nAggregating M42 Results Across Seeds {args.seeds}\n{'='*70}")
