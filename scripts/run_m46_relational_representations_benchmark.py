@@ -211,7 +211,7 @@ def aggregate_m46_results(seed_results: list[dict[str, Any]], device_name: str =
     """Aggregates metrics across the 3 seeds, computing mean and standard deviation."""
     n_seeds = len(seed_results)
 
-    def mean_std(values: list[float]) -> dict[str, float]:\
+    def mean_std(values: list[float]) -> dict[str, float]:
         arr = np.array(values, dtype=float)
         return {"mean": round(float(np.mean(arr)), 4), "std": round(float(np.std(arr)), 4)}
 
