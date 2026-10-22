@@ -152,3 +152,30 @@
      - Neural Production Promotion Gate: **REJECTED (NO-GO)**. Candidate weights remain experimental research lineages.
 - **Lineage Promotion Decision**: **NO-GO**. Base weights remain frozen.
 - **Next Direction (M33)**: Adaptive Reasoning Controller and Self-Directed Practice Curriculum (combine deterministic action routing with recurrent step-level neural retry, semantic retrieval memory, and self-directed curriculum scheduling).
+
+### M33: Repeated Self-Learning and Cumulative Skill Acquisition (Completed & Qualified)
+- **Objective**: Test whether a single evolving Mini-GPT neural checkpoint can learn from one experience, retain that improvement, encounter another unfamiliar problem, learn again, and become progressively more capable across sequential multi-episode experiences ( 	o V_2 	o V_3 	o V_4$) across Seeds 42, 43, 44 on Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m33-cumulative-study`, commit `db7b339c99186be00c07f2a32a66e86766692a01`). 1,089,280 parameters, 1024-BPE tokenizer (`1845a0a16f6ab9ff`). Mean duration: 81.1s per seed. 52/52 Pytest unit tests passed in 10.10s.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Claims Audit & Matched Before/After Evaluation**:
+     - Clarified Teacher-Forced 100% vs Autonomous Rollout discrepancy: teacher forcing provides ground-truth prefix tokens at every target step, completely masking autoregressive divergence.
+     - Reconciled Arm C (89.58% on full 128-sample multi-digit curriculum) vs single-episode interaction candidate (trained on only 48 samples from 1 failure encounter).
+     - Directly matched before/after evaluation on identical 10 fresh problems: Before training = **0.00% ± 0.00%**; After training = **13.33% ± 11.55%** (Seed 42: 20%, Seed 43: 20%, Seed 44: 0%; step acc: **69.55% ± 9.60%**). Confirms single-encounter practice achieves genuine positive transfer over baseline (+13.33%), but exhibits substantial inter-seed variance.
+  2. **Phase 2 & 3 Persistent Lineage & Sequential Multi-Episode Loop**:
+     - Evaluated sequential learning loop across 3 episodes: Episode A (Arithmetic) $	o$ Episode B (Logic) $	o$ Episode C (Language).
+     - **Episode A (Arithmetic)**: Fresh 4-digit arithmetic exact: **13.33% ± 11.55%**, step acc: **69.55% ± 9.60%**, carry retention: **95.33% ± 2.08%**. Candidates did not meet $\ge 30\%$ gate $	o$ safely rolled back.
+     - **Episode B (Logic)**: Fresh chained logic exact: **54.17% ± 7.22%** (Seed 43: **62.5%**). However, carry retention dropped to **66.50% ± 3.00%** (target $\ge 80\%$) $	o$ safely rolled back.
+     - **Episode C (Language)**: Fresh language reading comprehension reached 0.0% exact, and carry retention dropped further to 50.00% $	o$ safely rolled back.
+  3. **Phase 4 & 5 Strategy Comparison vs. Specialists**:
+     - `specialist_logic` (trained without replay): Logic exact = 37.50%, carry retention = **0.00% ± 0.00%** (complete catastrophic forgetting of arithmetic).
+     - Candidate $ (trained with multi-domain replay): Logic exact = **54.17% ± 7.22%**, carry retention = **66.50% ± 3.00%**. Replay buffers preserved +66.5% carry retention over unbuffered specialists, but dense parameter sharing still suffered partial representational degradation.
+  4. **Lineage Safety and Invariant Preservation**:
+     - 9 episodes attempted, 9 rollbacks executed (100% rollback precision).
+     - Active production lineage remained anchored at $ across all 3 seeds, protecting root model from degradation.
+  5. **Task-Specific Qualification Gates**:
+     - Operational Reasoning Gate: **PASS (100%)** (M18 deterministic solver retained).
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (52/52 Pytest unit tests passed on Tesla T4; 3-seed reproducibility confirmed).
+     - Scientific Cumulative Learning Gate: **HYPOTHESIS DISPROVEN FOR DENSE FULL FINE-TUNING**. A single 1M dense parameter matrix cannot cumulatively retain sequential skills across arithmetic, logic, and language via full fine-tuning alone, even with replay buffers.
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain frozen.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain frozen.
+- **Next Direction (M34)**: Modular Parameter Adaptation and Selective Subspace Routing (transition from full-parameter sequential fine-tuning to modular adapters / routing to isolate skill-specific parameter updates and eliminate representational interference across learning episodes).
