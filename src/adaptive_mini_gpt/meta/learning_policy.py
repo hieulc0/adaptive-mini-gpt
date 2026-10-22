@@ -53,6 +53,21 @@ class PolicyComparisonReport:
     practice_efficiency_gain: float  # comparison against fixed practice schedule
 
 
+def extract_hidden_states(model: MiniGPT, inp: torch.Tensor) -> torch.Tensor:
+    t = inp.size(1)
+    tok_emb = model.wte(inp)
+    if model.wpe is not None:
+        pos = torch.arange(0, t, dtype=torch.long, device=inp.device)
+        pos_emb = model.wpe(pos)
+        x = model.drop(tok_emb + pos_emb)
+    else:
+        x = model.drop(tok_emb)
+    for block in model.blocks:
+        out = block(x)
+        x = out[0] if isinstance(out, tuple) else out
+    return model.ln_f(x)
+
+
 class MetacognitivePolicyClassifier(nn.Module):
     """Linear classifier on top of pooled representations to output action decisions."""
 
@@ -130,13 +145,7 @@ class SelfDirectedLearningPolicy:
         inp = torch.tensor([toks], dtype=torch.long, device=self.device)
 
         with torch.no_grad():
-            pos = torch.arange(0, inp.size(1), dtype=torch.long, device=self.device)
-            tok_emb = self.base_model.transformer.wte(inp)
-            pos_emb = self.base_model.transformer.wpe(pos)
-            x = self.base_model.transformer.drop(tok_emb + pos_emb)
-            for block in self.base_model.transformer.h:
-                x = block(x)
-            hidden = self.base_model.transformer.ln_f(x)
+            hidden = extract_hidden_states(self.base_model, inp)
             logits = self.neural_classifier(hidden)
             probs = torch.softmax(logits, dim=-1)
             pred_idx = int(torch.argmax(probs, dim=-1).item())

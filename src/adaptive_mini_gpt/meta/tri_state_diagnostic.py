@@ -36,6 +36,21 @@ class DiagnosticMethodResult:
     abstention_precision: float
 
 
+def extract_hidden_states(model: MiniGPT, inp: torch.Tensor) -> torch.Tensor:
+    t = inp.size(1)
+    tok_emb = model.wte(inp)
+    if model.wpe is not None:
+        pos = torch.arange(0, t, dtype=torch.long, device=inp.device)
+        pos_emb = model.wpe(pos)
+        x = model.drop(tok_emb + pos_emb)
+    else:
+        x = model.drop(tok_emb)
+    for block in model.blocks:
+        out = block(x)
+        x = out[0] if isinstance(out, tuple) else out
+    return model.ln_f(x)
+
+
 class TriStateLinearHead(nn.Module):
     """Minimal 3-class neural projection head (Linear(d_model, 3))."""
 
@@ -274,15 +289,7 @@ class TriStateDiagnostic:
                 inp = torch.tensor([toks], dtype=torch.long, device=self.device)
 
                 with torch.no_grad():
-                    # Forward through model to get hidden states before lm_head
-                    # In MiniGPT, model.transformer.ln_f gives final hidden state
-                    pos = torch.arange(0, inp.size(1), dtype=torch.long, device=self.device)
-                    tok_emb = model.transformer.wte(inp)
-                    pos_emb = model.transformer.wpe(pos)
-                    x = model.transformer.drop(tok_emb + pos_emb)
-                    for block in model.transformer.h:
-                        x = block(x)
-                    hidden = model.transformer.ln_f(x)
+                    hidden = extract_hidden_states(model, inp)
 
                 target = torch.tensor([label_to_idx[task.expected_verdict]], dtype=torch.long, device=self.device)
                 optimizer.zero_grad()
@@ -315,13 +322,7 @@ class TriStateDiagnostic:
             inp = torch.tensor([toks], dtype=torch.long, device=self.device)
 
             with torch.no_grad():
-                pos = torch.arange(0, inp.size(1), dtype=torch.long, device=self.device)
-                tok_emb = model.transformer.wte(inp)
-                pos_emb = model.transformer.wpe(pos)
-                x = model.transformer.drop(tok_emb + pos_emb)
-                for block in model.transformer.h:
-                    x = block(x)
-                hidden = model.transformer.ln_f(x)
+                hidden = extract_hidden_states(model, inp)
                 logits = head(hidden)
                 pred_idx = int(torch.argmax(logits, dim=-1).item())
 
