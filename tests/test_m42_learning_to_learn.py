@@ -34,8 +34,8 @@ def dummy_setup() -> tuple[MiniGPT, BPETokenizer, torch.device]:
         vocab_size=128,
         context_length=64,
         d_model=64,
-        num_layers=2,
-        num_heads=2,
+        n_layers=2,
+        n_heads=2,
         d_ff=128,
         dropout=0.0,
     )
