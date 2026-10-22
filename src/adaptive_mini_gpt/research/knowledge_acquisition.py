@@ -210,7 +210,8 @@ class KnowledgeAcquisitionEvaluator:
                 optimizer.zero_grad()
                 idxs = idxs.unsqueeze(0).to(device)
                 lbls = lbls.unsqueeze(0).to(device)
-                logits = model(idxs)
+                out = model(idxs)
+                logits = out[0] if isinstance(out, tuple) else out
                 shift_logits = logits[..., :-1, :].contiguous()
                 shift_labels = lbls[..., 1:].contiguous()
                 loss = criterion(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1))
@@ -237,7 +238,8 @@ class KnowledgeAcquisitionEvaluator:
         with torch.no_grad():
             gen_tokens = []
             for _ in range(12):
-                logits = model(idx)
+                out = model(idx)
+                logits = out[0] if isinstance(out, tuple) else out
                 next_tok = int(torch.argmax(logits[0, -1, :]).item())
                 if next_tok == tokenizer.encode("<|endoftext|>")[0] if "<|endoftext|>" in tokenizer.token_to_id else 0:
                     break
