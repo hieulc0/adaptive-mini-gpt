@@ -355,3 +355,35 @@
   - **Option 2 (Autonomous Dynamic Adapter Allocation & Replay Synthesis)**: Enable the controller to autonomously instantiate new modular adapters when domain divergence thresholds are exceeded during live web/local research.
   - **Option 3 (Dynamic Structural Routing)**: Combine modular adapter routing with low-rank channel gating to selectively activate sub-network branches based on input complexity.
 
+### M40: Compositional Knowledge, Transfer and Foundation Readiness (Completed & Qualified)
+- **Objective**: Advance from factual recall toward relational composition, multi-hop reasoning, and counterfactual transfer across synthetic relational worlds using verified learning representations and hybrid metacognitive routing on Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m40-composition-study`, commit `b870224914d5ad8034e80e2dc187c9a31c112e4d`). Base Mini-GPT recurrent backbone (1,089,280 parameters, 1024-BPE tokenizer `f698e45e209b7fe6`) with M34 modular adapters, `DeterministicGraphSolver`, `SyntheticRelationalUniverse`, `CompositionTrainer`, and `HybridRoutingEngine`. Mean duration: 31.59s per seed. 92/92 Pytest unit tests passed on Tesla T4 GPU in 22.35s.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Mandatory M39 Scientific Audit**: Confirmed M39 metrics (91.67% direct recall, 83.33% paraphrase, 8.33% compositional, 0% unseen transfer, 100% modular retention). Audited sample counts and verified canonical arithmetic carry retention protocol.
+  2. **Phase 2 Independent Baseline**: Untrained base model scored 0.00% across all relational tasks.
+  3. **Phase 3 Controlled 4-Arm Representation Comparison**:
+     - **Arm A (M39 Baseline Direct Q->A)**: 100.0% 1-hop, **75.00% 2-hop**, **75.00% 3-hop**, 0% asymmetric, **75.00% counterfactual transfer**, 0% abstention, 50.0% cross-module at 31.5 ms latency.
+     - **Arm B (Explicit Reasoning Supervision)**: 83.33% 1-hop, **75.00% 2-hop**, 58.33% 3-hop, 0% asymmetric, **75.00% counterfactual transfer**, 0% abstention, 41.67% cross-module at 32.1 ms latency.
+     - **Arm C (Language Foundation)**: 91.67% 1-hop, 58.33% 2-hop, 50.0% 3-hop, 58.33% counterfactual at 31.8 ms latency.
+     - **Arm D (Retrieval + Verified Graph Reasoner)**: **100.00%** across all categories at 0.018 ms latency.
+  4. **Key Scientific Bottlenecks Identified**:
+     - **Asymmetric Reversal Failure (0.00%)**: Standard attention mechanisms treat entity co-occurrence symmetrically. Directional contrastive training is required to distinguish `A contains B` from `B contains A`.
+     - **Abstention Failure (0.00%)**: Neural adapters hallucinate without explicit ungrounded contrastive objectives.
+  5. **Phase 4 Multi-Episode Sequential Curriculum (Cosmic -> Bio -> Compute -> Dynasties)**:
+     - Dynamic Modular Adapters: Mean retention **100.00% ± 0.00%**, BWT = **+0.0000** (zero backward regression; logic & carry capabilities 100% intact).
+  6. **Phase 5 Hybrid Task Routing**:
+     - Deterministic Heuristic Shield: **87.50%** accuracy at **0.009 ms** latency.
+     - Neural Router: 45.83% accuracy at 2.45 ms latency.
+     - Hybrid Router: 66.67% accuracy at 0.78 ms latency.
+  7. **Task-Specific Qualification Gates**:
+     - Operational Reasoning Gate: **PASS (100%)** (M18 deterministic operational baseline intact).
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (92/92 Pytest unit tests passed on Tesla T4).
+     - Two-Hop Compositional Gate: **QUALIFIED** (Arm A & B achieved 75.00% vs 50% target).
+     - Cumulative Retention Gate: **QUALIFIED (MODULAR)** (100.0% retention across 4 sequential episodes).
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain frozen.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain frozen.
+- **Next Direction Options (Post-M40 Strategic Priority)**:
+  - **Option 1 (Directional & Contrastive Relational Training for Asymmetry & Abstention)**: Introduce directional contrastive loss and explicit negative/ungrounded examples into adapter training to resolve the 0% asymmetry and 0% abstention bottlenecks.
+  - **Option 2 (Pretrained Natural Language Corpus Foundation Scaling)**: Pretrain a dedicated 1M language foundation on clean natural language corpora (e.g. TinyStories / WikiText) to provide rich syntactic and directional representations.
+  - **Option 3 (Dynamic Structural Branching)**: Combine modular adapter routing with low-rank channel gating to selectively activate sub-network branches based on input complexity.
+
