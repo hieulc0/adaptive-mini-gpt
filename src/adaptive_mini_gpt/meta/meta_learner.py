@@ -29,7 +29,7 @@ from adaptive_mini_gpt.model.modular_adapter import (
 )
 from adaptive_mini_gpt.meta.benchmark_suite import MetaFamilyDataset, MetaTask
 from adaptive_mini_gpt.model.transformer import MiniGPT
-from adaptive_mini_gpt.training.bpe import BPETokenizer
+from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
 
 logger = logging.getLogger("meta_learner")
 

@@ -24,7 +24,7 @@ from adaptive_mini_gpt.meta.meta_learner import MetaLearner
 from adaptive_mini_gpt.meta.tri_state_diagnostic import TriStateDiagnostic
 from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.model.config import ModelConfig
-from adaptive_mini_gpt.training.bpe import BPETokenizer
+from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
 
 
 @pytest.fixture
