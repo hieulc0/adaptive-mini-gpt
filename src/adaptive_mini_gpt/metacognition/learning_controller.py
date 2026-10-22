@@ -38,7 +38,7 @@ from adaptive_mini_gpt.model.modular_adapter import (
     set_active_domain_adapter,
 )
 from adaptive_mini_gpt.model.transformer import MiniGPT
-from adaptive_mini_gpt.reasoning.recurrent_arithmetic import rollout_recurrent_arithmetic
+from adaptive_mini_gpt.reasoning.recurrent_reasoner import rollout_recurrent_arithmetic
 
 logger = logging.getLogger("m35_controller")
 
