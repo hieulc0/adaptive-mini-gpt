@@ -161,7 +161,7 @@ def run_seed_m36_pipeline(
 
     # Train baseline M35 outcome-aware policy
     policy_m35 = NeuralMetacognitivePolicy(d_model=base_config.d_model).to(device)
-    train_tokens = [torch.tensor(tokenizer.encode(s.prompt), dtype=torch.long, device=device).unsqueeze(0) for s in train_samples]
+    train_tokens = [torch.tensor(tokenizer.encode(s.query), dtype=torch.long, device=device).unsqueeze(0) for s in train_samples]
     with torch.no_grad():
         train_pooled = torch.cat([policy_m35.extract_pooled_representation(base_model, tok) for tok in train_tokens], dim=0)
 
@@ -171,7 +171,7 @@ def run_seed_m36_pipeline(
     train_outcome_aware_policy(policy_m35, train_pooled, train_targets, train_utils, epochs=epochs, lr=lr)
 
     # Evaluate M35 on eval set
-    eval_tokens = [torch.tensor(tokenizer.encode(s.prompt), dtype=torch.long, device=device).unsqueeze(0) for s in eval_samples]
+    eval_tokens = [torch.tensor(tokenizer.encode(s.query), dtype=torch.long, device=device).unsqueeze(0) for s in eval_samples]
     m35_preds: list[LearningAction] = []
     m35_confs: list[float] = []
     m35_uncs: list[float] = []
@@ -211,7 +211,7 @@ def run_seed_m36_pipeline(
     # Build adversarial & contradictory eval set with explicit context & ambiguous queries
     gen = VerifiedCurriculumGenerator(seed=seed + 100)
     eval_evidence_feats = [
-        extract_evidence_features(s.prompt, s.context, predictive_entropy=u, is_repeated_failure=s.is_repeated_failure).to_tensor().to(device)
+        extract_evidence_features(s.query, s.context, predictive_entropy=u, is_repeated_failure=s.is_repeated_failure).to_tensor().to(device)
         for s, u in zip(eval_samples, m35_uncs)
     ]
     eval_evidence_tensor = torch.stack(eval_evidence_feats, dim=0)
@@ -226,7 +226,7 @@ def run_seed_m36_pipeline(
         if s.scenario == "missing_contradictory":
             train_samples_balanced.extend([s, s])
 
-    tokens_bal = [torch.tensor(tokenizer.encode(s.prompt), dtype=torch.long, device=device).unsqueeze(0) for s in train_samples_balanced]
+    tokens_bal = [torch.tensor(tokenizer.encode(s.query), dtype=torch.long, device=device).unsqueeze(0) for s in train_samples_balanced]
     with torch.no_grad():
         pooled_bal = torch.cat([policy_m35.extract_pooled_representation(base_model, tok) for tok in tokens_bal], dim=0)
     targets_bal = torch.tensor([ACTION_TO_IDX[s.optimal_action] for s in train_samples_balanced], dtype=torch.long, device=device)
@@ -240,7 +240,7 @@ def run_seed_m36_pipeline(
 
     # Policy C: Enhanced Policy with Explicit Uncertainty & Evidence Features
     train_evidence_feats = [
-        extract_evidence_features(s.prompt, s.context, predictive_entropy=0.3, is_repeated_failure=s.is_repeated_failure).to_tensor().to(device)
+        extract_evidence_features(s.query, s.context, predictive_entropy=0.3, is_repeated_failure=s.is_repeated_failure).to_tensor().to(device)
         for s in train_samples_balanced
     ]
     train_evidence_tensor = torch.stack(train_evidence_feats, dim=0)
