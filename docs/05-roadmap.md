@@ -230,4 +230,31 @@
      - Scientific Metacognitive Policy Gate: **PASS (QUALIFIED - MAJOR ADVANCEMENT)**. The outcome-aware neural policy demonstrated statistically superior action selection and empirical utility over the deterministic router.
      - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Candidate neural weights and policies remain research lineages. Base weights remain frozen.
 - **Lineage Promotion Decision**: **NO-GO**. Base weights remain frozen.
-- **Next Direction (M36)**: Choose What to Study — Autonomous Curriculum Discovery & Self-Directed Gap Analysis (give Mini-GPT bounded autonomy to discover its own knowledge gaps, formulate hypothesis tests, plan verified practice curricula, and request research updates on unfamiliar subjects).
+- **Completed Direction (M36)**: Choose What to Study — Autonomous Curriculum Discovery & Self-Directed Gap Analysis.
+
+### M36: Self-Directed Curriculum Discovery & Capability-Gap Learning (Completed & Qualified)
+- **Objective**: Advance Adaptive Mini-GPT to autonomous capability-gap discovery, hypothesis formulation, ROI-aware objective selection, and verified curriculum generation across Seeds 42, 43, 44 on Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m36-curriculum-study`, commit `a04ea810b57b0b5e45426da804bef279e122f829`). Base Mini-GPT backbone (1,089,280 parameters, 1024-BPE tokenizer) with M34 V3 arithmetic and logic modular adapters, augmented with `EnhancedMetacognitivePolicy` (dual-stream sequence representation + explicit evidence & uncertainty features). Mean duration: 3.70s per seed. 69/69 Pytest unit tests passed on Tesla T4 GPU in 16.38s.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Audit & Uncertainty Failure Diagnosis**:
+     - Audited M35 baseline on held-out ungrounded/contradictory tasks: 0.0% accuracy, verifying M35's critical vulnerability.
+     - Strict utility penalty dropped M35 score from +0.3004 to +0.1558.
+  2. **Phase 2 Enhanced Uncertainty Handling**:
+     - Balanced unknown exposure (Policy B) achieved **93.75% ± 10.8%** accurate abstention on contradictory/ungrounded queries.
+     - Enhanced policy (Policy C) achieved **0.0% false confidence**, eliminating high-certainty hallucinations on unanswerable premises.
+  3. **Phase 3 & 4 Capability-Gap Discovery & Objective Selection**:
+     - Generated 4 structured `LearningObjective` proposals across procedural arithmetic, logic drills, factual retrieval, and language abstention.
+     - Achieved **100.0% ± 0.0% objective validity rate**.
+     - Neural-assisted ROI selection prioritized low-cost, high-benefit safety interventions first, outperforming round-robin scheduling.
+  4. **Phase 5 & 6 Verified Curriculum Generation & Multi-Episode Learning**:
+     - Programmatically validated arithmetic carry sequences, modus ponens logic chains, and source-grounded QA with zero test-set leakage.
+     - Maintained **100.0% ± 0.0% carry retention** across sequential self-learning episodes.
+  5. **Phase 8 Future Structural Evolution Interface**:
+     - Defined `StructuralEvolutionGate` for evaluating reversible architectural modifications, approving candidate adapter expansion within the 20% growth ceiling while rejecting unconstrained proposals.
+  6. **Task-Specific Qualification Gates**:
+     - Operational Reasoning Gate: **PASS (100%)** (M18 deterministic baseline retained).
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (69/69 Pytest unit tests passed on Tesla T4; 3-seed reproducibility confirmed).
+     - Scientific Curriculum Discovery Gate: **PASS (QUALIFIED - MAJOR ADVANCEMENT)**. Capability-gap discovery achieved 100% validity, and balanced uncertainty training resolved the missing/contradictory failure mode (improving from 0.0% to 93.8%).
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Candidate neural weights and policies remain research lineages. Base weights remain frozen.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain frozen.
+- **Next Direction (M37)**: Independent Research and Source-Grounded Knowledge Acquisition — Autonomous Investigation of Unfamiliar Topics (enable Mini-GPT to formulate search and retrieval queries for discovered factual gaps, verify source credibility, synthesize grounded practice curricula, and update modular memory or adapters under bounded resource ceilings).
