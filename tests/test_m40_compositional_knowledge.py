@@ -26,10 +26,10 @@ from adaptive_mini_gpt.model.modular_adapter import (
 from adaptive_mini_gpt.model.transformer import MiniGPT
 
 
-def _create_minimal_test_model() -> MiniGPT:
+def _create_minimal_test_model(vocab_size: int = 300) -> MiniGPT:
     """Create a minimal MiniGPT for fast unit test execution."""
     cfg = ModelConfig(
-        vocab_size=128,
+        vocab_size=vocab_size,
         context_length=64,
         d_model=32,
         n_layers=2,
@@ -42,8 +42,8 @@ def _create_minimal_test_model() -> MiniGPT:
 
 def _create_dummy_tokenizer() -> BPETokenizer:
     tok = BPETokenizer()
-    tok.vocab_size = 128
-    tok.eos_id = 0
+    corpus = "Newton force mass acceleration F ma mitochondria ATP cell Alan Turing 1936 Gutenberg 1440 0 1 2 3 4 5 6 7 8 9 + = : [STATE] [OUT] d c abstain Question Answer logic Socrates mortal Zorblax Nexus-4 Vortice Celestia Krypton-9 Epsilon-3 Pyron-1 Glapton Xyphos-7 Morvan-Prime inside precede connected_to power [PREMISES] [THINK] [ANSWER] yes no"
+    tok.train(corpus, target_vocab_size=300)
     return tok
 
 
@@ -102,8 +102,8 @@ def test_m40_benchmark_dataset_integrity() -> None:
 
 def test_m39_baseline_audit_record() -> None:
     """Verify Phase 1 audit record generation and hash invariance verification."""
-    model = _create_minimal_test_model()
     tok = _create_dummy_tokenizer()
+    model = _create_minimal_test_model(tok.vocab_size)
     dev = torch.device("cpu")
     initial_hash = compute_base_model_hash(model)
 
@@ -155,8 +155,8 @@ def test_hybrid_routing_engine_behavior() -> None:
 
 def test_composition_trainer_adapter_optimization() -> None:
     """Test that reasoning supervision pairs train on a minimal modular adapter."""
-    model = _create_minimal_test_model()
     tok = _create_dummy_tokenizer()
+    model = _create_minimal_test_model(tok.vocab_size)
     dev = torch.device("cpu")
 
     inject_multi_domain_adapters(model, target_modules=["c_attn", "c_proj", "c_fc"], r=4)
