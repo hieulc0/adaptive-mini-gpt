@@ -68,7 +68,7 @@ def test_mathematical_base_invariance_during_adapter_training() -> None:
         d_ff=64,
     )
     model = MiniGPT(cfg)
-    inject_multi_domain_adapters(model, r=4)
+    inject_multi_domain_adapters(model)
 
     base_hash_init = compute_base_model_hash(model)
 
@@ -105,7 +105,7 @@ def test_adapter_state_dict_save_and_load() -> None:
         d_ff=64,
     )
     model = MiniGPT(cfg)
-    inject_multi_domain_adapters(model, r=4)
+    inject_multi_domain_adapters(model)
     add_domain_adapter(model, "logic", r=4)
 
     # Mutate adapter parameters
@@ -145,7 +145,7 @@ def test_modular_lineage_manager() -> None:
             d_ff=64,
         )
         model = MiniGPT(cfg)
-        inject_multi_domain_adapters(model, r=4)
+        inject_multi_domain_adapters(model)
 
         rec_root = mgr.register_foundation(model, foundation_id="V1", description="Test Foundation")
         assert rec_root.version_id == "V1"

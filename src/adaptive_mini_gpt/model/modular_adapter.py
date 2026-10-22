@@ -129,6 +129,7 @@ class MultiAdapterLinear(nn.Module):
 def inject_multi_domain_adapters(
     model: MiniGPT,
     target_modules: list[str] | None = None,
+    r: int = 8,
 ) -> tuple[MiniGPT, int]:
     """Convert linear layers in transformer blocks to MultiAdapterLinear.
 
