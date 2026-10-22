@@ -73,6 +73,7 @@ def test_mathematical_base_invariance_during_adapter_training() -> None:
     base_hash_init = compute_base_model_hash(model)
 
     add_domain_adapter(model, "arithmetic", r=4)
+    set_active_domain_adapter(model, "arithmetic")
     trainable, frozen = freeze_for_adapter_training(model, "arithmetic")
     assert trainable > 0
     assert frozen > 0

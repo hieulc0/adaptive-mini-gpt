@@ -202,6 +202,7 @@ def freeze_for_adapter_training(
     Returns:
         (trainable_parameters, frozen_parameters)
     """
+    set_active_domain_adapter(model, target_domain)
     trainable = 0
     frozen = 0
 
