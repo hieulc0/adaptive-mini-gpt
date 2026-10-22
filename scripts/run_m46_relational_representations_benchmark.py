@@ -22,7 +22,10 @@ from typing import Any
 import numpy as np
 import torch
 
-from adaptive_mini_gpt.data.bpe_scaling import train_scaled_bpe_tokenizer
+from adaptive_mini_gpt.data.bpe_scaling import (
+    expand_model_vocabulary,
+    train_scaled_bpe_tokenizer,
+)
 from adaptive_mini_gpt.data.language_corpus import PRETRAIN_PROSE_CORPUS
 from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.modular_adapter import compute_base_model_hash
@@ -69,11 +72,17 @@ def run_seed_m46_benchmark(
     torch.manual_seed(seed)
     np.random.seed(seed)
 
-    # 1. Load immutable M18 base model
+    # 1. Load immutable M18 base model with expanded vocabulary
     raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_path)
-    base_config = ModelConfig(**raw_ckpt["model_config"])
-    base_model = MiniGPT(base_config).to(device)
-    base_model.load_state_dict(raw_ckpt["model_state_dict"])
+    base_tok = CheckpointManager.load_tokenizer(raw_ckpt)
+    state_dict = raw_ckpt.get("model_state_dict", raw_ckpt.get("model_state"))
+    base_model_orig = MiniGPT(ModelConfig(**raw_ckpt["model_config"]))
+    base_model_orig.load_state_dict(state_dict)
+    base_model = expand_model_vocabulary(
+        model=base_model_orig,
+        old_tokenizer=base_tok,
+        new_tokenizer=tokenizer,
+    ).to(device)
     base_model.eval()
 
     base_hash = compute_base_model_hash(base_model)
@@ -118,59 +127,52 @@ def run_seed_m46_benchmark(
         f"UNK Recall={arm_b.unknown_recall*100:.2f}%, ECE={arm_b.expected_calibration_error:.4f}"
     )
     logger.info(
-        f"Arm C (Contrastive Supervised): Acc={arm_c.overall_accuracy*100:.2f}%, MacroF1={arm_c.macro_f1:.4f}, "
+        f"Arm C (Contrastive+Supervised): Acc={arm_c.overall_accuracy*100:.2f}%, MacroF1={arm_c.macro_f1:.4f}, "
         f"UNK Recall={arm_c.unknown_recall*100:.2f}%, ECE={arm_c.expected_calibration_error:.4f}"
     )
     logger.info(
-        f"Arm D (External Verified Reasoner): Acc={arm_d.overall_accuracy*100:.2f}%, MacroF1={arm_d.macro_f1:.4f}"
+        f"Arm D (External Reasoner): Acc={arm_d.overall_accuracy*100:.2f}%, MacroF1={arm_d.macro_f1:.4f}, "
+        f"UNK Recall={arm_d.unknown_recall*100:.2f}%"
     )
 
     # Phase 5: Independent Representation Evaluation
     logger.info("--- Phase 5: Independent Representation Evaluation ---")
     rep_evaluator = IndependentRepresentationEvaluator(base_model, tokenizer, device)
-    rep_metrics = rep_evaluator.evaluate_representation_quality(list(worlds.values()))
+    rep_metrics = rep_evaluator.evaluate_representation_quality(target_world)
     logger.info(
         f"Representation Evaluation: Topology Acc={rep_metrics.topology_classification_accuracy*100:.1f}%, "
         f"Connectivity Acc={rep_metrics.connectivity_classification_accuracy*100:.1f}%, "
         f"Direction Acc={rep_metrics.direction_discrimination_accuracy*100:.1f}%, "
-        f"Margin={rep_metrics.embedding_separation_margin:.4f}, "
-        f"Heuristic Baseline Acc={rep_metrics.non_neural_heuristic_accuracy*100:.1f}%"
+        f"Margin={rep_metrics.embedding_separation_margin:.4f} (Heuristic Ref={rep_metrics.non_neural_heuristic_accuracy*100:.1f}%)"
     )
 
     # Phase 6: Epistemic Uncertainty & Selective Risk
-    logger.info("--- Phase 6: Epistemic Calibration & Selective Risk ---")
-    tri_head = TriStateClassificationHead(d_model=base_config.d_model, num_classes=3).to(device)
-    ep_eval = EpistemicGeneralizationEvaluator(base_model, tri_head, tokenizer, device)
-    calibrated_thresh = ep_eval.calibrate_threshold(target_world.validation_pool)
-    selective_risk = ep_eval.evaluate_selective_risk(target_world.held_out_test_pool, calibrated_thresh)
+    logger.info("--- Phase 6: Epistemic Uncertainty & Selective Risk Evaluation ---")
+    epistemic_evaluator = EpistemicGeneralizationEvaluator(base_model, tokenizer, device)
+    # Train candidate tri-state head on target_world's practice pool
+    tri_head = TriStateClassificationHead(d_model=base_model.config.d_model, num_classes=3).to(device)
+    arms_benchmark._train_head(tri_head, target_world.train_practice_pool[:16], epochs=25, lr=2e-3)
+    selective_risk = epistemic_evaluator.evaluate_selective_risk(tri_head, target_world.balanced_test_set)
     logger.info(
-        f"Selective Risk (Thresh={calibrated_thresh:.2f}): Coverage 100% Acc={selective_risk.coverage_100_accuracy*100:.1f}%, "
-        f"Coverage 80% Acc={selective_risk.coverage_80_accuracy*100:.1f}%, "
-        f"Coverage 50% Acc={selective_risk.coverage_50_accuracy*100:.1f}%, "
-        f"Abstention Precision={selective_risk.abstention_precision*100:.1f}%"
+        f"Selective Risk: Cov 100% Acc={selective_risk.coverage_100_accuracy*100:.1f}% | "
+        f"Cov 80% Acc={selective_risk.coverage_80_accuracy*100:.1f}% | "
+        f"Cov 50% Acc={selective_risk.coverage_50_accuracy*100:.1f}% | Abstention Quality={selective_risk.abstention_quality:.4f}"
     )
 
     # Phase 7: Corrective Adaptation and Learning Efficiency
-    logger.info("--- Phase 7: Corrective Learning Efficiency & Wall-Clock Timing ---")
+    logger.info("--- Phase 7: Corrective Adaptation & Learning Efficiency Curves ---")
     eff_runner = CorrectiveEfficiencyRunner(base_model, tokenizer, device)
-    eff_fresh = eff_runner.run_strategy_benchmark("FRESH_LEARNER", target_world)
-    eff_uniform = eff_runner.run_strategy_benchmark("UNIFORM_PRACTICE", target_world)
-    eff_corrective = eff_runner.run_strategy_benchmark("ERROR_TARGETED_CORRECTIVE", target_world)
+    eff_fresh = eff_runner.run_fresh_learner(target_world, budgets=[0, 2, 4, 8, 16, 32], epochs=25)
+    eff_uniform = eff_runner.run_uniform_practice(target_world, budgets=[0, 2, 4, 8, 16, 32], epochs=25)
+    eff_corrective = eff_runner.run_error_targeted_corrective(target_world, budgets=[0, 2, 4, 8, 16, 32], epochs=25)
 
     logger.info(
-        f"Fresh Learner: Final Acc={eff_fresh.final_accuracy*100:.2f}%, AUC={eff_fresh.area_under_curve:.4f}, "
-        f"UNK Recall={eff_fresh.final_unknown_recall*100:.2f}%, GPU Duration={eff_fresh.total_duration_seconds:.2f}s"
-    )
-    logger.info(
-        f"Uniform Practice: Final Acc={eff_uniform.final_accuracy*100:.2f}%, AUC={eff_uniform.area_under_curve:.4f}, "
-        f"UNK Recall={eff_uniform.final_unknown_recall*100:.2f}%, GPU Duration={eff_uniform.total_duration_seconds:.2f}s"
-    )
-    logger.info(
-        f"Error-Targeted Corrective: Final Acc={eff_corrective.final_accuracy*100:.2f}%, AUC={eff_corrective.area_under_curve:.4f}, "
-        f"UNK Recall={eff_corrective.final_unknown_recall*100:.2f}%, GPU Duration={eff_corrective.total_duration_seconds:.2f}s"
+        f"Learning Efficiency AUC: Fresh={eff_fresh.learning_curve_auc:.4f} ({eff_fresh.gpu_time_seconds:.1f}s) | "
+        f"Uniform={eff_uniform.learning_curve_auc:.4f} ({eff_uniform.gpu_time_seconds:.1f}s) | "
+        f"Corrective={eff_corrective.learning_curve_auc:.4f} ({eff_corrective.gpu_time_seconds:.1f}s)"
     )
 
-    # Verify Cryptographic Base Invariance
+    # Base hash invariance check
     final_base_hash = compute_base_model_hash(base_model)
     hash_invariant = (final_base_hash == base_hash)
     if not hash_invariant:
@@ -248,44 +250,32 @@ def aggregate_m46_results(seed_results: list[dict[str, Any]]) -> dict[str, Any]:
     cov_100 = [r["phase6_epistemic_selective_risk"]["coverage_100_accuracy"] for r in seed_results]
     cov_80 = [r["phase6_epistemic_selective_risk"]["coverage_80_accuracy"] for r in seed_results]
     cov_50 = [r["phase6_epistemic_selective_risk"]["coverage_50_accuracy"] for r in seed_results]
-    abstention_p = [r["phase6_epistemic_selective_risk"]["abstention_precision"] for r in seed_results]
 
-    # Phase 7: Efficiency
-    fresh_auc = [r["phase7_learning_efficiency"]["fresh_learner"]["area_under_curve"] for r in seed_results]
-    fresh_final = [r["phase7_learning_efficiency"]["fresh_learner"]["final_accuracy"] for r in seed_results]
-    fresh_time = [r["phase7_learning_efficiency"]["fresh_learner"]["total_duration_seconds"] for r in seed_results]
+    # Phase 7: Efficiency AUC
+    fresh_auc = [r["phase7_learning_efficiency"]["fresh_learner"]["learning_curve_auc"] for r in seed_results]
+    uniform_auc = [r["phase7_learning_efficiency"]["uniform_practice"]["learning_curve_auc"] for r in seed_results]
+    corr_auc = [r["phase7_learning_efficiency"]["error_targeted_corrective"]["learning_curve_auc"] for r in seed_results]
+    corr_gpu_time = [r["phase7_learning_efficiency"]["error_targeted_corrective"]["gpu_time_seconds"] for r in seed_results]
 
-    uniform_auc = [r["phase7_learning_efficiency"]["uniform_practice"]["area_under_curve"] for r in seed_results]
-    uniform_final = [r["phase7_learning_efficiency"]["uniform_practice"]["final_accuracy"] for r in seed_results]
-    uniform_time = [r["phase7_learning_efficiency"]["uniform_practice"]["total_duration_seconds"] for r in seed_results]
-
-    corr_auc = [r["phase7_learning_efficiency"]["error_targeted_corrective"]["area_under_curve"] for r in seed_results]
-    corr_final = [r["phase7_learning_efficiency"]["error_targeted_corrective"]["final_accuracy"] for r in seed_results]
-    corr_time = [r["phase7_learning_efficiency"]["error_targeted_corrective"]["total_duration_seconds"] for r in seed_results]
-
-    # Qualification Logic
-    pos_control_success = mean_std(pos_train_acc)["mean"] >= 0.80
-    rep_margin_positive = mean_std(margin)["mean"] > 0.0
-    epistemic_unk_broken = mean_std(arm_c_unk)["mean"] > 0.10
+    # Qualification checks
+    rep_margin_positive = mean_std(margin)["mean"] > 0.05
+    epistemic_unk_broken = mean_std(arm_c_unk)["mean"] > 0.20
     efficiency_gain = mean_std(corr_auc)["mean"] > mean_std(fresh_auc)["mean"]
 
     return {
-        "metadata": {
-            "experiment": "M46 Relational Representation Learning and Epistemic Generalization",
-            "device": "Kaggle Tesla T4 GPU",
-            "seeds": [r["seed"] for r in seed_results],
-            "total_wall_clock_seconds": round(sum(r["duration_seconds"] for r in seed_results), 2),
-        },
-        "phase2_positive_control_summary": {
+        "milestone": "M46",
+        "title": "Relational Representation Learning and Epistemic Generalization",
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
+        "seeds_evaluated": [r["seed"] for r in seed_results],
+        "device": str(seed_results[0]["duration_seconds"]),
+        "phase1_audit_summary": seed_results[0]["phase1_audit"]["phase1_audit_verdict"],
+        "phase2_positive_control": {
             "adapter_train_accuracy": mean_std(pos_train_acc),
             "adapter_held_out_accuracy": mean_std(pos_held_out_acc),
             "adapter_final_loss": mean_std(pos_final_loss),
-            "verdict": (
-                "PASS: 128-dimensional backbone + adapter successfully learned the balanced 3-way probe, "
-                f"achieving {mean_std(pos_train_acc)['mean']*100:.1f}% train accuracy with loss {mean_std(pos_final_loss)['mean']:.4f}."
-            ),
+            "optimization_gate": "PASSED (100% train accuracy reached on 3-class probe)" if mean_std(pos_train_acc)["mean"] > 0.99 else "FAILED",
         },
-        "phase4_relational_arms_summary": {
+        "phase4_relational_arms": {
             "arm_a_m45_baseline": {
                 "overall_accuracy": mean_std(arm_a_acc),
                 "macro_f1": mean_std(arm_a_f1),
@@ -309,35 +299,23 @@ def aggregate_m46_results(seed_results: list[dict[str, Any]]) -> dict[str, Any]:
                 "macro_f1": mean_std(arm_d_f1),
             },
         },
-        "phase5_representation_evaluation_summary": {
+        "phase5_independent_representation": {
             "topology_classification_accuracy": mean_std(topo_acc),
             "connectivity_classification_accuracy": mean_std(conn_acc),
             "direction_discrimination_accuracy": mean_std(dir_acc),
             "embedding_separation_margin": mean_std(margin),
             "non_neural_heuristic_accuracy": mean_std(h_acc),
         },
-        "phase6_epistemic_selective_risk_summary": {
+        "phase6_epistemic_selective_risk": {
             "coverage_100_accuracy": mean_std(cov_100),
             "coverage_80_accuracy": mean_std(cov_80),
             "coverage_50_accuracy": mean_std(cov_50),
-            "abstention_precision": mean_std(abstention_p),
         },
-        "phase7_learning_efficiency_summary": {
-            "fresh_learner": {
-                "area_under_curve": mean_std(fresh_auc),
-                "final_accuracy": mean_std(fresh_final),
-                "duration_seconds": mean_std(fresh_time),
-            },
-            "uniform_practice": {
-                "area_under_curve": mean_std(uniform_auc),
-                "final_accuracy": mean_std(uniform_final),
-                "duration_seconds": mean_std(uniform_time),
-            },
-            "error_targeted_corrective": {
-                "area_under_curve": mean_std(corr_auc),
-                "final_accuracy": mean_std(corr_final),
-                "duration_seconds": mean_std(corr_time),
-            },
+        "phase7_learning_efficiency": {
+            "fresh_auc": mean_std(fresh_auc),
+            "uniform_auc": mean_std(uniform_auc),
+            "corrective_auc": mean_std(corr_auc),
+            "corrective_gpu_time_seconds": mean_std(corr_gpu_time),
         },
         "scientific_qualification_gates": {
             "engineering_qualification_gate": "PASS (100% reproducible tests, base model hashes cryptographically invariant).",
@@ -379,9 +357,8 @@ def main() -> None:
     report = aggregate_m46_results(seed_results)
 
     report_path = args.output_dir / "m46_report.json"
-    with open(report_path, "w") as f:
-        json.dump(report, f, indent=2)
-    logger.info(f"M46 Benchmark complete! Report saved to {report_path}")
+    report_path.write_text(json.dumps(report, indent=2))
+    logger.info(f"M46 Benchmark finished successfully. Full report saved to {report_path}")
 
 
 if __name__ == "__main__":
