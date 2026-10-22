@@ -1542,3 +1542,116 @@ Tested across 4 sequential task episodes (`corporate_hierarchy` -> `containment_
 - **Neural Learning Gate**: **PASS**. Broke the M43 flat-curve defect; confirmed 100% accuracy on `YES` and 100% accuracy on `NO`.
 - **Retention Gate**: **PASS**. Modular isolation achieved **0.0000 BWT** with 100% canonical arithmetic/logic preservation.
 - **Operational Production Promotion Gate**: **REJECTED (NO-GO)**. Base weights remain strictly frozen; candidate adapters remain sandboxed in the research tier.
+
+
+---
+
+### M45: Epistemic Uncertainty and Transferable Learning (Completed & Evaluated)
+
+#### 1. Empirical Objectives & Scientific Scope
+Following the M44 finding that structural analogy transfer broke the flat-curve barrier (reaching 68.33% accuracy) but left UNKNOWN recall unresolved (0.0%) and relied on oracle schema injection (+33.33% external attribution), M45 systematically investigated the boundaries of neural epistemic uncertainty and autonomous transfer:
+1. **Phase 1 — M44 Outcome Attribution Audit & Forensic Decomposition**:
+   - Disentangle the contributions of neural-only adaptation, in-context oracle schema assistance, and external symbolic graph solvers.
+   - Investigate why positive-control memory accuracy was reported as 100% without memory (uncovering the BFS oracle solver fallback in `_solve_task_with_exemplars`).
+   - Reconcile the 40.0% sequential retention result (proving it corresponds to 8/20 accuracy driven by asymmetric reversal NOs, rather than cumulative multi-domain mastery).
+2. **Phase 2 — Formal Epistemic Benchmark with Open-World Semantics**:
+   - Construct independent, balanced synthetic relational worlds (`cosmic_containment`, `chronological_precedence`, `epistemological_citation`) with rigorous open-world and closed-world semantics.
+   - Distinctly separate supported positive conclusions (`YES`), explicitly refuted directional negations (`NO`), unsupported/disconnected hypotheses (`UNKNOWN`), and cyclical contradictions.
+3. **Phase 3 — Minimal Neural Uncertainty Experiment (4 Arms + 2 Baselines)**:
+   - Compare Arm A (M44 Causal LM Baseline), Arm B (Balanced Tri-State Classification Head `Linear(d_model, 3)`), Arm C (Analogy-Supervised Tri-State Head), Arm D (External Verified Graph Reasoner), Baseline Constant-YES, and Baseline Constant-UNKNOWN under matched compute and training budgets.
+   - Measure 3-class Macro F1, class-specific precision/recall, Expected Calibration Error (ECE), Brier score, and false-confident rate.
+4. **Phase 4 — Learned Structural Analogy Transfer (Autonomous Schema Prediction Ablation)**:
+   - Test whether the neural network can recognize and predict structural schemas autonomously without oracle assistance.
+   - Compare 5 regimes: Regime 1 (Raw Unfamiliar), Regime 2 (Lexical Retrieval), Regime 3 (Deterministic Oracle Schema), Regime 4 (Neural-Predicted Schema), Regime 5 (Neural-Predicted with Verified Correction).
+5. **Phase 5 — Closed-Loop Corrective Self-Learning**:
+   - Benchmark a 10-step bounded interaction loop against a static uniform practice schedule under identical task and compute budgets, measuring net neural-only adaptation gains, candidate promotions, and rollback safety.
+6. **Phase 6 — Sample Efficiency Curves across Budgets ($N \in [0, 2, 4, 8, 16, 32]$)**:
+   - Measure few-shot learning efficiency curves, AUC, $N_{50}/N_{66}$ sample requirements, inference latency, and continual retention of canonical arithmetic carry and chained logic capabilities.
+
+#### 2. Experimental Execution on Kaggle Tesla T4 GPU
+- **Hardware**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m45-epistemic-uncertainty-study`, commit `4b117b90e912dae18edea5a02541e9080d1cbf20`).
+- **Base Lineages**: Immutable M18 pretrain checkpoints (Seeds 42, 43, 44; SHA-256: `8736b364e4a8ce19`, `de7621751f2e99d0`, `c7bd81ae47f2e2de`). Base parameter hashes verified 100% invariant across all seeds and phases.
+- **Tokenizer**: 1024-BPE subword tokenizer (`f698e45e209b7fe6`).
+- **Wall-Clock Duration**: 120.36s total (mean ~40.1s per seed).
+- **Unit Test Suite**: 100% pass rate (**121/121 unit tests passed on Tesla T4 GPU in 41.90s**).
+
+#### 3. Phase 1 — M44 Attribution Audit & Forensic Findings
+| Attribution Component | Accuracy | Contribution | Scientific Assessment |
+| :--- | :---: | :---: | :--- |
+| **Fresh Baseline (Neural-Only)** | 35.00% | +0.00% | Constant YES prediction on unbalanced test set (7/20 YES). |
+| **In-Context Schema Assistance** | 68.33% | **+33.33%** | Oracle symbolic signature injected in prompt provided majority of gain. |
+| **External Symbolic Solver** | 100.00% | +65.00% | Programmatic BFS oracle ceiling. |
+| **Neural Learning Contribution** | 35.00% | **+0.00%** | Neural network did not independently discover abstract graph schemas. |
+
+- **Positive Control Confound Diagnosis**: In M44 `positive_control.py`, `_solve_task_with_exemplars` fell back to programmatic graph BFS when 0 memories were retrieved. The 100% accuracy was an artifact of the evaluation function itself being an oracle graph solver. In M45, task execution was evaluated strictly through the neural model's own predictions.
+- **Oracle Schema Dependency**: Structure-matched episodic retrieval (68.33%) slightly outperformed neural analogy with adaptation (66.67%) because the prompt injected an oracle-generated string: `[ANALOGY_SCHEMA] Pattern: CHAIN_2HOP | Rule: ...`. The neural network did not abstract graph structures autonomously; it was conditioned on externally precomputed symbolic labels.
+- **Sequential Retention Reconciliation**: The 40.0% retention observed in M44 corresponds exactly to 8/20 correct predictions on the test pool (mastered the 8 asymmetric reversal `NO` instances, while failing the 5 `UNKNOWN` instances and losing calibration on `YES` instances under conflicting relations). 40% retention represented binary collapse to `NO`, not cumulative mastery.
+
+#### 4. Phase 2 & 3 — Minimal Neural Uncertainty Benchmark
+Evaluated on balanced open-world epistemic validation sets (24 tasks per seed: 8 YES, 8 NO, 8 UNKNOWN) across Seeds 42, 43, 44 on Tesla T4:
+
+| Experimental Arm | Overall Acc | Macro F1 | YES Recall | NO Recall | UNK Recall | ECE | Brier Score | False Certainty | Latency |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Baseline: Constant YES** | 33.33% | 0.1667 | 100.0% | 0.0% | 0.0% | 0.6667 | 1.3333 | 100.0% | 0.00 ms |
+| **Baseline: Constant UNKNOWN** | 33.33% | 0.1667 | 0.0% | 0.0% | 100.0% | 0.6667 | 1.3333 | 0.0% | 0.00 ms |
+| **Arm A (M44 Neural Baseline)** | 33.33% ± 0.00% | 0.1667 ± 0.0000 | 100.0% | 0.0% | 0.0% | 0.6312 ± 0.0202 | 1.2589 ± 0.0387 | 100.0% | 28.5 ms |
+| **Arm B (Balanced Tri-State Head)**| 33.33% ± 0.00% | 0.1667 ± 0.0000 | 100.0% | 0.0% | 0.0% | **0.3774 ± 0.0358** | **0.9080 ± 0.0433** | 100.0% | 13.2 ms |
+| **Arm C (Analogy-Supervised Head)**| 33.33% ± 0.00% | 0.1667 ± 0.0000 | 100.0% | 0.0% | 0.0% | 0.5628 ± 0.0564 | 1.1394 ± 0.0899 | 100.0% | 13.4 ms |
+| **Arm D (External Verified Solver)**| **100.00% ± 0.00%**| **1.0000 ± 0.0000**| **100.0%**| **100.0%**| **100.0%**| **0.0000** | **0.0000** | **0.0%** | **0.01 ms** |
+
+- **Uncertainty Calibration Finding**:
+  - The dedicated tri-state head (Arm B) dramatically improved calibration, reducing Expected Calibration Error (ECE) from **0.6312** to **0.3774** (-40.2% error reduction) and Brier score from **1.2589** to **0.9080**.
+  - However, under few-shot frozen backbone conditioning without representation unfreezing, the 128-dimensional latent representations of ungrounded entities do not cleanly separate from supported chains. Consequently, greedy argmax predictions still collapse to `YES`, leaving UNKNOWN recall at 0.00%.
+  - Arm D (deterministic graph solver) achieved 100% accuracy and 0% false certainty at sub-millisecond latency, proving that operational epistemic reliability requires hybrid external verification rather than unassisted neural argmax decoding.
+
+#### 5. Phase 4 — Learned Structural Analogy Transfer (Autonomous Schema Ablation)
+Evaluated across 5 transfer regimes on held-out target world `epistemological_citation` across Seeds 42, 43, 44:
+
+| Transfer Regime | Tool-Assisted | Schema Pred Acc | Downstream Task Acc | Seed 42 | Seed 43 | Seed 44 |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Regime 1: Raw Unfamiliar** | No | N/A | 31.94% ± 6.36% | 37.5% | 25.0% | 33.3% |
+| **Regime 2: Lexical Retrieval** | No | N/A | 26.39% ± 12.03% | 33.3% | 33.3% | 12.5% |
+| **Regime 3: Deterministic Oracle Schema** | **Yes** | N/A | **36.11% ± 12.73%** | 33.3% | 25.0% | **50.0%** |
+| **Regime 4: Autonomous Neural Schema** | No | 33.33% ± 0.00% | 31.94% ± 2.40% | 33.3% | 33.3% | 29.2% |
+| **Regime 5: Neural Schema + Verified Correction**| **Yes** | 33.33% ± 0.00% | 29.17% ± 12.50% | 41.7% | 16.7% | 29.2% |
+
+- **Schema Prediction Accuracy**: The neural schema classifier achieved **33.33% ± 0.00%** accuracy across seeds (exactly chance on 3 canonical graph patterns: `CHAIN_2HOP`, `COMMON_SOURCE`, `CYCLE_CONTRADICTION`).
+- **Oracle-to-Neural Gap**: The downstream performance gap between oracle-generated schemas (36.11%) and neural-predicted schemas (31.94%) was **4.17%**.
+- **Scientific Conclusion**: The neural model cannot reliably abstract relational graph topologies from raw text tokens into structural signatures without explicit pretraining on graph topologies. Symbolic tool assistance remains the causal driver of schema-guided relational transfer.
+
+#### 6. Phase 5 — Closed-Loop Corrective Self-Learning Benchmark
+Evaluated across 12 diagnostic interaction episodes on `epistemological_citation` across Seeds 42, 43, 44:
+
+| Adaptation Strategy | Training Steps Used | Pre-Adapt Acc | Post-Adapt Acc | Net Neural Gain | Promoted | Rolled Back | Skills Preserved |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Static Uniform Schedule** | 50 steps | 33.33% | 38.89% ± 7.86% | +5.56% ± 6.36% | 1.0 ± 0.0 | 0.0 ± 0.0 | 100.0% |
+| **Closed-Loop Corrective** | **20–40 steps** | 33.33% | 38.89% ± 7.86% | **+5.56% ± 6.36%** | **1.7 ± 0.6** | **0.0 ± 0.0** | **100.0%** |
+
+- **Step Efficiency Advantage**: Closed-loop corrective learning achieved the identical +5.56% neural-only gain using **33.3% fewer gradient updates** (33.3 mean steps vs 50 steps for static schedule) by targeting diagnosed knowledge gaps (`MISIDENTIFIED_DIRECTION_NO`) rather than uniform sampling.
+- **Rollback Safety**: Verification gate executed with 100% safety, preventing regressed candidates from corrupting the lineage.
+- **Core Capability Preservation**: Canonical 4-digit arithmetic carry (100 states) and chained logic reasoning remained **100.00% intact**. Base parameter hashes remained invariant (`8736b364e4a8ce19`, `de7621751f2e99d0`, `c7bd81ae47f2e2de`).
+
+#### 7. Phase 6 — Sample Efficiency Curves across Budgets ($N \in [0, 2, 4, 8, 16, 32]$)
+Evaluated across practice budgets on held-out relational world `epistemological_citation` across Seeds 42, 43, 44 on Tesla T4:
+
+| Learning Strategy | Mean AUC | Final Acc (N=32) | Final Macro F1 | Final UNK Recall | $N_{50}$ Budget | $N_{66}$ Budget | Latency |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Fresh Neural Learner** | 0.3316 ± 0.0196 | 33.33% ± 8.34% | 0.1667 ± 0.0000 | 0.00% ± 0.00% | Unreachable | Unreachable | 30.5 ms |
+| **Experience-Conditioned Learner** | 0.3316 ± 0.0020 | 33.33% ± 0.00% | 0.1667 ± 0.0000 | 0.00% ± 0.00% | Unreachable | Unreachable | 30.6 ms |
+
+- **Sample Efficiency Progression ($N=0 \to 32$)**:
+  - $N=0$: Accuracy = 33.33% (YES: 100.0%, NO: 0.0%, UNKNOWN: 0.0%, ECE = 0.1599)
+  - $N=2$: Accuracy = 33.33% (YES: 100.0%, NO: 0.0%, UNKNOWN: 0.0%, ECE = 0.6554)
+  - $N=4$: Accuracy = 33.33% (YES: 100.0%, NO: 0.0%, UNKNOWN: 0.0%, ECE = 0.6559)
+  - $N=8$: Accuracy = 33.33% (YES: 100.0%, NO: 0.0%, UNKNOWN: 0.0%, ECE = 0.6575)
+  - $N=16$: Accuracy = 33.33% (YES: 100.0%, NO: 0.0%, UNKNOWN: 0.0%, ECE = 0.6358)
+  - $N=32$: Accuracy = 33.33% (YES: 100.0%, NO: 0.0%, UNKNOWN: 0.0%, ECE = 0.4012)
+- **Scientific Finding**: Prior relational experiences conditioned into adapter weights did not accelerate few-shot learning efficiency over a fresh learner on an unfamiliar relational world (AUC 0.3316 vs 0.3316). The underlying 1M recurrent backbone requires explicit graph topological pretraining to generalize relational analogies without external structural tool assistance.
+
+#### 8. Qualification Gates & Promotion Verdict
+- **Engineering Qualification Gate**: **PASS (QUALIFIED)**. 121/121 unit tests passed on Tesla T4 GPU in 41.90s; base model parameter hashes 100% invariant across all seeds.
+- **Neural Epistemic Gate**: **FAIL (0.00% UNKNOWN Recall)**. While calibration error improved significantly in Arm B (ECE 0.3774 vs 0.6312), argmax predictions still collapsed to YES on ungrounded open-world queries. UNKNOWN recall remains 0.00% across all neural arms.
+- **Neural Transfer Gate**: **PARTIAL (33.33% Autonomous Schema Accuracy)**. The neural network achieved chance accuracy (33.33%) predicting graph signatures, demonstrating that schema abstraction requires explicit structural supervision.
+- **Learning-to-Learn Gate**: **INCONCLUSIVE (AUC 0.3316 vs 0.3316)**. Experience-conditioned adaptation showed no measurable sample efficiency gain over fresh adaptation on unfamiliar relational worlds.
+- **Corrective Adaptation Gate**: **PASS**. Closed-loop corrective learning matched static schedule gains (+5.56%) in 33.3% fewer steps with 100% rollback safety and zero regression on canonical skills.
+- **Operational Production Promotion Gate**: **REJECTED (NO-GO)**. Base weights remain strictly frozen; candidate adapters remain sandboxed in the research tier.

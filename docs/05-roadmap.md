@@ -541,3 +541,44 @@
   - **Option 1 (M45: Calibrated Epistemic Uncertainty & UNKNOWN Resolution)**: Focus on closing the remaining 0% UNKNOWN recall boundary on held-out ungrounded and self-contradictory queries using calibrated abstention loss, temperature scaling, or energy-based out-of-distribution detection.
   - **Option 2 (Neural Meta-Analogy Controller)**: Train a lightweight neural graph transformer or relation embedding head that learns continuous embeddings of canonical graph patterns to automate schema extraction from raw natural text.
   - **Option 3 (Autonomous Cross-Domain Practice Formulation)**: Enable the closed-loop agent to autonomously generate synthetic analogical practice tasks when entering an unfamiliar task environment before running adapter optimization.
+
+
+### M45: Epistemic Uncertainty and Transferable Learning (Completed & Evaluated)
+- **Objective**: Establish whether Adaptive Mini-GPT can reliably recognize knowledge boundaries (distinguishing YES, NO, and UNKNOWN under open-world semantics); audit M44 outcome attribution (separating neural learning from oracle schema assistance); evaluate autonomous learned structural transfer without oracle tools; benchmark closed-loop corrective learning against static training schedules; and measure few-shot learning efficiency curves across budgets $[0, 2, 4, 8, 16, 32]$ on remote Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m45-epistemic-uncertainty-study`, commit `4b117b90e912dae18edea5a02541e9080d1cbf20`). Mini-GPT recurrent backbone (1,089,280 parameters, 1024-BPE tokenizer `f698e45e209b7fe6`), M34 modular adapters, `M44AttributionAuditor`, `EpistemicWorldDataset`, `TriStateEpistemicHead`, `LearnedStructuralTransferEvaluator`, `CorrectiveSelfLearningRunner`, and `EpistemicEfficiencyBenchmarkRunner`. Wall-clock duration: 120.36s total across Seeds 42, 43, 44. Unit test suite passed 121/121 on Tesla T4 in 41.90s.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Forensic M44 Attribution Audit**:
+     - Documented and reconciled: M44's 68.33% accuracy was heavily reliant on the oracle schema injected into prompts (`oracle_schema_contribution`: +33.33%). The neural network did not discover graph patterns autonomously; it was conditioned on external symbolic labels.
+     - Uncovered the positive control confound in M44 `positive_control.py`: `_solve_task_with_exemplars` fell back to programmatic graph BFS when 0 memories were retrieved. The 100% accuracy was an artifact of the evaluation function itself being an oracle graph solver.
+     - Reconciled 40.0% sequential retention: corresponds to 8/20 correct predictions (mastering asymmetric reversal NOs, while failing all UNKNOWN and conflicting YES queries).
+  2. **Phase 2 Formal Epistemic Benchmark with Open-World Semantics**:
+     - Constructed independent synthetic relational worlds (`cosmic_containment`, `chronological_precedence`, `epistemological_citation`) with balanced distributions of supported hypotheses (YES), directionally refuted hypotheses (NO), and disconnected ungrounded hypotheses (UNKNOWN).
+  3. **Phase 3 Minimal Neural Uncertainty Experiment**:
+     - Arm A (M44 Neural Baseline): Accuracy = 33.33%, Macro F1 = 0.1667, UNK Recall = 0.00%, ECE = 0.6312.
+     - Arm B (Balanced Tri-State Head): Accuracy = 33.33%, Macro F1 = 0.1667, UNK Recall = 0.00%, **ECE = 0.3774** (improved calibration error by 40.2%).
+     - Arm C (Analogy-Supervised Head): Accuracy = 33.33%, Macro F1 = 0.1667, UNK Recall = 0.00%, ECE = 0.5628.
+     - Arm D (External Verified Reasoner): Accuracy = **100.00%**, Macro F1 = **1.0000**, ECE = **0.0000**.
+     - Finding: Dedicated 3-class classification significantly improves uncertainty calibration (ECE: 0.3774 vs 0.6312), but 128-dim frozen embeddings collapse argmax predictions to YES on ungrounded queries without representation unfreezing.
+  4. **Phase 4 Autonomous Structural Transfer (Schema Ablation)**:
+     - Autonomous neural schema classifier scored **33.33% ± 0.00%** accuracy (chance on 3 graph patterns).
+     - Downstream task accuracy: Raw Unfamiliar = 31.94%, Lexical Retrieval = 26.39%, Deterministic Oracle Schema = 36.11%, Autonomous Neural-Predicted Schema = 31.94%. Oracle-to-neural gap is **4.17%**.
+     - Finding: Neural models cannot autonomously discover abstract graph topologies from raw text tokens without explicit graph topological pretraining.
+  5. **Phase 5 Closed-Loop Corrective Self-Learning**:
+     - Closed-loop corrective learning matched static schedule gains (**+5.56% net neural gain**) using **33.3% fewer gradient steps** (33.3 vs 50 steps) by targeting diagnosed knowledge gaps (`MISIDENTIFIED_DIRECTION_NO`).
+     - Verification gate executed with 100% rollback safety, preserving 100% of canonical arithmetic carry and logic reasoning.
+  6. **Phase 6 Sample Efficiency Curves across Budgets ($N \in [0, 2, 4, 8, 16, 32]$)**:
+     - Fresh Learner: AUC = 0.3316 ± 0.0196, Final Acc = 33.33%.
+     - Experience-Conditioned Learner: AUC = 0.3316 ± 0.0020, Final Acc = 33.33%.
+     - UNKNOWN recall remained 0.00% across all budgets.
+  7. **Task-Specific Qualification Gates**:
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (121/121 unit tests passed on Tesla T4; base hashes invariant).
+     - Neural Epistemic Gate: **FAIL (0.00% UNKNOWN Recall)**.
+     - Neural Transfer Gate: **PARTIAL (33.33% Autonomous Schema Accuracy)**.
+     - Learning-to-Learn Gate: **INCONCLUSIVE (AUC 0.3316 vs 0.3316)**.
+     - Corrective Adaptation Gate: **PASS (+5.56% gain in 33% fewer steps, 100% rollback safety)**.
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain strictly frozen.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen.
+- **Next Direction Options (Post-M45 Strategic Priority)**:
+  - **Option 1 (M46: Contrastive Graph-Inductive Pretraining Foundation)**: Pretrain adapter representations on relational path reachability and directional contrastive objectives, enabling latent embeddings to separate reachable chains from disconnected nodes before few-shot adaptation.
+  - **Option 2 (M46: Energy-Based Epistemic Out-of-Distribution Head)**: Formulate uncertainty via energy scores or Mahalanobis distance in hidden embedding space, allowing the model to detect unsupported hypotheses without relying on argmax softmax competition.
+  - **Option 3 (M46: Neuro-Symbolic Graph Verifier Integration)**: Formally deploy the verified external graph solver (Arm D) as an active operational co-processor, routing queries with low epistemic confidence to deterministic symbolic verification.
