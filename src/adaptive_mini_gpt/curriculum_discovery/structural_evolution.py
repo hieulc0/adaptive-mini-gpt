@@ -69,6 +69,10 @@ class StructuralProposal:
         return d
 
 
+# Alias for backward and forward compatibility
+StructuralModificationProposal = StructuralProposal
+
+
 class StructuralEvolutionGate:
     """External controller gate that evaluates structural modification proposals."""
 
