@@ -253,12 +253,12 @@ def load_adapter_state_dict(
 
 
 def compute_base_model_hash(model: MiniGPT) -> str:
-    """Compute SHA-256 hash of ONLY base linear & embedding parameters, ignoring adapters."""
+    """Compute SHA-256 hash of ONLY base linear & embedding parameters, ignoring adapters and skip connections."""
     hasher = hashlib.sha256()
     state = model.state_dict()
     for key in sorted(state.keys()):
-        # Exclude adapters
-        if "adapters." in key or "lora_" in key:
+        # Exclude adapters and structural skip connections
+        if "adapters." in key or "lora_" in key or "skip_connections." in key:
             continue
         hasher.update(key.encode("utf-8"))
         tensor = state[key].detach().cpu().contiguous()

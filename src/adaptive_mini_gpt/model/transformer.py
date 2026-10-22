@@ -107,8 +107,7 @@ class TransformerBlock(nn.Module):
         domain_mask: Tensor | None = None,
         **kwargs: Any,
     ) -> tuple[Tensor, dict[str, Any] | None]:
-        x = x + self.attn(self.ln_1(x))
-        normed = self.ln_2(x)
+        x = x + self.attn(self.ln_1(x))\n        normed = self.ln_2(x)
 
         if self.mod_router is not None and not bypass_moe:
 
@@ -159,6 +158,9 @@ class MiniGPT(nn.Module):
         self.moe_head: LowRankOutputAdapter | None = None
         if config.adaptive_enabled:
             self.moe_head = LowRankOutputAdapter(config.d_model, config.d_expert, config.vocab_size)
+
+        # M38 Structural Evolution: optional reversible inter-block skip connections
+        self.skip_connections: nn.ModuleDict = nn.ModuleDict()
 
         self.apply(self._init_weights)
         for pn, p in self.named_parameters():
@@ -259,7 +261,7 @@ class MiniGPT(nn.Module):
         bypass_moe: bool = False,
         **kwargs: Any,
     ) -> tuple[Tensor, Tensor | None]:
-        """Forward pass through the Transformer with M6 autonomous domain gating."""
+        """Forward pass through the Transformer with M6 autonomous domain gating and M38 structural connections."""
         b, t = idx.size()
         if self.config.pos_encoding == "absolute" and t > self.config.context_length:
             raise ValueError(
@@ -298,7 +300,11 @@ class MiniGPT(nn.Module):
         utilizations: list[Tensor] = []
         mod_fractions: list[float] = []
 
-        for block in self.blocks:
+        # M38 Structural Evolution: inter-block skip connection intercepts
+        saved_block_outputs: dict[int, Tensor] = {}
+        has_skips = hasattr(self, "skip_connections") and len(self.skip_connections) > 0
+
+        for idx_layer, block in enumerate(self.blocks):
             x, aux = block(
                 x,
                 task_id=task_id,
@@ -306,6 +312,15 @@ class MiniGPT(nn.Module):
                 domain_mask=domain_token_mask,
                 **kwargs,
             )
+            if has_skips:
+                saved_block_outputs[idx_layer] = x
+                for skip_name, skip_mod in self.skip_connections.items():
+                    if (
+                        getattr(skip_mod, "target_layer", None) == idx_layer
+                        and getattr(skip_mod, "source_layer", None) in saved_block_outputs
+                    ):
+                        x = skip_mod(saved_block_outputs[skip_mod.source_layer], x)
+
             if aux is not None:
                 if "balance_loss" in aux:
                     total_balance_loss = total_balance_loss + aux["balance_loss"]
