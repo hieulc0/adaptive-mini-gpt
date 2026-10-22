@@ -63,7 +63,7 @@ def test_mathematical_base_invariance_during_adapter_training() -> None:
         vocab_size=64,
         context_length=32,
         d_model=32,
-        num_layers=2,
+        n_layers=2,
         num_heads=2,
         d_ff=64,
     )
@@ -100,7 +100,7 @@ def test_adapter_state_dict_save_and_load() -> None:
         vocab_size=64,
         context_length=32,
         d_model=32,
-        num_layers=2,
+        n_layers=2,
         num_heads=2,
         d_ff=64,
     )
@@ -140,7 +140,7 @@ def test_modular_lineage_manager() -> None:
             vocab_size=64,
             context_length=32,
             d_model=32,
-            num_layers=2,
+            n_layers=2,
             num_heads=2,
             d_ff=64,
         )

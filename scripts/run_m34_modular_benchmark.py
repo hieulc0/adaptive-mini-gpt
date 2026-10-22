@@ -27,6 +27,8 @@ from pathlib import Path
 from typing import Any
 
 import torch
+from torch.utils.data import DataLoader, Dataset
+from adaptive_mini_gpt.reasoning.scratchpad import ApproachType
 
 # Ensure repository root and src are in sys.path
 REPO_ROOT = Path(__file__).resolve().parent.parent
