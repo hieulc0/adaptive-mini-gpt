@@ -30,8 +30,16 @@ from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
 @pytest.fixture
 def dummy_setup() -> tuple[MiniGPT, BPETokenizer, torch.device]:
     device = torch.device("cpu")
+    tok = BPETokenizer()
+    corpus = (
+        "YES NO UNKNOWN [PREMISES] [QUESTION] [ANSWER] AlphaPhase BetaCycle GammaEra DeltaEpoch "
+        "precedes succeeds contains inside_of subsumes charges discharges catalyzes converts "
+        "FluxCondenser PlasmaResistor VoltRelay ArcCapacitor Does Is it verified that GhostEntity"
+    )
+    tok.train(corpus, target_vocab_size=320)
+
     config = ModelConfig(
-        vocab_size=128,
+        vocab_size=tok.vocab_size,
         context_length=64,
         d_model=64,
         n_layers=2,
@@ -40,15 +48,6 @@ def dummy_setup() -> tuple[MiniGPT, BPETokenizer, torch.device]:
         dropout=0.0,
     )
     model = MiniGPT(config).to(device)
-
-    # Train dummy tokenizer with sufficient text to populate vocab
-    tok = BPETokenizer()
-    corpus = (
-        "YES NO UNKNOWN [PREMISES] [QUESTION] [ANSWER] AlphaPhase BetaCycle GammaEra DeltaEpoch "
-        "precedes succeeds contains inside_of subsumes charges discharges catalyzes converts "
-        "FluxCondenser PlasmaResistor VoltRelay ArcCapacitor Does Is it verified that GhostEntity"
-    )
-    tok.train(corpus, vocab_size=128)
 
     return model, tok, device
 
