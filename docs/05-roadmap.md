@@ -447,15 +447,60 @@
   5. **Phase 7 Self-Directed Metacognitive Policy Engine**:
      - Deterministic Controller: **100.00%** optimal action selection accuracy (`ANSWER`, `VERIFY`, `PRACTICE`, `TRAIN_EXISTING`, `PROPOSE_NEW_MODULE`, `ABSTAIN`).
      - Neural Policy Head: 8.33% ± 14.43% accuracy, confirming that neural metacognitive decisions remain uncalibrated without dedicated controller guidance.
-  6. **Task-Specific Qualification Gates**:
+  6. **Task-Specific Qualification Gates (Revised Post-M42 Audit)**:
      - Operational Reasoning Gate: **PASS (100%)** (M18 deterministic operational baseline intact).
      - Engineering Qualification Gate: **PASS (QUALIFIED)** (103/103 unit tests passed on Tesla T4; base hashes invariant).
-     - Epistemic Abstention Gate: **QUALIFIED**. Method C (3-class prediction head) resolved the 0% UNKNOWN failure mode (up to 33.33% recall with 100% precision).
-     - Learning-to-Learn Gate: **QUALIFIED**. Strategy C (Meta-Trained) outperformed Fresh Learner (AUC 0.3745 vs 0.3672).
-     - Cumulative Retention Gate: **QUALIFIED (MODULAR)**. Modular isolation preserved capabilities across sequential task families with zero regression.
+     - Epistemic Abstention Gate: **PARTIALLY IMPROVED BUT UNRELIABLE (REVISED)**. Method C (3-class prediction head) broke the 0% UNKNOWN failure mode, but 16.67% mean recall leaves over 83% of ungrounded cases unflagged.
+     - Learning-to-Learn Gate: **INCONCLUSIVE (REVISED)**. Strategy C (Meta-Trained Reptile) produced a marginal +1.99% relative AUC increase (0.3745 vs 0.3672) with overlapping confidence intervals. Flat curves through 16 examples. Target $N_{80}$ was unreachable.
+     - Cumulative Retention Gate: **SUPPORTED FOR PARAMETER ISOLATION ONLY (REVISED)**. Dynamic modular adapters guaranteed parameter isolation with zero backward transfer (BWT = 0.0000), but raw normalized retention was 35.00%. Zero forgetting is not identical to high task mastery.
+     - Neural Action Selection Gate: **FAIL / NO-GO (REVISED)**. Neural policy achieved only 8.33% accuracy on unfamiliar relational scenarios. Deterministic controller remains mandatory verified fallback.
      - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain frozen.
 - **Lineage Promotion Decision**: **NO-GO**. Base weights remain frozen.
 - **Next Direction Options (Post-M42 Strategic Priority)**:
-  - **Option 1 (M43: Selective Long-Term Memory, Consolidation, and Archiving)**: Implement an episodic memory buffer and utility-based consolidation engine to store high-value relational exemplars, enabling true sample-efficient retrieval without gradient steps, and archiving obsolete adapters.
-  - **Option 2 (Pretrained Natural Language Foundation Scaling)**: Train a 1M natural language foundation on clean synthetic text corpora (TinyStories / OpenWebText subsets) to enrich token representations before relational fine-tuning.
+  - **Option 1 (M43: Selective Long-Term Memory, Experience Reuse, and Continual Adaptation)**: Implement a verified episodic memory bank with provenance tracking, multi-factor retrieval, reversible consolidation/archiving, and evaluate sample efficiency on unfamiliar relational domains.
+  - **Option 2 (Pretrained Natural Language Foundation Scaling)**: Train a 1M natural language foundation on clean synthetic text corpora to enrich token representations before relational fine-tuning.
   - **Option 3 (Dynamic Structural Branching & Sparse Gating)**: Combine modular adapter routing with low-rank channel gating to selectively activate sub-network branches based on input complexity.
+
+
+### M43: Selective Long-Term Memory, Experience Reuse, and Continual Adaptation (Completed & Evaluated)
+- **Objective**: Build Adaptive Mini-GPT as a continually evolving learner using selective episodic memory, experience reuse, and reversible consolidation; evaluate sample efficiency curves, $N_{50}/N_{80}$, and AUC under budgets $[0, 2, 4, 8, 16, 32]$ on unfamiliar relational environments; benchmark multi-factor retrieval selection against noise and contradiction; and evaluate multi-episode sequential retention on remote Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m43-selective-memory-study`, commit `878e625e2e58b5158e799fd88117d0f5a90977a4`). Base Mini-GPT recurrent backbone (1,089,280 parameters, 1024-BPE tokenizer `f698e45e209b7fe6`) with modular adapters, `EpisodicMemoryBank`, `MemoryRetriever`, `ControlledLearningExperimentRunner`, `MemoryLifecycleBenchmark`, `TriStateAndMemoryDecisionEngine`, and `SequentialRetentionEvaluator`. Mean duration: 35.20s per seed across Seeds 42, 43, 44. Unit test suite passed 109/109 on Tesla T4.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Mandatory M42 Scientific Forensic Audit & Reconciliation**:
+     - Documented and reconciled: Reptile AUC 0.3745 vs Fresh AUC 0.3672 (+1.99% relative gain, overlapping CI, $p \approx 0.55$); Final accuracy 45.00% vs 41.67%; Neural UNKNOWN recall 16.67%; Neural action selection 8.33%; Modular retention 35.00% with BWT = 0.0000.
+     - Formalized corrected qualification verdicts: Learning-to-Learn is INCONCLUSIVE; Neural UNKNOWN is PARTIAL BUT UNRELIABLE; Modular isolation is QUALIFIED FOR PARAMETER ISOLATION ONLY; Neural action routing is NOT QUALIFIED (FAIL).
+  2. **Phase 2 & 3 Episodic Memory Storage and Multi-Factor Retrieval Benchmark**:
+     - Implemented lightweight, persistent provenance-aware episodic memory.
+     - Evaluated candidate retrieval under distractor noise, obsolete claims, and contradictory records: Selective Multi-Factor Retrieval achieved **100.00% noise rejection** and **100.00% contradiction rejection** at 0.08 ms latency.
+     - Key Insight on Lexical Retrieval: On completely disjoint ontologies (`orbital_mechanics` with prior memories from `metabolic_cascade`), pure token matching correctly yields 0 matches to avoid distractor injection, proving that lexical retrieval cannot perform cross-domain transfer without abstract schema alignment.
+  3. **Phase 4 & 5 Sample Efficiency on Sealed Meta-Test (`linguistic_etymology`)**:
+     - Evaluated across budgets $N \in [0, 2, 4, 8, 16, 32]$:
+     - **Approach 1 (Fresh Adaptation, No Memory)**: AUC = **0.3500 ± 0.0000**, Final Accuracy = **35.00% ± 0.00%**.
+     - **Approach 2 (Memory-Assisted Inference, Frozen Weights)**: AUC = **0.3500 ± 0.0000**, Final Accuracy = **35.00% ± 0.00%**.
+     - **Approach 3 (Memory-Assisted Training, Neural-Only Evaluation)**: AUC = **0.3500 ± 0.0000**, Final Accuracy = **35.00% ± 0.00%**.
+     - **Approach 4 (Selective Memory Combined)**: AUC = **0.3500 ± 0.0000**, Final Accuracy = **35.00% ± 0.00%**.
+     - $N_{80}$ was unreachable within 32 practice examples. Storing domain-specific memories does not spontaneously accelerate neural adaptation to unrelated symbolic rules.
+  4. **Phase 6 Reversible Memory Lifecycle & Consolidation**:
+     - Consolidated 4 duplicate experiences while preserving full provenance lineages (`consolidated_from`).
+     - Superseded 1 contradicted record with an auditable pointer.
+     - Verified 100% reversibility of archive and restore operations.
+  5. **Phase 7 Epistemic Diagnostics & Action Policy Engine**:
+     - Minimal 3-class head scored 35.00% overall accuracy with 0.0% UNKNOWN recall on the sealed unseen space, confirming failure to extrapolate uncertainty boundaries without domain calibration.
+     - Deterministic controller achieved **100.00%** action accuracy; neural action policy scored **25.00% ± 22.91%** (agreement: 25.00%), confirming that action selection cannot be delegated to uncalibrated neural heads.
+  6. **Phase 8 Multi-Episode Sequential Retention Matrix**:
+     - Evaluated across 4 sequential unfamiliar task families (`metabolic_cascade` -> `quantum_entanglement` -> `cryptographic_trust` -> `orbital_mechanics`):
+     - Neural-Only Mean Retention = **43.75% ± 0.00%**, BWT = **+0.0000 ± 0.0000**.
+     - Memory-Assisted Mean Retention = **43.75% ± 0.00%**, BWT = **+0.0000 ± 0.0000**.
+     - Canonical arithmetic carry (100 states) and chained logic reasoning remained **100.00% intact**. Base parameter hashes verified 100% invariant (`8736b364e4a8ce19`, `de7621751f2e99d0`, `c7bd81ae47f2e2de`).
+  7. **Task-Specific Qualification Gates**:
+     - Operational Reasoning Gate: **PASS (100%)** (M18 deterministic operational baseline intact).
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (109/109 unit tests passed on Tesla T4; base hashes invariant).
+     - System-Level Learning Gate: **FAIL (35.00% vs 35.00%)**. Memory-assisted inference on disjoint relational ontologies did not improve task accuracy over fresh baseline without structural analogy.
+     - Neural Learning-to-Learn Gate: **INCONCLUSIVE (AUC 0.3500 vs 0.3500)**. Storing domain-specific relational memories did not accelerate few-shot neural adaptation on completely unfamiliar sealed families.
+     - Memory Selection Policy Gate: **FAIL / INCONCLUSIVE**. Selective lexical matching correctly rejected distractors, but yielded 0% precision on unfamiliar vocabularies.
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain frozen.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain frozen.
+- **Next Direction Options (Post-M43 Strategic Priority)**:
+  - **Option 1 (M44: Structural Analogy and Abstract Schema Mapping)**: Move beyond surface lexical matching to abstract relation schemas ($S \xrightarrow{R} O$), enabling memories learned in one domain (e.g. `metabolic_cascade`) to map structurally to an unfamiliar domain (e.g. `linguistic_etymology`) via role-based analogical transfer.
+  - **Option 2 (Pretrained Natural Language Foundation Scaling)**: Pretrain a 1M language foundation on natural language corpora (TinyStories / OpenWebText subsets) to build semantic representations that understand entity relationships prior to task adaptation.
+  - **Option 3 (Joint Structural Evolution & Sparse Gating)**: Combine modular adapter routing with low-rank channel gating to selectively activate sub-network branches based on input complexity.
