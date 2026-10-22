@@ -65,7 +65,7 @@ from adaptive_mini_gpt.curriculum_discovery.uncertainty import (
     extract_evidence_features,
     train_enhanced_policy,
 )
-from adaptive_mini_gpt.data.bpe_scaling import train_scaled_bpe_tokenizer
+from adaptive_mini_gpt.data.bpe_scaling import expand_model_vocabulary, train_scaled_bpe_tokenizer
 from adaptive_mini_gpt.data.language_corpus import PRETRAIN_PROSE_CORPUS
 from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
 from adaptive_mini_gpt.evaluation.multi_domain import DomainType
@@ -138,13 +138,20 @@ def run_seed_m36_pipeline(
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
 
-    # 1. Load base model
+    # 1. Load base model and expand to 1024-BPE
     ckpt_path = checkpoints_dir / f"seed_{seed}/base_pretrain/best.pt"
     raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_path)
-    base_config = ModelConfig(**raw_ckpt["model_config"])
-    base_model = MiniGPT(base_config).to(device)
-    base_model.load_state_dict(raw_ckpt["model_state_dict"])
+    base_tok = CheckpointManager.load_tokenizer(raw_ckpt)
+    state_dict = raw_ckpt.get("model_state_dict", raw_ckpt.get("model_state"))
+    base_model_400 = MiniGPT(ModelConfig(**raw_ckpt["model_config"]))
+    base_model_400.load_state_dict(state_dict)
+    base_model = expand_model_vocabulary(
+        model=base_model_400,
+        old_tokenizer=base_tok,
+        new_tokenizer=tokenizer,
+    ).to(device)
     base_model.eval()
+    base_config = base_model.config
 
     base_hash_initial = compute_base_model_hash(base_model)
     logger.info(f"Base model loaded (hash={base_hash_initial[:16]}...)")
