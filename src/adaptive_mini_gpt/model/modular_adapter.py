@@ -105,9 +105,12 @@ class MultiAdapterLinear(nn.Module):
         self.adapters[name] = adapter
         return adapter
 
-    def set_active_adapter(self, name: str | None) -> None:
+    def set_active_adapter(self, name: str | None, allow_missing: bool = False) -> None:
         """Set active adapter name. None disables adapters and runs pure base layer."""
         if name is not None and name not in self.adapters:
+            if allow_missing:
+                self.active_adapter = None
+                return
             raise KeyError(
                 f"Adapter '{name}' not found. Registered adapters: {list(self.adapters.keys())}"
             )
@@ -183,12 +186,20 @@ def add_domain_adapter(
     return count
 
 
-def set_active_domain_adapter(model: MiniGPT, domain_name: str | None) -> int:
-    """Set the active domain adapter across all MultiAdapterLinear modules."""
+def set_active_domain_adapter(
+    model: MiniGPT,
+    domain_name: str | None,
+    allow_missing: bool = True,
+) -> int:
+    """Set the active domain adapter across all MultiAdapterLinear modules.
+    
+    If allow_missing is True and domain_name has not been registered yet,
+    deactivates adapters and evaluates base model parameters.
+    """
     count = 0
     for module in model.modules():
         if isinstance(module, MultiAdapterLinear):
-            module.set_active_adapter(domain_name)
+            module.set_active_adapter(domain_name, allow_missing=allow_missing)
             count += 1
     return count
 
