@@ -9,7 +9,7 @@ Constructs bounded, verified datasets across the 7 specified metacognitive scena
   6. repeated_failure: Persistent procedural failures requiring adaptation -> TRAIN_CANDIDATE / PRACTICE.
   7. mixed_domain: Context-rich word problems combining language and calculation -> RECURRENT_EXECUTION.
 
-Train and evaluation partitions are strictly disjoint.
+Train and evaluation partitions are strictly disjoint across queries, contexts, and entities.
 """
 
 from __future__ import annotations
@@ -40,6 +40,41 @@ class MetacognitiveSample:
     is_repeated_failure: bool = False
 
 
+# Disjoint factual pools for train and eval
+TRAIN_FACTS = [
+    ("Mitochondria generate cellular ATP through aerobic cellular respiration.", "What organelle generates ATP?", "Mitochondria"),
+    ("The speed of light in vacuum is approximately 300,000 km per second.", "What is the speed of light in vacuum?", "300,000 km/s"),
+    ("Chlorophyll pigments in plant chloroplasts absorb blue and red light.", "What pigment absorbs blue and red light?", "Chlorophyll"),
+    ("Water boils at 100 degrees Celsius at standard atmospheric pressure.", "At what temperature does water boil?", "100 degrees Celsius"),
+    ("DNA consists of four nucleotide bases: adenine, thymine, guanine, and cytosine.", "What molecules compose the core structure of DNA?", "nucleotide bases"),
+]
+
+EVAL_FACTS = [
+    ("Ribosomes are macromolecular machines that synthesize proteins.", "What machines synthesize cellular proteins?", "Ribosomes"),
+    ("The Earth orbits the Sun at an average distance of 150 million kilometers.", "What distance does Earth orbit from the Sun?", "150 million km"),
+    ("Hemoglobin in red blood cells binds and transports oxygen molecules.", "What protein binds oxygen in blood?", "Hemoglobin"),
+    ("Diamond is an allotrope of carbon with a rigid crystal lattice.", "What chemical element forms diamond?", "carbon"),
+    ("Photosynthesis converts carbon dioxide and water into glucose and oxygen.", "What sugars are produced in photosynthesis?", "glucose"),
+]
+
+# Disjoint contradiction pools for train and eval
+TRAIN_CONTRADICTIONS = [
+    ("Fact: The storage box is completely empty. Fact: The storage box contains 5 apples.", "How many apples are in the storage box?"),
+    ("Statement: Object Alpha is purely circular. Statement: Object Alpha has exactly four sharp corners.", "How many corners does Object Alpha have?"),
+    ("Query: What is the official gold currency of the sunken Republic of Atlantis?", "What currency is officially used?"),
+    ("Premise: All birds can fly. Premise: Emperor penguins are birds that cannot fly.", "Can an emperor penguin fly?"),
+    ("Query: What was the registered census population of Mars in the year 1800?", "What was the population of Mars in 1800?"),
+]
+
+EVAL_CONTRADICTIONS = [
+    ("Fact: The conference room has zero occupants. Fact: 10 people are talking inside the conference room.", "How many people are in the room?"),
+    ("Statement: Fabric Beta is completely dry. Statement: Fabric Beta is 100% soaked in liquid water.", "Is Fabric Beta dry or soaked?"),
+    ("Query: What is the telephone area code for the mythical continent of Lemuria?", "What is the area code of Lemuria?"),
+    ("Premise: All metals are solid at room temperature. Premise: Mercury is a liquid metal at room temperature.", "Is mercury a solid metal at room temperature?"),
+    ("Query: Who was the crowned king of the Earth's Moon in the year 1750?", "Who was the lunar king in 1750?"),
+]
+
+
 def _generate_scenario_samples(
     scenario: str,
     count: int,
@@ -54,9 +89,13 @@ def _generate_scenario_samples(
         sid = f"{scenario}_{partition}_{i:03d}"
 
         if scenario == "known_arithmetic":
-            # 1-2 digit addition: easy direct answer
-            a = rng.randint(2, 25)
-            b = rng.randint(2, 25)
+            # Disjoint numeric intervals
+            if partition == "train":
+                a = rng.randint(2, 49)
+                b = rng.randint(2, 49)
+            else:
+                a = rng.randint(50, 99)
+                b = rng.randint(50, 99)
             q = f"Add: {a} + {b} ="
             ans = str(a + b)
             opt = LearningAction.ANSWER
@@ -72,9 +111,13 @@ def _generate_scenario_samples(
             samples.append(MetacognitiveSample(sid, scenario, q, None, ans, opt, utils))
 
         elif scenario == "unfamiliar_procedural":
-            # Multi-digit procedural addition: requires recurrent execution
-            a = rng.randint(1000, 9999)
-            b = rng.randint(1000, 9999)
+            # Disjoint 4-digit intervals
+            if partition == "train":
+                a = rng.randint(1000, 4999)
+                b = rng.randint(1000, 4999)
+            else:
+                a = rng.randint(5000, 9999)
+                b = rng.randint(5000, 9999)
             q = f"Add: {a} + {b} ="
             ans = str(a + b)
             opt = LearningAction.RECURRENT_EXECUTION
@@ -90,9 +133,12 @@ def _generate_scenario_samples(
             samples.append(MetacognitiveSample(sid, scenario, q, None, ans, opt, utils))
 
         elif scenario == "logical_deduction":
-            # Chained implications: verify or recurrent unrolling
+            # Disjoint variable letters between train and eval
             hops = rng.choice([3, 4, 5])
-            syms = [chr(65 + j) for j in range(hops + 1)]
+            if partition == "train":
+                syms = [chr(65 + j) for j in range(hops + 1)]  # A, B, C, D, E...
+            else:
+                syms = [chr(80 + j) for j in range(hops + 1)]  # P, Q, R, S, T...
             rules = [f"If {syms[j]} then {syms[j+1]}" for j in range(hops)]
             q = f"Rules: {'. '.join(rules)}. Fact: {syms[0]} is True. Query: Is {syms[-1]} True?"
             ans = "True"
@@ -109,20 +155,13 @@ def _generate_scenario_samples(
             samples.append(MetacognitiveSample(sid, scenario, q, None, ans, opt, utils))
 
         elif scenario == "factual_grounding":
-            # Grounded reading comprehension
-            facts = [
-                ("Mitochondria generate cellular ATP through aerobic respiration.", "What generates ATP?", "Mitochondria"),
-                ("The speed of light in vacuum is approximately 300,000 km per second.", "What is the vacuum speed of light?", "300,000 km/s"),
-                ("Chlorophyll absorbs blue and red light while reflecting green.", "What pigment reflects green light?", "Chlorophyll"),
-                ("Water boils at 100 degrees Celsius at standard atmospheric pressure.", "At what temperature does water boil?", "100 degrees Celsius"),
-                ("DNA consists of four nucleotide bases: adenine, thymine, guanine, and cytosine.", "What molecules compose DNA?", "nucleotide bases"),
-            ]
-            fact_ctx, fact_q, fact_ans = rng.choice(facts)
+            pool = TRAIN_FACTS if partition == "train" else EVAL_FACTS
+            fact_ctx, fact_q, fact_ans = pool[i % len(pool)]
             q = f"Question: {fact_q}"
             opt = LearningAction.RETRIEVE
             utils = {
                 LearningAction.RETRIEVE: 0.95,
-                LearningAction.ANSWER: -0.90,  # Parametric 1M model cannot memorize open facts
+                LearningAction.ANSWER: -0.90,
                 LearningAction.VERIFY: 0.20,
                 LearningAction.RECURRENT_EXECUTION: -0.80,
                 LearningAction.PRACTICE: -0.50,
@@ -132,19 +171,12 @@ def _generate_scenario_samples(
             samples.append(MetacognitiveSample(sid, scenario, q, fact_ctx, fact_ans, opt, utils))
 
         elif scenario == "missing_contradictory":
-            # Contradictory premises or unanswerable / out-of-domain claims
-            contradictions = [
-                ("Fact: The box is completely empty. Fact: The box contains 5 apples.", "How many apples are in the box?"),
-                ("Statement: Object X is purely circular. Statement: Object X has exactly four corners.", "How many corners does Object X have?"),
-                ("Query: What is the official currency of the Republic of Atlantis?", "What currency is used?"),
-                ("Premise: All birds fly. Premise: Penguins are birds that cannot fly.", "Can a penguin fly?"),
-                ("Query: What was the population of Mars in the year 1800?", "What was the population of Mars?"),
-            ]
-            c_ctx, c_q = rng.choice(contradictions)
+            pool = TRAIN_CONTRADICTIONS if partition == "train" else EVAL_CONTRADICTIONS
+            c_ctx, c_q = pool[i % len(pool)]
             q = f"Context: {c_ctx} Question: {c_q}"
             opt = LearningAction.ABSTAIN
             utils = {
-                LearningAction.ABSTAIN: 0.99,  # High reward for abstaining
+                LearningAction.ABSTAIN: 0.99,
                 LearningAction.ANSWER: -1.00,
                 LearningAction.RETRIEVE: -0.80,
                 LearningAction.RECURRENT_EXECUTION: -1.00,
@@ -155,14 +187,16 @@ def _generate_scenario_samples(
             samples.append(MetacognitiveSample(sid, scenario, q, c_ctx, "unanswerable", opt, utils, is_unanswerable=True))
 
         elif scenario == "repeated_failure":
-            # Repeated procedural failure on specialized carry patterns
-            a = rng.choice([6138, 9999, 4589, 7291])
-            b = rng.choice([1936, 1, 3824, 8819])
-            q = f"Problem: Procedural carry step failed repeatedly on {a} + {b}. Decide next action."
+            if partition == "train":
+                pairs = [(6138, 1936), (9999, 1), (4589, 3824), (7291, 8819)]
+            else:
+                pairs = [(3419, 2875), (8888, 2), (5172, 4938), (6304, 7696)]
+            a, b = pairs[i % len(pairs)]
+            q = f"Problem: Procedural carry step failed repeatedly on {a} + {b} (id={partition}_{i}). Decide next action."
             ans = "TRAIN_CANDIDATE"
             opt = LearningAction.TRAIN_CANDIDATE
             utils = {
-                LearningAction.TRAIN_CANDIDATE: 0.90,  # Training justified after repeated failure
+                LearningAction.TRAIN_CANDIDATE: 0.90,
                 LearningAction.PRACTICE: 0.70,
                 LearningAction.RECURRENT_EXECUTION: 0.20,
                 LearningAction.ANSWER: -0.90,
@@ -173,11 +207,15 @@ def _generate_scenario_samples(
             samples.append(MetacognitiveSample(sid, scenario, q, None, ans, opt, utils, is_repeated_failure=True))
 
         elif scenario == "mixed_domain":
-            # Context-rich word problems combining natural language and calculation
-            items = ["books", "pencils", "widgets", "miles", "hours"]
-            itm = rng.choice(items)
-            val1 = rng.randint(45, 95)
-            val2 = rng.randint(35, 85)
+            if partition == "train":
+                items = ["cookies", "apples", "candies", "tickets", "marbles"]
+                val1 = rng.randint(20, 45)
+                val2 = rng.randint(15, 35)
+            else:
+                items = ["laptops", "bicycles", "parcels", "paintings", "telescopes"]
+                val1 = rng.randint(55, 95)
+                val2 = rng.randint(45, 85)
+            itm = items[i % len(items)]
             q = f"Context: A shipment contained {val1} {itm} on Monday and {val2} {itm} on Tuesday. How many {itm} were shipped altogether?"
             ans = str(val1 + val2)
             opt = LearningAction.RECURRENT_EXECUTION

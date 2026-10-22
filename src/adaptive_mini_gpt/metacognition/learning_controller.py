@@ -82,7 +82,7 @@ class ControlledSelfDirectedLearner:
         self.policy = policy
         self.device = device
         self.memory_bank = memory_bank or {}
-        self.lineage_manager = lineage_manager or ModularLineageManager()
+        self.lineage_manager = lineage_manager or ModularLineageManager(seed=42)
         self.max_training_budget = max_training_budget
         self.training_budget_spent = 0
         self.audit_log: list[EpisodeExecutionResult] = []
