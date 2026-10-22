@@ -149,7 +149,33 @@ def run_seed_m46_benchmark(
     # Phase 6: Epistemic Uncertainty & Selective Risk
     logger.info("--- Phase 6: Epistemic Uncertainty & Selective Risk Evaluation ---")
     tri_head = TriStateClassificationHead(d_model=base_model.config.d_model, num_classes=3).to(device)
-    arms_benchmark._train_head(tri_head, target_world.train_practice_pool[:16], epochs=25, lr=2e-3)
+    opt = torch.optim.AdamW(tri_head.parameters(), lr=2e-3)
+    loss_fn = torch.nn.CrossEntropyLoss()
+    tri_head.train()
+    for _ in range(25):
+        for t in target_world.train_practice_pool[:16]:
+            prompt = f"[PREMISES] {' '.join(t.premises)} [QUESTION] {t.question} [ANSWER]"
+            ids = tokenizer.encode(prompt)
+            if len(ids) > base_model.config.context_length:
+                ids = ids[-base_model.config.context_length:]
+            inp = torch.tensor([ids], dtype=torch.long, device=device)
+            target = torch.tensor([EpistemicGeneralizationEvaluator.CLASS_TO_IDX[t.expected_verdict]], dtype=torch.long, device=device)
+            with torch.no_grad():
+                b, seq_len = inp.size()
+                tok_emb = base_model.wte(inp)
+                pos = torch.arange(0, seq_len, dtype=torch.long, device=inp.device)
+                pos_emb = base_model.wpe(pos)
+                x = base_model.drop(tok_emb + pos_emb)
+                for block in base_model.blocks:
+                    x, _ = block(x)
+                hidden = base_model.ln_f(x)
+            logits = tri_head(hidden)
+            loss = loss_fn(logits, target)
+            opt.zero_grad()
+            loss.backward()
+            opt.step()
+    tri_head.eval()
+
     epistemic_evaluator = EpistemicGeneralizationEvaluator(base_model, tri_head, tokenizer, device)
     thresh = epistemic_evaluator.calibrate_threshold(target_world.validation_pool)
     selective_risk = epistemic_evaluator.evaluate_selective_risk(target_world.held_out_test_pool, thresh)
