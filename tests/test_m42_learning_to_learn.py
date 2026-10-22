@@ -22,14 +22,15 @@ from adaptive_mini_gpt.meta.benchmark_suite import (
 from adaptive_mini_gpt.meta.learning_policy import SelfDirectedLearningPolicy
 from adaptive_mini_gpt.meta.meta_learner import MetaLearner
 from adaptive_mini_gpt.meta.tri_state_diagnostic import TriStateDiagnostic
-from adaptive_mini_gpt.model.minigpt import MiniGPT, MiniGPTConfig
+from adaptive_mini_gpt.model.transformer import MiniGPT
+from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.training.bpe import BPETokenizer
 
 
 @pytest.fixture
 def dummy_setup() -> tuple[MiniGPT, BPETokenizer, torch.device]:
     device = torch.device("cpu")
-    config = MiniGPTConfig(
+    config = ModelConfig(
         vocab_size=128,
         context_length=64,
         d_model=64,

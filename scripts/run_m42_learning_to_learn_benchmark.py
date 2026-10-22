@@ -32,7 +32,7 @@ from adaptive_mini_gpt.meta.benchmark_suite import get_benchmark_families
 from adaptive_mini_gpt.meta.learning_policy import SelfDirectedLearningPolicy
 from adaptive_mini_gpt.meta.meta_learner import MetaLearner
 from adaptive_mini_gpt.meta.tri_state_diagnostic import TriStateDiagnostic
-from adaptive_mini_gpt.model.minigpt import MiniGPT
+from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.topology.structural_adapter import compute_base_model_hash
 from adaptive_mini_gpt.training.checkpoint import CheckpointManager
 

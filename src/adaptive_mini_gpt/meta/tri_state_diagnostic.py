@@ -17,7 +17,7 @@ import torch.nn as nn
 from torch.optim import AdamW
 
 from adaptive_mini_gpt.corrective.benchmark_suite import DirectionalTask
-from adaptive_mini_gpt.model.minigpt import MiniGPT
+from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.training.bpe import BPETokenizer
 
 logger = logging.getLogger("tri_state_diagnostic")

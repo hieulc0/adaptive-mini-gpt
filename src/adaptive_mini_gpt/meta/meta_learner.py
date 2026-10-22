@@ -28,7 +28,7 @@ from adaptive_mini_gpt.model.modular_adapter import (
     set_active_domain_adapter,
 )
 from adaptive_mini_gpt.meta.benchmark_suite import MetaFamilyDataset, MetaTask
-from adaptive_mini_gpt.model.minigpt import MiniGPT
+from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.training.bpe import BPETokenizer
 
 logger = logging.getLogger("meta_learner")
