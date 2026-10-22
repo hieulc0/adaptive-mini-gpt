@@ -24,6 +24,7 @@ import torch
 
 from adaptive_mini_gpt.model.modular_adapter import (
     add_domain_adapter,
+    compute_base_model_hash,
     inject_multi_domain_adapters,
     set_active_domain_adapter,
 )
@@ -33,7 +34,6 @@ from adaptive_mini_gpt.meta.learning_policy import SelfDirectedLearningPolicy
 from adaptive_mini_gpt.meta.meta_learner import MetaLearner
 from adaptive_mini_gpt.meta.tri_state_diagnostic import TriStateDiagnostic
 from adaptive_mini_gpt.model.transformer import MiniGPT
-from adaptive_mini_gpt.topology.structural_adapter import compute_base_model_hash
 from adaptive_mini_gpt.training.checkpoint import CheckpointManager
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
