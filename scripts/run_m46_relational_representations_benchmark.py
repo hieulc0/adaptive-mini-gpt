@@ -135,10 +135,10 @@ def run_seed_m46_benchmark(
         f"UNK Recall={arm_d.unknown_recall*100:.2f}%"
     )
 
-    # Phase 5: Independent Representation Evaluation
+    # Phase 5: Independent Representation Evaluation across all worlds
     logger.info("--- Phase 5: Independent Representation Evaluation ---")
     rep_evaluator = IndependentRepresentationEvaluator(base_model, tokenizer, device)
-    rep_metrics = rep_evaluator.evaluate_representation_quality(target_world)
+    rep_metrics = rep_evaluator.evaluate_representation_quality(list(worlds.values()))
     logger.info(
         f"Representation Evaluation: Topology Acc={rep_metrics.topology_classification_accuracy*100:.1f}%, "
         f"Connectivity Acc={rep_metrics.connectivity_classification_accuracy*100:.1f}%, "
@@ -148,28 +148,28 @@ def run_seed_m46_benchmark(
 
     # Phase 6: Epistemic Uncertainty & Selective Risk
     logger.info("--- Phase 6: Epistemic Uncertainty & Selective Risk Evaluation ---")
-    epistemic_evaluator = EpistemicGeneralizationEvaluator(base_model, tokenizer, device)
-    # Train candidate tri-state head on target_world's practice pool
     tri_head = TriStateClassificationHead(d_model=base_model.config.d_model, num_classes=3).to(device)
     arms_benchmark._train_head(tri_head, target_world.train_practice_pool[:16], epochs=25, lr=2e-3)
-    selective_risk = epistemic_evaluator.evaluate_selective_risk(tri_head, target_world.balanced_test_set)
+    epistemic_evaluator = EpistemicGeneralizationEvaluator(base_model, tri_head, tokenizer, device)
+    thresh = epistemic_evaluator.calibrate_threshold(target_world.validation_pool)
+    selective_risk = epistemic_evaluator.evaluate_selective_risk(target_world.held_out_test_pool, thresh)
     logger.info(
         f"Selective Risk: Cov 100% Acc={selective_risk.coverage_100_accuracy*100:.1f}% | "
         f"Cov 80% Acc={selective_risk.coverage_80_accuracy*100:.1f}% | "
-        f"Cov 50% Acc={selective_risk.coverage_50_accuracy*100:.1f}% | Abstention Quality={selective_risk.abstention_quality:.4f}"
+        f"Cov 50% Acc={selective_risk.coverage_50_accuracy*100:.1f}% | Abstention Precision={selective_risk.abstention_precision*100:.1f}%"
     )
 
     # Phase 7: Corrective Adaptation and Learning Efficiency
     logger.info("--- Phase 7: Corrective Adaptation & Learning Efficiency Curves ---")
     eff_runner = CorrectiveEfficiencyRunner(base_model, tokenizer, device)
-    eff_fresh = eff_runner.run_fresh_learner(target_world, budgets=[0, 2, 4, 8, 16, 32], epochs=25)
-    eff_uniform = eff_runner.run_uniform_practice(target_world, budgets=[0, 2, 4, 8, 16, 32], epochs=25)
-    eff_corrective = eff_runner.run_error_targeted_corrective(target_world, budgets=[0, 2, 4, 8, 16, 32], epochs=25)
+    eff_fresh = eff_runner.run_strategy_benchmark("FRESH_LEARNER", target_world)
+    eff_uniform = eff_runner.run_strategy_benchmark("UNIFORM_PRACTICE", target_world)
+    eff_corrective = eff_runner.run_strategy_benchmark("CORRECTIVE_LEARNER", target_world)
 
     logger.info(
-        f"Learning Efficiency AUC: Fresh={eff_fresh.learning_curve_auc:.4f} ({eff_fresh.gpu_time_seconds:.1f}s) | "
-        f"Uniform={eff_uniform.learning_curve_auc:.4f} ({eff_uniform.gpu_time_seconds:.1f}s) | "
-        f"Corrective={eff_corrective.learning_curve_auc:.4f} ({eff_corrective.gpu_time_seconds:.1f}s)"
+        f"Learning Efficiency AUC: Fresh={eff_fresh.area_under_curve:.4f} ({eff_fresh.total_duration_seconds:.1f}s) | "
+        f"Uniform={eff_uniform.area_under_curve:.4f} ({eff_uniform.total_duration_seconds:.1f}s) | "
+        f"Corrective={eff_corrective.area_under_curve:.4f} ({eff_corrective.total_duration_seconds:.1f}s)"
     )
 
     # Base hash invariance check
@@ -207,11 +207,11 @@ def run_seed_m46_benchmark(
     }
 
 
-def aggregate_m46_results(seed_results: list[dict[str, Any]]) -> dict[str, Any]:
+def aggregate_m46_results(seed_results: list[dict[str, Any]], device_name: str = "cuda") -> dict[str, Any]:
     """Aggregates metrics across the 3 seeds, computing mean and standard deviation."""
     n_seeds = len(seed_results)
 
-    def mean_std(values: list[float]) -> dict[str, float]:
+    def mean_std(values: list[float]) -> dict[str, float]:\
         arr = np.array(values, dtype=float)
         return {"mean": round(float(np.mean(arr)), 4), "std": round(float(np.std(arr)), 4)}
 
@@ -252,10 +252,10 @@ def aggregate_m46_results(seed_results: list[dict[str, Any]]) -> dict[str, Any]:
     cov_50 = [r["phase6_epistemic_selective_risk"]["coverage_50_accuracy"] for r in seed_results]
 
     # Phase 7: Efficiency AUC
-    fresh_auc = [r["phase7_learning_efficiency"]["fresh_learner"]["learning_curve_auc"] for r in seed_results]
-    uniform_auc = [r["phase7_learning_efficiency"]["uniform_practice"]["learning_curve_auc"] for r in seed_results]
-    corr_auc = [r["phase7_learning_efficiency"]["error_targeted_corrective"]["learning_curve_auc"] for r in seed_results]
-    corr_gpu_time = [r["phase7_learning_efficiency"]["error_targeted_corrective"]["gpu_time_seconds"] for r in seed_results]
+    fresh_auc = [r["phase7_learning_efficiency"]["fresh_learner"]["area_under_curve"] for r in seed_results]
+    uniform_auc = [r["phase7_learning_efficiency"]["uniform_practice"]["area_under_curve"] for r in seed_results]
+    corr_auc = [r["phase7_learning_efficiency"]["error_targeted_corrective"]["area_under_curve"] for r in seed_results]
+    corr_gpu_time = [r["phase7_learning_efficiency"]["error_targeted_corrective"]["total_duration_seconds"] for r in seed_results]
 
     # Qualification checks
     rep_margin_positive = mean_std(margin)["mean"] > 0.05
@@ -267,7 +267,7 @@ def aggregate_m46_results(seed_results: list[dict[str, Any]]) -> dict[str, Any]:
         "title": "Relational Representation Learning and Epistemic Generalization",
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
         "seeds_evaluated": [r["seed"] for r in seed_results],
-        "device": str(seed_results[0]["duration_seconds"]),
+        "device": device_name,
         "phase1_audit_summary": seed_results[0]["phase1_audit"]["phase1_audit_verdict"],
         "phase2_positive_control": {
             "adapter_train_accuracy": mean_std(pos_train_acc),
@@ -354,7 +354,7 @@ def main() -> None:
         seed_results.append(res)
 
     logger.info(f"\n{'='*70}\nAggregating M46 Results Across Seeds {args.seeds}\n{'='*70}")
-    report = aggregate_m46_results(seed_results)
+    report = aggregate_m46_results(seed_results, device_name=str(device))
 
     report_path = args.output_dir / "m46_report.json"
     report_path.write_text(json.dumps(report, indent=2))
