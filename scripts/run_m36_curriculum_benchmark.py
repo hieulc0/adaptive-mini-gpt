@@ -491,7 +491,8 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     logger.info("Initializing Tokenizer for M36 Benchmark...")
-    tokenizer = train_scaled_bpe_tokenizer(PRETRAIN_PROSE_CORPUS, target_vocab_size=1024)
+    all_prose = " ".join(PRETRAIN_PROSE_CORPUS)
+    tokenizer = train_scaled_bpe_tokenizer(all_prose, target_vocab_size=1024)
 
     seed_results: list[dict[str, Any]] = []
     for seed in args.seeds:
