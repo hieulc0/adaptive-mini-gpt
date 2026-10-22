@@ -118,7 +118,8 @@ class CompositionTrainer:
                     target_ids[0, :mask_limit] = -100
 
                 optimizer.zero_grad()
-                logits = model(input_ids)
+                out = model(input_ids)
+                logits = out[0] if isinstance(out, tuple) else out
                 loss = criterion(logits.view(-1, logits.size(-1)), target_ids.view(-1))
                 loss.backward()
                 optimizer.step()
@@ -140,7 +141,8 @@ class CompositionTrainer:
             curr_tensor = input_tensor
             generated: list[int] = []
             for _ in range(6):
-                logits = model(curr_tensor)
+                out = model(curr_tensor)
+                logits = out[0] if isinstance(out, tuple) else out
                 next_tok = int(torch.argmax(logits[:, -1, :], dim=-1).item())
                 generated.append(next_tok)
                 if next_tok == getattr(self.tokenizer, "eos_id", 0):
