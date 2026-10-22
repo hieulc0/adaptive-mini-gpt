@@ -87,8 +87,8 @@ class GatedSkipConnection(nn.Module):
         else:
             raise ValueError(f"Unknown gate_type: '{gate_type}'. Supported: 'scalar', 'channel', 'projection'")
 
-    def forward(self, h_source: Tensor, h_target: Tensor) -> Tensor:
-        """Apply gated residual connection if enabled."""
+    def forward(self, h_target: Tensor, h_source: Tensor) -> Tensor:
+        """Apply gated residual connection if enabled: h_target_new = h_target + alpha * h_source."""
         if not self.enabled:
             return h_target
 

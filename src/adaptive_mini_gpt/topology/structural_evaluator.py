@@ -234,18 +234,18 @@ class ControlledStructuralEvaluator:
             growth_ratio = 0.0
 
         elif arm_type == "ARM_B_MATCHED_PARAM_BUDGET":
-            desc = "Fixed topology with matched parameter budget (freeze base, small output head projection)"
-            # Create a small output projection with matched parameter count (~128 params)
-            matched_proj = nn.Linear(arm_model.config.d_model, arm_model.config.d_model, bias=False).to(self.device)
-            nn.init.eye_(matched_proj.weight)
-            arm_model.matched_proj = matched_proj
-            # Freeze base
+            desc = "Fixed topology with matched parameter budget (freeze base, intra-block layer scale)"
+            # Intra-block scaling (source=3, target=3) maintains the strictly fixed parent topology
+            skip = TopologyEvolutionManager.attach_gated_skip(
+                arm_model, source_layer=3, target_layer=3, gate_type="scalar", name="fixed_scale_l3"
+            )
+            # Freeze base; only the matched scalar scaling parameter is trainable
+            trainable_params = [p for p in skip.parameters()]
             for p in arm_model.parameters():
                 p.requires_grad = False
-            for p in matched_proj.parameters():
+            for p in trainable_params:
                 p.requires_grad = True
-            trainable_params = list(matched_proj.parameters())
-            growth_ratio = sum(p.numel() for p in trainable_params) / sum(p.numel() for p in arm_model.parameters())
+            growth_ratio = sum(p.numel() for p in trainable_params) / max(1, sum(p.numel() for p in arm_model.parameters()))
 
         elif arm_type == "ARM_C_MODULAR_ADAPTER":
             desc = "Original M34/M37 modular adapter strategy (rank-8 LoRA on attention/MLP)"
@@ -289,6 +289,8 @@ class ControlledStructuralEvaluator:
 
         if arm_type == "ARM_D_GATED_SKIP":
             gate_alpha_val = arm_model.skip_connections["skip_l1_l3"].get_alpha_value()
+        elif arm_type == "ARM_B_MATCHED_PARAM_BUDGET":
+            gate_alpha_val = arm_model.skip_connections["fixed_scale_l3"].get_alpha_value()
 
         # Evaluate across multi-domain tasks
         arith_acc = sum(self.evaluate_task_neural_only(arm_model, t) for t in UNSEEN_ARITHMETIC_TASKS) / len(UNSEEN_ARITHMETIC_TASKS)
