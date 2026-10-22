@@ -19,7 +19,6 @@ import torch.nn as nn
 from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
 from adaptive_mini_gpt.model.modular_adapter import (
     compute_base_model_hash,
-    set_active_domain_adapters,
 )
 from adaptive_mini_gpt.model.transformer import MiniGPT
 

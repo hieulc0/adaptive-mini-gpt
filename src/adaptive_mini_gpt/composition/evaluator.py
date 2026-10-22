@@ -28,7 +28,7 @@ from adaptive_mini_gpt.integration.benchmark_suite import PROCEDURAL_LOGIC_TASKS
 from adaptive_mini_gpt.model.modular_adapter import (
     add_domain_adapter,
     inject_multi_domain_adapters,
-    set_active_domain_adapters,
+    set_active_domain_adapter,
 )
 from adaptive_mini_gpt.model.transformer import MiniGPT
 
@@ -117,9 +117,9 @@ class SequentialRelationalEvaluator:
                 eval_tasks = past_ep["eval_tasks"]
 
                 if strategy == "dynamic_modular":
-                    set_active_domain_adapters(model, [f"relational_{past_subject}"])
+                    set_active_domain_adapter(model, f"relational_{past_subject}")
                 else:
-                    set_active_domain_adapters(model, ["shared_relational_adapter"])
+                    set_active_domain_adapter(model, "shared_relational_adapter")
 
                 acc = self.evaluate_episode_accuracy(model, eval_tasks)
                 matrix[ep_idx][past_idx] = acc
@@ -148,7 +148,7 @@ class SequentialRelationalEvaluator:
         passed_gate = bool(mean_ret >= 0.80)
 
         # Procedural logic retention check
-        set_active_domain_adapters(model, [])  # Evaluate base model on logic
+        set_active_domain_adapter(model, None)  # Evaluate base model on logic
         logic_ok = True
         for lt in PROCEDURAL_LOGIC_TASKS:
             prompt = f"{lt.question} {lt.expected_answer}"

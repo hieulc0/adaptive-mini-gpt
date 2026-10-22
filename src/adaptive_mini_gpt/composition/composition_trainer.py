@@ -34,7 +34,7 @@ from adaptive_mini_gpt.model.modular_adapter import (
     add_domain_adapter,
     compute_base_model_hash,
     inject_multi_domain_adapters,
-    set_active_domain_adapters,
+    freeze_for_adapter_training, set_active_domain_adapter,
 )
 from adaptive_mini_gpt.model.transformer import MiniGPT
 
@@ -87,7 +87,8 @@ class CompositionTrainer:
         lr: float = 5e-4,
     ) -> float:
         """Fine-tune the designated domain adapter on input-target token pairs."""
-        set_active_domain_adapters(model, [domain_name])
+        freeze_for_adapter_training(model, domain_name)
+        set_active_domain_adapter(model, domain_name)
 
         trainable_params = [p for p in model.parameters() if p.requires_grad]
         if not trainable_params:
@@ -196,7 +197,7 @@ class CompositionTrainer:
         ]
 
         self.train_adapter_on_text_pairs(model, "arm_a_m39_baseline", train_pairs, epochs=15, lr=5e-4)
-        set_active_domain_adapters(model, ["arm_a_m39_baseline"])
+        set_active_domain_adapter(model, "arm_a_m39_baseline")
 
         all_eval = M40_COMPOSITIONAL_BENCHMARK + M40_CROSS_MODULE_BENCHMARK
         accs, latency = self._measure_category_accuracies(model, all_eval)
@@ -241,7 +242,7 @@ class CompositionTrainer:
         ]
 
         self.train_adapter_on_text_pairs(model, "arm_b_reasoning", train_pairs, epochs=15, lr=5e-4)
-        set_active_domain_adapters(model, ["arm_b_reasoning"])
+        set_active_domain_adapter(model, "arm_b_reasoning")
 
         all_eval = M40_COMPOSITIONAL_BENCHMARK + M40_CROSS_MODULE_BENCHMARK
         accs, latency = self._measure_category_accuracies(model, all_eval)
@@ -291,7 +292,7 @@ class CompositionTrainer:
         combined_pairs = prose_pairs + reasoning_pairs
 
         self.train_adapter_on_text_pairs(model, "arm_c_lang_enhanced", combined_pairs, epochs=15, lr=5e-4)
-        set_active_domain_adapters(model, ["arm_c_lang_enhanced"])
+        set_active_domain_adapter(model, "arm_c_lang_enhanced")
 
         all_eval = M40_COMPOSITIONAL_BENCHMARK + M40_CROSS_MODULE_BENCHMARK
         accs, latency = self._measure_category_accuracies(model, all_eval)
