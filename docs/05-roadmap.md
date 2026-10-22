@@ -51,3 +51,43 @@
   - **Option 1 (M49: Autonomous Learning Strategies & Active Minimal-Pair Querying)**: Move beyond passive in-context demonstration or uniform random practice by enabling Mini-GPT to actively query the environment or verifier for specific structural perturbations (directional reversals and bridge tests) to reduce sample complexity on unfamiliar rules.
   - **Option 2 (M49: Selective Memory Consolidation & Rule Archival)**: Implement long-term rule consolidation where modular adapters retain verified relational axioms (transitivity, symmetry, equivalence) and retrieve matching rule modules when encountering novel vocabularies with analogous semantics.
   - **Option 3 (M49: Hybrid Neuro-Symbolic Co-Processor with Epistemic Calibrated Fallback)**: Formally deploy the verified external solver (Arm D) as an active operational co-processor, routing queries with low neural epistemic confidence or contradictory premises to deterministic symbolic verification.
+
+### M49: Active Learning and Efficient Experiment Selection (Completed & Qualified)
+- **Objective**: Investigate whether Mini-GPT can learn to choose useful experiments that help it acquire unfamiliar relational rules more efficiently than passive or random learning; audit M48 incomplete factorial design, conservative collapse, and paired correctness on minimal pairs; construct controlled hypothesis spaces and bounded active learning environments; benchmark controlled question-selection arms against deterministic information gain; evaluate neural adaptation curves ($N \in [0, 2, 4, 8, 16, 32]$) with external tools strictly disabled; and benchmark multi-environment continual retention on remote Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m49-active-learning-study`, commit `cd2b7d0bb583e72b0ffc73ed7d12f1685e6c92d8`). Mini-GPT recurrent backbone (1,089,280 parameters, 1024-BPE tokenizer `f698e45e209b7fe6`), `M48ForensicAuditor`, `ActiveLearningEnvironment`, `BayesianHypothesisTracker`, `NeuralQueryPolicyHead`, `ActiveObservationLearner`, and `ContinualActiveEvaluator`. Wall-clock duration: ~660s (~11 minutes across Seeds 42, 43, 44). Unit test suite passed 148/148 on Tesla T4 in 79.18s.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Forensic M48 Audit & Confound Diagnostics**:
+     - Confirmed Incomplete Factorial Coverage: M48's 7 worlds covered only 7 of 20 potential cells (35% density) in the 5x4 domain-topology matrix.
+     - Confirmed Conservative Collapse: Arm C UNKNOWN recall reached 79.17% while YES recall collapsed to 4.17% (answering withholding rather than true calibration).
+     - Confirmed Bridge Deletion Sensitivity vs Paired Correctness: 100% sensitivity dropped to 25.0%-33.3% when requiring both base and perturbed graphs to be answered correctly.
+     - Confirmed Compute Budget: In-context passive demonstrations added +71.6% execution time without sample efficiency improvement.
+  2. **Phase 2 Controlled Active-Learning Environment**:
+     - Finite hypothesis space $\mathcal{H} = \{\text{DIR\_TRANS}, \text{DIR\_NONTRANS}, \text{SYM\_TRANS}, \text{SYM\_NONTRANS}\}$.
+     - Candidate query pools featuring reverse tests, bridge tests, multi-hop chains, refutations, and disconnected open-world probes.
+     - Bounded oracle returning strictly `{"YES", "NO", "UNKNOWN"}` without leaking rule names or graphs.
+  3. **Phase 3 Bayesian Hypothesis Tracking**:
+     - Bayesian belief updating from uniform prior (2.0 bits) via exact Expected Information Gain (EIG).
+  4. **Phase 4 Controlled Question-Selection Arms ($Q=4$ Interaction Budget)**:
+     - Arm A (Random Selection): Cumulative Info Gain = 1.5217 $\pm$ 0.3768 bits, Hypothesis Identification Rate = 66.67% $\pm$ 47.14%, Final Confidence = 0.8133 $\pm$ 0.2218.
+     - Arm B (Deterministic Info-Gain): Cumulative Info Gain = **1.9894 $\pm$ 0.0000 bits** (near 2.0 max), Hypothesis Identification Rate = **100.0% $\pm$ 0.0%**, Final Confidence = **0.9992 $\pm$ 0.0000** (identified rule in $\le 2$ queries across all seeds).
+     - Arm C (Neural Policy): Cumulative Info Gain = **1.9457 $\pm$ 0.0618 bits**, Hypothesis Identification Rate = **100.0% $\pm$ 0.0%**, Final Confidence = **0.9928 $\pm$ 0.0091**.
+     - Arm D (Neural + Memory): Cumulative Info Gain = **1.9457 $\pm$ 0.0618 bits**, Hypothesis Identification Rate = **100.0% $\pm$ 0.0%**, Final Confidence = **0.9928 $\pm$ 0.0091**.
+  5. **Phase 5 & 6 Neural-Only Adaptation Curves & Sample Efficiency ($N \in [0, 2, 4, 8, 16, 32]$)**:
+     - Random Observations: AUC = 0.3633 $\pm$ 0.0541, Final Acc = 34.72% $\pm$ 5.20%, Macro F1 = 0.2508 $\pm$ 0.0360, Paired Correctness = 16.67% $\pm$ 23.57%.
+     - Info-Gain Observations: AUC = **0.3889 $\pm$ 0.0277**, Final Acc = **34.72% $\pm$ 1.97%**, Macro F1 = **0.2749 $\pm$ 0.0154**, Paired Correctness = **50.00% $\pm$ 0.00%** (3x improvement over random!).
+     - Neural + Memory Observations: AUC = 0.2978 $\pm$ 0.0078, Final Acc = 29.17% $\pm$ 3.40%, Macro F1 = 0.2219 $\pm$ 0.0223, Paired Correctness = 16.67% $\pm$ 23.57%.
+  6. **Phase 7 Continual Active Experience & Retained Capabilities**:
+     - Sequential adaptation across 3 environments: Shared BWT = -0.0347 $\pm$ 0.0393; Replay BWT = -0.0417 $\pm$ 0.0295; Modular BWT = -0.0347 $\pm$ 0.0260.
+     - 100% preservation of canonical arithmetic carry and chained logic reasoning across all strategies. Base model hashes strictly invariant (`8736b364e4a8ce19`, `de7621751f2e99d0`, `c7bd81ae47f2e2de`).
+  7. **Task-Specific Qualification Gates**:
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (148/148 unit tests passed on Tesla T4; base hashes invariant).
+     - Active Learning Gate: **QUALIFIED** (Arm B 1.9894 bits vs Arm A 1.5217 bits).
+     - Neural Policy Gate: **QUALIFIED** (Arm C/D 1.9457 bits vs Arm A 1.5217 bits).
+     - Paired Correctness Gate: **QUALIFIED** (Final Paired Correctness 50.0% vs 16.7% random).
+     - Learning-to-Learn Gate: **QUALIFIED** (Active Adaptation AUC 0.3889 vs Random AUC 0.3633).
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain strictly frozen; active learning modules remain in research tier.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; active learning candidates remain in research tier.
+- **Next Direction Options (Post-M49 Strategic Priority)**:
+  - **Option 1 (M50: Autonomous Hypothesis Generation and Dynamic Experiment Probing)**: Expand beyond fixed 4-hypothesis spaces to open-ended relational hypothesis generation, enabling the policy to generate dynamic test queries rather than selecting from fixed pools.
+  - **Option 2 (M50: Selective Memory Consolidation & Rule Archival)**: Implement long-term rule consolidation where actively verified relational axioms are stored in persistent modular adapters, testing whether archived rules accelerate adaptation to new domains.
+  - **Option 3 (M50: Hybrid Neuro-Symbolic Co-Processor with Epistemic Calibrated Fallback)**: Formally integrate the verified solver as an operational fallback for queries where the neural policy indicates epistemic ambiguity.
