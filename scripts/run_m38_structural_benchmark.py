@@ -32,7 +32,13 @@ from adaptive_mini_gpt.curriculum_discovery.structural_evolution import (
     StructuralModificationType,
     StructuralProposal,
 )
+from adaptive_mini_gpt.data.bpe_scaling import (
+    expand_model_vocabulary,
+    train_scaled_bpe_tokenizer,
+)
+from adaptive_mini_gpt.data.language_data import PRETRAIN_PROSE_CORPUS
 from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
+from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.modular_adapter import compute_base_model_hash
 from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.topology.benchmark_suite import (
@@ -82,10 +88,10 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     checkpoints_dir = Path(args.checkpoints_dir)
 
-    # Initialize tokenizer from M18 lineage
-    sample_ckpt = checkpoints_dir / f"seed_{args.seeds[0]}/base_pretrain/best.pt"
-    raw_sample = CheckpointManager.load_raw_checkpoint(sample_ckpt)
-    tokenizer = CheckpointManager.load_tokenizer(raw_sample)
+    # Initialize 1024-BPE Tokenizer
+    logger.info("Initializing 1024-BPE Tokenizer for M38 Benchmark...")
+    all_prose = " ".join(PRETRAIN_PROSE_CORPUS)
+    tokenizer = train_scaled_bpe_tokenizer(all_prose, target_vocab_size=1024)
     logger.info(f"Loaded Tokenizer with fingerprint: {tokenizer.get_fingerprint()} (vocab={tokenizer.vocab_size})")
 
     seed_results: list[dict[str, Any]] = []
@@ -108,7 +114,17 @@ def main() -> None:
 
         ckpt_path = checkpoints_dir / f"seed_{seed}/base_pretrain/best.pt"
         raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_path)
-        base_model = CheckpointManager.load_model(raw_ckpt).to(device)
+        base_tok = CheckpointManager.load_tokenizer(raw_ckpt)
+        state_dict = raw_ckpt.get("model_state_dict", raw_ckpt.get("model_state"))
+        base_model_400 = MiniGPT(ModelConfig(**raw_ckpt["model_config"]))
+        base_model_400.load_state_dict(state_dict)
+        base_model = expand_model_vocabulary(
+            model=base_model_400,
+            old_tokenizer=base_tok,
+            new_tokenizer=tokenizer,
+        ).to(device)
+        base_model.eval()
+
         base_hash = compute_base_model_hash(base_model)
         logger.info(f"Base model loaded for seed {seed} (hash={base_hash})")
 
@@ -118,10 +134,6 @@ def main() -> None:
         # Phase 1: M37 Audit & Baseline Reconciliation
         # -------------------------------------------------------------
         logger.info("--- Phase 1: Auditing M37 Neural Knowledge Acquisition & Retrieval Baseline ---")
-        # In M37, rank-8 language adapter achieved 18.52% neural-only accuracy
-        # Here we audit sample counts, confidence bounds, and verify absence of retrieval
-        m37_neural_pre = 0.0
-        # Re-evaluate untrained neural-only accuracy across factual tasks
         untrained_correct = sum(evaluator.evaluate_task_neural_only(base_model, t) for t in SOURCE_FACTUAL_TASKS)
         m37_neural_pre = untrained_correct / len(SOURCE_FACTUAL_TASKS)
         m37_sample_count = len(SOURCE_FACTUAL_TASKS) + len(PARAPHRASED_FACTUAL_TASKS)
@@ -215,7 +227,6 @@ def main() -> None:
         # Phase 6: Lineage Safety & Reversibility Verification
         # -------------------------------------------------------------
         logger.info("--- Phase 6: Lineage Safety & Rollback Verification ---")
-        # Ensure that base parameters remained strictly frozen across adapter and skip arms
         hash_c_invariant = arm_results["ARM_C_MODULAR_ADAPTER"]["base_hash_invariant"]
         hash_d_invariant = arm_results["ARM_D_GATED_SKIP"]["base_hash_invariant"]
         logger.info(f"Base Hash Invariant (Arm C Adapter): {hash_c_invariant}")
@@ -296,10 +307,6 @@ def main() -> None:
     carry_ret_skip = agg_arms["ARM_D_GATED_SKIP"]["carry_retention_accuracy"]["mean"]
     fact_skip = agg_arms["ARM_D_GATED_SKIP"]["factual_accuracy"]["mean"]
     fact_adapter = agg_arms["ARM_C_MODULAR_ADAPTER"]["factual_accuracy"]["mean"]
-
-    # Scientific qualification criteria:
-    # Does learnable skip connection reliably outperform simpler baselines or adapter training?
-    topology_advantage = fact_skip > fact_adapter
 
     qualification_verdicts = {
         "operational_reasoning_gate": "PASS (100% M18 deterministic baseline intact)",
