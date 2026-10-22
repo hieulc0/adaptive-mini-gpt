@@ -68,18 +68,27 @@ def load_or_init_base_checkpoint(
 ) -> tuple[MiniGPT, Any]:
     """Load canonical M18 base checkpoint or initialize model if checkpoint not found."""
     vocab_size = 1024
+    all_prose = " ".join(PRETRAIN_PROSE_CORPUS)
+    tokenizer = train_scaled_bpe_tokenizer(all_prose, target_vocab_size=vocab_size)
+
     if checkpoint_dir and checkpoint_dir.exists():
-        mgr = CheckpointManager(checkpoint_dir)
-        try:
-            bundle = mgr.load_checkpoint(step=None)
-            cfg = bundle["config"]
-            model = MiniGPT(cfg).to(device)
-            model.load_state_dict(bundle["model"])
-            tok = bundle.get("tokenizer", None)
-            if tok is not None:
-                return model, tok
-        except Exception as e:
-            logger.warning(f"Could not load checkpoint: {e}; falling back to init")
+        ckpt_path = checkpoint_dir / f"seed_{seed}" / "base_pretrain" / "best.pt"
+        if ckpt_path.exists():
+            try:
+                raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_path)
+                base_tok = CheckpointManager.load_tokenizer(raw_ckpt)
+                state_dict = raw_ckpt.get("model_state_dict", raw_ckpt.get("model_state"))
+                base_model_orig = MiniGPT(ModelConfig(**raw_ckpt["model_config"]))
+                base_model_orig.load_state_dict(state_dict)
+                base_model = expand_model_vocabulary(
+                    model=base_model_orig,
+                    old_tokenizer=base_tok,
+                    new_tokenizer=tokenizer,
+                ).to(device)
+                base_model.eval()
+                return base_model, tokenizer
+            except Exception as e:
+                logger.warning(f"Could not load checkpoint {ckpt_path}: {e}; falling back to init")
 
     # Deterministic init matching M18 specs
     torch.manual_seed(seed)
@@ -397,10 +406,11 @@ def _aggregate_m50_results(audit_report: Any, seed_runs: list[dict[str, Any]]) -
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run M50 Autonomous Experiment Design Benchmark")
-    parser.add_argument("--checkpoint-dir", type=Path, default=None, help="Directory containing base checkpoints")
+    parser.add_argument("--checkpoint-dir", "--checkpoints-dir", dest="checkpoints_dir", type=Path, default=None, help="Directory containing base checkpoints")
+    parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu", help="Torch compute device")
     parser.add_argument("--output-dir", type=Path, default=Path("runs/m50_output"), help="Output directory")
     parser.add_argument("--seeds", type=int, nargs="+", default=[42, 43, 44], help="Evaluation seeds")
     args = parser.parse_args()
 
-    dev = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    run_m50_study(args.checkpoint_dir, args.output_dir, dev, args.seeds)
+    dev = torch.device(args.device)
+    run_m50_study(args.checkpoints_dir, args.output_dir, dev, args.seeds)
