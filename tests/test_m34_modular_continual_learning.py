@@ -64,7 +64,7 @@ def test_mathematical_base_invariance_during_adapter_training() -> None:
         context_length=32,
         d_model=32,
         n_layers=2,
-        num_heads=2,
+        n_heads=2,
         d_ff=64,
     )
     model = MiniGPT(cfg)
@@ -101,7 +101,7 @@ def test_adapter_state_dict_save_and_load() -> None:
         context_length=32,
         d_model=32,
         n_layers=2,
-        num_heads=2,
+        n_heads=2,
         d_ff=64,
     )
     model = MiniGPT(cfg)
@@ -141,7 +141,7 @@ def test_modular_lineage_manager() -> None:
             context_length=32,
             d_model=32,
             n_layers=2,
-            num_heads=2,
+            n_heads=2,
             d_ff=64,
         )
         model = MiniGPT(cfg)
