@@ -29,6 +29,9 @@ class LearningAction(str, enum.Enum):
     ABSTAIN = "ABSTAIN"
 
 
+ACTION_LIST = list(LearningAction)
+
+
 @dataclass
 class ActionOutcomeRecord:
     """Empirical audit record of an action taken on a specific task."""
