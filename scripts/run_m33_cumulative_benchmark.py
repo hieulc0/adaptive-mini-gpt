@@ -34,11 +34,11 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from adaptive_mini_gpt.data.language_corpus import PRETRAIN_PROSE_CORPUS
-from adaptive_mini_gpt.data.subword_tokenizer import (
-    BPETokenizer,
+from adaptive_mini_gpt.data.bpe_scaling import (
     expand_model_vocabulary,
     train_scaled_bpe_tokenizer,
 )
+from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
 from adaptive_mini_gpt.learning.audit_m32 import run_phase1_audit
 from adaptive_mini_gpt.learning.cumulative_learner import (
     run_cumulative_learning_sequence,
