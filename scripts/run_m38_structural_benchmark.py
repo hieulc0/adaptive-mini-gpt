@@ -22,6 +22,7 @@ import math
 import sys
 import time
 from pathlib import Path
+from dataclasses import asdict
 from typing import Any
 
 import numpy as np
