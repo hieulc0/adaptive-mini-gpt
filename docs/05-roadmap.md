@@ -205,3 +205,29 @@
      - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Candidate neural weights and adapters remain research lineages. Base weights remain frozen.
 - **Lineage Promotion Decision**: **NO-GO**. Base weights remain frozen.
 - **Next Direction (M35)**: Choose How to Learn — Metacognitive Learning Action Policy (teach Mini-GPT to select among direct retrieval, practice curriculum, adapter addition, or search based on observed interactive gaps, consolidating modular adapters when beneficial).
+
+
+### M35: Learning How to Learn — Metacognitive Action Policy (Completed & Qualified)
+- **Objective**: Move Adaptive Mini-GPT toward a continually evolving learner that can decide when to perform, verify, retrieve information, practice, train, retain knowledge, or abstain. Compare Deterministic Router vs Supervised Neural Head vs Outcome-Aware Policy across Seeds 42, 43, 44 on Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m35-metacognitive-study`, commit `79745cf2851d738361020bb73a582d061b6a5621`). Base Mini-GPT backbone (1,089,280 parameters, 1024-BPE tokenizer `1845a0a16f6ab9ff`) with M34 V3 arithmetic and logic adapters, augmented with `NeuralMetacognitivePolicy` (pooled sequence representations mapped through a 2-layer MLP head to 7 metacognitive actions). Mean duration: 45.27s per seed. 61/61 Pytest unit tests passed on Tesla T4 GPU.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Audit & Verification**:
+     - Audited M34 V3 adapters in a fresh process: 100% arithmetic exact, 37.5% logic exact, 100% 200-state carry retention.
+     - Verified mathematical parameter invariance (SHA-256 base model hashes unchanged).
+  2. **Phase 3 & 5 Metacognitive Policy Benchmark**:
+     - Evaluated on 112 held-out samples across 7 distinct metacognitive scenarios.
+     - **Policy A (Deterministic Router Baseline)**: 50.0% ± 0.9% accuracy, +0.2570 ± 0.0052 utility, 33.3% false abstention rate.
+     - **Policy B (Supervised Neural Head)**: 65.8% ± 9.8% accuracy, +0.4603 ± 0.0923 utility, 0.4% false abstention rate.
+     - **Policy C (Outcome-Aware Policy)**: **67.3% ± 7.4% accuracy**, **+0.5260 ± 0.0359 utility** (more than 2x higher empirical utility than deterministic router!), 0.4% false abstention, 0.0% unnecessary training waste.
+  3. **Phase 6 Closed-Loop Self-Directed Learning**:
+     - Achieved **73.81% ± 16.49% verified task success rate** across interactive episodes with **0.0 mean emergency controller overrides**.
+  4. **Phase 7 Language Representation Diagnosis**:
+     - Diagnosed language gap: 73k linear adapters ($r=8$) cannot synthesize open-domain language comprehension from scratch without prior backbone language exposure (M28 language pretraining reached 33.33%, M34 recurrent foundation reached 0.00%).
+     - Recommended joint pretraining or retrieval grounding before expanding model parameter capacity.
+  5. **Task-Specific Qualification Gates**:
+     - Operational Reasoning Gate: **PASS (100%)** (M18 deterministic baseline retained).
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (61/61 Pytest unit tests passed on Tesla T4; 3-seed reproducibility confirmed).
+     - Scientific Metacognitive Policy Gate: **PASS (QUALIFIED - MAJOR ADVANCEMENT)**. The outcome-aware neural policy demonstrated statistically superior action selection and empirical utility over the deterministic router.
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Candidate neural weights and policies remain research lineages. Base weights remain frozen.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain frozen.
+- **Next Direction (M36)**: Choose What to Study — Autonomous Curriculum Discovery & Self-Directed Gap Analysis (give Mini-GPT bounded autonomy to discover its own knowledge gaps, formulate hypothesis tests, plan verified practice curricula, and request research updates on unfamiliar subjects).

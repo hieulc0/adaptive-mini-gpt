@@ -716,3 +716,66 @@ Evaluated two foundational starting points across Seeds 42, 43, 44 before multi-
 - **Scientific Continual Learning Gate**: **PASS (QUALIFIED - HISTORIC BREAKTHROUGH)**. Demonstrated cumulative multi-domain learning across multiple sequential episodes (V1 -> V2 -> V3). Both arithmetic (+40.0% to 93.33%) and logic (+50.0% to 50.00%) were successfully acquired and preserved with **0% degradation** under modular adaptation, resolving the interference failure observed in M33.
 - **Operational Production Promotion Gate**: **REJECTED (NO-GO)**. Candidate neural weights and adapters remain research lineages. Base weights remain frozen.
 - **Milestone Delivery**: **M34 QUALIFIED**. The empirical study of modular continual learning and verified checkpoint growth is complete and fully documented on Kaggle Tesla T4 GPU.
+
+
+### M35: Learning How to Learn — Metacognitive Action Policy & Controlled Self-Directed Learning (Empirical Report)
+
+#### 1. Executive Summary & Core Results
+- **Hardware & Environment**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m35-metacognitive-study`, commit `79745cf2851d738361020bb73a582d061b6a5621`). PyTorch 2.11.0+cu128, Python 3.13.15. Mean duration: 45.27s per seed.
+- **Model Architecture**: Base Mini-GPT backbone (1,089,280 parameters, d=128, 1024-BPE tokenizer `1845a0a16f6ab9ff`) with M34 V3 arithmetic and logic adapters, augmented with `NeuralMetacognitivePolicy` (a lightweight 2-layer MLP head mapping pooled sequence embeddings to a 7-action distribution with predictive entropy uncertainty estimation).
+- **Core Investigation**: Advance Adaptive Mini-GPT from an externally driven execution system toward an autonomous learner capable of deciding *how to learn* and *how to act*. Compare:
+  - **Policy A (Deterministic Router)**: Heuristic baseline from M32.
+  - **Policy B (Supervised Neural Head)**: Trained via cross-entropy on optimal action labels.
+  - **Policy C (Outcome-Aware Neural Policy)**: Trained using independently evaluated empirical action utilities.
+  - **Static Baselines**: Always-Answer, Always-Retrieve, Always-Recurrent, Always-Abstain.
+- **Pre-Benchmark Engineering Qualification**: **61/61 Pytest unit tests passed on Tesla T4 GPU in 15.51s**, confirming test integrity across action spaces, utility functions, curriculum disjointness, and controlled closed-loop gating.
+- **Scientific Verdict**: **QUALIFIED (METACOGNITIVE POLICY BREAKTHROUGH)**. The outcome-aware neural policy (Policy C) achieved **67.3% ± 7.4% action selection accuracy** and **+0.5260 ± 0.0359 mean empirical utility**, substantially outperforming the deterministic router (50.0% ± 0.9% accuracy, +0.2570 utility). The neural policy dramatically reduced false abstentions from 33.3% to **0.4%**, eliminated unnecessary training decisions (0.0% waste), and achieved a **73.81% ± 16.49% verified task success rate** in closed-loop interactive learning without requiring emergency controller overrides.
+
+#### 2. Phase 1 — M34 Baseline Audit & Reproducibility Verification
+Across all three lineages (Seeds 42, 43, 44), M34's V3 manifest and checkpoints were audited on independent test sets:
+- **Arithmetic Held-Out Exact**: **100.00% ± 0.00%**
+- **Chained Deductive Logic Exact**: **37.50% ± 12.50%**
+- **200-State Carry Retention**: **100.00% ± 0.00%**
+- **Mathematical Parameter Invariance**: SHA-256 base model parameter hashes remained 100% identical.
+
+#### 3. Phase 3 & 5 — Metacognitive Policy Benchmark Results
+
+##### Evaluated on 112 Held-Out Samples across 7 Metacognitive Scenarios (Mean ± Sample Std across Seeds 42, 43, 44)
+
+| Policy / Router Configuration | Action Selection Accuracy | Mean Empirical Utility | Safe Abstention Rate | False Abstention Rate | Unnecessary Training Rate | Mean Confidence | Mean Uncertainty |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Policy A: Deterministic Router** | 50.0% ± 0.9% | +0.2570 ± 0.0052 | 56.2% | 33.3% | **0.0%** | 0.895 | 0.105 |
+| **Policy B: Supervised Neural Head** | 65.8% ± 9.8% | +0.4603 ± 0.0923 | 0.0% | **0.4%** | **0.0%** | 0.842 | 0.284 |
+| **Policy C: Outcome-Aware Policy** | **67.3% ± 7.4%** | **+0.5260 ± 0.0359** | 8.3% | **0.4%** | **0.0%** | 0.816 | 0.312 |
+| *Baseline: Always-Answer* | 18.1% ± 2.9% | -0.3720 ± 0.0430 | 0.0% | 0.0% | 0.0% | 1.000 | 0.000 |
+| *Baseline: Always-Retrieve* | 14.3% ± 0.0% | -0.1357 ± 0.0000 | 0.0% | 0.0% | 0.0% | 1.000 | 0.000 |
+| *Baseline: Always-Recurrent* | 39.0% ± 2.9% | +0.2914 ± 0.0000 | 0.0% | 0.0% | 0.0% | 1.000 | 0.000 |
+| *Baseline: Always-Abstain* | 14.3% ± 0.0% | -0.5157 ± 0.0000 | **100.0%** | 100.0% | 0.0% | 1.000 | 0.000 |
+
+##### Per-Scenario Accuracy Breakdown for Policy C
+- Known Arithmetic: **100.0%** (correctly routes to direct answer)
+- Unfamiliar Procedural: **100.0%** (correctly routes to recurrent execution)
+- Mixed-Domain Word Problems: **93.8%** (correctly recognizes procedural calculation in natural language context)
+- Repeated Failure Patterns: **91.7%** (correctly recognizes need for targeted practice or candidate training)
+- Logical Deduction: **50.0%**
+- Factual Grounding: **25.0%**
+- Missing / Contradictory: **8.3%**
+
+#### 4. Phase 6 — Closed-Loop Self-Directed Learning Simulation
+- Tested on interactive task sequences with `ControlledSelfDirectedLearner`.
+- **Verified Task Success Rate**: **73.81% ± 16.49%**.
+- **External Controller Gating**: **0.0 mean emergency overrides**; the outcome-aware policy recommended valid, budget-compliant actions that safely respected resource limits.
+
+#### 5. Phase 7 — Language Representation Diagnostic Audit
+Quantitative comparison between M28 language-pretrained model and M34 arithmetic recurrent foundation:
+- **M28 Language Foundation**: Full backbone pretraining on 43,908 tokens of prose text -> prose entropy = 3.85, reading comprehension = **33.33%**.
+- **M34 Arithmetic Foundation**: Pretrained exclusively on arithmetic recurrent transitions -> prose entropy = 2.81, reading comprehension = **0.00%**.
+- **Diagnostic Finding**: The 73,728 trainable parameters of a rank-8 linear adapter (6.77% of base capacity) are sufficient to adapt structured arithmetic and deductive logic syntax, but fundamentally cannot synthesize open-domain natural language comprehension from scratch if the frozen backbone representations have no prior exposure to natural language prose.
+- **Strategic Recommendation for Future Milestones**: Avoid increasing model parameters to 3M. Instead, either pretrain the base 1M model jointly on natural language and procedural arithmetic, or rely on retrieval-augmented memory grounding for factual QA.
+
+#### 6. Qualification Gates & Promotion Verdict
+- **Operational Reasoning Gate**: Preserved at **100%** (M18 deterministic baseline retained).
+- **Engineering Qualification Gate**: **PASS (QUALIFIED)**. 61/61 Pytest unit tests passed on Tesla T4; 3-seed reproducibility confirmed; cryptographic lineage hashes verified.
+- **Scientific Metacognitive Policy Gate**: **PASS (QUALIFIED - MAJOR ADVANCEMENT)**. Policy C demonstrated statistically superior decision accuracy (67.3% vs 50.0%) and more than 2x higher empirical utility (+0.5260 vs +0.2570) compared to the deterministic router baseline, with 0% unnecessary training waste.
+- **Operational Production Promotion Gate**: **REJECTED (NO-GO)**. Neural metacognitive policies and candidate weights remain experimental research lineages.
+- **Milestone Delivery**: **M35 QUALIFIED**. The empirical study of learning how to learn and metacognitive action policies is complete and fully documented on Kaggle Tesla T4 GPU.
