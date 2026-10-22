@@ -21,7 +21,7 @@ import torch
 import torch.nn as nn
 from torch.optim import AdamW
 
-from adaptive_mini_gpt.adaptation.modular_adapter import (
+from adaptive_mini_gpt.model.modular_adapter import (
     add_domain_adapter,
     freeze_for_adapter_training,
     inject_multi_domain_adapters,

@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 import torch
 
-from adaptive_mini_gpt.adaptation.modular_adapter import (
+from adaptive_mini_gpt.model.modular_adapter import (
     add_domain_adapter,
     inject_multi_domain_adapters,
     set_active_domain_adapter,
