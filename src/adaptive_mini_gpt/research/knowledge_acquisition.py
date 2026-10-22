@@ -241,7 +241,8 @@ class KnowledgeAcquisitionEvaluator:
                 out = model(idx)
                 logits = out[0] if isinstance(out, tuple) else out
                 next_tok = int(torch.argmax(logits[0, -1, :]).item())
-                if next_tok == tokenizer.encode("<|endoftext|>")[0] if "<|endoftext|>" in tokenizer.token_to_id else 0:
+                eos_id = tokenizer.stoi.get(b"<eos>", 0)
+                if next_tok == eos_id or next_tok == 0:
                     break
                 gen_tokens.append(next_tok)
                 idx = torch.cat([idx, torch.tensor([[next_tok]], device=device)], dim=1)
