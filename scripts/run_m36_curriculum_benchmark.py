@@ -153,8 +153,11 @@ def run_seed_m36_pipeline(
     # PHASE 1: Audit M35 Policy & Uncertainty Failures
     # -------------------------------------------------------------
     logger.info("--- Phase 1: Auditing M35 Performance on Held-Out Partitions ---")
-    train_samples = build_metacognitive_curriculum(samples_per_scenario=16, partition="train", seed=seed)
-    eval_samples = build_metacognitive_curriculum(samples_per_scenario=16, partition="eval", seed=seed)
+    train_samples, eval_samples = build_metacognitive_curriculum(
+        seed=seed,
+        train_samples_per_scenario=16,
+        eval_samples_per_scenario=16,
+    )
 
     # Train baseline M35 outcome-aware policy
     policy_m35 = NeuralMetacognitivePolicy(d_model=base_config.d_model).to(device)
