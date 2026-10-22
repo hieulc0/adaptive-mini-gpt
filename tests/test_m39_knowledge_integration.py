@@ -25,10 +25,10 @@ from adaptive_mini_gpt.model.modular_adapter import (
 from adaptive_mini_gpt.model.transformer import MiniGPT
 
 
-def _create_minimal_test_model() -> MiniGPT:
+def _create_minimal_test_model(vocab_size: int = 300) -> MiniGPT:
     """Create a minimal MiniGPT for fast unit test execution."""
     cfg = ModelConfig(
-        vocab_size=128,
+        vocab_size=vocab_size,
         context_length=64,
         d_model=32,
         n_layers=2,
@@ -41,15 +41,13 @@ def _create_minimal_test_model() -> MiniGPT:
 
 def _create_dummy_tokenizer() -> BPETokenizer:
     tok = BPETokenizer()
-    tok.vocab_size = 128
-    tok.eos_id = 0
     return tok
 
 
 def test_carry_retention_reconciliation_audit() -> None:
     """Verify CarryRetentionAuditor correctly diagnoses raw vs canonical protocols."""
-    model = _create_minimal_test_model()
     tok = _create_dummy_tokenizer()
+    model = _create_minimal_test_model(vocab_size=max(300, tok.vocab_size))
     dev = torch.device("cpu")
     initial_hash = compute_base_model_hash(model)
 
@@ -106,8 +104,8 @@ def test_neural_task_router_mechanics() -> None:
 
 def test_multi_view_supervision_adapter_training() -> None:
     """Test that multi-view factual pairs train cleanly on isolated adapters."""
-    model = _create_minimal_test_model()
     tok = _create_dummy_tokenizer()
+    model = _create_minimal_test_model(vocab_size=max(300, tok.vocab_size))
     dev = torch.device("cpu")
 
     inject_multi_domain_adapters(model, target_modules=["c_attn", "c_proj", "c_fc"], r=4)
