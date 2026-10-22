@@ -25,11 +25,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from adaptive_mini_gpt.data.bpe_scaling import expand_model_vocabulary
-from adaptive_mini_gpt.data.subword_tokenizer import (
-    PRETRAIN_PROSE_CORPUS,
+from adaptive_mini_gpt.data.bpe_scaling import (
+    expand_model_vocabulary,
     train_scaled_bpe_tokenizer,
 )
+from adaptive_mini_gpt.data.language_corpus import PRETRAIN_PROSE_CORPUS
+from adaptive_mini_gpt.data.subword_tokenizer import BPETokenizer
 from adaptive_mini_gpt.integration.benchmark_suite import (
     FACTUAL_LEARNING_DATASET,
     PROCEDURAL_LOGIC_TASKS,
