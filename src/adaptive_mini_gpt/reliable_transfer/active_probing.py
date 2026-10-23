@@ -12,6 +12,10 @@ from adaptive_mini_gpt.reliable_transfer.noise_aware_belief import (
     SequentialProbabilityRatioTest,
     EpistemicDecision,
 )
+from adaptive_mini_gpt.reliable_transfer.target_environments import (
+    create_dense_clique_diagnostic_environment,
+    create_noisy_dense_control_environment,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -148,11 +152,6 @@ class ControlledActiveProbingAuditor:
         num_known_episodes: int = 15,
         num_unknown_episodes: int = 15,
     ) -> list[ActiveProbingBenchmarkSummary]:
-        from adaptive_mini_gpt.skill_composition.environment import (
-            create_dense_clique_diagnostic_environment,
-            create_noisy_dense_control_environment,
-        )
-
         summaries = []
         for strat in ["random_valid", "targeted_peripheral_bridge"]:
             sprt = SequentialProbabilityRatioTest(assumed_noise_floor=self.noise_rate)

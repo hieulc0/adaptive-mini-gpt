@@ -31,7 +31,9 @@ from adaptive_mini_gpt.reliable_transfer.retention_auditor import (
     ReliableRetentionAuditor,
 )
 from adaptive_mini_gpt.reliable_transfer.target_environments import (
+    create_dense_clique_diagnostic_environment,
     create_metabolic_bypass_environment,
+    create_noisy_dense_control_environment,
     create_reporting_hierarchy_environment,
     create_social_coalition_environment,
     create_supply_chain_pipeline_environment,
@@ -49,7 +51,6 @@ __all__ = [
     "AdaptationStepMetrics",
     "ArmTransferEvaluation",
     "BaselineFixedThresholdTracker",
-    "CompositionRetentionAuditResult",
     "ControlledActiveProbingAuditor",
     "EpistemicDecision",
     "GatedResidualSkillAdapter",
@@ -68,7 +69,9 @@ __all__ = [
     "RepresentationDriftInterventionReport",
     "ResidualSkillAdapter",
     "SequentialProbabilityRatioTest",
+    "create_dense_clique_diagnostic_environment",
     "create_metabolic_bypass_environment",
+    "create_noisy_dense_control_environment",
     "create_reporting_hierarchy_environment",
     "create_social_coalition_environment",
     "create_supply_chain_pipeline_environment",

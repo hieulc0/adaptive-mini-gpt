@@ -113,3 +113,48 @@ def create_social_coalition_environment(seed: int = 42) -> AutonomousEnvironment
         ],
         hypothesis=OUT_OF_HYPOTHESIS_PARITY,
     )
+
+
+def create_dense_clique_diagnostic_environment(seed: int = 42) -> AutonomousEnvironment:
+    """Diagnostic environment: dense clique with peripheral exceptions (out of hypothesis)."""
+    return _build_balanced_env(
+        env_id=f"diagnostic_dense_clique_exceptions_{seed}",
+        domain_name="ClusterTopology",
+        relation_name="strongly_interlinks_with",
+        entities=[
+            "CoreMember1", "CoreMember2", "CoreMember3",
+            "PeripheryNode1", "PeripheryNode2", "PeripheryNode3",
+        ],
+        edges=[
+            ("CoreMember1", "CoreMember2"),
+            ("CoreMember2", "CoreMember3"),
+            ("CoreMember3", "CoreMember1"),
+        ],
+        hypothesis=OUT_OF_HYPOTHESIS_DENSE_CLIQUE,
+        entity_levels={
+            "CoreMember1": 2, "CoreMember2": 2, "CoreMember3": 2,
+            "PeripheryNode1": 0, "PeripheryNode2": 0, "PeripheryNode3": 0,
+        },
+    )
+
+
+def create_noisy_dense_control_environment(seed: int = 42) -> AutonomousEnvironment:
+    """Diagnostic environment: dense known symmetric cluster with noise."""
+    return _build_balanced_env(
+        env_id=f"diagnostic_noisy_dense_known_{seed}",
+        domain_name="DenseKnownMesh",
+        relation_name="in_same_security_zone",
+        entities=[
+            "DenseNode1", "DenseNode2", "DenseNode3",
+            "DenseNode4", "DenseNode5", "DenseNode6",
+        ],
+        edges=[
+            ("DenseNode1", "DenseNode2"),
+            ("DenseNode2", "DenseNode3"),
+            ("DenseNode3", "DenseNode1"),
+            ("DenseNode3", "DenseNode4"),
+            ("DenseNode4", "DenseNode5"),
+            ("DenseNode5", "DenseNode6"),
+        ],
+        hypothesis=EXPANDED_HYPOTHESES["SYM_TRANS"],
+    )

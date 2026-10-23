@@ -34,7 +34,9 @@ from adaptive_mini_gpt.reliable_transfer.retention_auditor import (
     ReliableRetentionAuditor,
 )
 from adaptive_mini_gpt.reliable_transfer.target_environments import (
+    create_dense_clique_diagnostic_environment,
     create_metabolic_bypass_environment,
+    create_noisy_dense_control_environment,
     create_reporting_hierarchy_environment,
     create_social_coalition_environment,
     create_supply_chain_pipeline_environment,
@@ -135,6 +137,12 @@ def test_multi_world_environments():
     env_soc = create_social_coalition_environment(seed=42)
     assert len(env_soc.entities) == 6
 
+    env_dense = create_dense_clique_diagnostic_environment(seed=42)
+    assert len(env_dense.entities) == 6
+
+    env_noisy = create_noisy_dense_control_environment(seed=42)
+    assert len(env_noisy.entities) == 6
+
 
 def test_noise_aware_epistemic_detectors():
     """Verify SPRT and posterior-predictive tracker vs baseline on clean and noisy episodes."""
@@ -184,6 +192,13 @@ def test_controlled_active_probing():
     ep_targeted = auditor.run_probing_episode("targeted_peripheral_bridge", env, sprt)
     assert ep_targeted.queries_consumed <= 12
     assert ep_targeted.useful_evidence_count >= 0
+
+    # Test benchmark_strategies
+    summaries = auditor.benchmark_strategies(num_known_episodes=2, num_unknown_episodes=2)
+    assert len(summaries) == 2
+    for s in summaries:
+        assert s.total_episodes == 4
+        assert 0.0 <= s.unknown_rule_recall <= 1.0
 
 
 def test_reliable_retention_auditor(base_model_and_tokenizer):
