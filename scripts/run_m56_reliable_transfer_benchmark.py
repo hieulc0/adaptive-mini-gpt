@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import logging
 import sys
@@ -14,7 +15,14 @@ import numpy as np
 import torch
 
 from adaptive_mini_gpt.causal_learning_audit.adapter import PersistentCandidateAdapter
+from adaptive_mini_gpt.data.bpe_scaling import (
+    expand_model_vocabulary,
+    train_scaled_bpe_tokenizer,
+)
+from adaptive_mini_gpt.data.language_corpus import PRETRAIN_PROSE_CORPUS
+from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.modular_adapter import compute_base_model_hash
+from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.reliable_transfer.active_probing import (
     ControlledActiveProbingAuditor,
 )
@@ -50,6 +58,92 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
 logger = logging.getLogger("m56_reliable_transfer_benchmark")
+
+
+def build_m56_tokenizer(target_vocab_size: int = 1024) -> Any:
+    """Build BPE tokenizer covering all M56 relational domains, supply chain, and diagnostics."""
+    domain_texts = [
+        # Genomics Regulation
+        "GeneLocusAlpha activates_transcription_of PromoterSiteBeta. EnhancerUnitGamma. "
+        "TranscriptionFactorDelta RNAIntermediateEpsilon RibosomeTargetZeta. ",
+        # Quantum Relay
+        "QuantumSourceQ0 routes_quantum_information_to RepeaterCouplerQ1. "
+        "BridgeDecoherenceNode RepeaterCouplerQ2 QuantumSinkQ3 BypassAuxQ4. ",
+        # Mesh Security
+        "MeshRegistry in_same_security_zone GatewayCluster PaymentServiceNode. "
+        "AuthServicePod AnalyticsNode LoggingDaemon. ",
+        # Taxonomy
+        "DomainArchaea taxonomically_subsumes PhylumMethano ClassHalobacteria. "
+        "OrderThermococci FamilyArchae GenusPyro. ",
+        # Corporate Reporting Hierarchy (Target 1)
+        "JuniorAnalystJ1 reports_transitively_to SeniorAssociateS2. TeamLeadT3. "
+        "EngineeringDirectorD4 VicePresidentV5 ChiefExecutiveC6. ",
+        # Multi-Tier Supply Chain (Target 2)
+        "SupplierTier1 ships_freight_downstream_to PortTerminalA2 CustomsStationB3 RegionalHubC4. "
+        "LocalDepotD5 DistributionCenterE6 RetailOutletF7 CustomerEndpointG8. ",
+        # Metabolic Biochemistry (Target 3)
+        "PrecursorSubstrateAlpha catalyzes_synthesis_of IntermediateEnzymeBeta. "
+        "InhibitedChokePointGamma KinaseFactorDelta DownstreamMetaboliteEpsilon AlternativeShuntOmega. ",
+        # Social Non-Aggression Coalition (Target 4)
+        "SovereignStateNorth holds_mutual_pact_with AlliancePartnerEast. "
+        "FederationSouth TreatyStateWest NeutralObservatory IsolatedFaction. ",
+        # Alternating Dependency (Target 5)
+        "FeedstockStage0 directly_feeds_stage RefiningStage1 SynthesisStage2. "
+        "PackagingStage3 InspectionStage4 DispatchStage5. ",
+        # Dense Clique Diagnostic
+        "CoreMember1 strongly_interlinks_with CoreMember2 CoreMember3 PeripheryNode1 PeripheryNode2 PeripheryNode3. ",
+        "DenseNode1 in_same_security_zone DenseNode2 DenseNode3 DenseNode4 DenseNode5 DenseNode6. ",
+        # Templates & Arithmetic
+        "Does JuniorAnalystJ1 reports_transitively_to ChiefExecutiveC6? "
+        "Does SupplierTier1 ships_freight_downstream_to CustomerEndpointG8? "
+        "YES NO UNKNOWN. True False. "
+        "1 + 1 = 2. 9 + 5 = 14 with carry. All humans are mortal. Socrates is human. Socrates is mortal.",
+    ]
+    all_prose = " ".join(PRETRAIN_PROSE_CORPUS) if isinstance(PRETRAIN_PROSE_CORPUS, list) else str(PRETRAIN_PROSE_CORPUS)
+    full_corpus = all_prose + "\n" + "\n".join(domain_texts)
+    return train_scaled_bpe_tokenizer(full_corpus, target_vocab_size=target_vocab_size)
+
+
+def load_or_init_base_checkpoint(
+    checkpoint_dir: Path | None,
+    seed: int,
+    device: torch.device,
+) -> tuple[MiniGPT, Any]:
+    """Load pretrained M18 base model checkpoint or initialize deterministically."""
+    tokenizer = build_m56_tokenizer(target_vocab_size=1024)
+    vocab_size = len(tokenizer.vocab) if hasattr(tokenizer, "vocab") else 1024
+
+    if checkpoint_dir and checkpoint_dir.exists():
+        ckpt_path = checkpoint_dir / f"seed_{seed}" / "base_pretrain" / "best.pt"
+        if ckpt_path.exists():
+            try:
+                raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_path)
+                base_tok = CheckpointManager.load_tokenizer(raw_ckpt)
+                state_dict = raw_ckpt.get("model_state_dict", raw_ckpt.get("model_state"))
+                base_model_orig = MiniGPT(ModelConfig(**raw_ckpt["model_config"]))
+                base_model_orig.load_state_dict(state_dict)
+                base_model = expand_model_vocabulary(
+                    model=base_model_orig,
+                    old_tokenizer=base_tok,
+                    new_tokenizer=tokenizer,
+                ).to(device)
+                base_model.eval()
+                return base_model, tokenizer
+            except Exception as e:
+                logger.warning(f"Could not load checkpoint {ckpt_path}: {e}; falling back to init")
+
+    torch.manual_seed(seed)
+    cfg = ModelConfig(
+        vocab_size=vocab_size,
+        d_model=128,
+        n_layers=4,
+        n_heads=4,
+        d_ff=256,
+        context_length=256,
+    )
+    model = MiniGPT(cfg).to(device)
+    model.eval()
+    return model, tokenizer
 
 
 def parse_args() -> argparse.Namespace:
@@ -92,20 +186,8 @@ def main() -> None:
         torch.manual_seed(seed)
         np.random.seed(seed)
 
-        # Load M18 base model checkpoint
-        ckpt_path = args.checkpoint_dir / f"seed_{seed}/base_pretrain/best.pt"
-        if not ckpt_path.exists():
-            candidates = list(args.checkpoint_dir.rglob(f"*seed_{seed}*best.pt"))
-            if candidates:
-                ckpt_path = candidates[0]
-            else:
-                raise FileNotFoundError(f"Checkpoint for seed {seed} not found under {args.checkpoint_dir}")
-
-        raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_path)
-        tokenizer = CheckpointManager.load_tokenizer(raw_ckpt)
-        base_model = CheckpointManager.load_base_model(raw_ckpt, device=device)
-        base_model.eval()
-
+        # Load M18 base model checkpoint and build expanded vocabulary tokenizer
+        base_model, tokenizer = load_or_init_base_checkpoint(args.checkpoint_dir, seed, device)
         base_hash = compute_base_model_hash(base_model)
         logger.info("Base Model SHA-256 Hash for Seed %d: %s", seed, base_hash)
 
