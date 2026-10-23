@@ -14,13 +14,13 @@ import numpy as np
 
 from adaptive_mini_gpt.guided_experiment.environment import (
     EXPANDED_HYPOTHESES,
-    OUT_OF_HYPOTHESIS_DENSE_CLIQUE,
     OUT_OF_HYPOTHESIS_PARITY,
     AutonomousEnvironment,
     EnvironmentQuery,
     MinimalPairControl,
 )
 from adaptive_mini_gpt.skill_composition.environment import _build_balanced_env
+from adaptive_mini_gpt.skill_reuse.environment import OUT_OF_HYPOTHESIS_DENSE_CLIQUE
 
 logger = logging.getLogger(__name__)
 
