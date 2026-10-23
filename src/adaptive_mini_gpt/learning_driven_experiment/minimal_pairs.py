@@ -45,7 +45,7 @@ class MinimalPairEngine:
 
         # 1. Bridge Deletions: If u -> v is a critical edge, removing it turns YES -> NO or UNKNOWN
         for u, v in base_edges:
-            ans_base = env.oracle_evaluate_query(u, v)
+            ans_base = env.evaluate_ground_truth(u, v)
             if ans_base == "YES":
                 perturbed_edges = [e for e in base_edges if e != (u, v)]
                 ans_pert = env.true_hypothesis.evaluate_query(
@@ -86,8 +86,8 @@ class MinimalPairEngine:
         for u in entities:
             for v in entities:
                 if u != v:
-                    ans_uv = env.oracle_evaluate_query(u, v)
-                    ans_vu = env.oracle_evaluate_query(v, u)
+                    ans_uv = env.evaluate_ground_truth(u, v)
+                    ans_vu = env.evaluate_ground_truth(v, u)
                     if ans_uv != ans_vu:
                         q_uv = EnvironmentQuery(
                             query_id=f"dir_base_{len(pairs)}",
@@ -123,7 +123,7 @@ class MinimalPairEngine:
                     for w in entities:
                         if len({u, v, w}) == 3:
                             if (u, v) in edge_set and (v, w) in edge_set:
-                                ans_base = env.oracle_evaluate_query(u, w)
+                                ans_base = env.evaluate_ground_truth(u, w)
                                 pert_edges = [e for e in base_edges if e != (v, w)]
                                 ans_pert = env.true_hypothesis.evaluate_query(
                                     source=u,

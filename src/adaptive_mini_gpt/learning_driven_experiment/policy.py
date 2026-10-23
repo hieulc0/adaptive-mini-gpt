@@ -110,7 +110,7 @@ def train_learning_outcome_policy(
             log_prob = dist.log_prob(action_idx)
 
             chosen_probe = available[action_idx.item()]
-            ans = env.oracle_evaluate_query(chosen_probe.source, chosen_probe.target)
+            ans = env.ask_oracle(chosen_probe.source, chosen_probe.target)
             cand_obs = (chosen_probe.source, chosen_probe.target, ans)
 
             # Measure learning benefit reward on DEV environments
@@ -262,7 +262,7 @@ class LearningDrivenArmsRunner:
                 raise ValueError(f"Unknown exploration arm: {arm_name}")
 
             # Oracle interaction
-            ans = env_copy.oracle_evaluate_query(chosen_probe.source, chosen_probe.target)
+            ans = env_copy.ask_oracle(chosen_probe.source, chosen_probe.target)
             step_ig = tracker.update(chosen_probe.source, chosen_probe.target, ans)
             cumulative_ig += step_ig
             executed_queries.append((chosen_probe.source, chosen_probe.target, ans))
