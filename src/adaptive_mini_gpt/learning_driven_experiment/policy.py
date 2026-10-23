@@ -12,13 +12,29 @@ import torch.nn as nn
 import torch.optim as optim
 
 from adaptive_mini_gpt.guided_experiment.environment import AutonomousEnvironment
-from adaptive_mini_gpt.guided_experiment.ranking_policy import ArmExecutionResult, NeuralProbeRankingHead
+from adaptive_mini_gpt.guided_experiment.ranking_policy import NeuralProbeRankingHead
 from adaptive_mini_gpt.guided_experiment.structural_probe_generator import (
     StructuralProbe,
     StructuralProbeGenerator,
 )
 from adaptive_mini_gpt.learning_driven_experiment.epistemic_tracker import NormalizedEpistemicTracker
 from adaptive_mini_gpt.learning_driven_experiment.evaluator import LearningOutcomeEvaluator
+
+
+@dataclass
+class LearningDrivenArmResult:
+    """Outcome of running an exploration arm in an environment."""
+    arm_name: str
+    env_id: str
+    queries_executed: list[tuple[str, str, str]]
+    total_information_gain: float
+    final_entropy: float
+    entropy_history: list[float]
+    top_identified_hypothesis: str
+    top_hypothesis_probability: float
+    is_unknown_detected: bool
+    validity_rate: float = 1.00
+    duration_seconds: float = 0.0
 
 
 class LearningOutcomePolicyHead(nn.Module):
@@ -89,7 +105,6 @@ def train_learning_outcome_policy(
 
         for step in range(steps_per_episode):
             candidates, stats = generator.generate_candidate_probes(max_probes=16)
-            # Filter already executed
             available = [p for p in candidates if (p.source, p.target) not in [(o[0], o[1]) for o in executed_obs]]
             if not available:
                 break
@@ -104,7 +119,6 @@ def train_learning_outcome_policy(
             logits = policy_head(x_t)
             probs = torch.softmax(logits, dim=-1)
 
-            # Sample action via Categorical distribution
             dist = torch.distributions.Categorical(probs)
             action_idx = dist.sample()
             log_prob = dist.log_prob(action_idx)
@@ -113,7 +127,6 @@ def train_learning_outcome_policy(
             ans = env.ask_oracle(chosen_probe.source, chosen_probe.target)
             cand_obs = (chosen_probe.source, chosen_probe.target, ans)
 
-            # Measure learning benefit reward on DEV environments
             reward_res = evaluator.evaluate_fixed_budget_dev_improvement(
                 base_observations=executed_obs,
                 candidate_observation=cand_obs,
@@ -127,7 +140,6 @@ def train_learning_outcome_policy(
             episode_log_probs.append(log_prob)
             episode_rewards.append(reward_res.total_reward)
 
-        # REINFORCE policy gradient update with baseline subtraction
         if episode_log_probs:
             returns = []
             g = 0.0
@@ -168,7 +180,7 @@ class LearningDrivenArmsRunner:
         self.query_budget = query_budget
         self.seed = seed
 
-    def run_arm(self, arm_name: str) -> ArmExecutionResult:
+    def run_arm(self, arm_name: str) -> LearningDrivenArmResult:
         """Run exploration arm up to query budget on environment."""
         random.seed(self.seed)
         torch.manual_seed(self.seed)
@@ -243,7 +255,6 @@ class LearningDrivenArmsRunner:
                 chosen_probe = available[best_idx]
 
             elif arm_name == "ARM_E_POLICY_ABLATION":
-                # Identical policy architecture with shuffled scores (control ablation)
                 self.m52_policy.eval()
                 feats = [
                     LearningOutcomePolicyHead.extract_features(
@@ -253,7 +264,6 @@ class LearningDrivenArmsRunner:
                 ]
                 with torch.no_grad():
                     logits = self.m52_policy(torch.tensor(feats, dtype=torch.float32, device=device))
-                    # Deterministically shuffle indices to ablate learned ordering
                     shuffled_indices = list(range(len(available)))
                     random.Random(self.seed + step).shuffle(shuffled_indices)
                     chosen_probe = available[shuffled_indices[0]]
@@ -261,7 +271,6 @@ class LearningDrivenArmsRunner:
             else:
                 raise ValueError(f"Unknown exploration arm: {arm_name}")
 
-            # Oracle interaction
             ans = env_copy.ask_oracle(chosen_probe.source, chosen_probe.target)
             step_ig = tracker.update(chosen_probe.source, chosen_probe.target, ans)
             cumulative_ig += step_ig
@@ -271,7 +280,7 @@ class LearningDrivenArmsRunner:
         duration = time.perf_counter() - t0
         top_h, top_prob = tracker.get_top_hypothesis()
 
-        return ArmExecutionResult(
+        return LearningDrivenArmResult(
             arm_name=arm_name,
             env_id=self.env.env_id,
             queries_executed=executed_queries,
@@ -281,6 +290,6 @@ class LearningDrivenArmsRunner:
             top_identified_hypothesis=top_h,
             top_hypothesis_probability=float(top_prob),
             is_unknown_detected=tracker.is_unknown_rule_detected(),
-            validity_rate=1.00,  # Valid by construction
+            validity_rate=1.00,
             duration_seconds=float(duration),
         )

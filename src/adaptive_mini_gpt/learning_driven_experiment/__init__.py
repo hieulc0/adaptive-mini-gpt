@@ -22,6 +22,7 @@ from adaptive_mini_gpt.learning_driven_experiment.minimal_pairs import (
     MinimalPairEvaluationResult,
 )
 from adaptive_mini_gpt.learning_driven_experiment.policy import (
+    LearningDrivenArmResult,
     LearningDrivenArmsRunner,
     LearningOutcomePolicyHead,
     train_learning_outcome_policy,
@@ -38,6 +39,7 @@ __all__ = [
     "LearningOutcomeEvaluator",
     "MinimalPairEngine",
     "MinimalPairEvaluationResult",
+    "LearningDrivenArmResult",
     "LearningDrivenArmsRunner",
     "LearningOutcomePolicyHead",
     "train_learning_outcome_policy",
