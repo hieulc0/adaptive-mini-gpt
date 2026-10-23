@@ -144,16 +144,21 @@ class AdaptiveOptimizationBenchmarkEngine:
         # Unknown F1
         unknown_f1 = f1s[2]
 
-        # Paired Correctness
-        pair_dict = {q.query_id: p for q, p in zip(env.held_out_test_queries, predictions)}
-        pair_correct = 0
-        total_pairs = len(env.held_out_minimal_pairs)
-        for pair in env.held_out_minimal_pairs:
-            p_pos = pair_dict.get(pair.positive_query_id)
-            p_neg = pair_dict.get(pair.negative_query_id)
-            if p_pos == pair.expected_positive_answer and p_neg == pair.expected_negative_answer:
-                pair_correct += 1
-        paired_correctness = float(pair_correct / total_pairs) if total_pairs > 0 else 0.0
+        # Structural Paired Correctness on minimal pairs
+        paired_correct = 0
+        total_pairs = len(env.minimal_pairs)
+        with torch.no_grad():
+            for mp in env.minimal_pairs:
+                h_base = self._extract_hidden(mp.base_query.question_text)
+                pred_base = self.CLASS_LABELS[int(torch.argmax(module(h_base), dim=-1).item())]
+
+                h_pert = self._extract_hidden(mp.perturbed_query.question_text)
+                pred_pert = self.CLASS_LABELS[int(torch.argmax(module(h_pert), dim=-1).item())]
+
+                if pred_base == mp.base_query.expected_answer and pred_pert == mp.perturbed_query.expected_answer:
+                    paired_correct += 1
+
+        paired_correctness = float(paired_correct / total_pairs) if total_pairs > 0 else 0.0
 
         return macro_f1, accuracy, paired_correctness, unknown_f1
 
@@ -189,16 +194,15 @@ class AdaptiveOptimizationBenchmarkEngine:
 
             # Structural Minimal-Pair Contrastive Loss
             pair_loss = torch.tensor(0.0, device=self.device)
-            active_pairs = [p for p in env.held_out_minimal_pairs if p.positive_query_id in [q.query_id for q in train_queries]]
-            if active_pairs:
-                for pair in active_pairs:
-                    h_pos = self._extract_hidden(pair.positive_query_text)
-                    h_neg = self._extract_hidden(pair.negative_query_text)
-                    l_pos = module(h_pos)
-                    l_neg = module(h_neg)
-                    # Contrastive margin loss
-                    pair_loss = pair_loss + F.relu(1.0 - (l_pos[0, 0] - l_neg[0, 1]))
-                pair_loss = pair_loss / len(active_pairs)
+            if env.minimal_pairs:
+                mp = env.minimal_pairs[torch.randint(0, len(env.minimal_pairs), (1,)).item()]
+                h_b = self._extract_hidden(mp.base_query.question_text)
+                h_p = self._extract_hidden(mp.perturbed_query.question_text)
+                l_b = module(h_b)
+                l_p = module(h_p)
+                y_b = torch.tensor([self.CLASS_LABELS.index(mp.base_query.expected_answer)], device=self.device)
+                y_p = torch.tensor([self.CLASS_LABELS.index(mp.perturbed_query.expected_answer)], device=self.device)
+                pair_loss = 0.5 * (criterion(l_b, y_b) + criterion(l_p, y_p))
 
             combined_loss = pointwise_loss + 0.5 * pair_loss
             combined_loss.backward()
