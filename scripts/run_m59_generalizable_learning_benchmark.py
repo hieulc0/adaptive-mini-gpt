@@ -132,16 +132,21 @@ def load_or_init_base_checkpoint(
 
     if full_path.exists():
         logger.info("Loading pre-trained base model from %s", full_path)
-        checkpoint = CheckpointManager.load_raw_checkpoint(full_path)
-        tokenizer = CheckpointManager.load_tokenizer(checkpoint)
-        cfg = checkpoint["model_config"]
-        model = MiniGPT(cfg).to(device)
-        model.load_state_dict(checkpoint["model_state_dict"])
-        model.eval()
+        raw_ckpt = CheckpointManager.load_raw_checkpoint(full_path)
+        base_tok = CheckpointManager.load_tokenizer(raw_ckpt)
+        state_dict = raw_ckpt.get("model_state_dict", raw_ckpt.get("model_state"))
+        cfg_dict = raw_ckpt["model_config"]
+        cfg = ModelConfig(**cfg_dict) if isinstance(cfg_dict, dict) else cfg_dict
+        base_model_orig = MiniGPT(cfg)
+        base_model_orig.load_state_dict(state_dict)
 
-        # Expand vocabulary for M59 domains
         scaled_tok = build_m59_tokenizer(target_vocab_size=1024)
-        expand_model_vocabulary(model, old_vocab_size=model.config.vocab_size, new_vocab_size=scaled_tok.vocab_size)
+        model = expand_model_vocabulary(
+            model=base_model_orig,
+            old_tokenizer=base_tok,
+            new_tokenizer=scaled_tok,
+        ).to(device)
+        model.eval()
         return model, scaled_tok
 
     logger.warning("Checkpoint %s not found. Initializing fresh model for benchmark.", full_path)
