@@ -6,8 +6,9 @@ import torch.nn as nn
 import pytest
 
 from adaptive_mini_gpt.causal_learning_audit.adapter import PersistentCandidateAdapter
+from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.modular_adapter import compute_base_model_hash
-from adaptive_mini_gpt.model.transformer import MiniGPT, MiniGPTConfig
+from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.reliable_transfer.active_probing import (
     ControlledActiveProbingAuditor,
 )
@@ -50,13 +51,13 @@ class DummyTokenizer:
 
 @pytest.fixture
 def base_model_and_tokenizer():
-    config = MiniGPTConfig(
+    config = ModelConfig(
         vocab_size=1024,
-        block_size=128,
-        n_layer=2,
-        n_head=2,
         d_model=128,
+        n_layers=2,
+        n_heads=2,
         d_ff=256,
+        context_length=128,
         dropout=0.0,
     )
     model = MiniGPT(config)
