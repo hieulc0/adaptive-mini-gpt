@@ -200,8 +200,8 @@ class FunctionalSkillRouter(nn.Module):
 
             pooled_h = hidden_states.mean(dim=1).squeeze(0) if hidden_states.dim() == 3 else hidden_states.squeeze(0)
             if self.source_centroid is not None and self.target_centroid is not None:
-                dist_src = float(torch.norm(pooled_h - self.source_centroid).item())
-                dist_tgt = float(torch.norm(pooled_h - self.target_centroid).item())
+                dist_src = float(torch.norm(pooled_h - self.source_centroid.to(pooled_h.device)).item())
+                dist_tgt = float(torch.norm(pooled_h - self.target_centroid.to(pooled_h.device)).item())
                 score_src = conf_src / (1.0 + 0.5 * dist_src)
                 score_tgt = comp_logits_bias = conf_comp / (1.0 + 0.5 * dist_tgt)
             else:

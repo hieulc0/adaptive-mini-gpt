@@ -312,7 +312,7 @@ def main() -> None:
             d_model=getattr(base_model.config, "d_model", getattr(base_model.config, "n_embd", 128)),
             source_adapter=source_adapter,
             composite_adapter=target_composite,
-        )
+        ).to(device)
 
         # Calibrate evidence centroids
         with torch.no_grad():

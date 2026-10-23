@@ -192,6 +192,26 @@ def test_functional_skill_router_divergence(tiny_model: MiniGPT, tokenizer: Dumm
     assert 0.0 <= rep.joint_source_target_f1 <= 1.0
     assert rep.mean_latency_ms > 0.0
 
+    rep_det = router.evaluate_functional_benchmark(
+        base_model=tiny_model,
+        tokenizer=tokenizer,
+        device=device,
+        source_env=src_env,
+        target_env=tgt_env,
+        mode=RouterMode.DETERMINISTIC_VERIFIED_EVIDENCE,
+    )
+    assert rep_det.total_queries > 0
+
+    rep_gate = router.evaluate_functional_benchmark(
+        base_model=tiny_model,
+        tokenizer=tokenizer,
+        device=device,
+        source_env=src_env,
+        target_env=tgt_env,
+        mode=RouterMode.MINIMAL_TRAINABLE_ROUTER,
+    )
+    assert rep_gate.total_queries > 0
+
 
 def test_independent_epistemic_validator_zero_false_alarms() -> None:
     """Test 6: Verify SPRT with independent reachability achieves zero false alarms at 0% noise."""
