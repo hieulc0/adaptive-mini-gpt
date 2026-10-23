@@ -84,7 +84,7 @@ def test_task_complexity_disentanglement():
 
     # Hierarchical 6-node isomorphic check
     assert c_hier.num_nodes == 6
-    assert c_hier.graph_diameter == 4
+    assert c_hier.graph_diameter == 5
 
     # Queries and minimal pairs check
     assert len(deep_env.held_out_test_queries) >= 16
