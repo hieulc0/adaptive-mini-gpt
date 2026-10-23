@@ -153,8 +153,9 @@ class EvidenceBasedSkillRouter(nn.Module):
         self.trainable_gate.train()
         for _ in range(steps):
             for h, dest in training_data:
-                target = torch.tensor([label_map[dest]], dtype=torch.long, device=h.device)
-                logits = self.trainable_gate(h)
+                h_det = h.detach()
+                target = torch.tensor([label_map[dest]], dtype=torch.long, device=h_det.device)
+                logits = self.trainable_gate(h_det)
                 loss = criterion(logits, target)
                 optimizer.zero_grad()
                 loss.backward()

@@ -341,8 +341,9 @@ def main() -> None:
         ).to(device)
 
         # Calibrate centroids from verified observations (4 examples per task)
-        src_obs_h = [engine._extract_hidden(q.question_text) for q in source_env.held_out_test_queries[:4]]
-        tgt_obs_h = [engine._extract_hidden(q.question_text) for q in target_eval_env.held_out_test_queries[:4]]
+        with torch.no_grad():
+            src_obs_h = [engine._extract_hidden(q.question_text).detach() for q in source_env.held_out_test_queries[:4]]
+            tgt_obs_h = [engine._extract_hidden(q.question_text).detach() for q in target_eval_env.held_out_test_queries[:4]]
         router.calibrate_centroids(src_obs_h, tgt_obs_h)
 
         # Train minimal gate
@@ -351,8 +352,8 @@ def main() -> None:
         router.train_minimal_gate(gate_data, steps=20)
 
         # Contrastive representation loss evaluation (Phase 5)
-        h_src_sample = torch.cat(src_obs_h, dim=0)
-        h_tgt_sample = torch.cat(tgt_obs_h, dim=0)
+        h_src_sample = torch.cat(src_obs_h, dim=0).detach()
+        h_tgt_sample = torch.cat(tgt_obs_h, dim=0).detach()
         contrastive_loss_val = float(compute_contrastive_representation_loss(h_src_sample, h_tgt_sample).item())
 
         router_reports: dict[str, Any] = {}
