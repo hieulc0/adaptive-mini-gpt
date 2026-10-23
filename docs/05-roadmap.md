@@ -471,3 +471,42 @@
   - **Option 1 (M60: Multi-Skill Repertoire Composition)**: Extend verified-evidence routing and experiential memory from single source-target pairs to a hierarchical library of $K \ge 5$ modular skills with dynamic combinatorial routing.
   - **Option 2 (M60: Active Experiential Meta-Policy)**: Generalize experiential memory into a parametric meta-policy that predicts optimal learning budgets and skill compositions directly from diagnostic embeddings.
   - **Option 3 (M60: Autonomous Epistemic Curriculum)**: Combine zero-defect contrastive SPRT with experiential skill creation to trigger adapter allocation only when unknown rules are conclusively verified.
+
+
+### M60: Causal Meta-Learning and Functional Skill Routing (Completed & Scientifically Qualified)
+- **Objective**: Execute forensic audit of M59 claims (efficiency formulas, routing equivalence, task accounting); perform causal experiential-memory ablation across 7 arms (No History, Relevant History, Random History, Shuffled History, Incompatible History, Fixed 40 Steps, Progress-Cost No Memory); construct functional skill routing benchmark demonstrating measurable behavioral divergence on route-dependent queries; qualify SPRT epistemic detector under 0%, 5%, 15%, 25% noise against independent reachability oracle; enforce retention safeguards and SHA-256 base model hash invariance on Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m60-causal-meta-learning-study`, commit `afbcebf96fa06ea46ddc7d490e402e3080866a4a`). Mini-GPT recurrent backbone (1,089,280 parameters, tokenizer `f698e45e209b7fe6`), `M59ScientificAuditor`, `CausalAblationAdaptationEngine`, `FunctionalSkillRouter`, `MinimalNeuralGate`, `IndependentEpistemicValidator`, and `CausalRetentionAuditor`. Passed **223/223 unit tests on Tesla T4 in 110.71s**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 M59 Forensic Scientific Audit & Discrepancy Reconciliation**:
+     - Compute efficiency reconciled: M59 experiential memory saved 31.25% optimizer steps (27.5 vs 40), achieving a compute-adjusted efficiency of 0.4502 (+42.69% over Fixed 40 at 0.3155), but its raw AUC was -0.0060 below Fixed 40 (0.3095 vs 0.3155).
+     - Routing equivalence artifact diagnosed: in M59, both source adapter and composite adapter achieved 0.5833 on source queries (0 interference drop), yielding an identical 0.6458 Joint F1 across all routes with 0 behavioral advantage over unrouted composite.
+     - Environment accounting verified: exactly 13 environments were implemented in `task_suite.py` (2 meta-train, 1 source anchor, 1 aux dev, 4 dev targets, 5 sealed meta-test targets); 9 target environments were evaluated in M59 (162 adaptation episodes across 6 arms & 3 seeds).
+  2. **Phase 2 & 3 Causal Experiential-Memory Ablation Benchmark (7 Arms)**:
+     - Relevant History (Arm B, 0.2385 Sealed AUC) causally outperformed Shuffled History (Arm D, 0.1503 AUC, +0.0882 AUC) and Incompatible History (Arm E, 0.1503 AUC, +0.0882 AUC), and beat Progress-Cost No Memory (Arm G, 0.1969 AUC, +0.0416 AUC).
+     - However, Relevant History was outperformed by Random History (Arm C, 0.2906 AUC) and Fixed 40 Steps (Arm F, 0.4340 AUC), as experiential memory prematurely terminated optimization on unfamiliar sealed distributions.
+     - Causal Experiential Learning-to-Learn Gate: **FAIL (NOT QUALIFIED)**.
+  3. **Phase 4 & 5 Functional Skill Routing & Ultra-Low Latency Neural Gate**:
+     - Introduced conflicting bipartite relation queries creating 11.81% functional divergence and 6.94% true route dependence.
+     - Deterministic verified-evidence routing and minimal trainable neural routing both achieved **100.00% routing accuracy** and a verified **+0.0208 behavioral gain** (+2.08% absolute accuracy) over the unrouted composite baseline (0.3750 vs 0.3542 Joint F1), matching the Oracle bound.
+     - The 128-parameter `MinimalNeuralGate` executed in **0.22 ms**—a **4.8x speedup** over evidence likelihood calculation (1.08 ms).
+     - Skill Routing Gate: **PASS (QUALIFIED)**.
+  4. **Phase 6 Independent SPRT Epistemic Diagnostic**:
+     - Verified against independent Floyd-Warshall reachability oracle across 4 noise regimes.
+     - Targeted contrastive probing achieved **0.0% false alarms**, **100.0% unknown recall**, and **1.0000 balanced Macro F1** at 0%, 5%, and 15% noise. At 25% noise, maintained 94.4% recall, 5.6% false alarm rate, and 0.9441 Macro F1.
+     - Epistemic Gate: **PASS (QUALIFIED)**.
+  5. **Phase 7 Retention Safeguards & Reversible Rollback**:
+     - Base checkpoint SHA-256 hashes 100% invariant across all seeds (`8736b364e4a8ce19`, `de7621751f2e99d0`, `c7bd81ae47f2e2de`).
+     - 0.0000 isolated source backward forgetting; 100% arithmetic carry and chained logic retention; rollback 100% verified.
+     - Engineering Gate: **PASS (QUALIFIED)**.
+  6. **Task-Specific Qualification Gates**:
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (223/223 tests on Tesla T4; hashes invariant; rollback verified).
+     - Epistemic Qualification Gate: **PASS (QUALIFIED)** (0.0% false alarms at 0–15% noise; 1.0000 macro F1).
+     - Skill Routing Qualification Gate: **PASS (QUALIFIED)** (100.0% accuracy; +0.0208 behavioral gain; 0.22 ms latency).
+     - Causal Learning-to-Learn Gate: **FAIL (NOT QUALIFIED)** (beats shuffled history, but trails fixed 40 by -0.1955).
+     - Topology Expansion Status: **RESEARCH ONLY** (compact residuals remain superior).
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain strictly frozen; experiential controllers and evidence routers remain in research tier.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; meta-learning controllers remain in research tier.
+- **Next Direction Options (Post-M60 Strategic Priority)**:
+  - **Option 1 (M61: Parametric Meta-Optimization with Asymptotic Convergence Guarantees)**: Replace discrete kNN history retrieval with a continuous parametric meta-policy (e.g. meta-gradients or neural hypernetwork) that predicts adaptive learning rates rather than hard step truncation, preventing premature cutoff on unfamiliar distributions.
+  - **Option 2 (M61: Multi-Skill Repertoire Composition & Hierarchical Routing)**: Scale the verified 0.22ms neural gate to $K \ge 5$ archived relational skills, benchmarking combinatorial composition against flat monolithic multi-task baselines.
+  - **Option 3 (M61: Autonomous Epistemic Curriculum with Verified Skill Allocation)**: Connect the zero-false-alarm SPRT detector (0.0% FAR at 0-15% noise) to automated adapter creation, spawning new skill pathways only when genuine epistemic novelty is proven.
