@@ -510,3 +510,40 @@
   - **Option 1 (M61: Parametric Meta-Optimization with Asymptotic Convergence Guarantees)**: Replace discrete kNN history retrieval with a continuous parametric meta-policy (e.g. meta-gradients or neural hypernetwork) that predicts adaptive learning rates rather than hard step truncation, preventing premature cutoff on unfamiliar distributions.
   - **Option 2 (M61: Multi-Skill Repertoire Composition & Hierarchical Routing)**: Scale the verified 0.22ms neural gate to $K \ge 5$ archived relational skills, benchmarking combinatorial composition against flat monolithic multi-task baselines.
   - **Option 3 (M61: Autonomous Epistemic Curriculum with Verified Skill Allocation)**: Connect the zero-false-alarm SPRT detector (0.0% FAR at 0-15% noise) to automated adapter creation, spawning new skill pathways only when genuine epistemic novelty is proven.
+
+
+### M61: Safe Self-Learning and Evidence-Based Learning Decisions (Completed & Scientifically Qualified)
+- **Objective**: Execute forensic audit of M60 claims (quantify premature-stop mechanism and routing objective misalignment); implement a 3-action bounded learning controller (STOP, CONTINUE, RESET) with conservative minimum budget and real-time validation progress safeguards; compare 8 causal ablation arms on segregated task suites; benchmark counterfactual skill routing grounded in empirical downstream task utility; evaluate dynamic experience-memory accumulation; verify retention safeguards, SPRT epistemic detector, and SHA-256 base model hash invariance on Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m61-safe-meta-learning-study`, commit `6641d972a0b533abebf8d5263cd73992356509d6`). Mini-GPT recurrent backbone (1,089,280 parameters, tokenizer `f698e45e209b7fe6`), `M60ScientificAuditor`, `SafeLearningProgressController`, `SafeCausalAdaptationEngine`, `CounterfactualSkillRouter`, `DynamicExperienceMemoryUpdater`, and `M61SafeguardAuditor`. Passed **230/230 unit tests on Tesla T4 in 112.4s**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 M60 Forensic Scientific Audit**:
+     - Verified premature stopping rate: 60.0% of sealed tasks in M60 were truncated at $\le 15$ steps by unverified kNN advice, explaining the -0.1955 AUC deficit vs Fixed 40.
+     - Diagnosed routing discrepancy: Always Source achieved higher Joint F1 (0.3819) than nominal router (0.3750) because the target composite adapter underperformed the source adapter on target queries. Grounding utility in empirical downstream accuracy resolved this gap.
+  2. **Phase 2, 3 & 4 Safe Bounded Learning Control**:
+     - Safe Experiential Progress (Arm F) achieved **0.5080 Sealed AUC**, outperforming Unguarded Relevant History (Arm B, 0.2500 AUC, **+0.2580 AUC gain**) and Fixed 40 Steps (Arm G, 0.4472 AUC, **+0.0608 AUC gain**).
+     - Safe Learning Controller Gate: **PASS (QUALIFIED)**.
+     - Causal Learning-to-Learn Gate: **FAIL (NOT QUALIFIED)**. Arm F (0.5080 AUC) performed identically to Arm H (Progress-Cost No Memory, 0.5080 AUC). Performance gains were driven entirely by real-time progress monitoring and reset safeguards, with historical episode retrieval providing zero incremental benefit.
+  3. **Phase 5 Counterfactual Skill Routing Grounded in Task Utility**:
+     - Autonomous routing achieved **0.4236 Joint F1**, officially surpassing the strongest static pathway (ALWAYS_COMPOSITE at 0.4167 and ALWAYS_SOURCE at 0.3819) by **+0.0069** (+0.69% absolute task accuracy).
+     - Minimal neural gate executed in **0.21 ms**, providing a 5.6x speedup over evidence likelihood calculation (1.17 ms).
+     - Counterfactual Skill Routing Gate: **PASS (QUALIFIED)**.
+  4. **Phase 6 Experience Memory Updating**:
+     - Evaluated dynamic accumulation of verified learning traces (+2 episodes).
+  5. **Phase 7 Retention Safeguards & Epistemic Audit**:
+     - Base checkpoint SHA-256 hashes 100% invariant across all seeds (`8736b364e4a8ce19`, `de7621751f2e99d0`, `c7bd81ae47f2e2de`).
+     - 0.0000 isolated source backward forgetting; 100% arithmetic carry and chained logic retention; rollback 100% verified.
+     - Independent reachability SPRT confirmed 0.0% false alarms at 0–15% noise (Macro F1 = 1.0000).
+     - Engineering Gate: **PASS (QUALIFIED)**.
+  6. **Task-Specific Qualification Gates**:
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (230/230 tests on Tesla T4; hashes invariant; rollback verified).
+     - Safe Learning Controller Gate: **PASS (QUALIFIED)** (0.5080 AUC vs 0.2500 for unguarded history).
+     - Counterfactual Skill Routing Gate: **PASS (QUALIFIED)** (0.4236 Joint F1 beats best static 0.4167).
+     - Causal Learning-to-Learn Gate: **FAIL (NOT QUALIFIED)** (history provided zero gain over progress monitoring alone).
+     - Epistemic Qualification Gate: **PASS (QUALIFIED)** (0.0% false alarms at 0–15% noise; 1.0000 macro F1).
+     - Topology Expansion Status: **RESEARCH ONLY** (compact residuals remain superior).
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain strictly frozen; meta-controllers remain research tier.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; self-improving meta-controllers remain in research tier.
+- **Next Direction Options (Post-M61 Strategic Priority)**:
+  - **Option 1 (M62: Meta-Learning via Learned Continuous Schedules)**: Given that discrete kNN episode matching provides zero incremental advantage over memory-free progress monitoring, replace discrete step retrieval with continuous meta-parameter learning (e.g. meta-learning initialization and per-layer learning rate vectors) across meta-training splits.
+  - **Option 2 (M62: Multi-Skill Combinatorial Repertoire Composition)**: Extend the qualified 0.21ms neural router to a library of $K \ge 5$ archived skills, routing subsets of skills based on counterfactual empirical utility.
+  - **Option 3 (M62: Autonomous Epistemic Curriculum with Verified Skill Allocation)**: Connect the zero-false-alarm SPRT detector (0.0% FAR at 0–15% noise) to automated adapter creation, spawning new skill pathways only when genuine epistemic novelty is proven.
