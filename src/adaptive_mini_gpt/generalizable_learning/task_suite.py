@@ -19,7 +19,10 @@ from adaptive_mini_gpt.guided_experiment.environment import (
     MinimalPairControl,
 )
 from adaptive_mini_gpt.skill_composition.environment import _build_balanced_env
-from adaptive_mini_gpt.skill_reuse.environment import OUT_OF_HYPOTHESIS_DENSE_CLIQUE
+from adaptive_mini_gpt.skill_reuse.environment import (
+    OUT_OF_HYPOTHESIS_BIPARTITE,
+    OUT_OF_HYPOTHESIS_DENSE_CLIQUE,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -274,6 +277,28 @@ def create_dev_incompatible_parity_environment(seed: int = 42) -> AutonomousEnvi
         entities=entities,
         edges=edges,
         hypothesis=OUT_OF_HYPOTHESIS_PARITY,
+    )
+
+
+def create_dev_non_transitive_bipartite_environment(seed: int = 42) -> AutonomousEnvironment:
+    """Dev Task 6: 6-node non-transitive bipartite partition environment where 2-hop relations fail."""
+    entities = ["PartyNodeA0", "PartyNodeB1", "PartyNodeC2", "PartyNodeD3", "PartyNodeE4", "PartyNodeF5"]
+    edges = [
+        ("PartyNodeA0", "PartyNodeB1"),
+        ("PartyNodeB1", "PartyNodeC2"),
+        ("PartyNodeC2", "PartyNodeD3"),
+        ("PartyNodeD3", "PartyNodeE4"),
+        ("PartyNodeE4", "PartyNodeF5"),
+    ]
+    levels = {e: i for i, e in enumerate(entities)}
+    return _build_balanced_env(
+        env_id="dev_non_transitive_bipartite",
+        domain_name="BipartitePoliticalCoalition",
+        relation_name="opposes_ideological_bloc",
+        entities=entities,
+        edges=edges,
+        hypothesis=OUT_OF_HYPOTHESIS_BIPARTITE,
+        entity_levels=levels,
     )
 
 

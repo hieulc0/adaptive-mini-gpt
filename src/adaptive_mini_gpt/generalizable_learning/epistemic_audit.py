@@ -22,8 +22,7 @@ from adaptive_mini_gpt.guided_experiment.environment import AutonomousEnvironmen
 from adaptive_mini_gpt.reliable_transfer.noise_aware_belief import SequentialProbabilityRatioTest
 from adaptive_mini_gpt.generalizable_learning.task_suite import (
     create_dev_balanced_hierarchy_environment,
-    create_dev_incompatible_parity_environment,
-    create_dev_dense_cluster_exceptions_environment,
+    create_dev_non_transitive_bipartite_environment,
 )
 
 logger = logging.getLogger(__name__)
@@ -52,43 +51,24 @@ class CorrectedEpistemicAuditor:
         self.rng = random.Random(seed)
 
     def _generate_contrastive_query_pool(self, env: AutonomousEnvironment) -> list[tuple[str, str]]:
-        """Identify candidate pairs where multi-hop relational transitions and boundaries are concentrated."""
+        """Identify candidate pairs where multi-hop relational transitions are concentrated."""
         nodes = list(env.entities)
         edges = set(env.base_edges)
-        candidates = []
+        two_hop_candidates = []
 
-        # 1. Direct base edges (tests symmetry, parity, refutations)
-        for u, v in edges:
-            candidates.append((u, v))
-
-        # 2. Multi-hop candidates (u -> v -> w)
         for u in nodes:
             for v in nodes:
                 if (u, v) in edges:
                     for w in nodes:
                         if (v, w) in edges and u != w and (u, w) not in edges:
-                            if (u, w) not in candidates:
-                                candidates.append((u, w))
+                            two_hop_candidates.append((u, w))
 
-        # 3. Peripheral/boundary candidates
-        deg = {n: 0 for n in nodes}
-        for u, v in edges:
-            deg[u] = deg.get(u, 0) + 1
-            deg[v] = deg.get(v, 0) + 1
-        periphery = [n for n in nodes if deg[n] <= 1]
-        core = [n for n in nodes if deg[n] > 1]
-        for c in core:
-            for p in periphery:
-                if c != p and (c, p) not in candidates:
-                    candidates.append((c, p))
-
-        # 4. Remaining node pairs
         for u in nodes:
             for v in nodes:
-                if u != v and (u, v) not in candidates:
-                    candidates.append((u, v))
+                if u != v and (u, v) not in two_hop_candidates:
+                    two_hop_candidates.append((u, v))
 
-        return candidates
+        return two_hop_candidates
 
     def run_graph_episode(
         self,
@@ -173,7 +153,7 @@ class CorrectedEpistemicAuditor:
     ) -> EpistemicRegimeDiagnostic:
         """Evaluate epistemic performance across known and unknown rule worlds."""
         known_env = create_dev_balanced_hierarchy_environment(seed=self.rng.randint(1, 10000))
-        unknown_env = create_dev_incompatible_parity_environment(seed=self.rng.randint(1, 10000))
+        unknown_env = create_dev_non_transitive_bipartite_environment(seed=self.rng.randint(1, 10000))
 
         sprt = SequentialProbabilityRatioTest(
             assumed_noise_floor=max(0.01, noise_level),
