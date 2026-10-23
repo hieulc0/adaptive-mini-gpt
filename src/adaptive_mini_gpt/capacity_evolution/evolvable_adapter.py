@@ -105,6 +105,7 @@ class EvolvableResidualSkillAdapter(nn.Module):
                 num_classes=self.num_classes,
                 dropout=self.dropout,
             ).to(next(self.parameters()).device)
+            self.residual_head.train(self.training)
             self.current_bottleneck_dim = saved_dim
 
         self.residual_head.load_state_dict(self._snapshot_state["residual_state_dict"])
@@ -130,6 +131,7 @@ class EvolvableResidualSkillAdapter(nn.Module):
             num_classes=self.num_classes,
             dropout=self.dropout,
         ).to(device)
+        new_head.train(self.training)
 
         old_net = self.residual_head.net
         new_net = new_head.net

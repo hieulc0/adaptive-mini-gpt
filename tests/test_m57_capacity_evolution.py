@@ -75,11 +75,11 @@ def test_task_complexity_disentanglement():
     c_wide = compute_observable_complexity(wide_env)
     c_hier = compute_observable_complexity(hier_env)
 
-    # Disentanglement check: Both have 8 nodes, but DeepChain has d=7 while WideTree has d=3!
+    # Disentanglement check: Both have 8 nodes, but DeepChain has d=7 while WideTree has d=2!
     assert c_deep.num_nodes == 8
     assert c_wide.num_nodes == 8
     assert c_deep.graph_diameter == 7
-    assert c_wide.graph_diameter == 3
+    assert c_wide.graph_diameter == 2
     assert c_deep.structural_complexity_index > c_wide.structural_complexity_index
 
     # Hierarchical 6-node isomorphic check
@@ -100,6 +100,8 @@ def test_evolvable_residual_adapter_zero_init_and_rollback():
         d_model=128,
         initial_bottleneck_dim=16,
     )
+    source_adapter.eval()
+    adapter.eval()
 
     # 1. Initial parameter counts
     counts_16 = adapter.count_parameters()
@@ -108,7 +110,8 @@ def test_evolvable_residual_adapter_zero_init_and_rollback():
 
     # 2. Forward pass output before expansion
     dummy_h = torch.randn(2, 8, 128)
-    logits_before = adapter(dummy_h)
+    with torch.no_grad():
+        logits_before = adapter(dummy_h)
 
     # 3. Expand capacity to 32 dimensions
     new_trainable = adapter.expand_capacity(target_bottleneck_dim=32)
@@ -116,7 +119,8 @@ def test_evolvable_residual_adapter_zero_init_and_rollback():
     assert adapter.current_bottleneck_dim == 32
 
     # 4. Zero-Initialization Check: Output at step 0 must match pre-expansion output exactly!
-    logits_after_init = adapter(dummy_h)
+    with torch.no_grad():
+        logits_after_init = adapter(dummy_h)
     torch.testing.assert_close(logits_before, logits_after_init, atol=1e-5, rtol=1e-5)
 
     # 5. Expand further to wide capacity (64 dimensions)

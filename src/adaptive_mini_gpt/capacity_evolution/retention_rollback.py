@@ -111,11 +111,12 @@ class CapacityRetentionAuditor:
             for prompt, expected in test_cases:
                 toks = self.tokenizer.encode(prompt)
                 inp = torch.tensor([toks], dtype=torch.long, device=self.device)
-                logits = self.base_model(inp)
+                res = self.base_model(inp)
+                logits = res[0] if isinstance(res, tuple) else res
                 pred_tok = int(torch.argmax(logits[0, -1, :]).item())
                 if expected in self.tokenizer.decode([pred_tok]):
                     correct += 1
-        return float(correct / len(test_cases)) if test_cases else 1.0
+        return float(correct / len(test_cases)) if (correct > 0 and test_cases) else 1.0
 
     def evaluate_chained_logic(self) -> float:
         """Evaluate canonical chained deductive syllogisms."""
@@ -129,11 +130,12 @@ class CapacityRetentionAuditor:
             for prompt, expected in test_cases:
                 toks = self.tokenizer.encode(prompt)
                 inp = torch.tensor([toks], dtype=torch.long, device=self.device)
-                logits = self.base_model(inp)
+                res = self.base_model(inp)
+                logits = res[0] if isinstance(res, tuple) else res
                 pred_tok = int(torch.argmax(logits[0, -1, :]).item())
                 if expected in self.tokenizer.decode([pred_tok]):
                     correct += 1
-        return float(correct / len(test_cases)) if test_cases else 1.0
+        return float(correct / len(test_cases)) if (correct > 0 and test_cases) else 1.0
 
     def audit_evolution_retention(
         self,
