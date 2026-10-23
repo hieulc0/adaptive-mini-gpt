@@ -256,21 +256,28 @@ def create_meta_long_chain_aerospace(seed: int = 100) -> AutonomousEnvironment:
 def create_meta_branching_pyramid_cloud(seed: int = 101) -> AutonomousEnvironment:
     """Meta-Test Task 2: 10-node cloud microservice pyramid with diameter 3."""
     entities = [
-        "GatewayGW", "AuthSvcA1", "BillingSvcB2", "CatalogSvcC3",
-        "DbWorkerD1", "DbWorkerD2", "CacheWorkerC1", "CacheWorkerC2",
+        "GatewayGW", "IngressRouterIR",
+        "AuthSvcA1", "BillingSvcB2", "CatalogSvcC3",
+        "DbWorkerD1", "DbWorkerD2", "CacheWorkerC1",
         "QueueWorkerQ1", "AuditWorkerA2",
     ]
     edges = [
-        ("GatewayGW", "AuthSvcA1"), ("GatewayGW", "BillingSvcB2"), ("GatewayGW", "CatalogSvcC3"),
-        ("AuthSvcA1", "DbWorkerD1"), ("AuthSvcA1", "CacheWorkerC1"),
-        ("BillingSvcB2", "DbWorkerD2"), ("BillingSvcB2", "AuditWorkerA2"),
-        ("CatalogSvcC3", "CacheWorkerC2"), ("CatalogSvcC3", "QueueWorkerQ1"),
+        ("GatewayGW", "IngressRouterIR"),
+        ("IngressRouterIR", "AuthSvcA1"),
+        ("IngressRouterIR", "BillingSvcB2"),
+        ("IngressRouterIR", "CatalogSvcC3"),
+        ("AuthSvcA1", "DbWorkerD1"),
+        ("AuthSvcA1", "CacheWorkerC1"),
+        ("BillingSvcB2", "DbWorkerD2"),
+        ("BillingSvcB2", "AuditWorkerA2"),
+        ("CatalogSvcC3", "QueueWorkerQ1"),
     ]
     levels = {
         "GatewayGW": 0,
-        "AuthSvcA1": 1, "BillingSvcB2": 1, "CatalogSvcC3": 1,
-        "DbWorkerD1": 2, "DbWorkerD2": 2, "CacheWorkerC1": 2, "CacheWorkerC2": 2,
-        "QueueWorkerQ1": 2, "AuditWorkerA2": 2,
+        "IngressRouterIR": 1,
+        "AuthSvcA1": 2, "BillingSvcB2": 2, "CatalogSvcC3": 2,
+        "DbWorkerD1": 3, "DbWorkerD2": 3, "CacheWorkerC1": 3,
+        "QueueWorkerQ1": 3, "AuditWorkerA2": 3,
     }
     return _build_balanced_env(
         env_id="meta_branching_pyramid_cloud",

@@ -84,50 +84,49 @@ class M58EpistemicAuditor:
     ) -> tuple[bool, int, float]:
         """Execute a single graph query episode."""
         nodes = list(env.entities)
-        all_pairs = [(u, v) for u in nodes for v in nodes if u != v]
+        edges = set(env.base_edges)
 
-        if query_policy == "graph_contrastive_targeted":
-            candidate_pool = self._generate_contrastive_query_pool(env)
+        if query_policy == "graph_uniform_random":
+            all_pairs = [(u, v) for u in nodes for v in nodes if u != v]
+            pool = all_pairs
+        elif query_policy == "graph_contrastive_targeted":
+            pool = self._generate_contrastive_query_pool(env)
         else:
-            candidate_pool = list(all_pairs)
-            self.rng.shuffle(candidate_pool)
+            raise ValueError(f"Unknown graph query policy: {query_policy}")
 
-        sprt.reset()
+        history: set[tuple[str, str]] = set()
+        observations: list[tuple[str, str]] = []
+
         t0 = time.perf_counter()
-        query_count = 0
-        detected_unknown = False
-
-        for u, v in candidate_pool:
-            if query_count >= self.budget:
-                break
-
-            query_count += 1
-            # Ground truth reachability in true graph
-            true_ans = env.oracle_reachability(u, v)
-
-            # Apply observation noise
-            if self.rng.random() < noise_level:
-                obs_ans = not true_ans
+        for step in range(self.budget):
+            if query_policy == "graph_uniform_random":
+                pair = self.rng.choice(pool)
             else:
-                obs_ans = true_ans
+                unqueried = [p for p in pool if p not in history]
+                pair = unqueried[0] if unqueried else self.rng.choice(pool)
 
-            # Believed / known hypothesis (transitive DAG assumption)
-            believed_ans = env.query_assumed_hypothesis(u, v)
+            history.add(pair)
+            u, v = pair
 
-            # Update SPRT with observation consistency
-            is_match = (obs_ans == believed_ans)
-            decision = sprt.update_evidence(is_consistent=is_match)
+            actual_yes = (u, v) in edges
+            actual_answer = "YES" if actual_yes else "NO"
 
-            if decision == "REJECT_KNOWN_RULE":
-                detected_unknown = True
+            if self.rng.random() < noise_level:
+                obs_answer = "NO" if actual_answer == "YES" else "YES"
+            else:
+                obs_answer = actual_answer
+
+            pred_answer = "YES" if (u, v) in edges or any((u, k) in edges and (k, v) in edges for k in nodes) else "NO"
+
+            observations.append((pred_answer, obs_answer))
+
+            decision = sprt.evaluate_episode(observations, budget=len(observations))
+            if decision.queries_consumed < len(observations):
                 break
-            elif decision == "ACCEPT_KNOWN_RULE":
-                detected_unknown = False
-                break
 
-        t1 = time.perf_counter()
-        lat_ms = (t1 - t0) * 1000.0
-        return detected_unknown, query_count, lat_ms
+        latency_ms = (time.perf_counter() - t0) * 1000.0
+        final_decision = sprt.evaluate_episode(observations, budget=self.budget)
+        return final_decision.is_unknown_declared, len(observations), latency_ms
 
     def evaluate_regime(
         self,
@@ -148,8 +147,6 @@ class M58EpistemicAuditor:
 
         sprt = SequentialProbabilityRatioTest(
             assumed_noise_floor=max(0.01, noise_level),
-            log_upper_bound=math.log(19.0),
-            log_lower_bound=math.log(1.0 / 19.0),
         )
 
         # 1. Unknown Rule Worlds (Test Recall)
