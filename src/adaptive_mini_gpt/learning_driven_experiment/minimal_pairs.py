@@ -58,18 +58,20 @@ class MinimalPairEngine:
                 )
                 if ans_pert != ans_base:
                     base_q = EnvironmentQuery(
+                        query_id=f"base_bridge_{len(pairs)}",
                         source=u,
                         target=v,
-                        relation_name=env.relation_name,
-                        expected_answer=ans_base,
+                        query_type="bridge_cut",
                         question_text=f"Does {u} {env.relation_name} {v}?",
+                        expected_answer=ans_base,
                     )
                     pert_q = EnvironmentQuery(
+                        query_id=f"pert_bridge_{len(pairs)}",
                         source=u,
                         target=v,
-                        relation_name=env.relation_name,
-                        expected_answer=ans_pert,
+                        query_type="bridge_cut",
                         question_text=f"Without bridge {u}->{v}, does {u} {env.relation_name} {v}?",
+                        expected_answer=ans_pert,
                     )
                     pairs.append(MinimalPairControl(
                         pair_id=f"bridge_cut_{len(pairs)}",
@@ -88,18 +90,20 @@ class MinimalPairEngine:
                     ans_vu = env.oracle_evaluate_query(v, u)
                     if ans_uv != ans_vu:
                         q_uv = EnvironmentQuery(
+                            query_id=f"dir_base_{len(pairs)}",
                             source=u,
                             target=v,
-                            relation_name=env.relation_name,
-                            expected_answer=ans_uv,
+                            query_type="directional",
                             question_text=f"Does {u} {env.relation_name} {v}?",
+                            expected_answer=ans_uv,
                         )
                         q_vu = EnvironmentQuery(
+                            query_id=f"dir_pert_{len(pairs)}",
                             source=v,
                             target=u,
-                            relation_name=env.relation_name,
-                            expected_answer=ans_vu,
+                            query_type="directional",
                             question_text=f"Does {v} {env.relation_name} {u}?",
+                            expected_answer=ans_vu,
                         )
                         pairs.append(MinimalPairControl(
                             pair_id=f"dir_rev_{len(pairs)}",
@@ -131,16 +135,25 @@ class MinimalPairEngine:
                                 )
                                 if ans_base != ans_pert:
                                     b_q = EnvironmentQuery(
-                                        source=u, target=w, relation_name=env.relation_name,
-                                        expected_answer=ans_base, question_text=f"Does {u} {env.relation_name} {w}?",
+                                        query_id=f"two_hop_base_{len(pairs)}",
+                                        source=u,
+                                        target=w,
+                                        query_type="two_hop_cut",
+                                        question_text=f"Does {u} {env.relation_name} {w}?",
+                                        expected_answer=ans_base,
                                     )
                                     p_q = EnvironmentQuery(
-                                        source=u, target=w, relation_name=env.relation_name,
-                                        expected_answer=ans_pert, question_text=f"Without {v}->{w}, does {u} {env.relation_name} {w}?",
+                                        query_id=f"two_hop_pert_{len(pairs)}",
+                                        source=u,
+                                        target=w,
+                                        query_type="two_hop_cut",
+                                        question_text=f"Without {v}->{w}, does {u} {env.relation_name} {w}?",
+                                        expected_answer=ans_pert,
                                     )
                                     pairs.append(MinimalPairControl(
                                         pair_id=f"two_hop_cut_{len(pairs)}",
-                                        base_query=b_q, perturbed_query=p_q,
+                                        base_query=b_q,
+                                        perturbed_query=p_q,
                                         perturbation_type="TWO_HOP_BRIDGE_CUT",
                                     ))
                                     if len(pairs) >= max_pairs:

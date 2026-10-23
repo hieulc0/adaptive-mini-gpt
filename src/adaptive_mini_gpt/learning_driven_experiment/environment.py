@@ -248,22 +248,55 @@ def _create_environment(
                 ans = hypothesis.evaluate_query(u, v, edges, entity_levels, blocked_nodes, negated_edges)
                 all_pairs.append((u, v, ans))
 
-    yes_pool = [EnvironmentQuery(u, v, relation_name, ans, f"Does {u} {relation_name} {v}?") for u, v, ans in all_pairs if ans == "YES"]
-    no_pool = [EnvironmentQuery(u, v, relation_name, ans, f"Does {u} {relation_name} {v}?") for u, v, ans in all_pairs if ans == "NO"]
-    unk_pool = [EnvironmentQuery(u, v, relation_name, ans, f"Does {u} {relation_name} {v}?") for u, v, ans in all_pairs if ans == "UNKNOWN"]
+    yes_pool = [
+        EnvironmentQuery(
+            query_id=f"q_{u}_{v}",
+            source=u,
+            target=v,
+            query_type="direct",
+            question_text=f"Does {u} {relation_name} {v}?",
+            expected_answer=ans,
+        )
+        for u, v, ans in all_pairs if ans == "YES"
+    ]
+    no_pool = [
+        EnvironmentQuery(
+            query_id=f"q_{u}_{v}",
+            source=u,
+            target=v,
+            query_type="direct",
+            question_text=f"Does {u} {relation_name} {v}?",
+            expected_answer=ans,
+        )
+        for u, v, ans in all_pairs if ans == "NO"
+    ]
+    unk_pool = [
+        EnvironmentQuery(
+            query_id=f"q_{u}_{v}",
+            source=u,
+            target=v,
+            query_type="direct",
+            question_text=f"Does {u} {relation_name} {v}?",
+            expected_answer=ans,
+        )
+        for u, v, ans in all_pairs if ans == "UNKNOWN"
+    ]
 
     # Incomplete open-world queries if UNKNOWN is sparse
     if len(unk_pool) < 8:
         for i in range(len(unk_pool), 8):
             ext_u = f"ExtUnknown_{i}"
             ext_v = entities[i % len(entities)]
-            unk_pool.append(EnvironmentQuery(
-                source=ext_u,
-                target=ext_v,
-                relation_name=relation_name,
-                expected_answer="UNKNOWN",
-                question_text=f"Does ungrounded {ext_u} {relation_name} {ext_v}?",
-            ))
+            unk_pool.append(
+                EnvironmentQuery(
+                    query_id=f"ext_{i}",
+                    source=ext_u,
+                    target=ext_v,
+                    query_type="open_world",
+                    question_text=f"Does ungrounded {ext_u} {relation_name} {ext_v}?",
+                    expected_answer="UNKNOWN",
+                )
+            )
 
     # Balanced held-out test queries (8 YES, 8 NO, 8 UNKNOWN = 24 queries)
     held_out = yes_pool[:8] + no_pool[:8] + unk_pool[:8]
