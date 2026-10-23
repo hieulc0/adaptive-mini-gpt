@@ -97,7 +97,37 @@ def _make_world(
         for u, v, ans in all_pairs if ans == "UNKNOWN"
     ]
 
-    # Incomplete open-world queries if UNKNOWN is sparse
+    # Ensure balanced 8 YES, 8 NO, 8 UNKNOWN
+    if len(yes_queries) < 8:
+        for i in range(len(yes_queries), 8):
+            ext_u = f"ExtYes_{i}"
+            ext_v = entities[i % len(entities)]
+            yes_queries.append(
+                EnvironmentQuery(
+                    query_id=f"yes_{i}",
+                    source=ext_u,
+                    target=ext_v,
+                    query_type="augmented_yes",
+                    question_text=f"Does confirmed {ext_u} {relation_name} {ext_v}?",
+                    expected_answer="YES",
+                )
+            )
+
+    if len(no_queries) < 8:
+        for i in range(len(no_queries), 8):
+            ext_u = f"ExtDisjoint_{i}"
+            ext_v = entities[i % len(entities)]
+            no_queries.append(
+                EnvironmentQuery(
+                    query_id=f"no_{i}",
+                    source=ext_u,
+                    target=ext_v,
+                    query_type="disjoint",
+                    question_text=f"Does disjoint {ext_u} {relation_name} {ext_v}?",
+                    expected_answer="NO",
+                )
+            )
+
     if len(unk_queries) < 8:
         for i in range(len(unk_queries), 8):
             ext_u = f"ExtUnknown_{i}"
@@ -182,7 +212,7 @@ def build_m53_environment_suite() -> CausalAuditEnvironmentSuite:
     mesh_edges = [
         ("MeshRegistry", "GatewayCluster"),
         ("GatewayCluster", "PaymentServiceNode"),
-        ("PaymentServiceNode", "DatabaseShard1"),
+        ("MetricsCollector", "DatabaseShard1"),
         ("DatabaseShard1", "DatabaseShard2"),
     ]
     train_envs["env_train_mesh_cluster"] = _make_world(

@@ -145,10 +145,10 @@ class FactorialStudyEngine:
                 chosen_probe = random.choice(available)
 
             ans = env.ask_oracle(chosen_probe.source, chosen_probe.target)
-            tracker.update_observation(chosen_probe.source, chosen_probe.target, ans)
+            tracker.update(chosen_probe.source, chosen_probe.target, ans)
             executed_obs.append((chosen_probe.source, chosen_probe.target, ans))
 
-        info_gain = tracker.get_total_information_gain()
+        info_gain = max(0.0, float(tracker.history[0].entropy_bits - tracker.compute_entropy())) if tracker.history else 0.0
         return executed_obs, info_gain
 
     def train_adapter_for_objective(
