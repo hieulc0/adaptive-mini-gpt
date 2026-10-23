@@ -22,19 +22,39 @@ from adaptive_mini_gpt.learning_driven_experiment.minimal_pairs import MinimalPa
 # Novel Out-Of-Hypothesis Rule Definitions for Epistemic Generalization
 # ---------------------------------------------------------------------------
 
+@dataclass(frozen=True)
+class CustomCallableHypothesis(RuleHypothesis):
+    """Subclass of RuleHypothesis allowing custom rule evaluation logic."""
+    eval_fn: Any = None
+
+    def evaluate_query(
+        self,
+        source: str,
+        target: str,
+        edges: list[tuple[str, str]],
+        entity_levels: dict[str, int] | None = None,
+        blocked_nodes: set[str] | None = None,
+        negated_edges: set[tuple[str, str]] | None = None,
+    ) -> str:
+        if self.eval_fn is not None:
+            return self.eval_fn(source, target, edges, entity_levels, blocked_nodes, negated_edges)
+        return super().evaluate_query(source, target, edges, entity_levels, blocked_nodes, negated_edges)
+
+
 def _bipartite_coloring_eval(
     source: str,
     target: str,
     edges: list[tuple[str, str]],
-    entity_levels: dict[str, int],
-    blocked_nodes: set[str],
-    negated_edges: set[tuple[str, str]],
+    entity_levels: dict[str, int] | None = None,
+    blocked_nodes: set[str] | None = None,
+    negated_edges: set[tuple[str, str]] | None = None,
 ) -> str:
     """Out-of-hypothesis rule 2: Bipartite partition coloring.
     
     Relation holds iff source and target belong to opposite color partitions (odd level difference),
     violating transitivity (if A->B and B->C, A and C are same color so A cannot relate to C).
     """
+    entity_levels = entity_levels or {}
     src_lvl = entity_levels.get(source, 0)
     tgt_lvl = entity_levels.get(target, 0)
     if (src_lvl % 2) != (tgt_lvl % 2):
@@ -42,11 +62,13 @@ def _bipartite_coloring_eval(
     return "NO"
 
 
-OUT_OF_HYPOTHESIS_BIPARTITE = RuleHypothesis(
+OUT_OF_HYPOTHESIS_BIPARTITE = CustomCallableHypothesis(
     hypothesis_id="rule_bipartite_coloring_out_of_family",
     name="Odd-Cycle Bipartite Partition Relation",
+    is_symmetric=False,
+    is_transitive=False,
     description="True iff source and target belong to opposite parity partitions; non-transitive.",
-    evaluate_query=_bipartite_coloring_eval,
+    eval_fn=_bipartite_coloring_eval,
 )
 
 
@@ -54,15 +76,17 @@ def _dense_clique_core_eval(
     source: str,
     target: str,
     edges: list[tuple[str, str]],
-    entity_levels: dict[str, int],
-    blocked_nodes: set[str],
-    negated_edges: set[tuple[str, str]],
+    entity_levels: dict[str, int] | None = None,
+    blocked_nodes: set[str] | None = None,
+    negated_edges: set[tuple[str, str]] | None = None,
 ) -> str:
     """Out-of-hypothesis rule 3: Dense clique core with periphery exception.
     
     Nodes in core (level >= 1) form a dense clique (all pairs connect). Periphery nodes (level == 0)
     can only receive, never initiate. Blocked nodes break connection.
     """
+    blocked_nodes = blocked_nodes or set()
+    entity_levels = entity_levels or {}
     if source in blocked_nodes or target in blocked_nodes:
         return "NO"
     src_lvl = entity_levels.get(source, 0)
@@ -74,11 +98,13 @@ def _dense_clique_core_eval(
     return "UNKNOWN"
 
 
-OUT_OF_HYPOTHESIS_DENSE_CLIQUE = RuleHypothesis(
+OUT_OF_HYPOTHESIS_DENSE_CLIQUE = CustomCallableHypothesis(
     hypothesis_id="rule_dense_clique_periphery_exception",
     name="Dense Clique Core with Periphery Exceptions",
+    is_symmetric=True,
+    is_transitive=False,
     description="Core entities are mutually connected; periphery entities possess unidirectional exceptions.",
-    evaluate_query=_dense_clique_core_eval,
+    eval_fn=_dense_clique_core_eval,
 )
 
 
@@ -199,22 +225,22 @@ def _build_balanced_env(
     for i in range(min(pair_count, 8)):
         pair = MinimalPairControl(
             pair_id=f"pair_{env_id}_{i}",
-            standard_query=yes_q[i],
+            base_query=yes_q[i],
             perturbed_query=no_q[i],
             perturbation_type="structural_edge_contrast",
-            expected_standard_answer="YES",
-            expected_perturbed_answer="NO",
         )
         minimal_pairs.append(pair)
 
     env = AutonomousEnvironment(
+        env_id=env_id,
         domain_name=domain_name,
-        ground_truth_rule=hypothesis,
+        relation_name=relation_name,
         entities=entities,
         base_edges=edges,
+        true_hypothesis=hypothesis,
+        entity_levels=entity_levels,
         blocked_nodes=blocked_nodes,
         negated_edges=negated_edges,
-        entity_levels=entity_levels,
         held_out_test_queries=held_out,
         minimal_pairs=minimal_pairs,
     )
@@ -248,7 +274,7 @@ def build_m54_environment_suite() -> SkillBenchmarkEnvironments:
         relation_name="activates_transcription_of",
         entities=["GeneLocusAlpha", "PromoterSiteBeta", "EnhancerUnitGamma", "TranscriptionFactorDelta", "RNAIntermediateEpsilon", "RibosomeTargetZeta"],
         edges=[("GeneLocusAlpha", "PromoterSiteBeta"), ("PromoterSiteBeta", "EnhancerUnitGamma"), ("EnhancerUnitGamma", "TranscriptionFactorDelta"), ("TranscriptionFactorDelta", "RNAIntermediateEpsilon")],
-        hypothesis=EXPANDED_HYPOTHESES[0],  # standard transitive
+        hypothesis=EXPANDED_HYPOTHESES["DIR_TRANS"],  # standard transitive
     )
 
     # Skill B: Blocked Bridge Bottleneck
@@ -258,7 +284,7 @@ def build_m54_environment_suite() -> SkillBenchmarkEnvironments:
         relation_name="routes_quantum_information_to",
         entities=["QuantumSourceQ0", "RepeaterCouplerQ1", "BridgeDecoherenceNode", "RepeaterCouplerQ2", "QuantumSinkQ3", "BypassAuxQ4"],
         edges=[("QuantumSourceQ0", "RepeaterCouplerQ1"), ("RepeaterCouplerQ1", "BridgeDecoherenceNode"), ("BridgeDecoherenceNode", "RepeaterCouplerQ2"), ("RepeaterCouplerQ2", "QuantumSinkQ3"), ("RepeaterCouplerQ1", "BypassAuxQ4"), ("BypassAuxQ4", "RepeaterCouplerQ2")],
-        hypothesis=EXPANDED_HYPOTHESES[3],  # blocked bridge
+        hypothesis=EXPANDED_HYPOTHESES["BLOCKED_BRIDGE"],  # blocked bridge
         blocked_nodes={"BridgeDecoherenceNode"},
     )
 
@@ -269,7 +295,7 @@ def build_m54_environment_suite() -> SkillBenchmarkEnvironments:
         relation_name="in_same_security_zone",
         entities=["MeshRegistry", "GatewayCluster", "PaymentServiceNode", "AuthServicePod", "AnalyticsNode", "LoggingDaemon"],
         edges=[("MeshRegistry", "GatewayCluster"), ("GatewayCluster", "MeshRegistry"), ("GatewayCluster", "PaymentServiceNode"), ("PaymentServiceNode", "GatewayCluster"), ("PaymentServiceNode", "AuthServicePod"), ("AuthServicePod", "PaymentServiceNode")],
-        hypothesis=EXPANDED_HYPOTHESES[2],  # symmetric
+        hypothesis=EXPANDED_HYPOTHESES["SYM_TRANS"],  # symmetric
     )
 
     # Skill D: Hierarchical Depth Boundary
@@ -279,7 +305,7 @@ def build_m54_environment_suite() -> SkillBenchmarkEnvironments:
         relation_name="taxonomically_subsumes",
         entities=["DomainArchaea", "PhylumMethano", "ClassHalobacteria", "OrderThermococci", "FamilyArchae", "GenusPyro"],
         edges=[("DomainArchaea", "PhylumMethano"), ("PhylumMethano", "ClassHalobacteria"), ("ClassHalobacteria", "OrderThermococci"), ("OrderThermococci", "FamilyArchae"), ("FamilyArchae", "GenusPyro")],
-        hypothesis=EXPANDED_HYPOTHESES[4],  # hierarchy with level bounds
+        hypothesis=EXPANDED_HYPOTHESES["HIERARCHICAL_BOUNDARY"],  # hierarchy with level bounds
         entity_levels={"DomainArchaea": 0, "PhylumMethano": 1, "ClassHalobacteria": 2, "OrderThermococci": 3, "FamilyArchae": 4, "GenusPyro": 5},
     )
 
@@ -300,7 +326,7 @@ def build_m54_environment_suite() -> SkillBenchmarkEnvironments:
         relation_name="reports_transitively_to",
         entities=["JuniorAnalystJ1", "SeniorAssociateS2", "TeamLeadT3", "EngineeringDirectorD4", "VicePresidentV5", "ChiefExecutiveC6"],
         edges=[("JuniorAnalystJ1", "SeniorAssociateS2"), ("SeniorAssociateS2", "TeamLeadT3"), ("TeamLeadT3", "EngineeringDirectorD4"), ("EngineeringDirectorD4", "VicePresidentV5"), ("VicePresidentV5", "ChiefExecutiveC6")],
-        hypothesis=EXPANDED_HYPOTHESES[0],  # transitive reachability
+        hypothesis=EXPANDED_HYPOTHESES["DIR_TRANS"],  # transitive reachability
         entity_levels={"JuniorAnalystJ1": 1, "SeniorAssociateS2": 2, "TeamLeadT3": 3, "EngineeringDirectorD4": 4, "VicePresidentV5": 5, "ChiefExecutiveC6": 6},
     )
 
@@ -311,7 +337,7 @@ def build_m54_environment_suite() -> SkillBenchmarkEnvironments:
         relation_name="catalyzes_synthesis_of",
         entities=["PrecursorSubstrateAlpha", "IntermediateEnzymeBeta", "InhibitedChokePointGamma", "KinaseFactorDelta", "DownstreamMetaboliteEpsilon", "AlternativeShuntOmega"],
         edges=[("PrecursorSubstrateAlpha", "IntermediateEnzymeBeta"), ("IntermediateEnzymeBeta", "InhibitedChokePointGamma"), ("InhibitedChokePointGamma", "KinaseFactorDelta"), ("KinaseFactorDelta", "DownstreamMetaboliteEpsilon"), ("IntermediateEnzymeBeta", "AlternativeShuntOmega"), ("AlternativeShuntOmega", "KinaseFactorDelta")],
-        hypothesis=EXPANDED_HYPOTHESES[3],  # blocked bridge with shunt
+        hypothesis=EXPANDED_HYPOTHESES["BLOCKED_BRIDGE"],  # blocked bridge with shunt
         blocked_nodes={"InhibitedChokePointGamma"},
     )
 
@@ -322,7 +348,7 @@ def build_m54_environment_suite() -> SkillBenchmarkEnvironments:
         relation_name="holds_mutual_pact_with",
         entities=["SovereignStateNorth", "AlliancePartnerEast", "FederationSouth", "TreatyStateWest", "NeutralObservatory", "IsolatedFaction"],
         edges=[("SovereignStateNorth", "AlliancePartnerEast"), ("AlliancePartnerEast", "SovereignStateNorth"), ("AlliancePartnerEast", "FederationSouth"), ("FederationSouth", "AlliancePartnerEast"), ("FederationSouth", "TreatyStateWest"), ("TreatyStateWest", "FederationSouth")],
-        hypothesis=EXPANDED_HYPOTHESES[2],  # symmetric
+        hypothesis=EXPANDED_HYPOTHESES["SYM_TRANS"],  # symmetric
     )
 
     # Target 4: Alternating Production Dependency (Incompatible with transitivity; negative control)
@@ -381,7 +407,7 @@ def build_m54_environment_suite() -> SkillBenchmarkEnvironments:
         relation_name="activates_transcription_of",
         entities=["NoisyGeneA", "NoisyGeneB", "NoisyGeneC", "NoisyGeneD", "NoisyGeneE", "NoisyGeneF"],
         edges=[("NoisyGeneA", "NoisyGeneB"), ("NoisyGeneB", "NoisyGeneC"), ("NoisyGeneC", "NoisyGeneD"), ("NoisyGeneD", "NoisyGeneE")],
-        hypothesis=EXPANDED_HYPOTHESES[0],  # standard transitive
+        hypothesis=EXPANDED_HYPOTHESES["DIR_TRANS"],  # standard transitive
     )
 
     env_epistemic_exception = _build_balanced_env(
@@ -390,7 +416,7 @@ def build_m54_environment_suite() -> SkillBenchmarkEnvironments:
         relation_name="taxonomically_subsumes",
         entities=["RootTaxonA", "SubTaxonB", "SubTaxonC", "LeafTaxonD", "LeafTaxonE", "LeafTaxonF"],
         edges=[("RootTaxonA", "SubTaxonB"), ("SubTaxonB", "SubTaxonC"), ("SubTaxonC", "LeafTaxonD")],
-        hypothesis=EXPANDED_HYPOTHESES[1],  # transitive with single negated edge exception
+        hypothesis=EXPANDED_HYPOTHESES["EXPLICIT_REFUTATION"],  # transitive with single negated edge exception
         negated_edges={("SubTaxonB", "LeafTaxonD")},
     )
 
