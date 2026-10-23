@@ -80,8 +80,8 @@ def test_m53_scientific_audit_and_lineage_reconciliation():
         assert rec.pre_expansion_param_hash_vocab400 != rec.post_expansion_param_hash_vocab1024
 
     # Sign convention check
-    assert "BWT = Task1_Score_Final - Task1_Score_Initial" in rep.retention_convention.bwt_definition
-    assert "BF = Task1_Score_Initial - Task1_Score_Final" in rep.retention_convention.bf_definition
+    assert "(BWT) = Task1_Score_Final - Task1_Score_Initial" in rep.retention_convention.bwt_definition
+    assert "(BF) = Task1_Score_Initial - Task1_Score_Final" in rep.retention_convention.bf_definition
 
 
 def test_skill_repertoire_registry_and_serialization(tmp_path: Path):

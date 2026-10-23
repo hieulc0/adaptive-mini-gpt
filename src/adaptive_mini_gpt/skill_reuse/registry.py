@@ -120,7 +120,7 @@ class SkillRepertoireRegistry:
 
         for sid, adapter in self._skills.items():
             adapter_path = p / f"{sid}.pt"
-            adapter.save(adapter_path)
+            adapter.save_checkpoint(adapter_path)
 
     @classmethod
     def load_from_dir(
@@ -144,12 +144,7 @@ class SkillRepertoireRegistry:
             adapter_path = p / f"{sid}.pt"
             if not adapter_path.exists():
                 raise FileNotFoundError(f"Adapter checkpoint missing for skill {sid} at {adapter_path}")
-            adapter = PersistentCandidateAdapter.load(
-                adapter_path,
-                d_model=d_model,
-                bottleneck_dim=bottleneck_dim,
-                num_classes=num_classes,
-            )
+            adapter = PersistentCandidateAdapter.load_checkpoint(adapter_path)
             meta = RegisteredSkill.from_dict(meta_dict)
             current_hash = compute_adapter_hash(adapter)
             if current_hash != meta.checkpoint_hash:
