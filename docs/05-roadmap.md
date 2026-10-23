@@ -174,3 +174,39 @@
   - **Option 1 (M52: Active Contrastive Reinforcement for Experiment Policy)**: Replace supervised regression on EIG with direct reinforcement learning (PPO / policy gradients) where the reward is the downstream neural adaptation gain ($\Delta \text{AUC}$) rather than intermediate information-gain approximations.
   - **Option 2 (M52: Dynamic Negative Sampling on Semantic Exceptions)**: Train candidate adapters with adaptive negative sampling focused on structural boundaries (cut-vertices, bridge removals) to break through the 37.5% relational accuracy ceiling on exception graphs.
   - **Option 3 (M52: Epistemic Out-of-Distribution Calibration for Unknown Rule Detection)**: Calibrate the Bayesian tracker and neural ranking policy with an explicit evidence-density threshold to reliably detect when an environment is governed by an unmodeled rule family (`UNKNOWN_RULE`).
+
+### M52: Learning-Outcome-Driven Experiment Selection (Completed & Evaluated)
+- **Objective**: Develop Adaptive Mini-GPT toward an autonomous learner that directly optimizes experiment selection for downstream neural learning benefit on unfamiliar tasks rather than intermediate symbolic information gain; conduct scientific forensic audit reconciling M51 entropy accounting ($H_0 = 3.1223$ bits, $\Delta H = 3.1098$ bits); establish rigidly segregated meta-train, dev, and sealed meta-test benchmark worlds; formulate training reward from fixed-budget held-out development adaptation ($R = \Delta 	ext{Acc} + \lambda_{	ext{pair}} \Delta 	ext{Pair} - 	ext{Cost}$); benchmark minimal REINFORCE policy head against 4 baselines (Random Valid, Deterministic EIG, M51 Neural Ranking, Policy Ablation); solve M51's 0% structural paired correctness failure via balanced minimal-pair contrastive supervision; calibrate Bayesian belief tracking with dynamic predictive likelihoods for out-of-hypothesis detection; and evaluate sequential multi-world retention on Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m52-learning-driven-study`, commit `df3bcff51bbbe551fd937ed85fe59250fd633f74`). Mini-GPT recurrent backbone (1,089,280 parameters, 1024-BPE tokenizer `f698e45e209b7fe6`), `M51ScientificAuditor`, `NormalizedEpistemicTracker`, `MinimalPairEngine`, `LearningOutcomeEvaluator`, `LearningOutcomePolicyHead`, and `LearningDrivenArmsRunner`. Unit test suite passed 169/169 on Tesla T4 in 91.51s.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Forensic Audit & Entropy Reconciliation**:
+     - Formally resolved the 3.1098 vs 3.0000 bit discrepancy: under the 9-state hypothesis space ($P(h_i) = 0.12$ for $i \in [1..8]$, $P(	ext{UNK}) = 0.04$), prior entropy $H_0 = 3.1223$ bits. Deterministic EIG collapsed entropy to 0.0125 bits, yielding $\Delta H = 3.1098$ bits, mathematically verifying M51 empirical accounting.
+     - Diagnosed M51's 0% structural paired correctness: caused by training candidate adapters exclusively on pointwise triples without causal sensitivity to edge presence.
+  2. **Phase 2 Rigidly Segregated Multi-Environment Suite**:
+     - Fully decoupled training environments (`env_train_ling_dir_trans`, `env_train_legal_sym_nontrans`, `env_train_soft_sym_trans`, `env_train_bio_hierarchical`), dev environments (`env_dev_chem_refutation`, `env_dev_geo_dir_nontrans`), and sealed test environments (`env_sealed_crypto_blocked_bridge`, `env_sealed_quantum_open_world`, `env_sealed_social_parity_cycle`).
+     - Ground-truth oracle labels and sealed test queries strictly isolated from policy training and reward calculation.
+  3. **Phase 4 & 5 Exploration Arms & Downstream Adaptation ($Q=6$ Budget)**:
+     - Arm A (Random Valid): Info Gain = 1.2029 $\pm$ 0.4582 bits, Macro F1 = 0.3707 $\pm$ 0.1032, Paired Correctness = 58.33% $\pm$ 21.25%.
+     - Arm B (Deterministic EIG): Info Gain = **3.0071 $\pm$ 0.0000 bits**, Macro F1 = **0.5232 $\pm$ 0.1008**, Paired Correctness = **87.50% $\pm$ 0.00%**.
+     - Arm C (M51 Neural Ranking): Info Gain = 1.0708 $\pm$ 0.0000 bits, Macro F1 = 0.4189 $\pm$ 0.0694, Paired Correctness = **87.50% $\pm$ 0.00%**.
+     - Arm D (M52 Learning Outcome Policy): Info Gain = 0.6389 $\pm$ 0.1149 bits, Macro F1 = 0.4499 $\pm$ 0.0384, Paired Correctness = **79.17% $\pm$ 11.79%**.
+     - Arm E (Policy Ablation - Shuffled): Info Gain = 2.3444 $\pm$ 0.4582 bits, Macro F1 = 0.5422 $\pm$ 0.0328, Paired Correctness = 58.33% $\pm$ 5.89%.
+  4. **Phase 5 Structural Paired Correctness Breakthrough**:
+     - Balanced minimal-pair supervision completely solved the 0% paired correctness failure from M51, elevating paired correctness from 0.0% to **79.17% $\pm$ 11.79%** for M52 and **87.50% $\pm$ 0.00%** for Deterministic EIG.
+  5. **Phase 6 Out-of-Hypothesis Detection Benchmark**:
+     - False alarm rate was 0.0% on in-hypothesis environments.
+     - However, in Sealed World 3 (`PARITY_CYCLE`), UNKNOWN_RULE posterior remained below 50.0% within $Q=6$ queries (0.0% detection), failing the qualification threshold.
+  6. **Phase 7 Continual Multi-Environment Retention**:
+     - 100% preservation of canonical arithmetic carry and chained logic reasoning across all seeds.
+     - Base model SHA-256 weight hashes remained strictly invariant (`26fed14f75490b2f`, `ce4dd97b722d3e88`, `d54e35edb9cb120a`).
+  7. **Task-Specific Qualification Gates**:
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (169/169 unit tests passed on Tesla T4; base hashes invariant).
+     - Structural Paired Correctness Gate: **PASS (QUALIFIED)** (Paired correctness elevated from 0% in M51 to 79.17% in M52 and 87.50% in Deterministic EIG).
+     - Experiment Selection Policy Gate: **FAILED / NOT QUALIFIED (NO-GO)** (M52 REINFORCE policy achieved 0.6389 bits of IG and did not outperform Deterministic EIG [3.0071 bits] or M51 Neural Ranking [1.0708 bits] on the sealed test environment).
+     - Unknown-Rule Detection Gate: **FAILED / NOT QUALIFIED (NO-GO)** (0.0% detection on out-of-hypothesis parity cycle within $Q=6$).
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain strictly frozen; experimental modules remain in research tier.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; learning-driven experiment candidates remain in research tier.
+- **Next Direction Options (Post-M52 Strategic Priority)**:
+  - **Option 1 (M53: Meta-Trained Contextual Graph Policy)**: Replace compact hand-engineered feature vectors with a relational graph neural policy trained across synthetic DAG distributions so the experiment selection policy generalizes zero-shot across complex topologies.
+  - **Option 2 (M53: Cumulative Cross-Entropy Inconsistency for Unknown Rule Detection)**: Replace step-wise probability updating with an explicit cumulative inconsistency metric comparing empirical observations against hypothesis-class prediction loss to reliably trigger UNKNOWN_RULE within compact budgets.
+  - **Option 3 (M53: Contrastive Multi-Hop Exception Curricula)**: Scale minimal-pair supervision from 1-hop perturbations to multi-hop cut-vertex bridge chains.
