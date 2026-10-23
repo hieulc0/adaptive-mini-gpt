@@ -116,7 +116,8 @@ def build_m59_tokenizer(target_vocab_size: int = 1024) -> Any:
         # Meta-Test Logistics Lattice
         "LogisticsHubH0 forwards_container_consignment_to LogisticsHubH1 LogisticsHubH2 LogisticsHubH3 LogisticsHubH4 LogisticsHubH5 LogisticsHubH6 LogisticsHubH7. ",
     ]
-    training_data = PRETRAIN_PROSE_CORPUS + "\n" + "\n".join(domain_texts)
+    all_prose = " ".join(PRETRAIN_PROSE_CORPUS) if isinstance(PRETRAIN_PROSE_CORPUS, list) else str(PRETRAIN_PROSE_CORPUS)
+    training_data = all_prose + "\n" + "\n".join(domain_texts)
     tokenizer = train_scaled_bpe_tokenizer(training_data, target_vocab_size=target_vocab_size)
     return tokenizer
 
