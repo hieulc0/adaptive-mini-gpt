@@ -121,19 +121,19 @@ def test_composite_adapter_models():
 def test_multi_world_environments():
     """Verify target environments have valid reachability graphs and balanced queries."""
     env_rep = create_reporting_hierarchy_environment(seed=42)
-    assert len(env_rep.ground_truth.nodes) == 6
+    assert len(env_rep.entities) == 6
     assert len(env_rep.held_out_test_queries) >= 16
-    assert len(env_rep.held_out_minimal_pairs) >= 6
+    assert len(env_rep.minimal_pairs) >= 6
 
     env_sc = create_supply_chain_pipeline_environment(seed=42)
-    assert len(env_sc.ground_truth.nodes) == 8
+    assert len(env_sc.entities) == 8
     assert len(env_sc.held_out_test_queries) >= 16
 
     env_met = create_metabolic_bypass_environment(seed=42)
-    assert len(env_met.ground_truth.nodes) == 6
+    assert len(env_met.entities) == 6
 
     env_soc = create_social_coalition_environment(seed=42)
-    assert len(env_soc.ground_truth.nodes) == 8
+    assert len(env_soc.entities) == 8
 
 
 def test_noise_aware_epistemic_detectors():

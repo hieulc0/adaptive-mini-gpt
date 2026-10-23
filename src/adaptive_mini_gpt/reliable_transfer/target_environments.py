@@ -1,215 +1,115 @@
 """Multi-world benchmark environments for M56 skill transfer evaluation."""
 from __future__ import annotations
 
+import copy
 import random
 from typing import Any
+
 from adaptive_mini_gpt.guided_experiment.environment import (
     AutonomousEnvironment,
-    ExperimentQuery,
-    GroundTruthGraph,
+    EnvironmentQuery,
+    EXPANDED_HYPOTHESES,
+    MinimalPairControl,
+    OUT_OF_HYPOTHESIS_PARITY,
+    RuleHypothesis,
+    UNKNOWN_RULE,
 )
+from adaptive_mini_gpt.skill_reuse.environment import (
+    CustomCallableHypothesis,
+    OUT_OF_HYPOTHESIS_BIPARTITE,
+    OUT_OF_HYPOTHESIS_DENSE_CLIQUE,
+)
+from adaptive_mini_gpt.skill_composition.environment import _build_balanced_env
 
 
 def create_reporting_hierarchy_environment(seed: int = 42) -> AutonomousEnvironment:
-    """Corporate Reporting Hierarchy: 6-node Transitive DAG with unfamiliar corporate vocabulary."""
-    nodes = [
-        "ChiefExecutive", "VicePresidentOps", "DirectorLogistics",
-        "WarehouseManager", "InventoryLead", "FloorSupervisor",
-    ]
-    edges = [
-        ("ChiefExecutive", "VicePresidentOps"),
-        ("VicePresidentOps", "DirectorLogistics"),
-        ("DirectorLogistics", "WarehouseManager"),
-        ("WarehouseManager", "InventoryLead"),
-        ("InventoryLead", "FloorSupervisor"),
-    ]
-    gt = GroundTruthGraph(
-        nodes=nodes,
-        edges=edges,
-        rule_family="transitive_reachability",
-        domain="corporate_governance",
-        seed=seed,
+    """Target 1: Corporate Reporting Hierarchy (Transitive, 6 nodes)."""
+    return _build_balanced_env(
+        env_id="target_reporting_hierarchy",
+        domain_name="CorporateGovernance",
+        relation_name="reports_transitively_to",
+        entities=[
+            "JuniorAnalystJ1", "SeniorAssociateS2", "TeamLeadT3",
+            "EngineeringDirectorD4", "VicePresidentV5", "ChiefExecutiveC6",
+        ],
+        edges=[
+            ("JuniorAnalystJ1", "SeniorAssociateS2"),
+            ("SeniorAssociateS2", "TeamLeadT3"),
+            ("TeamLeadT3", "EngineeringDirectorD4"),
+            ("EngineeringDirectorD4", "VicePresidentV5"),
+            ("VicePresidentV5", "ChiefExecutiveC6"),
+        ],
+        hypothesis=EXPANDED_HYPOTHESES["DIR_TRANS"],
+        entity_levels={
+            "JuniorAnalystJ1": 1, "SeniorAssociateS2": 2, "TeamLeadT3": 3,
+            "EngineeringDirectorD4": 4, "VicePresidentV5": 5, "ChiefExecutiveC6": 6,
+        },
     )
-    env = AutonomousEnvironment(
-        ground_truth=gt,
-        num_development_episodes=6,
-        seed=seed,
-    )
-    _populate_minimal_pairs_and_heldout(env, nodes, edges, "transitive")
-    return env
 
 
 def create_supply_chain_pipeline_environment(seed: int = 42) -> AutonomousEnvironment:
-    """Supply Chain Logistics Pipeline: 8-node Transitive Chain with deep path diameter."""
-    nodes = [
-        "SupplierAlpha", "SmeltingPlant", "ComponentForge", "AssemblyDepot",
-        "QualityLab", "DistributionHub", "RetailPartner", "ConsumerPoint",
-    ]
-    edges = [
-        ("SupplierAlpha", "SmeltingPlant"),
-        ("SmeltingPlant", "ComponentForge"),
-        ("ComponentForge", "AssemblyDepot"),
-        ("AssemblyDepot", "QualityLab"),
-        ("QualityLab", "DistributionHub"),
-        ("DistributionHub", "RetailPartner"),
-        ("RetailPartner", "ConsumerPoint"),
-    ]
-    gt = GroundTruthGraph(
-        nodes=nodes,
-        edges=edges,
-        rule_family="transitive_reachability",
-        domain="logistics_supply_chain",
-        seed=seed,
+    """Target 2: Multi-Tier Supply Chain (Transitive, 8-node DAG with deep diameter)."""
+    return _build_balanced_env(
+        env_id="target_supply_chain",
+        domain_name="GlobalLogistics",
+        relation_name="ships_freight_downstream_to",
+        entities=[
+            "SupplierTier1", "PortTerminalA2", "CustomsStationB3", "RegionalHubC4",
+            "LocalDepotD5", "DistributionCenterE6", "RetailOutletF7", "CustomerEndpointG8",
+        ],
+        edges=[
+            ("SupplierTier1", "PortTerminalA2"),
+            ("PortTerminalA2", "CustomsStationB3"),
+            ("CustomsStationB3", "RegionalHubC4"),
+            ("RegionalHubC4", "LocalDepotD5"),
+            ("LocalDepotD5", "DistributionCenterE6"),
+            ("DistributionCenterE6", "RetailOutletF7"),
+            ("RetailOutletF7", "CustomerEndpointG8"),
+        ],
+        hypothesis=EXPANDED_HYPOTHESES["DIR_TRANS"],
     )
-    env = AutonomousEnvironment(
-        ground_truth=gt,
-        num_development_episodes=6,
-        seed=seed,
-    )
-    _populate_minimal_pairs_and_heldout(env, nodes, edges, "transitive")
-    return env
 
 
 def create_metabolic_bypass_environment(seed: int = 42) -> AutonomousEnvironment:
-    """Metabolic Bypass: 6-node Diamond Graph with Bypass and blocked paths (partially compatible)."""
-    nodes = [
-        "GlucoseInput", "KinaseEnzyme", "AldolaseEnzyme",
-        "BypassEnzyme", "PyruvateKinase", "ATPOutput",
-    ]
-    # Diamond with bypass: Glucose -> Kinase -> Aldolase -> Pyruvate -> ATP, plus Glucose -> Bypass -> Pyruvate
-    edges = [
-        ("GlucoseInput", "KinaseEnzyme"),
-        ("KinaseEnzyme", "AldolaseEnzyme"),
-        ("AldolaseEnzyme", "PyruvateKinase"),
-        ("GlucoseInput", "BypassEnzyme"),
-        ("BypassEnzyme", "PyruvateKinase"),
-        ("PyruvateKinase", "ATPOutput"),
-    ]
-    gt = GroundTruthGraph(
-        nodes=nodes,
-        edges=edges,
-        rule_family="diamond_bypass_reachability",
-        domain="metabolic_biochemistry",
-        seed=seed,
+    """Target 3: Metabolic Pathway with Bypass (Partially Compatible Diamond)."""
+    return _build_balanced_env(
+        env_id="target_metabolic_bypass",
+        domain_name="BiochemicalMetabolism",
+        relation_name="catalyzes_synthesis_of",
+        entities=[
+            "PrecursorSubstrateAlpha", "IntermediateEnzymeBeta", "InhibitedChokePointGamma",
+            "KinaseFactorDelta", "DownstreamMetaboliteEpsilon", "AlternativeShuntOmega",
+        ],
+        edges=[
+            ("PrecursorSubstrateAlpha", "IntermediateEnzymeBeta"),
+            ("IntermediateEnzymeBeta", "InhibitedChokePointGamma"),
+            ("InhibitedChokePointGamma", "KinaseFactorDelta"),
+            ("KinaseFactorDelta", "DownstreamMetaboliteEpsilon"),
+            ("IntermediateEnzymeBeta", "AlternativeShuntOmega"),
+            ("AlternativeShuntOmega", "KinaseFactorDelta"),
+        ],
+        hypothesis=EXPANDED_HYPOTHESES["BLOCKED_BRIDGE"],
+        blocked_nodes={"InhibitedChokePointGamma"},
     )
-    env = AutonomousEnvironment(
-        ground_truth=gt,
-        num_development_episodes=6,
-        seed=seed,
-    )
-    _populate_minimal_pairs_and_heldout(env, nodes, edges, "transitive")
-    return env
 
 
 def create_social_coalition_environment(seed: int = 42) -> AutonomousEnvironment:
-    """Social Coalition: 8-node Bipartite Partition / Parity graph (deliberately incompatible)."""
-    nodes = [
-        "FactionAlpha1", "FactionAlpha2", "FactionAlpha3", "FactionAlpha4",
-        "FactionBeta1", "FactionBeta2", "FactionBeta3", "FactionBeta4",
-    ]
-    # Bipartite edges strictly between Alpha and Beta
-    edges = [
-        ("FactionAlpha1", "FactionBeta1"),
-        ("FactionBeta1", "FactionAlpha2"),
-        ("FactionAlpha2", "FactionBeta2"),
-        ("FactionBeta2", "FactionAlpha3"),
-        ("FactionAlpha3", "FactionBeta3"),
-        ("FactionBeta3", "FactionAlpha4"),
-        ("FactionAlpha4", "FactionBeta4"),
-        ("FactionBeta4", "FactionAlpha1"),
-    ]
-    gt = GroundTruthGraph(
-        nodes=nodes,
-        edges=edges,
-        rule_family="bipartite_parity_coalition",
-        domain="social_dynamics",
-        seed=seed,
+    """Target 4: Incompatible Rule: Parity Cycle Alternating Coalition."""
+    return _build_balanced_env(
+        env_id="target_social_coalition",
+        domain_name="GeopoliticalCoalition",
+        relation_name="holds_mutual_pact_with",
+        entities=[
+            "SovereignStateNorth", "AlliancePartnerEast", "FederationSouth",
+            "TreatyStateWest", "NeutralObservatory", "IsolatedFaction",
+        ],
+        edges=[
+            ("SovereignStateNorth", "AlliancePartnerEast"),
+            ("AlliancePartnerEast", "FederationSouth"),
+            ("FederationSouth", "TreatyStateWest"),
+            ("TreatyStateWest", "NeutralObservatory"),
+            ("NeutralObservatory", "IsolatedFaction"),
+            ("IsolatedFaction", "SovereignStateNorth"),
+        ],
+        hypothesis=OUT_OF_HYPOTHESIS_PARITY,
     )
-    env = AutonomousEnvironment(
-        ground_truth=gt,
-        num_development_episodes=6,
-        seed=seed,
-    )
-    _populate_minimal_pairs_and_heldout(env, nodes, edges, "bipartite")
-    return env
-
-
-def _populate_minimal_pairs_and_heldout(
-    env: AutonomousEnvironment,
-    nodes: list[str],
-    edges: list[tuple[str, str]],
-    rule_type: str,
-) -> None:
-    """Generate balanced held-out test queries and structural minimal pairs."""
-    adj: dict[str, set[str]] = {n: set() for n in nodes}
-    for u, v in edges:
-        adj[u].add(v)
-
-    # Compute reachable pairs using BFS
-    reachable: set[tuple[str, str]] = set()
-    for start in nodes:
-        visited = set()
-        queue = [start]
-        while queue:
-            curr = queue.pop(0)
-            for neighbor in adj[curr]:
-                if neighbor not in visited:
-                    visited.add(neighbor)
-                    reachable.add((start, neighbor))
-                    queue.append(neighbor)
-
-    test_queries: list[ExperimentQuery] = []
-    minimal_pairs: list[tuple[ExperimentQuery, ExperimentQuery]] = []
-
-    # 1. Connected pairs (YES)
-    for u, v in list(reachable)[:8]:
-        q = ExperimentQuery(
-            query_id=f"q_{u}_{v}",
-            source_entity=u,
-            target_entity=v,
-            question_text=f"Is {u} connected to {v}?",
-            expected_answer="YES",
-        )
-        test_queries.append(q)
-
-    # 2. Reverse directional queries (NO or UNKNOWN)
-    for u, v in list(reachable)[:8]:
-        expected = "YES" if (v, u) in reachable else "NO"
-        q_rev = ExperimentQuery(
-            query_id=f"q_rev_{v}_{u}",
-            source_entity=v,
-            target_entity=u,
-            question_text=f"Is {v} connected to {u}?",
-            expected_answer=expected,
-        )
-        test_queries.append(q_rev)
-
-        # Build minimal contrastive pair
-        q_orig = ExperimentQuery(
-            query_id=f"q_fwd_{u}_{v}",
-            source_entity=u,
-            target_entity=v,
-            question_text=f"Is {u} connected to {v}?",
-            expected_answer="YES",
-        )
-        minimal_pairs.append((q_orig, q_rev))
-
-    # 3. Disconnected / Unknown queries
-    for u in nodes:
-        for v in nodes:
-            if u != v and (u, v) not in reachable and (v, u) not in reachable:
-                q_unk = ExperimentQuery(
-                    query_id=f"q_unk_{u}_{v}",
-                    source_entity=u,
-                    target_entity=v,
-                    question_text=f"Is {u} connected to {v}?",
-                    expected_answer="UNKNOWN",
-                )
-                test_queries.append(q_unk)
-                if len(test_queries) >= 24:
-                    break
-        if len(test_queries) >= 24:
-            break
-
-    env.held_out_test_queries = test_queries
-    env.held_out_minimal_pairs = minimal_pairs

@@ -7,11 +7,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
-from adaptive_mini_gpt.guided_experiment.environment import (
-    AutonomousEnvironment,
-    ExperimentQuery,
-    GroundTruthGraph,
-)
+from adaptive_mini_gpt.guided_experiment.environment import AutonomousEnvironment
 from adaptive_mini_gpt.reliable_transfer.noise_aware_belief import (
     SequentialProbabilityRatioTest,
     EpistemicDecision,
@@ -71,10 +67,10 @@ class ControlledActiveProbingAuditor:
         env: AutonomousEnvironment,
         sprt_detector: SequentialProbabilityRatioTest,
     ) -> ActiveProbingEpisodeResult:
-        nodes = env.ground_truth.nodes
-        edges = set(env.ground_truth.edges)
+        nodes = env.entities
+        edges = set(env.base_edges)
         candidate_pool = self._generate_candidate_pool(nodes)
-        is_unknown = "dense_clique" in env.ground_truth.rule_family or "parity" in env.ground_truth.rule_family
+        is_unknown = "dense_clique" in env.env_id or "parity" in env.env_id
 
         history: set[tuple[str, str]] = set()
         observations: list[tuple[str, str]] = []
@@ -89,16 +85,14 @@ class ControlledActiveProbingAuditor:
             if strategy == "random_valid":
                 u, v = self.rng.choice(candidate_pool)
             elif strategy == "targeted_peripheral_bridge":
-                # Targeted strategy: prioritize boundary nodes (degree 1 or 2) and cross-tier pairs
-                # Find degree of nodes
+                # Targeted strategy: prioritize boundary nodes and cross-tier pairs
                 degrees = {n: 0 for n in nodes}
                 for src, dst in edges:
-                    degrees[src] += 1
-                    degrees[dst] += 1
-                # Sort pairs by peripheral status (sum of degrees is low or high-low contrast)
+                    degrees[src] = degrees.get(src, 0) + 1
+                    degrees[dst] = degrees.get(dst, 0) + 1
                 sorted_pool = sorted(
                     candidate_pool,
-                    key=lambda pair: abs(degrees[pair[0]] - degrees[pair[1]]) + (1 if pair in history else 0),
+                    key=lambda pair: abs(degrees.get(pair[0], 0) - degrees.get(pair[1], 0)) + (1 if pair in history else 0),
                     reverse=True,
                 )
                 u, v = sorted_pool[step % len(sorted_pool)]
@@ -120,7 +114,6 @@ class ControlledActiveProbingAuditor:
                 observed_answer = actual_answer
 
             # Predicted answer under baseline transitive/symmetric hypothesis
-            # Assume baseline hypothesis expects uniform transitivity/symmetry
             hyp_pred = "YES" if (u, v) in edges or (v, u) in edges else "NO"
 
             if hyp_pred != observed_answer:

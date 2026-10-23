@@ -15,7 +15,8 @@ import torch.optim as optim
 from adaptive_mini_gpt.causal_learning_audit.adapter import PersistentCandidateAdapter
 from adaptive_mini_gpt.guided_experiment.environment import (
     AutonomousEnvironment,
-    ExperimentQuery,
+    EnvironmentQuery,
+    MinimalPairControl,
 )
 from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.reliable_transfer.composition_models import (
@@ -136,7 +137,9 @@ class ReliableTransferEngine:
         paired_correct = 0
         total_pairs = 0
         with torch.no_grad():
-            for q_fwd, q_rev in env.held_out_minimal_pairs:
+            for pair in env.minimal_pairs:
+                q_fwd = pair.base_query
+                q_rev = pair.perturbed_query
                 h_fwd = self._extract_hidden(q_fwd.question_text)
                 h_rev = self._extract_hidden(q_rev.question_text)
                 p_fwd = self.CLASS_LABELS[int(torch.argmax(module(h_fwd), dim=-1).item())]
@@ -151,8 +154,8 @@ class ReliableTransferEngine:
     def _train_combined_supervision(
         self,
         module: nn.Module,
-        train_examples: list[ExperimentQuery],
-        minimal_pairs: list[tuple[ExperimentQuery, ExperimentQuery]],
+        train_examples: list[EnvironmentQuery],
+        minimal_pairs: list[MinimalPairControl],
         epochs: int = 12,
         lr: float = 1e-3,
     ) -> None:
@@ -182,7 +185,9 @@ class ReliableTransferEngine:
                 # 2. Structural minimal-pair contrastive step if available
                 l_pair = torch.tensor(0.0, device=self.device)
                 if minimal_pairs:
-                    q_f, q_r = minimal_pairs[epoch % len(minimal_pairs)]
+                    pair = minimal_pairs[epoch % len(minimal_pairs)]
+                    q_f = pair.base_query
+                    q_r = pair.perturbed_query
                     h_f = self._extract_hidden(q_f.question_text)
                     h_r = self._extract_hidden(q_r.question_text)
                     logits_f = module(h_f)
@@ -202,7 +207,7 @@ class ReliableTransferEngine:
         env: AutonomousEnvironment,
         compatible_source_adapter: PersistentCandidateAdapter,
         incompatible_source_adapter: PersistentCandidateAdapter,
-        target_practice_pool: list[ExperimentQuery],
+        target_practice_pool: list[EnvironmentQuery],
         seed: int = 42,
     ) -> ArmTransferEvaluation:
         """Run trajectory evaluation for a single arm across N in [0, 2, 4, 8, 16, 32]."""
@@ -256,7 +261,7 @@ class ReliableTransferEngine:
                 self._train_combined_supervision(
                     module=module,
                     train_examples=train_slice,
-                    minimal_pairs=env.held_out_minimal_pairs,
+                    minimal_pairs=env.minimal_pairs,
                     epochs=12,
                 )
 
@@ -280,7 +285,7 @@ class ReliableTransferEngine:
 
         return ArmTransferEvaluation(
             arm_name=arm_name,
-            target_task_id=env.ground_truth.domain,
+            target_task_id=env.domain_name,
             trainable_parameters=trainable_p,
             total_parameters=total_p,
             trajectory=trajectory,

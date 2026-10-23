@@ -121,13 +121,13 @@ def main() -> None:
         transfer_engine._train_combined_supervision(
             compatible_source_adapter,
             source_env_transitive.held_out_test_queries[:16],
-            source_env_transitive.held_out_minimal_pairs,
+            source_env_transitive.minimal_pairs,
             epochs=15,
         )
         transfer_engine._train_combined_supervision(
             incompatible_source_adapter,
             source_env_bipartite.held_out_test_queries[:16],
-            source_env_bipartite.held_out_minimal_pairs,
+            source_env_bipartite.minimal_pairs,
             epochs=15,
         )
 
@@ -189,7 +189,7 @@ def main() -> None:
         transfer_engine._train_combined_supervision(
             composite_trained,
             environments["reporting_hierarchy"].held_out_test_queries[:16],
-            environments["reporting_hierarchy"].held_out_minimal_pairs,
+            environments["reporting_hierarchy"].minimal_pairs,
             epochs=12,
         )
 
