@@ -113,8 +113,8 @@ def main() -> None:
         source_env_transitive = create_reporting_hierarchy_environment(seed=seed)
         source_env_bipartite = create_social_coalition_environment(seed=seed)
 
-        compatible_source_adapter = PersistentCandidateAdapter(d_model=base_model.config.d_model).to(device)
-        incompatible_source_adapter = PersistentCandidateAdapter(d_model=base_model.config.d_model).to(device)
+        compatible_source_adapter = PersistentCandidateAdapter(d_model=base_model.config.d_model, bottleneck_dim=32).to(device)
+        incompatible_source_adapter = PersistentCandidateAdapter(d_model=base_model.config.d_model, bottleneck_dim=32).to(device)
 
         # Pre-train source adapters using combined supervision
         transfer_engine = ReliableTransferEngine(base_model, tokenizer, device)

@@ -216,7 +216,7 @@ class ReliableTransferEngine:
 
         # Build arm model
         if arm_name == "fresh":
-            module = PersistentCandidateAdapter(d_model=d_model).to(self.device)
+            module = PersistentCandidateAdapter(d_model=d_model, bottleneck_dim=32).to(self.device)
         elif arm_name == "fine_tuning":
             module = copy.deepcopy(compatible_source_adapter).to(self.device)
             for p in module.parameters():
@@ -246,7 +246,7 @@ class ReliableTransferEngine:
                 # Reset module weights from jumpstart checkpoint and train up to budget n
                 # To guarantee monotonic practice data budget without compounding artifacts
                 if arm_name == "fresh":
-                    module = PersistentCandidateAdapter(d_model=d_model).to(self.device)
+                    module = PersistentCandidateAdapter(d_model=d_model, bottleneck_dim=32).to(self.device)
                 elif arm_name == "fine_tuning":
                     module = copy.deepcopy(compatible_source_adapter).to(self.device)
                     for p in module.parameters():

@@ -87,8 +87,7 @@ def test_m55_scientific_audit_reconciliation():
 
 def test_composite_adapter_models():
     """Verify parameter counts, freezing, and gradient flow across adapter architectures."""
-    source_adapter = PersistentCandidateAdapter(d_model=128)
-
+    source_adapter = PersistentCandidateAdapter(d_model=128, bottleneck_dim=32)
     # 1. ResidualSkillAdapter
     res_model = ResidualSkillAdapter(source_adapter, d_model=128)
     res_counts = res_model.count_parameters()
@@ -192,7 +191,7 @@ def test_reliable_retention_auditor(base_model_and_tokenizer):
     model, tokenizer, device = base_model_and_tokenizer
     auditor = ReliableRetentionAuditor(model, tokenizer, device)
 
-    source_adapter = PersistentCandidateAdapter(d_model=128).to(device)
+    source_adapter = PersistentCandidateAdapter(d_model=128, bottleneck_dim=32).to(device)
     composite_adapter = ResidualSkillAdapter(source_adapter, d_model=128).to(device)
 
     env_src = create_reporting_hierarchy_environment(seed=42)
