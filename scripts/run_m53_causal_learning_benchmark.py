@@ -50,7 +50,7 @@ from adaptive_mini_gpt.learning_driven_experiment.policy import (
     LearningOutcomePolicyHead,
     train_learning_outcome_policy,
 )
-from adaptive_mini_gpt.model.checkpoint import CheckpointManager
+from adaptive_mini_gpt.training.checkpoint import CheckpointManager
 from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.modular_adapter import compute_base_model_hash
 from adaptive_mini_gpt.model.transformer import MiniGPT
