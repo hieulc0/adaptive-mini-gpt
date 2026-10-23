@@ -61,6 +61,7 @@ def train_neural_ranking_head(
 ) -> float:
     """Supervise ranking head on candidate probes using research oracle EIG across training worlds."""
     torch.manual_seed(seed)
+    device = next(ranking_head.parameters()).device
     optimizer = optim.Adam(ranking_head.parameters(), lr=lr, weight_decay=1e-4)
     criterion = nn.MSELoss()
 
@@ -86,8 +87,8 @@ def train_neural_ranking_head(
                 feats.append(feat)
                 targets.append(eig)
 
-            x = torch.tensor(feats, dtype=torch.float32)
-            y = torch.tensor(targets, dtype=torch.float32)
+            x = torch.tensor(feats, dtype=torch.float32, device=device)
+            y = torch.tensor(targets, dtype=torch.float32, device=device)
 
             optimizer.zero_grad()
             preds = ranking_head(x)
@@ -135,6 +136,7 @@ class GuidedArmsRunner:
 
     def run_arm(self, arm_name: str) -> ArmExecutionResult:
         """Run specified arm: 'ARM_A_RANDOM', 'ARM_B_INFOGAIN', 'ARM_C_NEURAL', 'ARM_D_NEURAL_FILTERED', or 'ARM_ABLATION_FILTER_ONLY'."""
+        device = next(self.ranking_head.parameters()).device
         tracker = GuidedHypothesisTracker(
             base_edges=self.environment.base_edges,
             entity_levels=self.environment.entity_levels,
@@ -185,7 +187,7 @@ class GuidedArmsRunner:
                         )
                         for p in remaining_candidates
                     ]
-                    x = torch.tensor(feats, dtype=torch.float32)
+                    x = torch.tensor(feats, dtype=torch.float32, device=device)
                     scores = self.ranking_head(x).tolist()
                     if isinstance(scores, float):
                         scores = [scores]
@@ -203,7 +205,7 @@ class GuidedArmsRunner:
                         )
                         for p in remaining_candidates
                     ]
-                    x = torch.tensor(feats, dtype=torch.float32)
+                    x = torch.tensor(feats, dtype=torch.float32, device=device)
                     scores = self.ranking_head(x).tolist()
                     if isinstance(scores, float):
                         scores = [scores]
