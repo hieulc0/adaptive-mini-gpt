@@ -210,3 +210,40 @@
   - **Option 1 (M53: Meta-Trained Contextual Graph Policy)**: Replace compact hand-engineered feature vectors with a relational graph neural policy trained across synthetic DAG distributions so the experiment selection policy generalizes zero-shot across complex topologies.
   - **Option 2 (M53: Cumulative Cross-Entropy Inconsistency for Unknown Rule Detection)**: Replace step-wise probability updating with an explicit cumulative inconsistency metric comparing empirical observations against hypothesis-class prediction loss to reliably trigger UNKNOWN_RULE within compact budgets.
   - **Option 3 (M53: Contrastive Multi-Hop Exception Curricula)**: Scale minimal-pair supervision from 1-hop perturbations to multi-hop cut-vertex bridge chains.
+
+### M53: Causal Learning Audit and Transferable Skill Acquisition (Completed & Qualified)
+- **Objective**: Conduct forensic metric audit reconciling M52 reported accuracy (100.0%) with downstream macro F1 (0.3156 – 0.5679); perform a 3×4 factorial experiment factorially crossing 3 training objectives (pointwise, paired, combined) with 4 experience selection policies (random, EIG, M51 neural ranking, M52 outcome policy); build an independent multi-world benchmark suite with unfamiliar vocabularies, complete graph generators, and balanced 24-item held-out test pools (8 YES, 8 NO, 8 UNKNOWN); evaluate persistent isolated neural candidate adapters with checkpoint serialization verification; benchmark cross-task forward skill transfer, experience replay, and negative control interference; and systematically audit the Dirichlet-multinomial belief tracker across known, noisy, and out-of-hypothesis regimes on remote Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m53-causal-learning-study`, commit `8474601e47c66c4b0b2afa3c9224a785728b187b`). Mini-GPT recurrent backbone (1,089,280 parameters, 1024-BPE tokenizer `f698e45e209b7fe6`), `M52ScientificAuditor`, `CausalAuditEnvironmentSuite`, `FactorialStudyEngine`, `PersistentCandidateAdapter`, `SkillTransferEngine`, and `EpistemicAuditEngine`. Unit test suite passed **175/175 tests on Tesla T4 in 102.31s**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Forensic Audit & Metric Reconciliation**:
+     - Formally resolved the 100% final accuracy anomaly: isolated the bug to `src/adaptive_mini_gpt/learning_driven_experiment/evaluator.py:302` where the missing `if p == g` filter caused `sum(...)` to count all evaluation examples. With the fix, true 3-class accuracy is properly bounded and aligned with macro F1.
+     - Confirmed that M52's paired correctness jump from 0% in M51 to 79.17% was confounded by injecting minimal-pair contrastive supervision into all experimental arms during adaptation.
+  2. **Phase 2 3×4 Factorial Experiment (Objective vs Policy)**:
+     - Pointwise Objective: Acc = 54.86% $\pm$ 4.91%, Macro F1 = 0.4377 $\pm$ 0.0393, Paired Correctness = 46.88% $\pm$ 19.93%.
+     - Paired Objective: Acc = 37.15% $\pm$ 6.93%, Macro F1 = 0.2553 $\pm$ 0.0943, Paired Correctness = 63.54% $\pm$ 19.15%.
+     - Combined Objective: Acc = **57.99% $\pm$ 6.44%**, Macro F1 = **0.4655 $\pm$ 0.0526**, Paired Correctness = **77.08% $\pm$ 19.32%** (reaching **93.75%** on Seed 42).
+     - Selection Policies (Random, EIG, M51 Ranking, M52 Policy): Downstream macro F1 differences remained modest (0.3819 – 0.3898).
+     - Causal Attribution: Paired supervision is the causal prerequisite for non-zero paired correctness; Combined supervision provides the optimal balance; experience selection primarily guides exploratory information gathering.
+  3. **Phase 4 Persistent Isolated Candidate Adapter**:
+     - Validated checkpoint save and reload in clean state; parameter hash strictly invariant across disk serialization. Evaluated purely neural-only.
+  4. **Phase 5 Cross-Task Skill Transfer & Retention Benchmark**:
+     - Compatible Transfer Jumpstart Macro F1: **0.3579 $\pm$ 0.0292** (+11.09 percentage points over Fresh Adaptation at 0.2470).
+     - Incompatible Control Jumpstart Macro F1: 0.2407 $\pm$ 0.0524 (negative control rejected).
+     - Experience Replay achieved highest final Macro F1 (**0.5387**) with zero variance while limiting backward forgetting to 0.0886 F1.
+     - 100.0% retention of arithmetic carry and chained logic. Base model SHA-256 parameter hashes strictly invariant.
+  5. **Phase 6 Epistemic Dirichlet-Multinomial Belief Tracker Audit**:
+     - Known Regime: 0.00% false alarm rate (mean unk prob = 0.0002).
+     - Noisy Known Regime (15% observation flip noise): 0.00% false alarm rate (mean unk prob = 0.0294; noise robustness confirmed).
+     - Out-of-Hypothesis Regime (Parity Cycle): **100.00% detection rate** (mean unk prob = **1.0000** over budget $Q=12$).
+  6. **Task-Specific Qualification Gates**:
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (175/175 unit tests passed on Tesla T4; base hashes invariant).
+     - Metric Reconciliation Gate: **PASS (QUALIFIED)** (Line 302 bug pinpointed, corrected, and reconciled).
+     - Structural Paired Learning Gate: **PASS (QUALIFIED)** (77.08% paired correctness under combined supervision on held-out minimal pairs).
+     - Skill Transfer Gate: **PASS (QUALIFIED)** (+11.09 percentage points forward transfer over fresh adaptation; incompatible control rejected).
+     - Epistemic Tracker Gate: **PASS (QUALIFIED)** (100% detection recall on out-of-hypothesis rule; 0.0% false positives on known and noisy regimes).
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain strictly frozen; experimental modules remain in research tier.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; causal learning audit candidates remain in research tier.
+- **Next Direction Options (Post-M53 Strategic Priority)**:
+  - **Option 1 (M54: Autonomous Experiential Repertoire & Dynamic Skill Selection)**: Build upon M53's validated transfer finding by allowing the agent to maintain an archival repertoire of verified relational skill adapters, dynamically routing new environments to the most compatible prior skill.
+  - **Option 2 (M54: Self-Supervised Minimal-Pair Generation)**: Transition from synthetic minimal pairs to an autonomous neural probe generator that synthesizes its own contrastive edge-perturbation pairs during active exploration.
+  - **Option 3 (M54: Closed-Loop Epistemic Out-of-Hypothesis Adaptation)**: When the belief tracker detects an UNKNOWN_RULE with 100% confidence, dynamically initialize an open-ended rule discovery adapter rather than attempting to fit any known hypothesis.
