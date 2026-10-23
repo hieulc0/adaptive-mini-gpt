@@ -357,3 +357,38 @@
   - **Option 1 (M57: Topology-Aware Adaptive Capacity & Residual Scaling)**: Implement dynamic capacity expansion (scaling residual bottleneck dimension {\text{res}}$ proportionally to target graph diameter and node count) to eliminate the capacity bottleneck observed on the 8-node supply chain.
   - **Option 2 (M57: Multi-Skill Routing & Axiomatic Composition)**: Dynamically compose multiple qualified source skills ($\mathbf{y} = \sum w_i f_i(\mathbf{h}) + g_{\text{res}}(\mathbf{h})$) with automated compatibility gating for multi-relational graphs.
   - **Option 3 (M57: Active SPRT Exploration with Adaptive Variance Calibration)**: Couple the validated SPRT detector directly with a closed-loop policy that selects probe edges to maximize expected log-likelihood ratio divergence, minimizing total queries required for confident unknown-rule declaration.
+
+
+### M57: Controlled Neural Capacity Evolution (Completed & Audited)
+- **Objective**: Execute the first bounded experiment in evidence-driven neural capacity evolution; audit M56 gradient scale invariance and active probing base-rate discrepancies; disentangle graph depth (diameter) from size (node count); evaluate fixed-capacity controls against compute-matched smaller residuals; implement an adaptive capacity controller (`KEEP`, `EXPAND`, `RESET`); deploy `EvolvableResidualSkillAdapter` with zero-initialized reversible expansion; and audit retention and calibrated SPRT diagnostics on Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m57-controlled-neural-capacity-study`, commit `b785d24e5c642a7c960f55162afcc52960ab3de4`). Recurrent backbone (1,089,280 parameters, tokenizer `f698e45e209b7fe6`), `M56ScientificAuditor`, `ObservableTaskComplexity`, `EvolvableResidualSkillAdapter`, `AdaptiveCapacityController`, `ControlledCapacityEvolutionEngine`, `CapacityRetentionAuditor`, and `CalibratedSPRTDiagnosticAuditor`. Passed **201/201 tests on Tesla T4 in 106.27s**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 M56 Scientific Audit & Forensic Reconciliation**:
+     - *AdamW Scale Invariance*: Proved why $\\alpha \\in [0.25, 0.50, 1.00]$ produced identical displacement (1.1697): AdamW normalizes by running second moment $\\sqrt{g_t^2}$, canceling scalar multipliers $\\frac{\\alpha g_t}{\\alpha |g_t|} \\approx \\text{sgn}(g_t)$. Graded intervention requires parameter-group learning rate scaling.
+     - *SPRT Probing Discrepancy*: Resolved why Phase 4 reported 100% recall while Phase 5 reported 2.8%–8.3%: Phase 4 used a high 70% mismatch base-rate stream, whereas Phase 5 probed sparse graphs where >85% unconnected negative pairs dominated, causing uniform random probing to miss rare peripheral exceptions.
+  2. **Phase 2 Task Complexity Disentanglement**:
+     - Disentangled diameter from size: `deep_chain_dag` ($N=8, d=7$) vs `wide_branching_tree` ($N=8, d=2$). Computed observable complexity index without peeking at test labels.
+  3. **Phase 3 & 6 Fixed-Capacity Controls vs Compute-Matched Small Residual**:
+     - Evaluated Arms A, B, C, D, E, F across seeds 42, 43, 44 under M53 combined supervision.
+     - **Decisive Empirical Result**: Arm D (Compute-Matched Small Residual, 2,371 params) reached **0.7430 AUC** on `deep_chain_dag`, beating Arm C (Fixed Large Residual, 4,483 params) at **0.7159 AUC** (-0.0272 difference).
+     - **Scientific Finding**: The hypothesis that the learner suffered from a capacity bottleneck is **falsified**. Extra residual parameters merely compensated for undertraining. Giving the compact residual matched compute achieved superior generalization with 47.1% fewer parameters.
+  4. **Phase 4 & 5 Bounded Adaptive Controller & Reversible Expansion**:
+     - Adaptive controller selected `EXPAND` on deep chain DAG (reaching 0.7324 AUC, +0.0243 over fixed small residual) and `RESET` on incompatible parity.
+     - Reversible expansion initialized new output columns to zero ($W_{\\text{out}}[:, d_{\\text{old}}:d_{\\text{new}}] = 0.0$), guaranteeing bitwise identity at initialization (error $< 10^{-6}$).
+  5. **Phase 6 Retention & Safeguards**:
+     - 0.0000 isolated source forgetting; 100% arithmetic carry and chained logic retention; base model SHA-256 hashes strictly invariant across all seeds.
+     - Reversible rollback successfully tested.
+  6. **Phase 7 Calibrated SPRT Epistemic Diagnostic**:
+     - Targeted contrastive edge querying achieved 100% recall at 0-5% noise and 80% recall at 15% noise, confirming hypothesis-directed edge sampling resolves the active probing dilemma.
+  7. **Task-Specific Qualification Gates**:
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (201/201 tests on Tesla T4; base hashes invariant; reversible rollback verified).
+     - Adaptive Capacity Controller Gate: **PASS (QUALIFIED)** (Correct discrete proposals, +0.0243 AUC gain).
+     - Capacity-Benefit Over Matched-Compute Gate: **FAIL (NOT QUALIFIED)** (Arm C trailed Arm D by -0.0272 AUC on deep chain; parameter growth not justified).
+     - Isolated Retention Gate: **PASS (QUALIFIED)** (0.0000 isolated backward forgetting; 100% core retention).
+     - Overall Scientific Verdict: **PARTIAL PASS / CAPACITY GROWTH NOT JUSTIFIED OVER COMPUTE MATCHING**.
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain strictly frozen; dynamic capacity evolution remains research-only.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; evolvable capacity candidates remain in research tier.
+- **Next Direction Options (Post-M57 Strategic Priority)**:
+  - **Option 1 (M58: Optimization-Aware Adaptive Budgeting over Topology Expansion)**: Rather than expanding parameter width when learning stalls, dynamically allocate optimization iterations and sample budgets based on observable task complexity index.
+  - **Option 2 (M58: Task-Conditioned Residual Routing & Interference Elimination)**: Eliminate through-composition interference (0.3449) by introducing task-conditioned routing that preserves isolated evaluation pathways without manual branch switching.
+  - **Option 3 (M58: Contrastive Active Probing with Closed-Loop SPRT)**: Directly couple the validated contrastive edge sampler to the epistemic belief tracker to autonomously discover unknown rules with minimal query budgets under noise.
