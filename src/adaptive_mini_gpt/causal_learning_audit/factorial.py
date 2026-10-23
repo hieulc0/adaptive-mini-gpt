@@ -110,7 +110,7 @@ class FactorialStudyEngine:
                 chosen_probe = random.choice(available)
             elif policy == "eig":
                 scored = [
-                    (tracker.compute_expected_information_gain(p.source, p.target), p)
+                    (tracker.compute_expected_information_gain(p), p)
                     for p in available
                 ]
                 scored.sort(key=lambda x: x[0], reverse=True)
