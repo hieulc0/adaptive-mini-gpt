@@ -392,3 +392,39 @@
   - **Option 1 (M58: Optimization-Aware Adaptive Budgeting over Topology Expansion)**: Rather than expanding parameter width when learning stalls, dynamically allocate optimization iterations and sample budgets based on observable task complexity index.
   - **Option 2 (M58: Task-Conditioned Residual Routing & Interference Elimination)**: Eliminate through-composition interference (0.3449) by introducing task-conditioned routing that preserves isolated evaluation pathways without manual branch switching.
   - **Option 3 (M58: Contrastive Active Probing with Closed-Loop SPRT)**: Directly couple the validated contrastive edge sampler to the epistemic belief tracker to autonomously discover unknown rules with minimal query budgets under noise.
+
+
+### M58: Adaptive Learning Budget and Task-Conditioned Skill Routing (Completed & Audited)
+- **Objective**: Investigate adaptive optimization budgeting and skill routing as the primary learning-to-learn mechanism, preserving topology evolution strictly as a research control; reconcile M57 capacity vs optimization findings; benchmark fixed training budgets against minimal bounded budget controllers (`KEEP`, `TRAIN`, `RESET`, optional `EXPAND`) across 5 development environments and 4 sealed final meta-test environments; construct task-conditioned skill router preventing through-composition source interference (-0.3449) without hidden task labels; enforce retention safeguards and rollback; and run calibrated SPRT epistemic diagnostics on Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m58-adaptive-optimization-study`, commit `e7c03aa16d6f1b1bf2a5169790259d69b24fa6e8`). Mini-GPT recurrent backbone (1,089,280 parameters, tokenizer `f698e45e209b7fe6`), `M57ScientificAuditor`, `AdaptiveBudgetController`, `HeuristicLearnedBudgetController`, `AdaptiveOptimizationBenchmarkEngine`, `TaskConditionedSkillRouter`, `RoutedRetentionAuditor`, and `M58EpistemicAuditor`. Passed **207/207 unit tests on Tesla T4 in 104.14s**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 M57 Scientific Audit & Forensic Reconciliation**:
+     - Compute-matched compact residual ($d=16$, 2,371 params) outperformed fixed large residual ($d=32$, 4,483 params) on `deep_chain_dag` (0.7430 vs 0.7159 AUC, -0.0272 diff).
+     - Confirmed AdamW second-moment normalization cancels uniform scalar gradient scaling ($\Delta\theta_t \approx -\eta \frac{g_t}{|g_t|}$), proving that graded learning interventions must vary optimizer steps, learning rates, and early stopping decisions.
+     - Function-preserving zero-init expansion ($<10^{-6}$ error) and snapshot rollback verified.
+     - M57 through-composition interference (-0.3449) reproduced.
+  2. **Phase 2 & 4 Multi-World Optimization Budget Benchmark (6 Arms across 9 Tasks)**:
+     - Arms: Fixed Short 10, Fixed Med 20, Fixed Max 40, Deterministic Adaptive, Heuristic Adaptive, M57 Expansion Control.
+     - **Decisive Empirical Result**: Arm D (Deterministic Adaptive Controller) matched Fixed Max 40 in mean AUC (0.3420 vs 0.3401) while saving **12.5%** of GPU optimization steps (up to **25%** on moderate tasks), delivering a **+0.0832 compute efficiency gain** (+24.5% boost).
+     - On `dev_dense_cluster_exceptions`, Arm D stopped early and achieved **0.5615 AUC** / **0.7704 F1**, beating Fixed Max 40 (0.4349 AUC / 0.5938 F1) by preventing overfitting.
+     - Arm F (M57 Expansion) averaged 0.2907 AUC, trailing compact residual arms across all environments. Parameter growth remains unjustified.
+  3. **Phase 5 Task-Conditioned Skill Routing**:
+     - The autonomous evidence router recovered **+0.0900 F1** of the M57 through-composition interference on source tasks without task IDs.
+     - Autonomous routing accuracy was 47.92% (mean latency 7.40ms), indicating that representations partially overlap between source and target, requiring explicit representation disentanglement for complete routing immunity.
+  4. **Phase 6 Retention & Safeguards**:
+     - 0.0000 isolated source backward forgetting; 100% arithmetic carry and chained logic retention; base model SHA-256 hashes strictly invariant across all seeds (`8736b364e4a8ce19`, `de7621751f2e99d0`, `c7bd81ae47f2e2de`).
+     - Automated rollback triggered and verified when routed drop exceeded tolerance.
+  5. **Phase 7 Calibrated SPRT Epistemic Diagnostic**:
+     - Targeted contrastive probing achieved 100% recall at 0-5% noise and 90% recall at 15% noise on sparse graphs, outperforming uniform random sampling (10-30% recall).
+  6. **Task-Specific Qualification Gates**:
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (207/207 tests on Tesla T4; base hashes invariant; rollback verified).
+     - Adaptive Optimization Gate: **PASS (QUALIFIED)** (+0.0832 compute efficiency gain over fixed max, saving 12.5% steps without regression).
+     - Skill Routing Gate: **PARTIAL PASS (NOT FULLY QUALIFIED)** (+0.0900 interference recovered; routing accuracy 47.92% requires representation disentanglement).
+     - Source Retention Gate: **PASS (QUALIFIED)** (0.0000 isolated source forgetting; 100% core retention).
+     - Overall Scientific Verdict: **PARTIAL PASS / ADAPTIVE BUDGETING QUALIFIED, SKILL ROUTING REQUIRES REPRESENTATION DISENTANGLEMENT**.
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain strictly frozen; dynamic budgeting and skill routing remain research-only.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; adaptive optimization and skill routing candidates remain in research tier.
+- **Next Direction Options (Post-M58 Strategic Priority)**:
+  - **Option 1 (M59: Representation-Disentangled Contrastive Skill Routing)**: Resolve the 47.9% routing bottleneck by training target residuals with an explicit orthogonal representation projection or task-discriminative prototype anchor, ensuring source and target activation geometries remain cleanly separable for 90%+ routing accuracy.
+  - **Option 2 (M59: Transferable Meta-Learned Budget Policy)**: Meta-train a lightweight neural policy (e.g. contextual bandit or cross-entropy method) across synthetic task distributions that predicts the optimal step budget $T^*$ directly from $N=4$ initial diagnostic probes.
+  - **Option 3 (M59: Multi-Source Compositional Routing)**: Scale routing from single-source transfer to multi-skill composition across an archival repertoire of 4+ qualified relational modules.
