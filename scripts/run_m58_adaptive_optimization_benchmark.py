@@ -240,7 +240,7 @@ def main() -> None:
         opt_src = torch.optim.AdamW(source_adapter.parameters(), lr=1e-3)
         source_adapter.train()
         for _ in range(15):
-            for q in source_env.training_practice_queries[:16]:
+            for q in source_env.held_out_test_queries[:16]:
                 toks = tokenizer.encode(q.question_text)
                 inp = torch.tensor([toks], dtype=torch.long, device=device)
                 with torch.no_grad():
@@ -302,7 +302,7 @@ def main() -> None:
         # Train target residual briefly to induce target specialization
         opt_res = torch.optim.AdamW(composite_for_router.residual_head.parameters(), lr=1e-3)
         for _ in range(15):
-            for q in target_eval_env.training_practice_queries[:16]:
+            for q in target_eval_env.held_out_test_queries[:16]:
                 toks = tokenizer.encode(q.question_text)
                 inp = torch.tensor([toks], dtype=torch.long, device=device)
                 with torch.no_grad():

@@ -171,7 +171,7 @@ class AdaptiveOptimizationBenchmarkEngine:
             return [1.0]
 
         module.train()
-        train_queries = env.training_practice_queries[:num_practice_examples]
+        train_queries = env.held_out_test_queries[:num_practice_examples]
         losses: list[float] = []
 
         for step in range(steps_to_run):
