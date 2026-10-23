@@ -94,7 +94,8 @@ def build_m53_tokenizer(target_vocab_size: int = 1024) -> Any:
         "YES NO UNKNOWN. True False. "
         "1 + 1 = 2. 9 + 5 = 14 with carry. All humans are mortal. Socrates is human. Socrates is mortal.",
     ]
-    full_corpus = PRETRAIN_PROSE_CORPUS + "\n" + "\n".join(domain_texts)
+    all_prose = " ".join(PRETRAIN_PROSE_CORPUS) if isinstance(PRETRAIN_PROSE_CORPUS, list) else str(PRETRAIN_PROSE_CORPUS)
+    full_corpus = all_prose + "\n" + "\n".join(domain_texts)
     return train_scaled_bpe_tokenizer(full_corpus, target_vocab_size=target_vocab_size)
 
 
