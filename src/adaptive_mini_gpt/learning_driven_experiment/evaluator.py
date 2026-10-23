@@ -299,7 +299,7 @@ class LearningOutcomeEvaluator:
             predictions.append(pred_label)
             ground_truth.append(q.expected_answer)
 
-        acc = sum(1 for p, g in zip(predictions, ground_truth)) / max(1, len(ground_truth))
+        acc = sum(1 for p, g in zip(predictions, ground_truth) if p == g) / max(1, len(ground_truth))
 
         f1s = []
         unk_recall = 0.0
