@@ -214,7 +214,7 @@ def build_m53_environment_suite() -> CausalAuditEnvironmentSuite:
         relation_name="taxonomically_subsumes",
         entities=phylo_entities,
         edges=phylo_edges,
-        hypothesis=EXPANDED_HYPOTHESES["HIERARCHICAL_DIR"],
+        hypothesis=EXPANDED_HYPOTHESES["HIERARCHICAL_BOUNDARY"],
         entity_levels=phylo_levels,
     )
 

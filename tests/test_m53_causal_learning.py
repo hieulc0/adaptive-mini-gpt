@@ -92,6 +92,7 @@ def test_environment_suite_construction():
 def test_persistent_candidate_adapter_serialization(tmp_path: Path):
     d_model = 32
     adapter = PersistentCandidateAdapter(d_model=d_model, bottleneck_dim=8, num_classes=3)
+    adapter.eval()
     x = torch.randn(2, 5, d_model)
     out1 = adapter(x)
     assert out1.shape == (2, 3)
@@ -101,6 +102,7 @@ def test_persistent_candidate_adapter_serialization(tmp_path: Path):
     assert chk_path.exists()
 
     reloaded = PersistentCandidateAdapter.load_checkpoint(chk_path)
+    reloaded.eval()
     h2 = reloaded.compute_parameter_hash()
     assert h1 == h2
 
