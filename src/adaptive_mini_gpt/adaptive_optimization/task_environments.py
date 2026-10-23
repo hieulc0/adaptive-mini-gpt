@@ -12,7 +12,14 @@ from typing import Any
 
 import numpy as np
 
-from adaptive_mini_gpt.guided_experiment.environment import AutonomousEnvironment, EnvironmentQuery, MinimalPairControl
+from adaptive_mini_gpt.guided_experiment.environment import (
+    EXPANDED_HYPOTHESES,
+    OUT_OF_HYPOTHESIS_DENSE_CLIQUE,
+    OUT_OF_HYPOTHESIS_PARITY,
+    AutonomousEnvironment,
+    EnvironmentQuery,
+    MinimalPairControl,
+)
 from adaptive_mini_gpt.skill_composition.environment import _build_balanced_env
 
 logger = logging.getLogger(__name__)
@@ -32,48 +39,53 @@ class ObservableTaskComplexity:
 
 
 def compute_observable_complexity(env: AutonomousEnvironment) -> ObservableTaskComplexity:
-    """Extract observable topological complexity strictly from the task relational structure."""
-    nodes = set(env.nodes)
+    """Extract observable topological complexity strictly from the observed base edges."""
+    nodes = list(env.entities)
     n = len(nodes)
-    if n == 0:
-        return ObservableTaskComplexity(
-            env_id=env.env_id, num_nodes=0, num_edges=0, graph_diameter=0,
-            graph_density=0.0, mean_degree=0.0, transitive_reachability_density=0.0,
-            structural_complexity_index=0.0,
-        )
+    edges = list(env.base_edges)
+    m = len(edges)
 
-    edges = set(env.directed_edges)
-    num_edges = len(edges)
-    density = num_edges / (n * (n - 1)) if n > 1 else 0.0
-    mean_deg = num_edges / n
+    max_possible_edges = n * (n - 1) if n > 1 else 1
+    density = float(m / max_possible_edges)
 
-    # Compute shortest path lengths using Floyd-Warshall
-    node_list = sorted(list(nodes))
-    node_to_idx = {node: i for i, node in enumerate(node_list)}
-    dist = np.full((n, n), np.inf)
-    np.fill_diagonal(dist, 0)
+    degrees: dict[str, int] = {u: 0 for u in nodes}
     for u, v in edges:
-        if u in node_to_idx and v in node_to_idx:
-            dist[node_to_idx[u], node_to_idx[v]] = 1
+        degrees[u] = degrees.get(u, 0) + 1
+        degrees[v] = degrees.get(v, 0) + 1
+    mean_deg = float(sum(degrees.values()) / (2 * n)) if n > 0 else 0.0
 
-    for k in range(n):
-        for i in range(n):
-            for j in range(n):
-                if dist[i, k] + dist[k, j] < dist[i, j]:
-                    dist[i, j] = dist[i, k] + dist[k, j]
+    dist: dict[tuple[str, str], float] = {}
+    for u in nodes:
+        for v in nodes:
+            dist[(u, v)] = 0.0 if u == v else float("inf")
+    for u, v in edges:
+        dist[(u, v)] = 1.0
 
-    finite_dists = dist[np.isfinite(dist) & (dist > 0)]
-    diameter = int(np.max(finite_dists)) if len(finite_dists) > 0 else 0
-    reachability_count = np.sum(np.isfinite(dist) & (dist > 0))
-    reachability_density = reachability_count / (n * (n - 1)) if n > 1 else 0.0
+    for k in nodes:
+        for i in nodes:
+            for j in nodes:
+                if dist[(i, k)] + dist[(k, j)] < dist[(i, j)]:
+                    dist[(i, j)] = dist[(i, k)] + dist[(k, j)]
 
-    # Composite structural complexity index
-    complexity_index = float(diameter + (density * 10.0) + (mean_deg * 2.0) + reachability_density)
+    reachable_pairs = 0
+    max_finite_dist = 0
+    for i in nodes:
+        for j in nodes:
+            if i != j and dist[(i, j)] < float("inf"):
+                reachable_pairs += 1
+                if dist[(i, j)] > max_finite_dist:
+                    max_finite_dist = int(dist[(i, j)])
+
+    reachability_density = float(reachable_pairs / max_possible_edges)
+    diameter = max_finite_dist
+
+    # Structural complexity index: combines depth, size, and reachability density
+    complexity_index = float((n * 0.4) + (diameter * 0.8) + (reachability_density * 2.0))
 
     return ObservableTaskComplexity(
         env_id=env.env_id,
         num_nodes=n,
-        num_edges=num_edges,
+        num_edges=m,
         graph_diameter=diameter,
         graph_density=density,
         mean_degree=mean_deg,
@@ -88,78 +100,136 @@ def compute_observable_complexity(env: AutonomousEnvironment) -> ObservableTaskC
 
 def create_dev_deep_chain_environment(seed: int = 42) -> AutonomousEnvironment:
     """Dev Task: 8-node deep transitive DAG with diameter 7."""
-    nodes = [f"Stage{i}" for i in range(8)]
-    edges = [(nodes[i], nodes[i + 1]) for i in range(7)]
+    entities = [
+        "ComponentStageC1", "AssemblyUnitA2", "SubsystemModuleS3", "CalibrationRigR4",
+        "IntegrationBayI5", "AvionicsHousingH6", "PropulsionCouplerP7", "OrbitalPayloadO8",
+    ]
+    edges = [
+        ("ComponentStageC1", "AssemblyUnitA2"),
+        ("AssemblyUnitA2", "SubsystemModuleS3"),
+        ("SubsystemModuleS3", "CalibrationRigR4"),
+        ("CalibrationRigR4", "IntegrationBayI5"),
+        ("IntegrationBayI5", "AvionicsHousingH6"),
+        ("AvionicsHousingH6", "PropulsionCouplerP7"),
+        ("PropulsionCouplerP7", "OrbitalPayloadO8"),
+    ]
+    levels = {e: i for i, e in enumerate(entities)}
     return _build_balanced_env(
         env_id="dev_deep_chain_dag",
-        nodes=nodes,
-        directed_edges=edges,
+        domain_name="AerospacePayloadPipeline",
         relation_name="feeds_downstream_stage_to",
-        seed=seed,
+        entities=entities,
+        edges=edges,
+        hypothesis=EXPANDED_HYPOTHESES["DIR_TRANS"],
+        entity_levels=levels,
     )
 
 
 def create_dev_wide_branching_tree_environment(seed: int = 42) -> AutonomousEnvironment:
     """Dev Task: 8-node wide branching tree with diameter 2."""
-    nodes = ["ClusterRootR0", "SubClusterA1", "SubClusterB2", "SubClusterC3",
-             "LeafWorkerA11", "LeafWorkerA12", "LeafWorkerB21", "LeafWorkerC31"]
-    edges = [
-        ("ClusterRootR0", "SubClusterA1"), ("ClusterRootR0", "SubClusterB2"), ("ClusterRootR0", "SubClusterC3"),
-        ("SubClusterA1", "LeafWorkerA11"), ("SubClusterA1", "LeafWorkerA12"),
-        ("SubClusterB2", "LeafWorkerB21"), ("SubClusterC3", "LeafWorkerC31"),
+    entities = [
+        "ClusterRootR0",
+        "SubClusterA1", "SubClusterB2", "SubClusterC3",
+        "LeafWorkerA11", "LeafWorkerA12", "LeafWorkerB21", "LeafWorkerC31",
     ]
+    edges = [
+        ("ClusterRootR0", "SubClusterA1"),
+        ("ClusterRootR0", "SubClusterB2"),
+        ("ClusterRootR0", "SubClusterC3"),
+        ("SubClusterA1", "LeafWorkerA11"),
+        ("SubClusterA1", "LeafWorkerA12"),
+        ("SubClusterB2", "LeafWorkerB21"),
+        ("SubClusterC3", "LeafWorkerC31"),
+    ]
+    levels = {
+        "ClusterRootR0": 0,
+        "SubClusterA1": 1, "SubClusterB2": 1, "SubClusterC3": 1,
+        "LeafWorkerA11": 2, "LeafWorkerA12": 2, "LeafWorkerB21": 2, "LeafWorkerC31": 2,
+    }
     return _build_balanced_env(
         env_id="dev_wide_branching_tree",
-        nodes=nodes,
-        directed_edges=edges,
+        domain_name="CloudClusterDispatch",
         relation_name="delegates_workload_to",
-        seed=seed,
+        entities=entities,
+        edges=edges,
+        hypothesis=EXPANDED_HYPOTHESES["DIR_TRANS"],
+        entity_levels=levels,
     )
 
 
 def create_dev_balanced_hierarchy_environment(seed: int = 42) -> AutonomousEnvironment:
     """Dev Task: 6-node hierarchical corporate structure with diameter 5."""
-    nodes = [f"CorpNode{i}" for i in range(6)]
-    edges = [(nodes[i], nodes[i + 1]) for i in range(5)]
+    entities = [
+        "JuniorAnalystJ1", "SeniorAssociateS2", "TeamLeadT3",
+        "EngineeringDirectorD4", "VicePresidentV5", "ChiefExecutiveC6",
+    ]
+    edges = [
+        ("JuniorAnalystJ1", "SeniorAssociateS2"),
+        ("SeniorAssociateS2", "TeamLeadT3"),
+        ("TeamLeadT3", "EngineeringDirectorD4"),
+        ("EngineeringDirectorD4", "VicePresidentV5"),
+        ("VicePresidentV5", "ChiefExecutiveC6"),
+    ]
+    levels = {e: i + 1 for i, e in enumerate(entities)}
     return _build_balanced_env(
         env_id="dev_balanced_hierarchy",
-        nodes=nodes,
-        directed_edges=edges,
+        domain_name="CorporateGovernance",
         relation_name="reports_transitively_to",
-        seed=seed,
+        entities=entities,
+        edges=edges,
+        hypothesis=EXPANDED_HYPOTHESES["DIR_TRANS"],
+        entity_levels=levels,
     )
 
 
 def create_dev_dense_cluster_exceptions_environment(seed: int = 42) -> AutonomousEnvironment:
     """Dev Task: 6-node dense security cluster with peripheral exceptions."""
-    nodes = [f"SecurityNode{i}" for i in range(6)]
-    edges = [
-        (nodes[0], nodes[1]), (nodes[1], nodes[2]), (nodes[2], nodes[3]),
-        (nodes[3], nodes[0]), (nodes[0], nodes[2]), (nodes[1], nodes[3]),
-        (nodes[4], nodes[5]),
+    entities = [
+        "CoreSecurityNode1", "CoreSecurityNode2", "CoreSecurityNode3", "CoreSecurityNode4",
+        "PeripheralSensorNode5", "IsolatedGatewayNode6",
     ]
+    edges = [
+        ("CoreSecurityNode1", "CoreSecurityNode2"),
+        ("CoreSecurityNode2", "CoreSecurityNode3"),
+        ("CoreSecurityNode3", "CoreSecurityNode4"),
+        ("CoreSecurityNode4", "CoreSecurityNode1"),
+    ]
+    levels = {
+        "CoreSecurityNode1": 2, "CoreSecurityNode2": 2, "CoreSecurityNode3": 2, "CoreSecurityNode4": 2,
+        "PeripheralSensorNode5": 0, "IsolatedGatewayNode6": 0,
+    }
     return _build_balanced_env(
         env_id="dev_dense_cluster_exceptions",
-        nodes=nodes,
-        directed_edges=edges,
+        domain_name="SecureSubnetMesh",
         relation_name="in_same_security_zone",
-        seed=seed,
+        entities=entities,
+        edges=edges,
+        hypothesis=OUT_OF_HYPOTHESIS_DENSE_CLIQUE,
+        entity_levels=levels,
     )
 
 
 def create_dev_incompatible_parity_environment(seed: int = 42) -> AutonomousEnvironment:
     """Dev Task: 6-node parity constraint environment (negative transfer control)."""
-    nodes = [f"PactState{i}" for i in range(6)]
+    entities = [
+        "StateAlpha1", "StateBeta2", "StateGamma3",
+        "StateDelta4", "StateEpsilon5", "StateZeta6",
+    ]
     edges = [
-        (nodes[0], nodes[1]), (nodes[1], nodes[2]), (nodes[2], nodes[0]),
-        (nodes[3], nodes[4]), (nodes[4], nodes[5]), (nodes[5], nodes[3]),
+        ("StateAlpha1", "StateBeta2"),
+        ("StateBeta2", "StateGamma3"),
+        ("StateGamma3", "StateDelta4"),
+        ("StateDelta4", "StateEpsilon5"),
+        ("StateEpsilon5", "StateZeta6"),
+        ("StateZeta6", "StateAlpha1"),
     ]
     return _build_balanced_env(
         env_id="dev_incompatible_parity",
-        nodes=nodes,
-        directed_edges=edges,
+        domain_name="GeopoliticalCoalition",
         relation_name="holds_mutual_pact_with",
-        seed=seed,
+        entities=entities,
+        edges=edges,
+        hypothesis=OUT_OF_HYPOTHESIS_PARITY,
     )
 
 
@@ -169,68 +239,85 @@ def create_dev_incompatible_parity_environment(seed: int = 42) -> AutonomousEnvi
 
 def create_meta_long_chain_aerospace(seed: int = 100) -> AutonomousEnvironment:
     """Meta-Test Task 1: 10-node deep aerospace assembly DAG with diameter 9."""
-    nodes = [f"AeroModuleM{i}" for i in range(10)]
-    edges = [(nodes[i], nodes[i + 1]) for i in range(9)]
+    entities = [f"AeroModuleM{i}" for i in range(10)]
+    edges = [(entities[i], entities[i + 1]) for i in range(9)]
+    levels = {e: i for i, e in enumerate(entities)}
     return _build_balanced_env(
         env_id="meta_long_chain_aerospace",
-        nodes=nodes,
-        directed_edges=edges,
+        domain_name="AerospaceAvionicsChain",
         relation_name="assembles_into_subsystem",
-        seed=seed,
+        entities=entities,
+        edges=edges,
+        hypothesis=EXPANDED_HYPOTHESES["DIR_TRANS"],
+        entity_levels=levels,
     )
 
 
 def create_meta_branching_pyramid_cloud(seed: int = 101) -> AutonomousEnvironment:
     """Meta-Test Task 2: 10-node cloud microservice pyramid with diameter 3."""
-    nodes = ["GatewayGW", "AuthSvcA1", "BillingSvcB2", "CatalogSvcC3",
-             "DbWorkerD1", "DbWorkerD2", "CacheWorkerC1", "CacheWorkerC2",
-             "QueueWorkerQ1", "AuditWorkerA2"]
+    entities = [
+        "GatewayGW", "AuthSvcA1", "BillingSvcB2", "CatalogSvcC3",
+        "DbWorkerD1", "DbWorkerD2", "CacheWorkerC1", "CacheWorkerC2",
+        "QueueWorkerQ1", "AuditWorkerA2",
+    ]
     edges = [
         ("GatewayGW", "AuthSvcA1"), ("GatewayGW", "BillingSvcB2"), ("GatewayGW", "CatalogSvcC3"),
         ("AuthSvcA1", "DbWorkerD1"), ("AuthSvcA1", "CacheWorkerC1"),
         ("BillingSvcB2", "DbWorkerD2"), ("BillingSvcB2", "AuditWorkerA2"),
         ("CatalogSvcC3", "CacheWorkerC2"), ("CatalogSvcC3", "QueueWorkerQ1"),
     ]
+    levels = {
+        "GatewayGW": 0,
+        "AuthSvcA1": 1, "BillingSvcB2": 1, "CatalogSvcC3": 1,
+        "DbWorkerD1": 2, "DbWorkerD2": 2, "CacheWorkerC1": 2, "CacheWorkerC2": 2,
+        "QueueWorkerQ1": 2, "AuditWorkerA2": 2,
+    }
     return _build_balanced_env(
         env_id="meta_branching_pyramid_cloud",
-        nodes=nodes,
-        directed_edges=edges,
+        domain_name="CloudMicroserviceMesh",
         relation_name="routes_traffic_payload_to",
-        seed=seed,
+        entities=entities,
+        edges=edges,
+        hypothesis=EXPANDED_HYPOTHESES["DIR_TRANS"],
+        entity_levels=levels,
     )
 
 
 def create_meta_cyclic_parity_treaty(seed: int = 102) -> AutonomousEnvironment:
     """Meta-Test Task 3: 8-node parity alliance treaty environment."""
-    nodes = [f"NationN{i}" for i in range(8)]
+    entities = [f"NationN{i}" for i in range(8)]
     edges = [
-        (nodes[0], nodes[1]), (nodes[1], nodes[2]), (nodes[2], nodes[3]), (nodes[3], nodes[0]),
-        (nodes[4], nodes[5]), (nodes[5], nodes[6]), (nodes[6], nodes[7]), (nodes[7], nodes[4]),
+        (entities[0], entities[1]), (entities[1], entities[2]), (entities[2], entities[3]), (entities[3], entities[0]),
+        (entities[4], entities[5]), (entities[5], entities[6]), (entities[6], entities[7]), (entities[7], entities[4]),
     ]
     return _build_balanced_env(
         env_id="meta_cyclic_parity_treaty",
-        nodes=nodes,
-        directed_edges=edges,
+        domain_name="InternationalTreatyNetwork",
         relation_name="ratifies_bilateral_treaty_with",
-        seed=seed,
+        entities=entities,
+        edges=edges,
+        hypothesis=OUT_OF_HYPOTHESIS_PARITY,
     )
 
 
 def create_meta_modular_network_biomedical(seed: int = 103) -> AutonomousEnvironment:
     """Meta-Test Task 4: 8-node biomedical network with two clusters connected by a bottleneck bridge."""
-    nodes = [f"ProteinP{i}" for i in range(8)]
+    entities = [f"ProteinP{i}" for i in range(8)]
     edges = [
         # Cluster 1: P0, P1, P2
-        (nodes[0], nodes[1]), (nodes[1], nodes[2]), (nodes[2], nodes[0]),
+        (entities[0], entities[1]), (entities[1], entities[2]), (entities[2], entities[0]),
         # Bottleneck bridge: P2 -> P3 -> P4
-        (nodes[2], nodes[3]), (nodes[3], nodes[4]),
+        (entities[2], entities[3]), (entities[3], entities[4]),
         # Cluster 2: P4, P5, P6, P7
-        (nodes[4], nodes[5]), (nodes[5], nodes[6]), (nodes[6], nodes[7]), (nodes[7], nodes[4]),
+        (entities[4], entities[5]), (entities[5], entities[6]), (entities[6], entities[7]), (entities[7], entities[4]),
     ]
+    levels = {e: 2 for e in entities}
     return _build_balanced_env(
         env_id="meta_modular_network_biomedical",
-        nodes=nodes,
-        directed_edges=edges,
+        domain_name="KinasePhosphorylationNetwork",
         relation_name="catalyzes_phosphorylation_of",
-        seed=seed,
+        entities=entities,
+        edges=edges,
+        hypothesis=OUT_OF_HYPOTHESIS_DENSE_CLIQUE,
+        entity_levels=levels,
     )

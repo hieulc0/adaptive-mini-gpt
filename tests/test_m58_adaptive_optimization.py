@@ -146,7 +146,7 @@ def test_adaptive_budget_controller_actions():
     # Case 4: Severe negative transfer -> RESET
     d_reset = controller.evaluate_budget_action(
         current_steps=10,
-        val_loss_history=[1.25, 1.24],  # loss > 1.15 and slope < 0.01
+        val_loss_history=[1.25, 1.24],  # loss > 1.15 and slope <= 0.02
         has_reset=False,
     )
     assert d_reset.action == BudgetAction.RESET
@@ -167,7 +167,7 @@ def test_task_conditioned_skill_router_and_interference_recovery(base_model_and_
     model, tokenizer, device = base_model_and_tokenizer
 
     source_adapter = PersistentCandidateAdapter(d_model=128, bottleneck_dim=16).to(device)
-    composite_adapter = ResidualSkillAdapter(source_adapter=source_adapter, d_model=128, bottleneck_dim=16).to(device)
+    composite_adapter = ResidualSkillAdapter(source_adapter=source_adapter, d_model=128, residual_bottleneck_dim=16).to(device)
     source_adapter.eval()
     composite_adapter.eval()
 
@@ -214,7 +214,7 @@ def test_routed_retention_and_rollback_safeguards(base_model_and_tokenizer):
     auditor = RoutedRetentionAuditor(model, tokenizer, device)
 
     source_adapter = PersistentCandidateAdapter(d_model=128, bottleneck_dim=16).to(device)
-    composite_adapter = ResidualSkillAdapter(source_adapter=source_adapter, d_model=128, bottleneck_dim=16).to(device)
+    composite_adapter = ResidualSkillAdapter(source_adapter=source_adapter, d_model=128, residual_bottleneck_dim=16).to(device)
 
     router = TaskConditionedSkillRouter(
         source_adapter=source_adapter,

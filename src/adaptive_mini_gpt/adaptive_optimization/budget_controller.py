@@ -100,7 +100,7 @@ class AdaptiveBudgetController:
             )
 
         # 2. Harmful Negative Transfer -> RESET (if not already reset)
-        if not has_reset and curr_loss >= self.incompatible_loss_threshold and slope < 0.01:
+        if not has_reset and curr_loss >= self.incompatible_loss_threshold and slope <= 0.02:
             return ControllerBudgetDecision(
                 action=BudgetAction.RESET,
                 block_steps_allocated=self.block_step_size,
