@@ -428,3 +428,46 @@
   - **Option 1 (M59: Representation-Disentangled Contrastive Skill Routing)**: Resolve the 47.9% routing bottleneck by training target residuals with an explicit orthogonal representation projection or task-discriminative prototype anchor, ensuring source and target activation geometries remain cleanly separable for 90%+ routing accuracy.
   - **Option 2 (M59: Transferable Meta-Learned Budget Policy)**: Meta-train a lightweight neural policy (e.g. contextual bandit or cross-entropy method) across synthetic task distributions that predicts the optimal step budget $T^*$ directly from $N=4$ initial diagnostic probes.
   - **Option 3 (M59: Multi-Source Compositional Routing)**: Scale routing from single-source transfer to multi-skill composition across an archival repertoire of 4+ qualified relational modules.
+
+
+### M59: Generalization-Safe Learning Control and Reliable Skill Routing (Completed & Scientifically Qualified)
+- **Objective**: Execute forensic audit of M58 claims; resolve environment accounting and metric calculation discrepancies; isolate and fix the 100% SPRT false alarm rate under targeted contrastive probing; benchmark fixed budget baselines against validation progress-cost and experiential memory-guided controllers across segregated Meta-Train, Development, and Sealed Meta-Test splits; eliminate sub-chance skill routing with verified-evidence likelihood and minimal trainable routing; enforce retention safeguards and SHA-256 base model hash invariance on Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m59-generalizable-learning-study`, commit `36b2ff78c6ba76b0dae006e39562f30d7a79f8be`). Mini-GPT recurrent backbone (1,089,280 parameters, tokenizer `f698e45e209b7fe6`), `M58ScientificAuditor`, `FixedBudgetController`, `M58AdaptiveBudgetController`, `ValidationProgressCostController`, `ExperientialBudgetController`, `EvidenceBasedSkillRouter`, `CorrectedEpistemicAuditor`, and `RoutedRetentionAuditor`. Passed **215/215 unit tests on Tesla T4 in 118s**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 M58 Forensic Scientific Audit & Discrepancy Reconciliation**:
+     - Reconciled environment accounting: 8 target environments were evaluated across 6 arms and 3 seeds, using `dev_balanced_hierarchy` as the source task anchor.
+     - Documented the development vs. sealed held-out split divergence: M58 controller yielded +0.0306 AUC on development worlds, but suffered a -0.0268 AUC degradation on sealed meta-test tasks.
+     - Recalculated compute efficiency: true aggregate-mean efficiency gain is +14.9% (0.3909), not the claimed 24.5% (which arose from averaging per-task ratios).
+     - Isolated SPRT false alarm root cause: M58 checked direct edge membership `(u, v) in edges` instead of transitive closure `env.evaluate_ground_truth(u, v)`. In targeted contrastive probing of 2-hop edges, valid reachability was mislabeled "NO" by the oracle while the true hypothesis predicted "YES", driving SPRT to 100% false alarms.
+     - Corrected detection metric from positive-class F1 (0.6667) to balanced macro F1 (0.3333).
+  2. **Phase 2 Segregated Multi-Split Environment Suite**:
+     - 11 environments segregated across Meta-Train (3 worlds), Development (5 worlds), and Sealed Meta-Test (5 worlds).
+  3. **Phase 3 & 7 Learning Decisions & Experiential Learning-to-Learn**:
+     - Experiential memory controller (Arm F) storing compact records of past learning outcomes achieved **0.3095 AUC** on sealed meta-test tasks, outperforming the stateless M58 controller (0.2857 AUC) by **+0.0238 AUC** and narrowing the held-out generalization gap from -0.0298 to -0.0060.
+     - Learning-to-Learn Gate: **PASS**.
+  4. **Phase 4 & 5 Evidence-Based Skill Routing**:
+     - Deterministic verified-evidence router achieved **97.22% accuracy** and **0.6458 Joint F1** (matching Oracle bound).
+     - Minimal trainable router achieved **100.00% accuracy** and **0.6458 Joint F1** (5.75 ms latency).
+     - M58 confidence/entropy routing failed at 43.75% accuracy and 0.5903 Joint F1.
+     - Skill Routing Gate: **PASS**.
+  5. **Phase 6 Corrected SPRT Epistemic Diagnostic**:
+     - Corrected transitive ground truth evaluation dropped known-world false alarm rate from 100% to **0.0%** at 0%, 5%, and 15% noise, and **4.2%** at 25% noise.
+     - Unknown rule recall maintained at **100.0%** up to 15% noise and 79.2% at 25% noise.
+     - Balanced Macro F1 reached **1.0000** at 0–15% noise and 0.8726 at 25% noise.
+     - Epistemic Gate: **PASS**.
+  6. **Phase 8 Retention Safeguards & Reversible Rollback**:
+     - Base checkpoint hashes 100% invariant across all seeds (`8736b364e4a8ce19`, `de7621751f2e99d0`, `c7bd81ae47f2e2de`).
+     - 0.0000 isolated source backward forgetting; 100% arithmetic carry and chained logic retention; rollback 100% successful.
+     - Engineering Gate: **PASS**.
+  7. **Task-Specific Qualification Gates**:
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (215/215 tests on Tesla T4; hashes invariant; rollback verified).
+     - Epistemic Qualification Gate: **PASS (QUALIFIED)** (0.0% false alarms at 0–15% noise; 1.0000 macro F1).
+     - Skill Routing Qualification Gate: **PASS (QUALIFIED)** (97.22% & 100.0% accuracy, matching Oracle joint F1).
+     - Learning-to-Learn Gate: **PASS (QUALIFIED)** (+0.0238 AUC gain on sealed tasks using prior learning experience).
+     - Topology Expansion Status: **RESEARCH ONLY** (compact residuals remain superior).
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain strictly frozen; experiential controllers and evidence routers remain in research tier.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; self-improving experiential mechanisms remain in research tier.
+- **Next Direction Options (Post-M59 Strategic Priority)**:
+  - **Option 1 (M60: Multi-Skill Repertoire Composition)**: Extend verified-evidence routing and experiential memory from single source-target pairs to a hierarchical library of $K \ge 5$ modular skills with dynamic combinatorial routing.
+  - **Option 2 (M60: Active Experiential Meta-Policy)**: Generalize experiential memory into a parametric meta-policy that predicts optimal learning budgets and skill compositions directly from diagnostic embeddings.
+  - **Option 3 (M60: Autonomous Epistemic Curriculum)**: Combine zero-defect contrastive SPRT with experiential skill creation to trigger adapter allocation only when unknown rules are conclusively verified.
