@@ -75,7 +75,7 @@ logger = logging.getLogger("m60_benchmark")
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run M60 Causal Meta-Learning Benchmark")
     parser.add_argument("--seeds", type=int, nargs="+", default=[42, 43, 44], help="Random seeds")
-    parser.add_argument("--checkpoints-dir", type=str, default="/kaggle/input/amg-m18-checkpoints", help="M18 Checkpoints directory")
+    parser.add_argument("--checkpoints-dir", "--checkpoint-dir", dest="checkpoints_dir", type=str, default="/kaggle/input/amg-m18-checkpoints", help="M18 Checkpoints directory")
     parser.add_argument("--output-dir", type=str, default="runs/m60_causal_meta_learning", help="Output directory")
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu", help="Compute device")
     return parser.parse_args()
