@@ -117,16 +117,17 @@ class FactorialStudyEngine:
                 chosen_probe = scored[0][1]
             elif policy == "m51_neural" and self.m51_ranking_head is not None:
                 self.m51_ranking_head.eval()
-                scores = []
+                feats = [
+                    NeuralProbeRankingHead.extract_features(
+                        p, tracker.compute_entropy(), step, budget, tracker
+                    )
+                    for p in available
+                ]
                 with torch.no_grad():
-                    for p in available:
-                        f1, f2, f3, f4 = p.structural_features
-                        f5 = min(1.0, tracker.compute_entropy() / 3.1223)
-                        x_t = torch.tensor([[f1, f2, f3, f4, f5]], dtype=torch.float32, device=self.device)
-                        s = float(self.m51_ranking_head(x_t).item())
-                        scores.append((s, p))
-                scores.sort(key=lambda x: x[0], reverse=True)
-                chosen_probe = scores[0][1]
+                    x_t = torch.tensor(feats, dtype=torch.float32, device=self.device)
+                    logits = self.m51_ranking_head(x_t)
+                    best_idx = int(torch.argmax(logits).item())
+                chosen_probe = available[best_idx]
             elif policy == "m52_outcome" and self.m52_policy_head is not None:
                 self.m52_policy_head.eval()
                 feats = [
