@@ -264,14 +264,14 @@ def run_m52_benchmark(
             unknown_detected = s_exec.is_unknown_detected
             unknown_detection_records[s_key].append(unknown_detected)
             detection_per_env[s_key] = {
-                "true_rule": s_env.hypothesis.hypothesis_id,
+                "true_rule": s_env.true_hypothesis.hypothesis_id,
                 "top_identified": s_exec.top_identified_hypothesis,
                 "top_prob": s_exec.top_hypothesis_probability,
                 "unknown_rule_detected": unknown_detected,
                 "info_gain": s_exec.total_information_gain,
             }
             logger.info(
-                f"  [{s_key}] Rule: {s_env.hypothesis.hypothesis_id} | "
+                f"  [{s_key}] Rule: {s_env.true_hypothesis.hypothesis_id} | "
                 f"Top: {s_exec.top_identified_hypothesis} ({s_exec.top_hypothesis_probability * 100:.1f}%) | "
                 f"Unknown Detected: {unknown_detected}"
             )

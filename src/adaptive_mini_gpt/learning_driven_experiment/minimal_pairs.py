@@ -48,7 +48,7 @@ class MinimalPairEngine:
             ans_base = env.oracle_evaluate_query(u, v)
             if ans_base == "YES":
                 perturbed_edges = [e for e in base_edges if e != (u, v)]
-                ans_pert = env.hypothesis.evaluate_query(
+                ans_pert = env.true_hypothesis.evaluate_query(
                     source=u,
                     target=v,
                     edges=perturbed_edges,
@@ -125,7 +125,7 @@ class MinimalPairEngine:
                             if (u, v) in edge_set and (v, w) in edge_set:
                                 ans_base = env.oracle_evaluate_query(u, w)
                                 pert_edges = [e for e in base_edges if e != (v, w)]
-                                ans_pert = env.hypothesis.evaluate_query(
+                                ans_pert = env.true_hypothesis.evaluate_query(
                                     source=u,
                                     target=w,
                                     edges=pert_edges,

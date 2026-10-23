@@ -307,7 +307,7 @@ def _create_environment(
         relation_name=relation_name,
         entities=entities,
         base_edges=edges,
-        hypothesis=hypothesis,
+        true_hypothesis=hypothesis,
         entity_levels=entity_levels,
         blocked_nodes=blocked_nodes,
         negated_edges=negated_edges,
