@@ -21,7 +21,7 @@ import torch.nn.functional as F
 
 from adaptive_mini_gpt.guided_experiment.environment import AutonomousEnvironment
 from adaptive_mini_gpt.model import MiniGPT
-from adaptive_mini_gpt.skill_reuse.adapter import ResidualSkillAdapter
+from adaptive_mini_gpt.reliable_transfer.composition_models import ResidualSkillAdapter
 
 logger = logging.getLogger(__name__)
 

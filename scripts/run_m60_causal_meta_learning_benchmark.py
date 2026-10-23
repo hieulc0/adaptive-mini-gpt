@@ -56,8 +56,12 @@ from adaptive_mini_gpt.causal_meta_learning.task_suite import (
     create_meta_long_chain_aerospace,
 )
 from adaptive_mini_gpt.generalizable_learning.skill_router import RouterMode
-from adaptive_mini_gpt.model import GPTConfig, MiniGPT
-from adaptive_mini_gpt.skill_reuse.adapter import ResidualSkillAdapter
+from adaptive_mini_gpt.model.config import ModelConfig
+from adaptive_mini_gpt.model.transformer import MiniGPT
+from adaptive_mini_gpt.data.bpe_scaling import expand_model_vocabulary, train_scaled_bpe_tokenizer
+from adaptive_mini_gpt.data.language_corpus import PRETRAIN_PROSE_CORPUS
+from adaptive_mini_gpt.training.checkpoint import CheckpointManager
+from adaptive_mini_gpt.reliable_transfer.composition_models import ResidualSkillAdapter
 
 logging.basicConfig(
     level=logging.INFO,
@@ -76,59 +80,68 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-class SimpleBpeTokenizer:
-    """Tokenizer wrapper matching canonical 1024-BPE vocab."""
-    def __init__(self, vocab_size: int = 1024) -> None:
-        self.vocab_size = vocab_size
+def build_m60_tokenizer(target_vocab_size: int = 1024) -> Any:
+    """Build BPE tokenizer covering all M60 relational domains and vocabularies."""
+    domain_texts = [
+        "GeneMasterA activates_transcription_of OperonUnitB PromoterRegionC RnaPolymeraseD ExonCodingE ProteinProductF. ",
+        "MeshNodeA1 replicates_state_to MeshNodeA2 MeshNodeA3 MeshNodeB1 MeshNodeB2 MeshNodeB3. ",
+        "ComponentStageC1 feeds_downstream_stage_to AssemblyUnitA2 SubsystemModuleS3 CalibrationRigR4 IntegrationBayI5 AvionicsHousingH6 PropulsionCouplerP7 OrbitalPayloadO8. ",
+        "ClusterRootR0 delegates_workload_to SubClusterA1 SubClusterB2 SubClusterC3 LeafWorkerA11 LeafWorkerA12 LeafWorkerB21 LeafWorkerC31. ",
+        "JuniorAnalystJ1 reports_transitively_to SeniorAssociateS2 TeamLeadT3 EngineeringDirectorD4 VicePresidentV5 ChiefExecutiveC6. ",
+        "CoreSecurityNode1 in_same_security_zone CoreSecurityNode2 CoreSecurityNode3 CoreSecurityNode4 PeripheralSensorNode5 IsolatedGatewayNode6. ",
+        "StateAlpha1 holds_mutual_pact_with StateBeta2 StateGamma3 StateDelta4 StateEpsilon5 StateZeta6. ",
+        "AeroModuleM0 assembles_into_subsystem AeroModuleM1 AeroModuleM2 AeroModuleM3 AeroModuleM4 AeroModuleM5 AeroModuleM6 AeroModuleM7 AeroModuleM8 AeroModuleM9. ",
+        "GatewayGW routes_traffic_payload_to IngressRouterIR AuthSvcA1 BillingSvcB2 CatalogSvcC3 DbWorkerD1 DbWorkerD2 CacheWorkerC1 QueueWorkerQ1 AuditWorkerA2. ",
+        "NationN0 ratifies_bilateral_treaty_with NationN1 NationN2 NationN3 NationN4 NationN5 NationN6 NationN7. ",
+        "ProteinP0 catalyzes_phosphorylation_of ProteinP1 ProteinP2 ProteinP3 ProteinP4 ProteinP5 ProteinP6 ProteinP7. ",
+        "LogisticsHubH0 forwards_container_consignment_to LogisticsHubH1 LogisticsHubH2 LogisticsHubH3 LogisticsHubH4 LogisticsHubH5 LogisticsHubH6 LogisticsHubH7. ",
+    ]
+    all_prose = " ".join(PRETRAIN_PROSE_CORPUS) if isinstance(PRETRAIN_PROSE_CORPUS, list) else str(PRETRAIN_PROSE_CORPUS)
+    training_data = all_prose + chr(10) + chr(10).join(domain_texts)
+    tokenizer = train_scaled_bpe_tokenizer(training_data, target_vocab_size=target_vocab_size)
+    return tokenizer
 
-    def encode(self, text: str) -> list[int]:
-        encoded = [ord(c) % (self.vocab_size - 1) + 1 for c in text]
-        return encoded or [1]
 
-    def decode(self, tokens: list[int]) -> str:
-        return "".join(chr(t) for t in tokens if t > 0)
+def load_or_init_base_checkpoint(
+    checkpoint_dir: Path,
+    seed: int,
+    device: torch.device,
+) -> tuple[MiniGPT, Any]:
+    """Load base model checkpoint from M18 repository artifacts."""
+    relative_path = Path(f"seed_{seed}/base_pretrain/best.pt")
+    full_path = checkpoint_dir / relative_path
 
+    if full_path.exists():
+        logger.info("Loading pre-trained base model from %s", full_path)
+        raw_ckpt = CheckpointManager.load_raw_checkpoint(full_path)
+        base_tok = CheckpointManager.load_tokenizer(raw_ckpt)
+        state_dict = raw_ckpt.get("model_state_dict", raw_ckpt.get("model_state"))
+        cfg_dict = raw_ckpt["model_config"]
+        cfg = ModelConfig(**cfg_dict) if isinstance(cfg_dict, dict) else cfg_dict
+        base_model_orig = MiniGPT(cfg)
+        base_model_orig.load_state_dict(state_dict)
 
-def load_m18_base_model(ckpt_dir: Path, seed: int, device: torch.device) -> tuple[MiniGPT, SimpleBpeTokenizer]:
-    """Load canonical M18 base model checkpoint."""
-    ckpt_path = ckpt_dir / f"m18_base_seed{seed}.pt"
-    if not ckpt_path.exists():
-        manifest_path = ckpt_dir / "checkpoint-manifest.json"
-        if manifest_path.exists():
-            with open(manifest_path) as f:
-                manifest = json.load(f)
-                for entry in manifest.get("checkpoints", []):
-                    if entry.get("seed") == seed:
-                        p = ckpt_dir / entry["filename"]
-                        if p.exists():
-                            ckpt_path = p
-                            break
+        scaled_tok = build_m60_tokenizer(target_vocab_size=1024)
+        model = expand_model_vocabulary(
+            model=base_model_orig,
+            old_tokenizer=base_tok,
+            new_tokenizer=scaled_tok,
+        ).to(device)
+        model.eval()
+        return model, scaled_tok
 
-    cfg = GPTConfig(
-        vocab_size=1024,
-        block_size=128,
-        n_layer=4,
-        n_head=4,
-        n_embd=128,
-        dropout=0.0,
+    logger.warning("Checkpoint %s not found. Initializing fresh model for benchmark.", full_path)
+    tokenizer = build_m60_tokenizer(target_vocab_size=1024)
+    cfg = ModelConfig(
+        vocab_size=tokenizer.vocab_size,
+        d_model=128,
+        n_layers=4,
+        n_heads=4,
+        d_ff=256,
+        context_length=256,
     )
     model = MiniGPT(cfg).to(device)
-
-    if ckpt_path.exists():
-        logger.info("Loading pretrained M18 base model from %s", ckpt_path)
-        payload = torch.load(ckpt_path, map_location=device, weights_only=False)
-        state_dict = payload.get("model_state_dict", payload)
-        clean_sd = {k.replace("_orig_mod.", ""): v for k, v in state_dict.items()}
-        model.load_state_dict(clean_sd, strict=False)
-    else:
-        logger.warning("Checkpoint %s not found. Using initialized base model with seed %d", ckpt_path, seed)
-        torch.manual_seed(seed)
-
-    for p in model.parameters():
-        p.requires_grad = False
     model.eval()
-
-    tokenizer = SimpleBpeTokenizer(vocab_size=cfg.vocab_size)
     return model, tokenizer
 
 
@@ -138,7 +151,7 @@ def train_source_adapter(
     """Pre-train source adapter on corporate governance / balanced hierarchy task."""
     torch.manual_seed(seed)
     adapter = ResidualSkillAdapter(
-        d_model=base_model.config.n_embd, bottleneck_dim=16, num_classes=2
+        d_model=getattr(base_model.config, "d_model", getattr(base_model.config, "n_embd", 128)), bottleneck_dim=16, num_classes=2
     ).to(device)
     optimizer = torch.optim.AdamW(adapter.parameters(), lr=2e-3, weight_decay=1e-4)
 
@@ -225,7 +238,7 @@ def main() -> None:
         logger.info(">>> Processing Seed: %d <<<", seed)
         logger.info("--------------------------------------------------")
 
-        base_model, tokenizer = load_m18_base_model(Path(args.checkpoints_dir), seed, device)
+        base_model, tokenizer = load_or_init_base_checkpoint(Path(args.checkpoints_dir), seed, device)
         retention_auditor = CausalRetentionAuditor(base_model, tokenizer, device)
         base_hash = retention_auditor.compute_base_parameter_hash()
         logger.info("Seed %d Base Parameter SHA-256 Hash: %s", seed, base_hash[:16])
@@ -265,7 +278,7 @@ def main() -> None:
         target_routing_env = create_dev_non_transitive_bipartite_environment(seed=seed + 1)
         # Adapt target composite adapter on conflicting environment to introduce real interference on source
         target_composite = ResidualSkillAdapter(
-            d_model=base_model.config.n_embd, bottleneck_dim=16, num_classes=2
+            d_model=getattr(base_model.config, "d_model", getattr(base_model.config, "n_embd", 128)), bottleneck_dim=16, num_classes=2
         ).to(device)
         with torch.no_grad():
             target_composite.down_proj.weight.copy_(source_adapter.down_proj.weight)
@@ -294,7 +307,7 @@ def main() -> None:
             opt_comp.step()
 
         router = FunctionalSkillRouter(
-            d_model=base_model.config.n_embd,
+            d_model=getattr(base_model.config, "d_model", getattr(base_model.config, "n_embd", 128)),
             source_adapter=source_adapter,
             composite_adapter=target_composite,
         )

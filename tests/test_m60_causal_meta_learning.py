@@ -36,8 +36,9 @@ from adaptive_mini_gpt.causal_meta_learning.task_suite import (
     create_meta_long_chain_aerospace,
 )
 from adaptive_mini_gpt.generalizable_learning.skill_router import RouterMode
-from adaptive_mini_gpt.model import GPTConfig, MiniGPT
-from adaptive_mini_gpt.skill_reuse.adapter import ResidualSkillAdapter
+from adaptive_mini_gpt.model.config import ModelConfig
+from adaptive_mini_gpt.model.transformer import MiniGPT
+from adaptive_mini_gpt.reliable_transfer.composition_models import ResidualSkillAdapter
 
 
 class DummyTokenizer:
@@ -51,12 +52,13 @@ class DummyTokenizer:
 
 @pytest.fixture
 def tiny_model() -> MiniGPT:
-    cfg = GPTConfig(
+    cfg = ModelConfig(
         vocab_size=256,
-        block_size=32,
-        n_layer=2,
-        n_head=2,
-        n_embd=32,
+        d_model=32,
+        n_layers=2,
+        n_heads=2,
+        d_ff=64,
+        context_length=32,
         dropout=0.0,
     )
     return MiniGPT(cfg)

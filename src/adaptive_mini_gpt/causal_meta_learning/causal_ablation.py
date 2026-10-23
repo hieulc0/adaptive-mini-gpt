@@ -34,7 +34,7 @@ from adaptive_mini_gpt.generalizable_learning.experiential_memory import (
 )
 from adaptive_mini_gpt.guided_experiment.environment import AutonomousEnvironment
 from adaptive_mini_gpt.model import MiniGPT
-from adaptive_mini_gpt.skill_reuse.adapter import ResidualSkillAdapter
+from adaptive_mini_gpt.reliable_transfer.composition_models import ResidualSkillAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -280,7 +280,7 @@ class CausalAblationAdaptationEngine:
         np.random.seed(seed)
 
         # 1. Target residual adapter initialization
-        d_model = self.base_model.config.n_embd
+        d_model = getattr(self.base_model.config, "d_model", getattr(self.base_model.config, "n_embd", 128))
         target_adapter = ResidualSkillAdapter(
             d_model=d_model, bottleneck_dim=16, num_classes=2
         ).to(self.device)
