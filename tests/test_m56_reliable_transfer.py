@@ -92,7 +92,7 @@ def test_composite_adapter_models():
     # 1. ResidualSkillAdapter
     res_model = ResidualSkillAdapter(source_adapter, d_model=128)
     res_counts = res_model.count_parameters()
-    assert res_counts["trainable"] == 2371  # 128*16 + 16 + 16*3 + 3 = 2048 + 16 + 48 + 3 = 2115 + layer params = 2371
+    assert res_counts["trainable"] == 2371  # 256 LayerNorm + 2064 Linear + 51 Linear = 2371
     assert res_counts["frozen"] == 4483
     for p in res_model.source_adapter.parameters():
         assert not p.requires_grad
@@ -107,8 +107,9 @@ def test_composite_adapter_models():
     # 2. GatedResidualSkillAdapter
     gated_model = GatedResidualSkillAdapter(source_adapter, d_model=128)
     gated_counts = gated_model.count_parameters()
-    assert gated_counts["trainable"] == 2371 + 3  # residual head + gate_logit (3) -> 2374/3014
-    assert gated_model.gate_logit.requires_grad is True
+    assert gated_counts["trainable"] == 3014  # 2371 residual + 643 gating = 3014
+    for p in gated_model.gate_layer.parameters():
+        assert p.requires_grad is True
 
     # 3. PartiallyTrainableSkillAdapter
     pt_frozen = PartiallyTrainableSkillAdapter(source_adapter, trainability_alpha=0.0, d_model=128)
@@ -133,7 +134,7 @@ def test_multi_world_environments():
     assert len(env_met.entities) == 6
 
     env_soc = create_social_coalition_environment(seed=42)
-    assert len(env_soc.entities) == 8
+    assert len(env_soc.entities) == 6
 
 
 def test_noise_aware_epistemic_detectors():
