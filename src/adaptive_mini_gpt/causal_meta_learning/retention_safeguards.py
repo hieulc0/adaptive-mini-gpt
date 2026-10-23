@@ -96,7 +96,7 @@ class CausalRetentionAuditor:
     def audit_retention_and_rollback(
         self,
         source_env: AutonomousEnvironment,
-        initial_source_adapter: ResidualSkillAdapter,
+        initial_source_adapter: Any,
         routed_source_f1: float,
         tolerance: float = 0.15,
     ) -> CausalRetentionReport:

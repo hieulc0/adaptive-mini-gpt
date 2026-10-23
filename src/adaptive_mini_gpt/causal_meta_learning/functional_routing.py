@@ -102,9 +102,9 @@ class FunctionalSkillRouter(nn.Module):
     def __init__(
         self,
         d_model: int,
-        source_adapter: ResidualSkillAdapter,
-        composite_adapter: ResidualSkillAdapter,
-        fresh_adapter: ResidualSkillAdapter | None = None,
+        source_adapter: nn.Module,
+        composite_adapter: nn.Module,
+        fresh_adapter: nn.Module | None = None,
     ) -> None:
         super().__init__()
         self.d_model = d_model

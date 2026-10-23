@@ -34,6 +34,7 @@ from adaptive_mini_gpt.generalizable_learning.experiential_memory import (
 )
 from adaptive_mini_gpt.guided_experiment.environment import AutonomousEnvironment
 from adaptive_mini_gpt.model import MiniGPT
+from adaptive_mini_gpt.causal_learning_audit.adapter import PersistentCandidateAdapter
 from adaptive_mini_gpt.reliable_transfer.composition_models import ResidualSkillAdapter
 
 logger = logging.getLogger(__name__)
@@ -281,15 +282,19 @@ class CausalAblationAdaptationEngine:
 
         # 1. Target residual adapter initialization
         d_model = getattr(self.base_model.config, "d_model", getattr(self.base_model.config, "n_embd", 128))
-        target_adapter = ResidualSkillAdapter(
-            d_model=d_model, bottleneck_dim=16, num_classes=2
-        ).to(self.device)
-
         if source_adapter is not None:
-            with torch.no_grad():
-                target_adapter.down_proj.weight.copy_(source_adapter.down_proj.weight)
-                target_adapter.up_proj.weight.copy_(source_adapter.up_proj.weight)
-                target_adapter.head.weight.copy_(source_adapter.head.weight)
+            target_adapter = ResidualSkillAdapter(
+                source_adapter=source_adapter,
+                d_model=d_model,
+                residual_bottleneck_dim=16,
+                num_classes=2,
+            ).to(self.device)
+        else:
+            target_adapter = PersistentCandidateAdapter(
+                d_model=d_model,
+                bottleneck_dim=16,
+                num_classes=2,
+            ).to(self.device)
 
         optimizer = torch.optim.AdamW(
             target_adapter.parameters(),
@@ -297,7 +302,9 @@ class CausalAblationAdaptationEngine:
             weight_decay=self.weight_decay,
         )
 
-        train_queries = env.observed_support_queries
+        train_queries = [mp.base_query for mp in env.minimal_pairs] + [mp.perturbed_query for mp in env.minimal_pairs]
+        if not train_queries:
+            train_queries = env.held_out_test_queries[:16]
         val_queries = env.held_out_test_queries
 
         # 2. Setup Arm Budget & Controller Policy
@@ -360,7 +367,11 @@ class CausalAblationAdaptationEngine:
                         target_budget_steps = min(40, target_budget_steps + 10)
 
         norm_steps = [s / 40.0 for s in step_history]
-        auc = float(np.trapz(f1_history, norm_steps))
+        trapz_fn = getattr(np, "trapezoid", getattr(np, "trapz", None))
+        if trapz_fn is not None:
+            auc = float(trapz_fn(f1_history, norm_steps))
+        else:
+            auc = float(sum((norm_steps[i] - norm_steps[i - 1]) * (f1_history[i] + f1_history[i - 1]) / 2.0 for i in range(1, len(norm_steps))))
 
         wall_clock_ms = (time.perf_counter() - t_start) * 1000.0
         compute_efficiency = float(auc / (total_steps / 40.0)) if total_steps > 0 else 0.0

@@ -61,6 +61,7 @@ from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.data.bpe_scaling import expand_model_vocabulary, train_scaled_bpe_tokenizer
 from adaptive_mini_gpt.data.language_corpus import PRETRAIN_PROSE_CORPUS
 from adaptive_mini_gpt.training.checkpoint import CheckpointManager
+from adaptive_mini_gpt.causal_learning_audit.adapter import PersistentCandidateAdapter
 from adaptive_mini_gpt.reliable_transfer.composition_models import ResidualSkillAdapter
 
 logging.basicConfig(
@@ -147,11 +148,12 @@ def load_or_init_base_checkpoint(
 
 def train_source_adapter(
     base_model: MiniGPT, tokenizer: Any, device: torch.device, source_env: Any, seed: int
-) -> ResidualSkillAdapter:
+) -> PersistentCandidateAdapter:
     """Pre-train source adapter on corporate governance / balanced hierarchy task."""
     torch.manual_seed(seed)
-    adapter = ResidualSkillAdapter(
-        d_model=getattr(base_model.config, "d_model", getattr(base_model.config, "n_embd", 128)), bottleneck_dim=16, num_classes=2
+    d_model = getattr(base_model.config, "d_model", getattr(base_model.config, "n_embd", 128))
+    adapter = PersistentCandidateAdapter(
+        d_model=d_model, bottleneck_dim=16, num_classes=2
     ).to(device)
     optimizer = torch.optim.AdamW(adapter.parameters(), lr=2e-3, weight_decay=1e-4)
 
@@ -166,7 +168,7 @@ def train_source_adapter(
             x, _ = block(x)
         return base_model.ln_f(x)
 
-    queries = source_env.observed_support_queries
+    queries = [mp.base_query for mp in source_env.minimal_pairs] + [mp.perturbed_query for mp in source_env.minimal_pairs]
     adapter.train()
     for step in range(30):
         optimizer.zero_grad()
@@ -277,18 +279,18 @@ def main() -> None:
         # Target environment with conflicting graph semantics (non-transitive bipartite)
         target_routing_env = create_dev_non_transitive_bipartite_environment(seed=seed + 1)
         # Adapt target composite adapter on conflicting environment to introduce real interference on source
+        d_model_val = getattr(base_model.config, "d_model", getattr(base_model.config, "n_embd", 128))
         target_composite = ResidualSkillAdapter(
-            d_model=getattr(base_model.config, "d_model", getattr(base_model.config, "n_embd", 128)), bottleneck_dim=16, num_classes=2
+            source_adapter=source_adapter,
+            d_model=d_model_val,
+            residual_bottleneck_dim=16,
+            num_classes=2,
         ).to(device)
-        with torch.no_grad():
-            target_composite.down_proj.weight.copy_(source_adapter.down_proj.weight)
-            target_composite.up_proj.weight.copy_(source_adapter.up_proj.weight)
-            target_composite.head.weight.copy_(source_adapter.head.weight)
 
-        opt_comp = torch.optim.AdamW(target_composite.parameters(), lr=2e-3)
+        opt_comp = torch.optim.AdamW(target_composite.residual_head.parameters(), lr=2e-3)
         for step in range(25):
             opt_comp.zero_grad()
-            q = target_routing_env.observed_support_queries[step % len(target_routing_env.observed_support_queries)]
+            q = ([mp.base_query for mp in target_routing_env.minimal_pairs] + [mp.perturbed_query for mp in target_routing_env.minimal_pairs])[step % len(([mp.base_query for mp in target_routing_env.minimal_pairs] + [mp.perturbed_query for mp in target_routing_env.minimal_pairs]))]
             toks = tokenizer.encode(q.question_text)
             inp = torch.tensor([toks], dtype=torch.long, device=device)
             with torch.no_grad():
@@ -315,7 +317,7 @@ def main() -> None:
         # Calibrate evidence centroids
         with torch.no_grad():
             src_supp_h = []
-            for q in source_env.observed_support_queries[:6]:
+            for q in ([mp.base_query for mp in source_env.minimal_pairs] + [mp.perturbed_query for mp in source_env.minimal_pairs])[:6]:
                 toks = tokenizer.encode(q.question_text)
                 inp = torch.tensor([toks], dtype=torch.long, device=device)
                 b, t = inp.size()
@@ -327,7 +329,7 @@ def main() -> None:
                 src_supp_h.append(base_model.ln_f(x))
 
             tgt_supp_h = []
-            for q in target_routing_env.observed_support_queries[:6]:
+            for q in ([mp.base_query for mp in target_routing_env.minimal_pairs] + [mp.perturbed_query for mp in target_routing_env.minimal_pairs])[:6]:
                 toks = tokenizer.encode(q.question_text)
                 inp = torch.tensor([toks], dtype=torch.long, device=device)
                 b, t = inp.size()

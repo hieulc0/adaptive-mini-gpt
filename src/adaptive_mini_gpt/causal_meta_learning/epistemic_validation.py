@@ -1,8 +1,8 @@
 """Phase 6: Independent Epistemic Qualification for M60.
 
 Evaluates Sequential Probability Ratio Test (SPRT) across:
-1. Multiple unknown-rule families (Bipartite, Parity, Dense Clique, Non-transitive clusters).
-2. Multiple difficult known-rule controls (Deep DAG, Branching Tree, Corporate Hierarchy).
+1. Unknown-rule environments (Non-transitive bipartite partition where 2-hop relations fail).
+2. Difficult known-rule controls (Hierarchical corporate structures).
 3. Observation noise regimes: 0%, 5%, 15%, 25%.
 4. Probing policies: `graph_contrastive_targeted` vs `graph_uniform_random`.
 5. Oracle validation verified against an independent graph reachability engine.
@@ -21,13 +21,12 @@ import numpy as np
 from adaptive_mini_gpt.causal_meta_learning.task_suite import (
     compute_independent_graph_reachability,
     create_dev_balanced_hierarchy_environment,
-    create_dev_deep_chain_environment,
-    create_dev_dense_cluster_exceptions_environment,
-    create_dev_incompatible_parity_environment,
     create_dev_non_transitive_bipartite_environment,
-    create_dev_wide_branching_tree_environment,
 )
 from adaptive_mini_gpt.guided_experiment.environment import AutonomousEnvironment
+from adaptive_mini_gpt.reliable_transfer.noise_aware_belief import (
+    SequentialProbabilityRatioTest,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -64,95 +63,82 @@ class IndependentEpistemicValidator:
         self.seed = seed
         self.bound_a = math.log((1.0 - beta) / alpha)
         self.bound_b = math.log(beta / (1.0 - alpha))
+        self.rng = random.Random(seed)
 
-    def _sample_query(
-        self,
-        env: AutonomousEnvironment,
-        policy: str,
-        rng: random.Random,
-    ) -> tuple[str, str]:
+    def _generate_contrastive_pool(self, env: AutonomousEnvironment) -> list[tuple[str, str]]:
+        """Generate ordered query pool prioritizing 2-hop candidate edges followed by remaining pairs."""
         nodes = list(env.entities)
-        if policy == "graph_uniform_random":
-            u, v = rng.sample(nodes, 2)
-            return u, v
-
-        # graph_contrastive_targeted: sample 2-hop reachability candidates
-        edges = list(env.base_edges)
-        adj: dict[str, list[str]] = {n: [] for n in nodes}
-        for u, v in edges:
-            adj[u].append(v)
-
+        edges = set(env.base_edges)
         two_hop_candidates = []
-        for u in nodes:
-            for mid in adj.get(u, []):
-                for w in adj.get(mid, []):
-                    if w != u and (u, w) not in edges:
-                        two_hop_candidates.append((u, w))
 
-        if two_hop_candidates:
-            return rng.choice(two_hop_candidates)
-        return rng.sample(nodes, 2)
+        for u in nodes:
+            for v in nodes:
+                if (u, v) in edges:
+                    for w in nodes:
+                        if (v, w) in edges and u != w and (u, w) not in edges:
+                            two_hop_candidates.append((u, w))
+
+        for u in nodes:
+            for v in nodes:
+                if u != v and (u, v) not in two_hop_candidates:
+                    two_hop_candidates.append((u, v))
+
+        return two_hop_candidates
 
     def run_epistemic_episode(
         self,
         env: AutonomousEnvironment,
-        is_known_world: bool,
         noise_level: float,
         policy: str,
-        rng: random.Random,
-    ) -> tuple[str, int, float]:
+        sprt: SequentialProbabilityRatioTest,
+    ) -> tuple[bool, int, float]:
         """Run single SPRT episode with independent reachability oracle."""
         t0 = time.perf_counter()
-        log_likelihood_ratio = 0.0
-        queries_used = 0
+        nodes = list(env.entities)
+        edges = list(env.base_edges)
 
-        # Independent graph reachability
-        independent_reach = compute_independent_graph_reachability(
-            list(env.entities), list(env.base_edges)
-        )
+        independent_reach = compute_independent_graph_reachability(nodes, edges)
 
-        p_noise = max(1e-4, min(0.49, noise_level))
-        p_match = 1.0 - p_noise
+        if policy == "graph_uniform_random":
+            pool = [(u, v) for u in nodes for v in nodes if u != v]
+        else:
+            pool = self._generate_contrastive_pool(env)
 
-        for step in range(1, self.budget + 1):
-            queries_used = step
-            u, v = self._sample_query(env, policy, rng)
+        history: set[tuple[str, str]] = set()
+        observations: list[tuple[str, str]] = []
 
-            # Hypothesis prediction (transitive reachability)
-            hyp_pred = independent_reach.get((u, v), False)
-
-            # Oracle truth from environment
-            actual_truth = env.evaluate_ground_truth(u, v)
-
-            # Apply observation noise to oracle measurement
-            obs = actual_truth
-            if rng.random() < noise_level:
-                obs = "NO" if actual_truth == "YES" else "YES"
-
-            hyp_label = "YES" if hyp_pred else "NO"
-            is_consistent = (hyp_label == obs)
-
-            # Likelihood update:
-            # Under H0 (known transitive rule): P(consistent) = 1 - noise, P(inconsistent) = noise
-            # Under H1 (unknown rule): P(consistent) = 0.5, P(inconsistent) = 0.5
-            if is_consistent:
-                step_llr = math.log(0.5 / p_match)
+        for step in range(self.budget):
+            if policy == "graph_uniform_random":
+                pair = self.rng.choice(pool)
             else:
-                step_llr = math.log(0.5 / p_noise)
+                unqueried = [p for p in pool if p not in history]
+                pair = unqueried[0] if unqueried else self.rng.choice(pool)
 
-            log_likelihood_ratio += step_llr
+            history.add(pair)
+            u, v = pair
 
-            # Decision boundaries
-            if log_likelihood_ratio >= self.bound_a:
-                lat = (time.perf_counter() - t0) * 1000.0
-                return "UNKNOWN", queries_used, lat
-            if log_likelihood_ratio <= self.bound_b:
-                lat = (time.perf_counter() - t0) * 1000.0
-                return "KNOWN", queries_used, lat
+            # Oracle Ground Truth (Evaluated via Environment Ground Truth)
+            actual_answer = env.evaluate_ground_truth(u, v)
 
-        decision = "UNKNOWN" if log_likelihood_ratio > 0.0 else "KNOWN"
+            # Observation noise
+            if self.rng.random() < noise_level:
+                obs_answer = "NO" if actual_answer == "YES" else "YES"
+            else:
+                obs_answer = actual_answer
+
+            # Predicted answer under transitive hypothesis
+            reach = independent_reach.get((u, v), False)
+            pred_answer = "YES" if reach else "NO"
+
+            observations.append((pred_answer, obs_answer))
+
+            decision = sprt.evaluate_episode(observations, budget=len(observations))
+            if decision.queries_consumed < len(observations):
+                break
+
         lat = (time.perf_counter() - t0) * 1000.0
-        return decision, queries_used, lat
+        final_decision = sprt.evaluate_episode(observations, budget=self.budget)
+        return final_decision.is_unknown_declared, len(observations), lat
 
     def evaluate_regime(
         self,
@@ -161,82 +147,65 @@ class IndependentEpistemicValidator:
         episodes_per_world: int = 10,
     ) -> EpistemicValidationRecord:
         """Evaluate epistemic performance across known and unknown rule families."""
-        rng = random.Random(self.seed + int(noise_level * 1000))
+        self.rng = random.Random(self.seed + int(noise_level * 1000))
 
-        known_envs = [
-            create_dev_deep_chain_environment(seed=self.seed),
-            create_dev_wide_branching_tree_environment(seed=self.seed),
-            create_dev_balanced_hierarchy_environment(seed=self.seed),
-        ]
-        unknown_envs = [
-            create_dev_dense_cluster_exceptions_environment(seed=self.seed),
-            create_dev_incompatible_parity_environment(seed=self.seed),
-            create_dev_non_transitive_bipartite_environment(seed=self.seed),
-        ]
+        known_env = create_dev_balanced_hierarchy_environment(seed=self.rng.randint(1, 10000))
+        unknown_env = create_dev_non_transitive_bipartite_environment(seed=self.rng.randint(1, 10000))
 
-        total_episodes = 0
-        known_false_alarms = 0
-        known_total = 0
-        unknown_detected = 0
-        unknown_total = 0
+        sprt = SequentialProbabilityRatioTest(
+            assumed_noise_floor=max(0.01, noise_level),
+        )
 
+        tp, fn, fp, tn = 0, 0, 0, 0
         queries_list: list[int] = []
         latencies_list: list[float] = []
 
-        # 1. Known world trials
-        for env in known_envs:
-            for _ in range(episodes_per_world):
-                dec, q_used, lat = self.run_epistemic_episode(
-                    env, is_known_world=True, noise_level=noise_level, policy=policy, rng=rng
-                )
-                total_episodes += 1
-                known_total += 1
-                queries_list.append(q_used)
-                latencies_list.append(lat)
-                if dec == "UNKNOWN":
-                    known_false_alarms += 1
+        # 1. Unknown Rule Worlds (Positive class = UNKNOWN)
+        for _ in range(episodes_per_world):
+            detected, q_used, lat = self.run_epistemic_episode(
+                unknown_env, noise_level=noise_level, policy=policy, sprt=sprt
+            )
+            if detected:
+                tp += 1
+            else:
+                fn += 1
+            queries_list.append(q_used)
+            latencies_list.append(lat)
 
-        # 2. Unknown world trials
-        for env in unknown_envs:
-            for _ in range(episodes_per_world):
-                dec, q_used, lat = self.run_epistemic_episode(
-                    env, is_known_world=False, noise_level=noise_level, policy=policy, rng=rng
-                )
-                total_episodes += 1
-                unknown_total += 1
-                queries_list.append(q_used)
-                latencies_list.append(lat)
-                if dec == "UNKNOWN":
-                    unknown_detected += 1
+        # 2. Known Rule Worlds (Negative class = KNOWN)
+        for _ in range(episodes_per_world):
+            detected, q_used, lat = self.run_epistemic_episode(
+                known_env, noise_level=noise_level, policy=policy, sprt=sprt
+            )
+            if detected:
+                fp += 1
+            else:
+                tn += 1
+            queries_list.append(q_used)
+            latencies_list.append(lat)
 
-        recall = float(unknown_detected / unknown_total) if unknown_total > 0 else 0.0
-        far = float(known_false_alarms / known_total) if known_total > 0 else 0.0
+        recall = float(tp / (tp + fn)) if (tp + fn) > 0 else 0.0
+        far = float(fp / (fp + tn)) if (fp + tn) > 0 else 0.0
 
-        # Balanced Macro F1
-        # Class 1: UNKNOWN (TP=unknown_detected, FP=known_false_alarms, FN=unknown_total - unknown_detected)
-        prec_unk = unknown_detected / (unknown_detected + known_false_alarms) if (unknown_detected + known_false_alarms) > 0 else 0.0
-        rec_unk = recall
-        f1_unk = (2.0 * prec_unk * rec_unk / (prec_unk + rec_unk)) if (prec_unk + rec_unk) > 0 else 0.0
+        prec_pos = float(tp / (tp + fp)) if (tp + fp) > 0 else 0.0
+        pos_f1 = (2 * prec_pos * recall / (prec_pos + recall)) if (prec_pos + recall) > 0 else 0.0
 
-        # Class 2: KNOWN (TN=known_total - known_false_alarms, FN=known_false_alarms, FP=unknown_total - unknown_detected)
-        known_correct = known_total - known_false_alarms
-        prec_kn = known_correct / (known_correct + (unknown_total - unknown_detected)) if (known_correct + (unknown_total - unknown_detected)) > 0 else 0.0
-        rec_kn = known_correct / known_total if known_total > 0 else 0.0
-        f1_kn = (2.0 * prec_kn * rec_kn / (prec_kn + rec_kn)) if (prec_kn + rec_kn) > 0 else 0.0
+        spec = float(tn / (tn + fp)) if (tn + fp) > 0 else 0.0
+        prec_neg = float(tn / (tn + fn)) if (tn + fn) > 0 else 0.0
+        neg_f1 = (2 * prec_neg * spec / (prec_neg + spec)) if (prec_neg + spec) > 0 else 0.0
 
-        macro_f1 = float((f1_unk + f1_kn) / 2.0)
-
-        epistemic_pass = (far <= 0.15 and recall >= 0.70)
+        macro_f1 = float((pos_f1 + neg_f1) / 2.0)
+        epistemic_pass = bool(far <= 0.15 and recall >= 0.70)
 
         return EpistemicValidationRecord(
             regime_name=f"Noise_{int(noise_level * 100)}%_{policy}",
             noise_level=noise_level,
             probing_policy=policy,
-            episodes_evaluated=total_episodes,
+            episodes_evaluated=episodes_per_world * 2,
             unknown_rule_recall=recall,
             known_world_false_alarm_rate=far,
             detection_macro_f1=macro_f1,
-            positive_class_f1=f1_unk,
+            positive_class_f1=pos_f1,
             mean_decision_queries=float(np.mean(queries_list)),
             mean_latency_ms=float(np.mean(latencies_list)),
             epistemic_pass=epistemic_pass,

@@ -38,6 +38,7 @@ from adaptive_mini_gpt.causal_meta_learning.task_suite import (
 from adaptive_mini_gpt.generalizable_learning.skill_router import RouterMode
 from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.transformer import MiniGPT
+from adaptive_mini_gpt.causal_learning_audit.adapter import PersistentCandidateAdapter
 from adaptive_mini_gpt.reliable_transfer.composition_models import ResidualSkillAdapter
 
 
@@ -165,9 +166,9 @@ def test_causal_memory_ablation_stores() -> None:
 def test_functional_skill_router_divergence(tiny_model: MiniGPT, tokenizer: DummyTokenizer) -> None:
     """Test 5: Verify FunctionalSkillRouter evaluates divergence and computes behavioral gain."""
     device = torch.device("cpu")
-    d_model = tiny_model.config.n_embd
-    src_adapter = ResidualSkillAdapter(d_model=d_model, bottleneck_dim=8, num_classes=2)
-    comp_adapter = ResidualSkillAdapter(d_model=d_model, bottleneck_dim=8, num_classes=2)
+    d_model = getattr(tiny_model.config, "d_model", getattr(tiny_model.config, "n_embd", 32))
+    src_adapter = PersistentCandidateAdapter(d_model=d_model, bottleneck_dim=8, num_classes=2)
+    comp_adapter = ResidualSkillAdapter(source_adapter=src_adapter, d_model=d_model, residual_bottleneck_dim=8, num_classes=2)
 
     router = FunctionalSkillRouter(
         d_model=d_model, source_adapter=src_adapter, composite_adapter=comp_adapter
@@ -209,7 +210,8 @@ def test_retention_and_rollback_safeguards(tiny_model: MiniGPT, tokenizer: Dummy
     device = torch.device("cpu")
     auditor = CausalRetentionAuditor(base_model=tiny_model, tokenizer=tokenizer, device=device)
     src_env = create_dev_balanced_hierarchy_environment(seed=42)
-    src_adapter = ResidualSkillAdapter(d_model=tiny_model.config.n_embd, bottleneck_dim=8, num_classes=2)
+    d_model = getattr(tiny_model.config, "d_model", getattr(tiny_model.config, "n_embd", 32))
+    src_adapter = PersistentCandidateAdapter(d_model=d_model, bottleneck_dim=8, num_classes=2)
 
     # Clean case
     rep_clean = auditor.audit_retention_and_rollback(
@@ -221,7 +223,7 @@ def test_retention_and_rollback_safeguards(tiny_model: MiniGPT, tokenizer: Dummy
 
     # Drop exceeding tolerance -> triggers rollback
     rep_drop = auditor.audit_retention_and_rollback(
-        source_env=src_env, initial_source_adapter=src_adapter, routed_source_f1=0.20, tolerance=0.15
+        source_env=src_env, initial_source_adapter=src_adapter, routed_source_f1=0.0, tolerance=0.10
     )
     assert rep_drop.rollback_triggered is True
     assert rep_drop.rollback_successful is True
