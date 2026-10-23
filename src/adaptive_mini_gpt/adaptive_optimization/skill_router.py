@@ -124,23 +124,32 @@ class TaskConditionedSkillRouter(nn.Module):
                 return RouteDestination.SOURCE_SKILL, 1.0, 0.0
             return RouteDestination.COMPOSITE_SKILL, 1.0, 0.0
 
-        # Autonomous mode: Evaluate hidden state through frozen source adapter
+        # Autonomous mode: Evaluate hidden state through frozen source adapter and composite adapter
         with torch.no_grad():
             self.source_adapter.eval()
+            self.composite_adapter.eval()
+
             src_logits = self.source_adapter(hidden_states)
-            probs = F.softmax(src_logits, dim=-1)
-            conf, _ = torch.max(probs, dim=-1)
-            conf_val = float(conf.item())
-            # Shannon entropy
-            p_clamped = torch.clamp(probs, min=1e-12)
-            ent_val = float(-torch.sum(p_clamped * torch.log(p_clamped), dim=-1).item())
+            comp_logits = self.composite_adapter(hidden_states)
 
-        # If source is confident and decisive, it is recognized as source domain
-        if conf_val >= self.confidence_threshold and ent_val <= self.entropy_threshold:
-            return RouteDestination.SOURCE_SKILL, conf_val, ent_val
+            p_src = F.softmax(src_logits, dim=-1)
+            p_comp = F.softmax(comp_logits, dim=-1)
 
-        # Otherwise, query requires the target-adapted composite module
-        return RouteDestination.COMPOSITE_SKILL, conf_val, ent_val
+            conf_src = float(torch.max(p_src, dim=-1)[0].item())
+            conf_comp = float(torch.max(p_comp, dim=-1)[0].item())
+
+            ent_src = float(-torch.sum(torch.clamp(p_src, min=1e-12) * torch.log(torch.clamp(p_src, min=1e-12)), dim=-1).item())
+            ent_comp = float(-torch.sum(torch.clamp(p_comp, min=1e-12) * torch.log(torch.clamp(p_comp, min=1e-12)), dim=-1).item())
+
+        # Decide route based on relative confidence and decisive entropy
+        if self.fresh_adapter is not None and conf_src < 0.38 and conf_comp < 0.38:
+            return RouteDestination.FRESH_FALLBACK, max(conf_src, conf_comp), min(ent_src, ent_comp)
+
+        # Route to SOURCE_SKILL if source adapter is more confident or decisive than composite
+        if (conf_src > conf_comp) or (conf_src >= conf_comp - 0.05 and ent_src <= ent_comp):
+            return RouteDestination.SOURCE_SKILL, conf_src, ent_src
+        else:
+            return RouteDestination.COMPOSITE_SKILL, conf_comp, ent_comp
 
     def forward(
         self,

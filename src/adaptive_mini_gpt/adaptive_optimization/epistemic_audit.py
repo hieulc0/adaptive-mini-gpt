@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import logging
 import math
+import numpy as np
 import random
 import time
 from dataclasses import dataclass
