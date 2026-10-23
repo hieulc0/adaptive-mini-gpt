@@ -11,7 +11,7 @@ import torch.nn.functional as F
 from adaptive_mini_gpt.guided_experiment.environment import (
     AutonomousEnvironment,
     EnvironmentQuery,
-    MinimalPairItem,
+    MinimalPairControl,
     RuleHypothesis,
 )
 
@@ -36,20 +36,18 @@ class MinimalPairEngine:
         cls,
         env: AutonomousEnvironment,
         max_pairs: int = 12,
-    ) -> list[MinimalPairItem]:
+    ) -> list[MinimalPairControl]:
         """Synthesize verified minimal pairs where a single edge perturbation flips ground-truth reachability."""
-        pairs: list[MinimalPairItem] = []
+        pairs: list[MinimalPairControl] = []
         entities = env.entities
         base_edges = list(env.base_edges)
         edge_set = set(base_edges)
 
         # 1. Bridge Deletions: If u -> v is a critical edge, removing it turns YES -> NO or UNKNOWN
         for u, v in base_edges:
-            # Query the direct connection
             ans_base = env.oracle_evaluate_query(u, v)
             if ans_base == "YES":
                 perturbed_edges = [e for e in base_edges if e != (u, v)]
-                # Evaluate under perturbed edge set
                 ans_pert = env.hypothesis.evaluate_query(
                     source=u,
                     target=v,
@@ -73,11 +71,11 @@ class MinimalPairEngine:
                         expected_answer=ans_pert,
                         question_text=f"Without bridge {u}->{v}, does {u} {env.relation_name} {v}?",
                     )
-                    pairs.append(MinimalPairItem(
+                    pairs.append(MinimalPairControl(
+                        pair_id=f"bridge_cut_{len(pairs)}",
                         base_query=base_q,
                         perturbed_query=pert_q,
                         perturbation_type="BRIDGE_DELETION",
-                        expected_differential=f"{ans_base}->{ans_pert}",
                     ))
                     if len(pairs) >= max_pairs // 2:
                         break
@@ -103,18 +101,18 @@ class MinimalPairEngine:
                             expected_answer=ans_vu,
                             question_text=f"Does {v} {env.relation_name} {u}?",
                         )
-                        pairs.append(MinimalPairItem(
+                        pairs.append(MinimalPairControl(
+                            pair_id=f"dir_rev_{len(pairs)}",
                             base_query=q_uv,
                             perturbed_query=q_vu,
                             perturbation_type="DIRECTIONAL_REVERSAL",
-                            expected_differential=f"{ans_uv}->{ans_vu}",
                         ))
                         if len(pairs) >= max_pairs:
                             break
             if len(pairs) >= max_pairs:
                 break
 
-        # If not enough pairs, add 2-hop bridge cuts
+        # 3. Two-hop bridge cuts
         if len(pairs) < max_pairs:
             for u in entities:
                 for v in entities:
@@ -122,7 +120,6 @@ class MinimalPairEngine:
                         if len({u, v, w}) == 3:
                             if (u, v) in edge_set and (v, w) in edge_set:
                                 ans_base = env.oracle_evaluate_query(u, w)
-                                # Cut v -> w
                                 pert_edges = [e for e in base_edges if e != (v, w)]
                                 ans_pert = env.hypothesis.evaluate_query(
                                     source=u,
@@ -141,10 +138,10 @@ class MinimalPairEngine:
                                         source=u, target=w, relation_name=env.relation_name,
                                         expected_answer=ans_pert, question_text=f"Without {v}->{w}, does {u} {env.relation_name} {w}?",
                                     )
-                                    pairs.append(MinimalPairItem(
+                                    pairs.append(MinimalPairControl(
+                                        pair_id=f"two_hop_cut_{len(pairs)}",
                                         base_query=b_q, perturbed_query=p_q,
                                         perturbation_type="TWO_HOP_BRIDGE_CUT",
-                                        expected_differential=f"{ans_base}->{ans_pert}",
                                     ))
                                     if len(pairs) >= max_pairs:
                                         break
@@ -155,7 +152,7 @@ class MinimalPairEngine:
     def evaluate_paired_correctness(
         cls,
         predict_fn: Any,
-        minimal_pairs: list[MinimalPairItem],
+        minimal_pairs: list[MinimalPairControl],
     ) -> MinimalPairEvaluationResult:
         """Evaluate whether predict_fn outputs the exact ground-truth answer on BOTH sides of minimal pairs."""
         if not minimal_pairs:

@@ -9,7 +9,7 @@ from adaptive_mini_gpt.guided_experiment.environment import (
     AutonomousEnvironment,
     EnvironmentQuery,
     EXPANDED_HYPOTHESES,
-    MinimalPairItem,
+    MinimalPairControl,
     OUT_OF_HYPOTHESIS_PARITY,
     RuleHypothesis,
     UNKNOWN_RULE,
