@@ -399,6 +399,15 @@ def compute_contrastive_representation_loss(
     Encourages distinct clustering between source and target skills without imposing
     rigid orthogonality across relational features.
     """
+    if source_representations.dim() == 3:
+        source_representations = source_representations.mean(dim=1)
+    if target_representations.dim() == 3:
+        target_representations = target_representations.mean(dim=1)
+
+    if source_representations.size(0) != target_representations.size(0):
+        source_representations = source_representations.mean(dim=0, keepdim=True)
+        target_representations = target_representations.mean(dim=0, keepdim=True)
+
     # Normalize
     z_src = F.normalize(source_representations, p=2, dim=-1)
     z_tgt = F.normalize(target_representations, p=2, dim=-1)

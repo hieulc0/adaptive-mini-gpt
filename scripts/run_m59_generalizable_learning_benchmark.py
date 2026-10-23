@@ -352,8 +352,10 @@ def main() -> None:
         router.train_minimal_gate(gate_data, steps=20)
 
         # Contrastive representation loss evaluation (Phase 5)
-        h_src_sample = torch.cat(src_obs_h, dim=0).detach()
-        h_tgt_sample = torch.cat(tgt_obs_h, dim=0).detach()
+        h_src_vecs = [h.squeeze(0).mean(dim=0, keepdim=True).detach() for h in src_obs_h]
+        h_tgt_vecs = [h.squeeze(0).mean(dim=0, keepdim=True).detach() for h in tgt_obs_h]
+        h_src_sample = torch.cat(h_src_vecs, dim=0)
+        h_tgt_sample = torch.cat(h_tgt_vecs, dim=0)
         contrastive_loss_val = float(compute_contrastive_representation_loss(h_src_sample, h_tgt_sample).item())
 
         router_reports: dict[str, Any] = {}
