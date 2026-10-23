@@ -135,29 +135,29 @@ def test_causal_memory_ablation_stores() -> None:
     """Test 4: Verify construction of the 7 ablation memory stores."""
     # Cold start arms
     store_a = build_ablated_memory_store(CausalAblationArm.ARM_A_NO_HISTORY)
-    assert len(store_a.episodes) == 0
+    assert len(store_a.records) == 0
 
     store_f = build_ablated_memory_store(CausalAblationArm.ARM_F_FIXED_40_STEPS)
-    assert len(store_f.episodes) == 0
+    assert len(store_f.records) == 0
 
     # Relevant history
     store_b = build_ablated_memory_store(CausalAblationArm.ARM_B_RELEVANT_HISTORY)
-    assert len(store_b.episodes) == 3
-    assert all(ep.adaptation_succeeded for ep in store_b.episodes)
+    assert len(store_b.records) == 3
+    assert all(not ep.was_negative_transfer for ep in store_b.records)
 
     # Random history
     store_c = build_ablated_memory_store(CausalAblationArm.ARM_C_RANDOM_UNRELATED_HISTORY)
-    assert len(store_c.episodes) == 4
+    assert len(store_c.records) == 4
 
     # Shuffled history
     store_d = build_ablated_memory_store(CausalAblationArm.ARM_D_SHUFFLED_OUTCOMES_HISTORY)
-    assert len(store_d.episodes) == 3
-    assert all(not ep.adaptation_succeeded for ep in store_d.episodes)
+    assert len(store_d.records) == 3
+    assert all(ep.was_negative_transfer for ep in store_d.records)
 
     # Incompatible history
     store_e = build_ablated_memory_store(CausalAblationArm.ARM_E_INCOMPATIBLE_HISTORY)
-    assert len(store_e.episodes) == 3
-    assert all(ep.controller_action == "RESET" for ep in store_e.episodes)
+    assert len(store_e.records) == 3
+    assert all(ep.recommended_action == "RESET" for ep in store_e.records)
 
 
 def test_functional_skill_router_divergence(tiny_model: MiniGPT, tokenizer: DummyTokenizer) -> None:

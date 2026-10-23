@@ -29,8 +29,8 @@ from adaptive_mini_gpt.causal_meta_learning.task_suite import (
     compute_observable_complexity,
 )
 from adaptive_mini_gpt.generalizable_learning.experiential_memory import (
-    ExperientialEpisodeRecord,
     ExperientialMemoryStore,
+    LearningEpisodeRecord,
 )
 from adaptive_mini_gpt.guided_experiment.environment import AutonomousEnvironment
 from adaptive_mini_gpt.model import MiniGPT
@@ -80,132 +80,91 @@ def build_ablated_memory_store(
 
     # Relevant base experiences (matching graph families)
     relevant_episodes = [
-        ExperientialEpisodeRecord(
+        LearningEpisodeRecord(
             episode_id="exp_train_chain_01",
-            env_id="train_genomics_hierarchy",
-            domain_name="CellularGenomics",
-            rule_hypothesis="DIR_TRANS",
-            task_complexity=ObservableTaskComplexity(
-                env_id="train_genomics_hierarchy",
-                num_nodes=6,
-                num_edges=5,
-                graph_diameter=5,
-                graph_density=0.167,
-                mean_degree=0.833,
-                transitive_reachability_density=0.50,
-                structural_complexity_index=7.4,
-            ),
-            initial_source_adapter="dev_balanced_hierarchy",
-            initial_source_compatibility=0.55,
-            allocated_budget_steps=25,
-            actual_steps_spent=25,
-            controller_action="TRAIN",
-            validation_loss_initial=0.693,
-            validation_loss_final=0.485,
-            validation_f1_initial=0.50,
-            validation_f1_final=0.75,
-            neural_auc_achieved=0.380,
-            retention_drop=0.00,
-            adaptation_succeeded=True,
+            task_id="train_genomics_hierarchy",
+            num_nodes=6,
+            graph_diameter=5,
+            graph_density=0.167,
+            structural_complexity_index=7.4,
+            prior_skill_id="source_hierarchy",
+            initial_sample_loss=0.693,
+            initial_sample_acc=0.55,
+            steps_spent=25,
+            final_loss=0.485,
+            final_f1=0.75,
+            learning_gain_f1=0.20,
+            was_negative_transfer=False,
+            recommended_action="TRAIN",
+            recommended_budget_steps=25,
         ),
-        ExperientialEpisodeRecord(
+        LearningEpisodeRecord(
             episode_id="exp_train_mesh_02",
-            env_id="train_cluster_mesh",
-            domain_name="DistributedMeshGrid",
-            rule_hypothesis="DENSE_CLIQUE",
-            task_complexity=ObservableTaskComplexity(
-                env_id="train_cluster_mesh",
-                num_nodes=6,
-                num_edges=6,
-                graph_diameter=2,
-                graph_density=0.20,
-                mean_degree=1.00,
-                transitive_reachability_density=0.33,
-                structural_complexity_index=4.6,
-            ),
-            initial_source_adapter="dev_balanced_hierarchy",
-            initial_source_compatibility=0.48,
-            allocated_budget_steps=15,
-            actual_steps_spent=15,
-            controller_action="KEEP",
-            validation_loss_initial=0.710,
-            validation_loss_final=0.520,
-            validation_f1_initial=0.48,
-            validation_f1_final=0.71,
-            neural_auc_achieved=0.420,
-            retention_drop=0.00,
-            adaptation_succeeded=True,
+            task_id="train_cluster_mesh",
+            num_nodes=6,
+            graph_diameter=2,
+            graph_density=0.20,
+            structural_complexity_index=4.6,
+            prior_skill_id="source_hierarchy",
+            initial_sample_loss=0.710,
+            initial_sample_acc=0.50,
+            steps_spent=15,
+            final_loss=0.520,
+            final_f1=0.71,
+            learning_gain_f1=0.21,
+            was_negative_transfer=False,
+            recommended_action="KEEP",
+            recommended_budget_steps=15,
         ),
-        ExperientialEpisodeRecord(
+        LearningEpisodeRecord(
             episode_id="exp_train_deep_dag_03",
-            env_id="train_deep_causal_chain",
-            domain_name="EpidemiologicalCausality",
-            rule_hypothesis="DIR_TRANS",
-            task_complexity=ObservableTaskComplexity(
-                env_id="train_deep_causal_chain",
-                num_nodes=7,
-                num_edges=6,
-                graph_diameter=6,
-                graph_density=0.143,
-                mean_degree=0.857,
-                transitive_reachability_density=0.50,
-                structural_complexity_index=8.6,
-            ),
-            initial_source_adapter="dev_balanced_hierarchy",
-            initial_source_compatibility=0.52,
-            allocated_budget_steps=35,
-            actual_steps_spent=35,
-            controller_action="TRAIN",
-            validation_loss_initial=0.705,
-            validation_loss_final=0.460,
-            validation_f1_initial=0.50,
-            validation_f1_final=0.78,
-            neural_auc_achieved=0.365,
-            retention_drop=0.00,
-            adaptation_succeeded=True,
+            task_id="train_deep_causal_chain",
+            num_nodes=7,
+            graph_diameter=6,
+            graph_density=0.143,
+            structural_complexity_index=8.6,
+            prior_skill_id="source_hierarchy",
+            initial_sample_loss=0.705,
+            initial_sample_acc=0.52,
+            steps_spent=35,
+            final_loss=0.460,
+            final_f1=0.78,
+            learning_gain_f1=0.26,
+            was_negative_transfer=False,
+            recommended_action="TRAIN",
+            recommended_budget_steps=35,
         ),
     ]
 
     if arm == CausalAblationArm.ARM_B_RELEVANT_HISTORY:
         for ep in relevant_episodes:
-            store.store_episode(ep)
+            store.add_record(ep)
         return store
 
     if arm == CausalAblationArm.ARM_C_RANDOM_UNRELATED_HISTORY:
         # Generate arbitrary synthetic topological features and budgets
         for i in range(4):
             rand_nodes = rng.randint(20, 50)
-            rand_edges = rng.randint(50, 150)
             rand_steps = rng.choice([5, 10, 45, 50])
-            ep = ExperientialEpisodeRecord(
+            ep = LearningEpisodeRecord(
                 episode_id=f"exp_random_{i}",
-                env_id=f"synthetic_random_graph_{i}",
-                domain_name="SyntheticRandomGraph",
-                rule_hypothesis="UNKNOWN",
-                task_complexity=ObservableTaskComplexity(
-                    env_id=f"synthetic_random_graph_{i}",
-                    num_nodes=rand_nodes,
-                    num_edges=rand_edges,
-                    graph_diameter=rng.randint(15, 30),
-                    graph_density=rng.uniform(0.6, 0.9),
-                    mean_degree=rng.uniform(5.0, 15.0),
-                    transitive_reachability_density=rng.uniform(0.7, 0.95),
-                    structural_complexity_index=rng.uniform(25.0, 50.0),
-                ),
-                initial_source_adapter="dev_balanced_hierarchy",
-                initial_source_compatibility=rng.uniform(0.1, 0.9),
-                allocated_budget_steps=rand_steps,
-                actual_steps_spent=rand_steps,
-                controller_action=rng.choice(["KEEP", "TRAIN", "RESET"]),
-                validation_loss_initial=rng.uniform(0.6, 1.2),
-                validation_loss_final=rng.uniform(0.4, 0.9),
-                validation_f1_initial=rng.uniform(0.4, 0.6),
-                validation_f1_final=rng.uniform(0.5, 0.8),
-                neural_auc_achieved=rng.uniform(0.2, 0.4),
-                retention_drop=0.0,
-                adaptation_succeeded=True,
+                task_id=f"synthetic_random_graph_{i}",
+                num_nodes=rand_nodes,
+                graph_diameter=rng.randint(15, 30),
+                graph_density=rng.uniform(0.6, 0.9),
+                structural_complexity_index=rng.uniform(25.0, 50.0),
+                prior_skill_id="source_hierarchy",
+                initial_sample_loss=rng.uniform(0.6, 1.2),
+                initial_sample_acc=rng.uniform(0.4, 0.6),
+                steps_spent=rand_steps,
+                final_loss=rng.uniform(0.4, 0.9),
+                final_f1=rng.uniform(0.5, 0.8),
+                learning_gain_f1=rng.uniform(0.1, 0.3),
+                was_negative_transfer=False,
+                recommended_action=rng.choice(["KEEP", "TRAIN", "RESET"]),
+                recommended_budget_steps=rand_steps,
             )
-            store.store_episode(ep)
+            store.add_record(ep)
         return store
 
     if arm == CausalAblationArm.ARM_D_SHUFFLED_OUTCOMES_HISTORY:
@@ -217,46 +176,36 @@ def build_ablated_memory_store(
         for i, ep in enumerate(relevant_episodes):
             ep_shuffled = copy.deepcopy(ep)
             ep_shuffled.episode_id = f"exp_shuffled_{i}"
-            ep_shuffled.allocated_budget_steps = shuffled_steps[i]
-            ep_shuffled.actual_steps_spent = shuffled_steps[i]
-            ep_shuffled.controller_action = shuffled_actions[i]
-            ep_shuffled.validation_f1_final = rng.uniform(0.35, 0.55)
-            ep_shuffled.adaptation_succeeded = False
-            store.store_episode(ep_shuffled)
+            ep_shuffled.steps_spent = shuffled_steps[i]
+            ep_shuffled.recommended_budget_steps = shuffled_steps[i]
+            ep_shuffled.recommended_action = shuffled_actions[i]
+            ep_shuffled.final_f1 = rng.uniform(0.35, 0.55)
+            ep_shuffled.was_negative_transfer = True
+            store.add_record(ep_shuffled)
         return store
 
     if arm == CausalAblationArm.ARM_E_INCOMPATIBLE_HISTORY:
         # History exclusively from incompatible rule structures (severe negative transfer)
         for i in range(3):
-            ep_incomp = ExperientialEpisodeRecord(
+            ep_incomp = LearningEpisodeRecord(
                 episode_id=f"exp_incomp_{i}",
-                env_id=f"incompatible_parity_{i}",
-                domain_name="IncompatibleParityDomain",
-                rule_hypothesis="OUT_OF_HYPOTHESIS_PARITY",
-                task_complexity=ObservableTaskComplexity(
-                    env_id=f"incompatible_parity_{i}",
-                    num_nodes=8,
-                    num_edges=8,
-                    graph_diameter=4,
-                    graph_density=0.14,
-                    mean_degree=1.0,
-                    transitive_reachability_density=0.25,
-                    structural_complexity_index=6.9,
-                ),
-                initial_source_adapter="dev_balanced_hierarchy",
-                initial_source_compatibility=0.20,
-                allocated_budget_steps=40,
-                actual_steps_spent=40,
-                controller_action="RESET",
-                validation_loss_initial=1.15,
-                validation_loss_final=1.45,
-                validation_f1_initial=0.35,
-                validation_f1_final=0.28,
-                neural_auc_achieved=0.150,
-                retention_drop=0.25,
-                adaptation_succeeded=False,
+                task_id=f"incompatible_parity_{i}",
+                num_nodes=8,
+                graph_diameter=4,
+                graph_density=0.14,
+                structural_complexity_index=6.9,
+                prior_skill_id="source_hierarchy",
+                initial_sample_loss=1.15,
+                initial_sample_acc=0.35,
+                steps_spent=40,
+                final_loss=1.45,
+                final_f1=0.28,
+                learning_gain_f1=-0.07,
+                was_negative_transfer=True,
+                recommended_action="RESET",
+                recommended_budget_steps=10,
             )
-            store.store_episode(ep_incomp)
+            store.add_record(ep_incomp)
         return store
 
     return store
@@ -337,7 +286,6 @@ class CausalAblationAdaptationEngine:
         ).to(self.device)
 
         if source_adapter is not None:
-            # Transfer source weights into target adapter base
             with torch.no_grad():
                 target_adapter.down_proj.weight.copy_(source_adapter.down_proj.weight)
                 target_adapter.up_proj.weight.copy_(source_adapter.up_proj.weight)
@@ -358,33 +306,22 @@ class CausalAblationAdaptationEngine:
 
         t_lookup_start = time.perf_counter()
         target_budget_steps = 40
-        controller_action = "TRAIN"
+
+        # Initial small sample diagnostic
+        init_loss, init_f1 = self._evaluate_split(target_adapter, train_queries[:4])
 
         if arm == CausalAblationArm.ARM_F_FIXED_40_STEPS:
             target_budget_steps = 40
         elif arm == CausalAblationArm.ARM_G_PROGRESS_COST_NO_MEMORY:
-            # Dynamic progress controller: initial allocation 20 steps, dynamically extended by 10
             target_budget_steps = 20
         else:
-            # Experiential memory arms (A, B, C, D, E)
-            if len(memory_store.episodes) == 0:
-                # Cold start: defaults based on complexity
-                target_budget_steps = 30 if complexity.structural_complexity_index > 7.0 else 20
+            rec = memory_store.query_recommendation(
+                complexity=complexity, sample_loss=init_loss, sample_acc=init_f1
+            )
+            if rec.negative_transfer_warning or rec.recommended_action == "RESET":
+                target_budget_steps = 15
             else:
-                similar = memory_store.retrieve_similar_experiences(complexity, top_k=2)
-                if similar:
-                    rec, sim_score = similar[0]
-                    if rec.adaptation_succeeded and sim_score > 0.60:
-                        target_budget_steps = rec.actual_steps_spent
-                        controller_action = rec.controller_action
-                    elif not rec.adaptation_succeeded:
-                        # Negative transfer warning: short budget or reset
-                        target_budget_steps = 15
-                        controller_action = "KEEP"
-                    else:
-                        target_budget_steps = 25
-                else:
-                    target_budget_steps = 25
+                target_budget_steps = rec.recommended_budget_steps
 
         lookup_overhead_ms = (time.perf_counter() - t_lookup_start) * 1000.0
 
@@ -392,9 +329,9 @@ class CausalAblationAdaptationEngine:
         target_budget_steps = max(10, min(40, target_budget_steps))
 
         step_history: list[int] = [0]
-        init_loss, init_f1 = self._evaluate_split(target_adapter, val_queries)
-        loss_history: list[float] = [init_loss]
-        f1_history: list[float] = [init_f1]
+        full_init_loss, full_init_f1 = self._evaluate_split(target_adapter, val_queries)
+        loss_history: list[float] = [full_init_loss]
+        f1_history: list[float] = [full_init_f1]
 
         # 3. Optimization Loop
         total_steps = 0
@@ -411,20 +348,17 @@ class CausalAblationAdaptationEngine:
             optimizer.step()
             total_steps += 1
 
-            # Intermediate evaluation every 10 steps
             if step % 10 == 0 or step == target_budget_steps:
                 cur_loss, cur_f1 = self._evaluate_split(target_adapter, val_queries)
                 step_history.append(step)
                 loss_history.append(cur_loss)
                 f1_history.append(cur_f1)
 
-                # Check progress-cost dynamic decision
                 if arm == CausalAblationArm.ARM_G_PROGRESS_COST_NO_MEMORY and step == 20:
                     delta_loss = loss_history[-2] - cur_loss
                     if delta_loss > 0.05 and cur_f1 < 0.70 and target_budget_steps < 40:
                         target_budget_steps = min(40, target_budget_steps + 10)
 
-        # 4. Learning Curve AUC Computation (Trapezoidal Rule normalized by max budget 40)
         norm_steps = [s / 40.0 for s in step_history]
         auc = float(np.trapz(f1_history, norm_steps))
 
