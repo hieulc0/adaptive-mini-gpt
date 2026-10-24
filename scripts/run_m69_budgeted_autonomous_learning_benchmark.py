@@ -55,6 +55,11 @@ from adaptive_mini_gpt.modular_skill_learning.uncertainty_diagnostic import (
     EpistemicUncertaintyDiagnostic,
 )
 from adaptive_mini_gpt.training.checkpoint import CheckpointManager
+from adaptive_mini_gpt.modular_skill_learning.task_suite import (
+    create_source_consortium_bipartite,
+    create_source_dag_transitive,
+    create_source_metabolic_inhibitor,
+)
 from adaptive_mini_gpt.utility_calibrated_selection.task_environments import (
     create_chromatin_stage1_train_env,
     create_chromatin_stage2_qual_env,
@@ -67,9 +72,6 @@ from adaptive_mini_gpt.utility_calibrated_selection.task_environments import (
     create_rail_stage1_train_env,
     create_rail_stage2_qual_env,
     create_rail_stage3_eval_env,
-    create_source_consortium_bipartite,
-    create_source_dag_transitive,
-    create_source_metabolic_inhibitor,
 )
 
 logging.basicConfig(
