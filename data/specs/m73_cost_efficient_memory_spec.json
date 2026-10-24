@@ -1,0 +1,76 @@
+{
+  "spec_id": "m73_cost_efficient_memory_spec",
+  "version": "1.0",
+  "description": "Standardized multi-world lifelong continual learning benchmark for M73 cost-efficient neural memory and causal attribution",
+  "default_seed": 42,
+  "families": [
+    {
+      "family_id": "PARITY_CYCLE",
+      "description": "Autonomous Rail Parity Grid with alternating coordinate station power",
+      "relation_name": "dispatches_consist_to",
+      "universe_size": 24,
+      "is_directed": false
+    },
+    {
+      "family_id": "CHROMATIN_LATTICE",
+      "description": "Epigenetic Chromatin Remodeling with histone acetylation and boundary silencers",
+      "relation_name": "propagates_acetylation_to",
+      "universe_size": 20,
+      "is_directed": true
+    },
+    {
+      "family_id": "TRANSITIVE_DAG",
+      "description": "Transitive reachability across multi-tier directed acyclic graphs",
+      "relation_name": "routes_payload_to",
+      "universe_size": 16,
+      "is_directed": true
+    },
+    {
+      "family_id": "INHIBITOR_CASCADE",
+      "description": "Metabolic phosphorylation cascade with competitive inhibitors",
+      "relation_name": "catalyzes_cascade_to",
+      "universe_size": 18,
+      "is_directed": true
+    },
+    {
+      "family_id": "FAULT_CASCADE",
+      "description": "Cascading trip breakers in electrical overcurrent grid",
+      "relation_name": "propagates_surge_to",
+      "universe_size": 18,
+      "is_directed": true
+    },
+    {
+      "family_id": "ANTI_TRANSITIVE_DAG",
+      "description": "Inverted transitive reachability where paths imply disconnection",
+      "relation_name": "routes_payload_to",
+      "universe_size": 16,
+      "is_directed": true
+    },
+    {
+      "family_id": "INVERTED_PARITY_CYCLE",
+      "description": "Inverted coordinate rail dispatch where identical parity implies disconnection",
+      "relation_name": "dispatches_consist_to",
+      "universe_size": 24,
+      "is_directed": false
+    },
+    {
+      "family_id": "MODULAR_CONGRUENCE_MOD_3",
+      "description": "Relational modular arithmetic congruence modulo 3",
+      "relation_name": "is_congruent_mod_3_with",
+      "universe_size": 20,
+      "is_directed": false
+    },
+    {
+      "family_id": "HIERARCHICAL_SUBSUMPTION",
+      "description": "Taxonomic ontology inheritance tree with multi-level subsumption",
+      "relation_name": "subsumes_category",
+      "universe_size": 20,
+      "is_directed": true
+    }
+  ],
+  "partition_sizes": {
+    "train": 60,
+    "dev": 30,
+    "sealed_test": 30
+  }
+}
