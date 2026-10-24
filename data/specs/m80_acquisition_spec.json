@@ -1,0 +1,52 @@
+{
+  "milestone": "M80",
+  "name": "Autonomous Neural Skill Acquisition and Transfer",
+  "hypothesis": "When Adaptive Mini-GPT encounters an unsupported task diagnosed as a genuine skill gap (S(P) < -1.65), autonomously acquiring a compact rank-16 neural adapter (2,592 parameters) on top of frozen Transformer representations achieves >=85% held-out exact match, can be safely admitted to the active repertoire, expands the plan hypothesis space from 10 to 17 candidate plans, and enables zero-shot neural skill composition with previously learned primitives without compound retraining or base parameter drift, outperforming fresh random initialization and maintaining 100% retention on core arithmetic and logic capabilities.",
+  "architectural_principle": "The student must learn transferable neural capabilities, not merely accumulate task-specific answers or call symbolic calculators.",
+  "parameters": {
+    "core_backbone": 928512,
+    "task_heads": 46146,
+    "expanded_checkpoint_total": 974658,
+    "rank16_adapter": 2592,
+    "rank8_adapter": 1432,
+    "base_growth": 0
+  },
+  "phases": {
+    "phase_1_baseline_audit": "Forensic audit of M79 query accounting and nominal oracle probe control",
+    "phase_2_autonomous_acquisition": "Epistemic skill gap detection, bounded adapter training (T in {20, 40, 60, 80}), held-out EM >= 0.85 qualification gate",
+    "phase_3_learning_to_learn": "Comparative evaluation: FRESH_RANDOM vs PRETRAINED_BACKBONE vs EXPERIENCE_WARM_START vs SHUFFLED_WEIGHTS",
+    "phase_4_transfer_and_composition": "Repertoire expansion (10 -> 17 plans) and zero-shot compound composition (Arm A-F)",
+    "phase_5_capacity_and_safety": "Parameter accounting, bit-exact rollback, and 100% core retention"
+  },
+  "transfer_arms": [
+    "ARM_A_AUTONOMOUS_PLAN_EXPANDED",
+    "ARM_B_ORACLE_PLAN_PROVIDED",
+    "ARM_C_INVERTED_ORDER_CONTROL",
+    "ARM_D_SINGLE_SKILL_ABLATION",
+    "ARM_E_SHUFFLED_ACQUIRED_ADAPTER",
+    "ARM_F_FRESH_MONOLITHIC_ADAPTER"
+  ],
+  "evaluation_design": {
+    "seeds": [42, 43, 44, 45, 46],
+    "unsupported_skill_rule": "BITWISE_XOR_MASK",
+    "compound_transfer_tasks": [
+      "REFLECT_THEN_XOR",
+      "XOR_THEN_REFLECT",
+      "SHIFT3_THEN_XOR",
+      "XOR_THEN_SHIFT3"
+    ],
+    "admission_gate_em": 0.85,
+    "statistical_model": "Paired Student-t test (df=4, t_crit=2.776 at 95% two-tailed)"
+  },
+  "success_criteria": {
+    "skill_gap_identification": ">= 0.95 detection rate on unsupported tasks",
+    "autonomous_acquisition_generalization": ">= 0.85 held-out exact match on qualification set",
+    "repertoire_expansion": "Expands plan hypothesis space from 10 to 17 candidate plans",
+    "rollback_invariance": "Bit-exact restoration of 10-plan space upon skill rollback",
+    "knowledge_reuse_and_transfer": "Autonomous plan discovery achieves >= 0.75 EM on compound tasks combining old and new skills",
+    "causal_weight_attribution": "p < 0.01 superiority over shuffled adapter weights",
+    "learning_to_learn": "Pretrained representations significantly improve acquisition over fresh random student",
+    "base_model_invariance": "Bit-exact SHA-256 hash invariance of base model weights",
+    "core_retention": "100.0% accuracy on 20/20 arithmetic carry and 8/8 operational logic probes"
+  }
+}

@@ -8,6 +8,8 @@ Implements:
     * AFFINE_TRANSFORM: si -> (3 * si + 1) % 16
     * COMPLEMENT_REFLECT: si -> 15 - si
     * NONLINEAR_SBOX: bijective non-linear permutation pi(si)
+    * BITWISE_XOR_MASK: si -> (si ^ 6) % 16
+    * MODULAR_DOUBLING: si -> (2 * si) % 16
 - Four isolated, disjoint partitions per task instance:
     * train (practice/adaptation examples)
     * dev (router observable examples)
@@ -34,6 +36,8 @@ class ProceduralRuleFamily(StrEnum):
     AFFINE_TRANSFORM = "AFFINE_TRANSFORM"
     COMPLEMENT_REFLECT = "COMPLEMENT_REFLECT"
     NONLINEAR_SBOX = "NONLINEAR_SBOX"
+    BITWISE_XOR_MASK = "BITWISE_XOR_MASK"
+    MODULAR_DOUBLING = "MODULAR_DOUBLING"
 
 
 @dataclass(frozen=True)
@@ -71,19 +75,24 @@ class ProceduralTaskDataset:
 
 
 def apply_procedural_rule(
-    rule_family: ProceduralRuleFamily, seq: tuple[int, ...], vocab_size: int = 16
+    rule_family: ProceduralRuleFamily | str, seq: tuple[int, ...], vocab_size: int = 16
 ) -> tuple[int, ...]:
     """Deterministically map input sequence to target sequence under the rule."""
-    if rule_family == ProceduralRuleFamily.CAESAR_SHIFT_MOD3:
+    rf_str = rule_family.value if hasattr(rule_family, "value") else str(rule_family)
+    if rf_str == ProceduralRuleFamily.CAESAR_SHIFT_MOD3:
         return tuple((s + 3) % vocab_size for s in seq)
-    elif rule_family == ProceduralRuleFamily.CAESAR_SHIFT_MOD5:
+    elif rf_str == ProceduralRuleFamily.CAESAR_SHIFT_MOD5:
         return tuple((s + 5) % vocab_size for s in seq)
-    elif rule_family == ProceduralRuleFamily.AFFINE_TRANSFORM:
+    elif rf_str == ProceduralRuleFamily.AFFINE_TRANSFORM:
         return tuple((3 * s + 1) % vocab_size for s in seq)
-    elif rule_family == ProceduralRuleFamily.COMPLEMENT_REFLECT:
+    elif rf_str == ProceduralRuleFamily.COMPLEMENT_REFLECT:
         return tuple((vocab_size - 1 - s) for s in seq)
-    elif rule_family == ProceduralRuleFamily.NONLINEAR_SBOX:
+    elif rf_str == ProceduralRuleFamily.NONLINEAR_SBOX:
         return tuple(SBOX_MAP[s % len(SBOX_MAP)] for s in seq)
+    elif rf_str == ProceduralRuleFamily.BITWISE_XOR_MASK:
+        return tuple((s ^ 6) % vocab_size for s in seq)
+    elif rf_str == ProceduralRuleFamily.MODULAR_DOUBLING:
+        return tuple((2 * s) % vocab_size for s in seq)
     else:
         raise ValueError(f"Unknown rule family: {rule_family}")
 
@@ -131,10 +140,10 @@ class ProceduralTaskGenerator:
                 exs.append(
                     ProceduralExample(
                         example_id=f"{prefix}_{idx}",
-                        rule_family=rule_family.value,
+                        rule_family=str(rule_family.value if hasattr(rule_family, "value") else rule_family),
                         input_tokens=seq,
                         target_tokens=tgt,
-                        input_text=f"Rule: {rule_family.value} | Input: {in_str} -> Output:",
+                        input_text=f"Rule: {rule_family.value if hasattr(rule_family, 'value') else rule_family} | Input: {in_str} -> Output:",
                         target_text=tgt_str,
                     )
                 )

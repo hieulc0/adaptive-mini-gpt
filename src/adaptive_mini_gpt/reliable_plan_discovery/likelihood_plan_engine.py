@@ -29,7 +29,7 @@ from adaptive_mini_gpt.neural_weight_learning.pathway_instrumentation import (
 )
 from adaptive_mini_gpt.neural_weight_learning.procedural_tasks import ProceduralExample
 
-logger = logging.getLogger(__name__)\
+logger = logging.getLogger(__name__)
 
 
 class PlanExecutionStatus(StrEnum):
@@ -84,6 +84,27 @@ class LikelihoodPlanDiscoveryEngine:
     DEFAULT_MIN_TOKEN_ACCURACY: float = 0.50
 
     @classmethod
+    def _lookup_primitive(
+        cls, primitives: dict[Any, QualifiedPrimitiveRecord], stage: Any
+    ) -> QualifiedPrimitiveRecord:
+        """Resolve primitive record supporting both enum keys and dynamic string identifiers."""
+        if stage in primitives:
+            return primitives[stage]
+        if isinstance(stage, str):
+            for k, v in primitives.items():
+                if getattr(k, "value", None) == stage or getattr(k, "name", None) == stage:
+                    return v
+                if getattr(v, "skill_id", None) == stage or getattr(v, "rule_family", None) == stage:
+                    return v
+            try:
+                enum_key = PrimitiveSkillType(stage)
+                if enum_key in primitives:
+                    return primitives[enum_key]
+            except ValueError:
+                pass
+        raise KeyError(f"Primitive stage '{stage}' not found in active primitives: {list(primitives.keys())}")
+
+    @classmethod
     def execute_single_primitive(
         cls,
         model: MiniGPT,
@@ -92,7 +113,7 @@ class LikelihoodPlanDiscoveryEngine:
         device: torch.device,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """Execute a single neural primitive adapter on token sequences."""
-        dummy_examples = [
+        dummy_examples = [\
             ProceduralExample(
                 example_id=f"probe_{i}",
                 rule_family="PROBE",
@@ -119,7 +140,7 @@ class LikelihoodPlanDiscoveryEngine:
         model: MiniGPT,
         plan: CandidatePlan,
         demonstrations: list[CompoundProceduralExample],
-        primitives: dict[PrimitiveSkillType, QualifiedPrimitiveRecord],
+        primitives: dict[Any, QualifiedPrimitiveRecord],
         device: torch.device,
     ) -> LikelihoodPlanTrace:
         """Compute exact normalized sequence log-likelihood for a candidate plan on demonstrations.
@@ -143,8 +164,7 @@ class LikelihoodPlanDiscoveryEngine:
         total_passes = 0
 
         # Stage 1 execution
-        prim1_type = PrimitiveSkillType(plan.stages[0])
-        prim1_rec = primitives[prim1_type]
+        prim1_rec = cls._lookup_primitive(primitives, plan.stages[0])
         logits1, preds1 = cls.execute_single_primitive(model, prim1_rec, inputs, device)
         total_passes += len(inputs)
 
@@ -154,8 +174,7 @@ class LikelihoodPlanDiscoveryEngine:
         elif plan.depth == 2:
             # Stage 2 receives predictions of stage 1
             stage1_outputs = [tuple(p.tolist()) for p in preds1]
-            prim2_type = PrimitiveSkillType(plan.stages[1])
-            prim2_rec = primitives[prim2_type]
+            prim2_rec = cls._lookup_primitive(primitives, plan.stages[1])
             logits2, preds2 = cls.execute_single_primitive(model, prim2_rec, stage1_outputs, device)
             total_passes += len(inputs)
             final_logits = logits2
@@ -190,7 +209,7 @@ class LikelihoodPlanDiscoveryEngine:
         model: MiniGPT,
         task_id: str,
         demonstrations: list[CompoundProceduralExample],
-        primitives: dict[PrimitiveSkillType, QualifiedPrimitiveRecord],
+        primitives: dict[Any, QualifiedPrimitiveRecord],
         device: torch.device,
         candidate_plans: list[CandidatePlan] | None = None,
         min_log_likelihood: float = DEFAULT_MIN_LOG_LIKELIHOOD,
@@ -258,7 +277,6 @@ class LikelihoodPlanDiscoveryEngine:
         evidence_margin = max(0.0, best_ll - runner_up_ll)
 
         # Compute posterior probabilities over executable plans via softmax with temperature
-        # Scale temperature by sequence length * demonstrations count for total evidence
         evidence_scale = max(1.0, min(10.0, float(len(demonstrations) * 3)))
         ll_tensor = torch.tensor([t.sequence_log_likelihood for t in sorted_traces], dtype=torch.float32)
         posterior_probs = F.softmax(ll_tensor * (evidence_scale / temperature), dim=0)
