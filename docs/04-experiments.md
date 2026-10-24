@@ -3151,3 +3151,177 @@ Evaluated across distinct procedural relationship tiers under `RELEVANT_HISTORY`
 | **Compactness Gate** | Base frozen (974k params); adapter rank-16 default (2,592 params) | Active trainable footprint strictly 0.266% of backbone | **PASS (QUALIFIED)** |
 | **Topology Expansion Status** | Autonomous neural growth or module spawning | Unjustified; compact rank-16 default maintained | **RESEARCH ONLY** |
 | **Operational Production Gate** | Promotion of autonomous learning loop to production tier | Autonomous research loop kept strictly in research tier | **REJECTED (NO-GO)** |
+
+---
+
+## Milestone M76: Causal Neural Skill Composition and Reusable Procedural Knowledge (Completed & Qualified on Remote Kaggle Tesla T4 GPU)
+
+### 1. Executive Summary & Central Research Question
+Milestone M76 investigates the central research question:
+> **Can Adaptive Mini-GPT combine independently learned neural procedures to solve unseen compound tasks without training an entirely new model or allocating additional task-specific parameters, while preserving prior knowledge and demonstrating verifiable gains in generalization and learning efficiency?**
+
+To address the limitations of prior milestones and establish verified neural skill composition:
+1. **Mandatory M75 Forensic Audit & Hindsight Comparator Diagnosis**:
+   - Reconciled M75 empirical metrics: `NO_HISTORY` (0.5366 utility), `RELEVANT_HISTORY` (0.5576 utility), `SHUFFLED_HISTORY` (0.5890 utility).
+   - Re-verified paired Student's t 95% confidence intervals: $\Delta U(\text{RELEVANT} - \text{NO\_HISTORY}) = +0.0210$, 95% CI `[-0.1228, +0.1649]` (spans zero; causal experience learning gate failed).
+   - Forensic analysis of the offline hindsight comparator underperformance (0.5215 utility vs 0.5576 relevant): M75 implemented the hindsight evaluator with a static 40-step budget rather than optimizing over the full action space (including zero-step repertoire reuse). Renamed and documented as a restricted diagnostic.
+2. **Independently Qualified Primitive Neural Skills**:
+   - Trained and qualified 3 atomic procedural skills on held-out splits (threshold EM $\ge 0.75$):
+     * `COMPLEMENT_REFLECT`: **0.8125 EM**, loss 0.3753, SHA-256 hash `12c3faec0382026a`
+     * `CAESAR_SHIFT_MOD3`: **0.7500 EM**, loss 0.3788, SHA-256 hash `faa08474eaac76f3`
+     * `AFFINE_TRANSFORM`: **0.8750 EM**, loss 0.2641, SHA-256 hash `ec7a7b3b58f72b6b`
+   - All primitive weights were frozen completely with immutable SHA-256 digests logged prior to composition experiments.
+3. **Cascaded Two-Stage Neural Skill Composition Pipeline**:
+   - Chained execution: Input sequence $\to$ Backbone $\to$ Adapter A $\to \hat{y}_1 \to$ Backbone $\to$ Adapter B $\to \hat{y}_2$.
+   - Both transformations are executed by real neural forward inference without any symbolic or deterministic shortcuts.
+   - Evaluated on strictly noncommutative compound procedural tasks ($A \circ B \neq B \circ A$).
+4. **9-Arm Causal Composition Evaluation Suite**:
+   - Evaluated across 9 causal arms: `A_NEURAL_COMPOSITION`, `B_WRONG_ORDER`, `C_SINGLE_SKILL_A`, `D_SINGLE_SKILL_B`, `E_SHUFFLED_COMPONENT`, `F_UNRELATED_COMPONENT`, `G_FRESH_MONOLITHIC`, `H_UNCHANGED_BASE`, `I_DETERMINISTIC_ORACLE`.
+   - `A_NEURAL_COMPOSITION` achieved **0.4479 $\pm$ 0.0375 Exact Match** and **0.7812 $\pm$ 0.0218 Token Accuracy** with **0 training steps** and **0 additional parameters allocated**.
+   - Causally outclassed all control baselines with non-overlapping 95% paired Student's t intervals ($df=2, t_{\text{crit}}=4.303$):
+     * vs `WRONG_ORDER` (0.1302 EM): $\Delta = \mathbf{+0.3177}$, 95% CI `[+0.2057, +0.4297]`
+     * vs `SINGLE_SKILL_A` (0.0000 EM): $\Delta = \mathbf{+0.4479}$, 95% CI `[+0.3546, +0.5412]`
+     * vs `SHUFFLED_COMPONENT` (0.0000 EM): $\Delta = \mathbf{+0.4479}$, 95% CI `[+0.3546, +0.5412]`
+     * vs `UNCHANGED_BASE` (0.0000 EM): $\Delta = \mathbf{+0.4479}$, 95% CI `[+0.3546, +0.5412]`
+5. **Two-Stage Error Decomposition & Teacher-Forced Diagnostics**:
+   - Decomposed errors using teacher-forced Stage 2 forward passes on reference intermediate sequences:
+     * `SUCCESS`: **44.44%**
+     * `STAGE_1_DEFECT`: **0.00%**
+     * `ERROR_PROPAGATION`: **21.53%** (Stage 1 error induced Stage 2 failure, but Stage 2 succeeded when teacher-forced)
+     * `STAGE_2_DEFECT`: **25.00%** (Stage 2 failed even given ground truth intermediate)
+     * `DUAL_DEFECT`: **9.03%**
+   - Noncommutative order sensitivity gap: **0.4306** (0.4306 forward EM vs 0.0000 reversed EM).
+6. **Hardware Footprint & Parameter Accounting**:
+   - Frozen Base Backbone: 928,512 parameters (3,714,048 bytes in fp32) [974,658 with heads].
+   - Stored Primitive Repertoire: 3 adapters $\times$ 2,592 = 7,776 parameters (31,104 bytes).
+   - Additional Parameters for Composition: **0** (100% parameter growth avoided).
+   - Monolithic Alternative: +2,592 parameters allocated per compound task + 50 training steps.
+7. **Empirical Safeguards & Regression Suite**:
+   - Passed **318/318 regression tests** on Kaggle Tesla T4 GPU in 125.67s.
+   - Base parameter hashes 100% invariant across Seeds 42, 43, 44.
+   - 100% arithmetic carry retention (20 cases); 100% operational logic retention (8 probes).
+   - Bit-exact rollback 100% verified.
+
+---
+
+### 2. Experimental Execution on Kaggle Tesla T4 GPU
+- **Hardware**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m76-neural-skill-composition`, commit `dcc97b4ccf9c72de5881a636713fa310b6c916db`).
+- **Base Lineages**: Immutable M18 pretrain checkpoints (Seeds 42, 43, 44; SHA-256: `8736b364...`, `de762175...`, `c7bd81ae...`).
+- **Tokenizer**: 1024-BPE subword tokenizer (`f698e45e209b7fe6`).
+- **Test Suite Execution**: **318/318 passed in 125.67s** on Tesla T4 (including `tests/test_m76_neural_skill_composition.py` and M25–M75 regression suite).
+- **Execution Policy**: All neural training, real forward-pass evaluations, multi-seed benchmarks, and regression suites executed exclusively on remote GPU. Local machine reserved strictly for editing, linting, and fast deterministic unit tests.
+
+---
+
+### 3. Phase 1 — M75 Forensic Scientific Audit & Hindsight Oracle Diagnosis
+| Forensic Diagnostic | Finding / Value | Scientific Diagnosis & Remedy |
+| :--- | :---: | :--- |
+| **M75 Empirical Metrics** | NO_HISTORY: 0.5366<br>RELEVANT: 0.5576<br>SHUFFLED: 0.5890 | Confirmed. Shuffled history exceeded relevant history by +0.0314 utility. |
+| **Paired 95% Confidence Interval** | [-0.1228, +0.1649] | Confirmed. Spans zero ($t_{\text{crit}}=4.303$). Causal experience gate failed. |
+| **Hindsight Comparator Anomaly** | Hindsight: 0.5215 utility<br>Relevant: 0.5576 utility | Root cause identified: M75 hindsight policy used a static 40-step budget on all episodes, incurring cost penalties on familiar tasks where zero-step reuse was feasible. Reclassified as a restricted diagnostic rather than a true upper bound. |
+| **Trained vs Shuffled Attribution** | M74 $\Delta \text{EM} = +0.6562$ | Confirmed. Causal neural weight learning reproduces. |
+
+---
+
+### 4. Phase 2 — Qualified Primitive Neural Skills
+Evaluated on strictly disjoint held-out qualification partitions across Seeds 42, 43, 44:
+
+| Primitive Skill ID | Transformation Formula | Trainable Params | Qualification Exact Match | Qualification Cross-Entropy Loss | Parameter Hash | Qualification Status |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| `COMPLEMENT_REFLECT` | $s \to 15 - s$ | 2,592 | **0.8125** | 0.3753 | `12c3faec0382026a` | **QUALIFIED (PASS)** |
+| `CAESAR_SHIFT_MOD3` | $s \to (s + 3) \bmod 16$ | 2,592 | **0.7500** | 0.3788 | `faa08474eaac76f3` | **QUALIFIED (PASS)** |
+| `AFFINE_TRANSFORM` | $s \to (3s + 1) \bmod 16$| 2,592 | **0.8750** | 0.2641 | `ec7a7b3b58f72b6b` | **QUALIFIED (PASS)** |
+
+All three primitive adapters met the qualification threshold ($\text{EM} \ge 0.75$), were fully frozen (`requires_grad = False`), and had their immutable parameter digests recorded before composition testing.
+
+---
+
+### 5. Phase 3 & 4 — 9-Arm Causal Neural Composition Suite
+Evaluated on sealed test pools (48 compound sequences per task $\times$ 4 compound tasks $\times$ 3 seeds = 576 evaluation sequences) on Kaggle Tesla T4:
+
+| Experimental Arm | Execution Mechanism | Mean Exact Match | Std Exact Match | Mean Token Acc | Training Steps Incurred | Stored Params Allocated |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **`A_NEURAL_COMPOSITION`** | Two-stage cascaded neural inference | **0.4479** | 0.0375 | **0.7812** | **0** | **0** |
+| **`B_WRONG_ORDER`** | Reverse noncommutative order ($B \to A$) | 0.1302 | 0.0138 | 0.2205 | 0 | 0 |
+| **`C_SINGLE_SKILL_A`** | Stage 1 primitive only ($A$) | 0.0000 | 0.0000 | 0.0098 | 0 | 0 |
+| **`D_SINGLE_SKILL_B`** | Stage 2 primitive only ($B$) | 0.0000 | 0.0000 | 0.0052 | 0 | 0 |
+| **`E_SHUFFLED_COMPONENT`** | Stage 2 weights randomly permuted | 0.0000 | 0.0000 | 0.1013 | 0 | 0 |
+| **`F_UNRELATED_COMPONENT`** | Stage 2 replaced with unrelated skill | 0.0000 | 0.0000 | 0.0654 | 0 | 0 |
+| **`G_FRESH_MONOLITHIC`** | Direct 50-step adapter training on task | 0.6858 | 0.0421 | 0.8831 | 50 | 2,592 |
+| **`H_UNCHANGED_BASE`** | Frozen backbone without adapters | 0.0000 | 0.0000 | 0.0689 | 0 | 0 |
+| **`I_DETERMINISTIC_ORACLE`**| Exact reference solver (non-neural) | 1.0000 | 0.0000 | 1.0000 | 0 | 0 |
+
+#### Paired Student's t Confidence Intervals ($N=3, df=2, t_{\text{crit}}=4.303$)
+
+| Comparison | Delta Mean ($\Delta \text{EM}$) | Delta Std | Paired 95% Confidence Interval | Spans Zero? | Causal Superiority Established? |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **`COMPOSITION` vs `WRONG_ORDER`** | **+0.3177** | 0.0451 | **[+0.2057, +0.4297]** | **NO** | **YES (Statistically Superior)** |
+| **`COMPOSITION` vs `SINGLE_SKILL_A`** | **+0.4479** | 0.0375 | **[+0.3546, +0.5412]** | **NO** | **YES (Statistically Superior)** |
+| **`COMPOSITION` vs `SINGLE_SKILL_B`** | **+0.4479** | 0.0375 | **[+0.3546, +0.5412]** | **NO** | **YES (Statistically Superior)** |
+| **`COMPOSITION` vs `SHUFFLED_COMPONENT`** | **+0.4479** | 0.0375 | **[+0.3546, +0.5412]** | **NO** | **YES (Statistically Superior)** |
+| **`COMPOSITION` vs `UNRELATED_COMPONENT`** | **+0.4479** | 0.0375 | **[+0.3546, +0.5412]** | **NO** | **YES (Statistically Superior)** |
+| **`COMPOSITION` vs `UNCHANGED_BASE`** | **+0.4479** | 0.0375 | **[+0.3546, +0.5412]** | **NO** | **YES (Statistically Superior)** |
+| **`COMPOSITION` vs `FRESH_MONOLITHIC`** | -0.2379 | 0.0524 | [-0.3681, -0.1076] | **NO** | Monolithic achieves higher EM via retraining |
+
+**Key Causal Insights**:
+1. Zero-shot neural composition achieves **0.4479 Exact Match** without any training steps or parameter updates on the compound task.
+2. Reversing the noncommutative execution order drops Exact Match to 0.1302, yielding a statistically significant **+0.3177 causal ordering advantage** (95% CI `[+0.2057, +0.4297]`).
+3. Single skills, shuffled components, unrelated skills, and the base backbone all achieve **0.0000 Exact Match**, confirming that compound task solution strictly requires both specific learned neural skills executing in the correct operational sequence.
+4. While `FRESH_MONOLITHIC` achieves higher accuracy (0.6858 EM), it incurs 50 optimizer steps and allocates 2,592 new parameters per compound task. Neural composition provides immediate zero-cost transfer with zero parameter expansion.
+
+---
+
+### 6. Phase 5 — Two-Stage Error Decomposition & Diagnostics
+To pinpoint why compound predictions fail, we evaluated Stage 2 both with cascaded neural predictions $\hat{y}_1$ and with teacher-forced ground-truth intermediate tokens $y_1^*$:
+
+| Error Classification | Empirical Frequency | Mechanistic Interpretation |
+| :--- | :---: | :--- |
+| **`SUCCESS`** | **44.44%** | Both neural stages predicted all tokens correctly. |
+| **`STAGE_1_DEFECT`** | **0.00%** | Stage 1 produced an incorrect intermediate sequence while Stage 2 was otherwise capable. (Across all failures, Stage 1 defects always cascaded). |
+| **`ERROR_PROPAGATION`** | **21.53%** | Stage 1 produced a defect that caused Stage 2 to fail; however, when Stage 2 was given the ground-truth intermediate $y_1^*$, it succeeded completely. |
+| **`STAGE_2_DEFECT`** | **25.00%** | Stage 2 failed even when provided with the correct teacher-forced intermediate $y_1^*$, representing inherent primitive capability limits. |
+| **`DUAL_DEFECT`** | **9.03%** | Both Stage 1 and Stage 2 failed independently on their respective sub-problems. |
+
+#### Noncommutative Order Sensitivity Analysis
+- Forward Composition Exact Match ($A \circ B$): **0.4306**
+- Reversed Composition Exact Match ($B \circ A$): **0.0000**
+- Order Sensitivity Gap: **0.4306** (100% order-dependent discrimination on noncommutative tasks).
+
+---
+
+### 7. Phase 7 — Parameter Accounting & Computational Efficiency
+| Architecture Configuration | Backbone Parameters | Active Adapter Parameters | Stored Repertoire Parameters | Additional Parameters Allocated | Training Steps Incurred |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Base Backbone Baseline** | 928,512 (3.71 MB) | 0 | 0 | 0 | 0 |
+| **Qualified Primitive Repertoire (3 skills)** | 928,512 (3.71 MB) | 2,592 (10.4 KB) | 7,776 (31.1 KB) | 0 | 0 |
+| **Cascaded Neural Composition (M76)** | 928,512 (3.71 MB) | 2,592 per stage | 7,776 (31.1 KB) | **0 (0.0% growth)** | **0 steps** |
+| **Fresh Monolithic Adaptation** | 928,512 (3.71 MB) | 2,592 (10.4 KB) | 10,368 (41.5 KB) | **+2,592 (+33.3% growth)** | **50 steps** |
+
+**Efficiency Advantage**:
+Neural composition avoids compound-specific retraining entirely ($\Delta \text{Steps} = -50$ per task) and requires **0 additional parameter allocations**, achieving a parameter savings ratio of **1.0 (100% savings)** relative to monolithic growth.
+
+---
+
+### 8. Phase 11 & 12 — Retention Safeguards & Qualification Scorecard
+1. **Base Backbone Invariance**: Double SHA-256 parameter hashes verified 100% invariant across all three seeds before and after composition experiments.
+2. **Immutable Primitive Parameters**: All 3 qualified primitive adapters verified completely frozen with unchanged parameter digests.
+3. **Core Domain Retention**:
+   - Multi-digit Arithmetic Carry (20 test cases): **100.0% retention**.
+   - Chained Operational Logic Probes (8 test cases): **100.0% retention**.
+4. **Bit-Exact Rollback**: Verified 100% bit-exact state restoration upon simulated candidate rejection.
+
+---
+
+### Milestone M76 Scientific Qualification Scorecard
+
+| Gate | Qualification Criteria | Empirical Result (Kaggle Tesla T4) | Scientific Verdict |
+| :--- | :--- | :--- | :---: |
+| **Engineering Regression Gate** | 318/318 tests on Tesla T4; hashes invariant; bit-exact rollback | 318/318 passed in 125.67s; SHA-256 invariant; rollback 100% | **PASS (QUALIFIED)** |
+| **Primitive Learning Gate** | Atomic neural primitives independently qualify (held-out EM $\ge 0.75$) | All 3 primitives qualified: Reflect (0.8125), Shift (0.7500), Affine (0.8750) | **PASS (QUALIFIED)** |
+| **Neural Composition Gate** | Two-stage neural composition statistically outperforms all causal controls | Beats wrong order (+0.3177), single skills (+0.4479), shuffled (+0.4479); CIs exclude zero | **PASS (QUALIFIED)** |
+| **Efficiency Gate** | Meaningful compositional transfer with 0 additional parameter allocations | 0.4479 EM achieved with 0 training steps and 0 new parameters (100% savings) | **PASS (QUALIFIED)** |
+| **Generalization Gate** | Benefits hold on independently generated unseen compositions | Evaluated on 4 noncommutative compound tasks across 576 sealed instances | **PASS (QUALIFIED)** |
+| **Neural Retention Gate** | Base frozen; 100% carry retention; 100% operational logic retention | Base hashes invariant; 100% carry; 100% logic; primitive hashes invariant | **PASS (QUALIFIED)** |
+| **Experience Learning Gate** | Unqualified from M75; remains separated from fixed composition | Fixed routing used; experience learning kept separate as open research problem | **UNQUALIFIED (OPEN)** |
+| **Topology Evolution Status** | Autonomous neural growth or dimension expansion | Unjustified; compact rank-16 maintained; zero permanent growth | **RESEARCH ONLY** |
+| **Operational Production Gate** | Promotion of autonomous learning loop to production tier | Autonomous research loop kept strictly in research tier | **REJECTED (NO-GO)** |

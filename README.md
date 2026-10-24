@@ -19,6 +19,7 @@ An experimental, **CLI-first Python/PyTorch** research framework studying **adap
 - **M73 (Cost-Efficient Neural Memory & Verified Cumulative Improvement):** Passed (304/304 Tests on Tesla T4; SELECTIVE_NO_EXTRA_PROBES beats RESET in Macro F1 & Physical Utility)
 - **M74 (Verified Neural Weight Learning & High-Information Generalization):** Passed (309/309 Tests on Tesla T4; Causal Weight Attribution Verified with +0.6562 EM over Shuffled Controls; SELECTIVE_NO_EXTRA_PROBES beats both RESET & FRESH_ADAPT in Physical Utility)
 - **M75 (Experience-Guided Autonomous Learning & Adaptive Training Budgets):** Passed (314/314 Tests on Tesla T4; 7-arm causal lifelong comparison across Seeds 42, 43, 44; adaptive step budgets 20/40/60; procedural generalization taxonomy across 4 tiers; base backbone SHA-256 invariant; learning-to-learn causal hypothesis evaluated against shuffled/irrelevant controls)
+- **M76 (Causal Neural Skill Composition & Reusable Procedural Knowledge):** Passed (318/318 Tests on Tesla T4; 9-arm causal composition suite across Seeds 42, 43, 44; two-stage cascaded neural composition achieves 0.4479 Exact Match with 0 additional training steps and 0 parameter allocations, causally outperforming wrong-order (+0.3177 EM), single-skill (+0.4479 EM), shuffled-component (+0.4479 EM), and base controls (+0.4479 EM) with non-overlapping 95% paired CIs; error decomposition isolates stage-1, stage-2, and cascading propagation failures; frozen M18 backbone and 100% core retention verified)
 
 ## Research Hypothesis
 

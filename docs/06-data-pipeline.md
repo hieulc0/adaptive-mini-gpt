@@ -282,3 +282,19 @@ Milestone M75 introduces `data/specs/m75_experience_spec.json`, formalizing:
     * `sealed_test`: 48 strictly segregated test examples for post-hoc evaluation.
 - Decoupled target scrambling generator: uniform random replacement across the 16-symbol alphabet, eliminating permutation artifacts and information leakage.
 - Compatible with `PortableDatasetLoader` and `AMG_DATA_ROOT` environment override on Kaggle and Google Colab runtimes.
+
+### 8. Milestone M76 Causal Neural Skill Composition Specification
+Milestone M76 introduces `data/specs/m76_composition_spec.json`, formalizing:
+- Three independently trained and qualified atomic procedural primitives:
+    1. `COMPLEMENT_REFLECT`: $s \to 15 - s$
+    2. `CAESAR_SHIFT_MOD3`: $s \to (s + 3) \bmod 16$
+    3. `AFFINE_TRANSFORM`: $s \to (3s + 1) \bmod 16$
+- Noncommutative compound procedural transformations ($A \circ B \neq B \circ A$):
+    * `REFLECT_THEN_SHIFT3`: $s \to 15 - s \to (15 - s + 3) \bmod 16 = (2 - s) \bmod 16$
+    * `SHIFT3_THEN_REFLECT`: $s \to (s + 3) \bmod 16 \to 15 - ((s + 3) \bmod 16) = (12 - s) \bmod 16$
+    * `REFLECT_THEN_AFFINE`: $s \to 15 - s \to (3(15 - s) + 1) \bmod 16 = (14 - 3s) \bmod 16$
+    * `AFFINE_THEN_SHIFT3`: $s \to (3s + 1) \bmod 16 \to ((3s + 1) + 3) \bmod 16 = (3s + 4) \bmod 16$
+- Strict 4-way partition isolation enforcing disjoint symbol combinations across `train` (48), `dev` (16), `qualification` (16), and `sealed_test` (48) sets.
+- 9-Arm causal evaluation suite: `A_NEURAL_COMPOSITION`, `B_WRONG_ORDER`, `C_SINGLE_SKILL_A`, `D_SINGLE_SKILL_B`, `E_SHUFFLED_COMPONENT`, `F_UNRELATED_COMPONENT`, `G_FRESH_MONOLITHIC`, `H_UNCHANGED_BASE`, `I_DETERMINISTIC_ORACLE`.
+- Two-stage error decomposition: `STAGE_1_DEFECT`, `STAGE_2_DEFECT`, `ERROR_PROPAGATION`, and `DUAL_DEFECT` using teacher-forced reference intermediates.
+- Reversible candidate rollback and frozen backbone double SHA-256 parameter invariance.
