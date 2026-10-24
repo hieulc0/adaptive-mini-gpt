@@ -51,6 +51,7 @@ from adaptive_mini_gpt.modular_skill_learning import (
     create_source_dag_transitive,
     create_source_metabolic_inhibitor,
     create_unrelated_control_quantum_dag,
+    extract_model_hidden,
 )
 from adaptive_mini_gpt.three_valued_reasoning.architectures import Rank16ResidualAdapter
 from adaptive_mini_gpt.training.checkpoint import CheckpointManager
@@ -162,8 +163,7 @@ def train_source_skill_adapter(
             tokens, tgt = encoded_dataset[idx]
             inp = torch.tensor([tokens], dtype=torch.long, device=device)
             with torch.no_grad():
-                out = model(inp)
-                hidden = out.hidden_states if hasattr(out, "hidden_states") else out.last_hidden_state
+                hidden = extract_model_hidden(model, inp)
             logits = adapter(hidden)
             loss = nn.functional.cross_entropy(logits, torch.tensor([tgt], dtype=torch.long, device=device))
             batch_loss = batch_loss + loss
@@ -183,8 +183,7 @@ def train_source_skill_adapter(
         for q in env.held_out_test_queries:
             tokens = model.tokenizer.encode(q.question_text)
             inp = torch.tensor([tokens], dtype=torch.long, device=device)
-            out = model(inp)
-            hidden = out.hidden_states if hasattr(out, "hidden_states") else out.last_hidden_state
+            hidden = extract_model_hidden(model, inp)
             pred_idx = adapter(hidden).argmax(dim=-1).item()
             true_idx = label_to_idx.get(q.expected_answer, 2)
             conf_mat[true_idx][pred_idx] += 1

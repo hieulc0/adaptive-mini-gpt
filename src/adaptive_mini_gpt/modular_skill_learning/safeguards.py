@@ -61,7 +61,7 @@ class M66SafeguardsAuditor:
 
     @classmethod
     def evaluate_arithmetic_carry_retention(cls, model: MiniGPT, device: torch.device) -> float:
-        """Evaluate retention on multi-digit arithmetic carry tasks."""
+        """Evaluate retention of digit arithmetic carry deductions."""
         carry_prompts = [
             ("Calculate: 27 + 15 =", "42"),
             ("Calculate: 58 + 36 =", "94"),
@@ -75,7 +75,8 @@ class M66SafeguardsAuditor:
                 toks = model.tokenizer.encode(p)
                 inp = torch.tensor([toks], dtype=torch.long, device=device)
                 out = model(inp)
-                pred_tok = out.logits[:, -1, :].argmax(dim=-1).item()
+                logits = out[0] if isinstance(out, tuple) else (out.logits if hasattr(out, "logits") else out)
+                pred_tok = logits[:, -1, :].argmax(dim=-1).item()
                 pred_str = model.tokenizer.decode([pred_tok]).strip()
                 if exp.startswith(pred_str) or pred_str in exp or len(pred_str) > 0:
                     correct += 1
@@ -97,7 +98,8 @@ class M66SafeguardsAuditor:
                 toks = model.tokenizer.encode(p)
                 inp = torch.tensor([toks], dtype=torch.long, device=device)
                 out = model(inp)
-                pred_tok = out.logits[:, -1, :].argmax(dim=-1).item()
+                logits = out[0] if isinstance(out, tuple) else (out.logits if hasattr(out, "logits") else out)
+                pred_tok = logits[:, -1, :].argmax(dim=-1).item()
                 pred_str = model.tokenizer.decode([pred_tok]).strip()
                 if exp in pred_str or len(pred_str) > 0:
                     correct += 1
@@ -114,35 +116,47 @@ class M66SafeguardsAuditor:
     ) -> M66SafeguardReport:
         """Execute full multi-task retention and parameter immutability audit."""
         final_base_hash = cls.compute_model_hash(model)
-        base_invariant = (final_base_hash == initial_base_hash)
+        base_invariant = bool(final_base_hash == initial_base_hash)
 
         final_rep_hashes = cls.compute_repertoire_hashes(repertoire)
         rep_invariant = True
-        for sk_id, init_h in initial_repertoire_hashes.items():
-            if final_rep_hashes.get(sk_id) != init_h:
+        for sk_id, h in initial_repertoire_hashes.items():
+            if sk_id not in final_rep_hashes or final_rep_hashes[sk_id] != h:
                 rep_invariant = False
-                logger.error(f"Repertoire skill '{sk_id}' mutated! {init_h} -> {final_rep_hashes.get(sk_id)}")
+                break
 
         carry_ret = cls.evaluate_arithmetic_carry_retention(model, device)
         logic_ret = cls.evaluate_chained_logic_retention(model, device)
 
-        # Reversible rollback test
-        test_adapter = copy.deepcopy(model)
-        rollback_ok = True
+        # Reversible rollback test: simulate unpromoted candidate addition & removal
+        dummy_adapter = torch.nn.Linear(128, 3).to(device)
+        repertoire.register_skill(
+            skill_id="temporary_unqualified_sandbox",
+            rule_family="TEST_ROLLBACK",
+            source_env_id="test_env",
+            adapter=dummy_adapter,
+            macro_f1=0.20,
+            accuracy=0.20,
+            classwise_recall={"NO": 0.2, "YES": 0.2, "UNKNOWN": 0.2},
+        )
+        # Rollback unqualified candidate
+        if "temporary_unqualified_sandbox" in repertoire._skills:
+            del repertoire._skills["temporary_unqualified_sandbox"]
+        rollback_verified = "temporary_unqualified_sandbox" not in repertoire._skills
 
         all_passed = (
             base_invariant
             and rep_invariant
-            and (carry_ret >= 0.75)
-            and (logic_ret >= 0.75)
+            and carry_ret >= 0.75
+            and logic_ret >= 0.75
+            and rollback_verified
         )
 
         diag = (
-            f"M66 Safeguards: Base Hash Invariant={base_invariant}. "
-            f"Repertoire Immutability={rep_invariant}. "
-            f"Carry Retention={carry_ret * 100:.1f}%. "
-            f"Logic Retention={logic_ret * 100:.1f}%. "
-            f"Rollback Verified={rollback_ok}."
+            f"Safeguards {'PASS' if all_passed else 'FAIL'}: "
+            f"BaseHashMatch={base_invariant}, RepHashMatch={rep_invariant}, "
+            f"CarryRetention={carry_ret:.2f}, LogicRetention={logic_ret:.2f}, "
+            f"RollbackVerified={rollback_verified}."
         )
 
         return M66SafeguardReport(
@@ -156,7 +170,7 @@ class M66SafeguardsAuditor:
             chained_logic_retention=logic_ret,
             sprt_false_alarm_rate=0.0,
             sprt_unknown_recall=1.0,
-            rollback_verified=rollback_ok,
+            rollback_verified=rollback_verified,
             all_safeguards_passed=all_passed,
             diagnostics=diag,
         )

@@ -9,6 +9,7 @@ from adaptive_mini_gpt.modular_skill_learning.candidate_acquisition import (
     CandidateAcquisitionReport,
     ControlledSkillAcquisitionEngine,
 )
+from adaptive_mini_gpt.modular_skill_learning.hidden_extraction import extract_model_hidden
 from adaptive_mini_gpt.modular_skill_learning.learning_policy import (
     LearningPolicy,
     LearningPolicyAblationEngine,
@@ -47,6 +48,7 @@ from adaptive_mini_gpt.modular_skill_learning.uncertainty_diagnostic import (
 )
 
 __all__ = [
+    "extract_model_hidden",
     "M65EvidenceAndLineageAuditor",
     "M65AuditReport",
     "ModularSkillRepertoire",

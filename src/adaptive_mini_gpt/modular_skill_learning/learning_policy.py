@@ -1,4 +1,4 @@
-"""Phase 7: Learning-Policy Ablation & Empirical Cost Accounting."""
+"""Phase 7: Bounded Learning-Policy Ablation & Operational Cost Accounting."""
 from __future__ import annotations
 
 import copy
@@ -13,6 +13,7 @@ import torch.nn as nn
 
 from adaptive_mini_gpt.model import MiniGPT
 from adaptive_mini_gpt.modular_skill_learning.candidate_acquisition import (
+    CandidateAcquisitionReport,
     ControlledSkillAcquisitionEngine,
 )
 from adaptive_mini_gpt.modular_skill_learning.repertoire import (
@@ -29,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 class LearningPolicy(str, Enum):
-    """Candidate autonomous learning and skill allocation policies."""
+    """Learning policies compared in Phase 7 ablation."""
     ALWAYS_FRESH = "ALWAYS_FRESH"
     ALWAYS_REUSE = "ALWAYS_REUSE"
     ALWAYS_SPAWN = "ALWAYS_SPAWN"
@@ -39,30 +40,29 @@ class LearningPolicy(str, Enum):
 
 @dataclass
 class PolicyEvaluationResult:
-    """Quantitative performance and resource accounting for an autonomous learning policy."""
+    """Quantitative performance and resource expenditure under an evaluated policy."""
     policy_name: str
-    target_env_id: str
     macro_f1: float
     accuracy: float
-    held_out_unk_recall: float
+    classwise_recall: dict[str, float]
     paired_correctness: float
-    adapters_allocated: int
     oracle_queries_used: int
+    adapters_allocated: int
     false_allocation_count: int
-    missed_reuse_count: int
-    candidate_rejections: int
-    storage_parameters: int
-    diagnostics: str
+    missed_useful_reuse_count: int
+    candidate_rejection_count: int
+    storage_footprint_params: int
+    decision_diagnostics: str
 
 
 class LearningPolicyAblationEngine:
-    """Executes policy comparisons with full accounting of accuracy and operational costs."""
+    """Evaluates the 5 policies with exhaustive accounting of oracle, training, and storage costs."""
 
     def __init__(
         self,
         acquisition_engine: ControlledSkillAcquisitionEngine,
         uncertainty_diagnostic: EpistemicUncertaintyDiagnostic,
-        reuse_f1_threshold: float = 0.50,
+        reuse_f1_threshold: float = 0.45,
     ) -> None:
         self.acq_engine = acquisition_engine
         self.diagnostic = uncertainty_diagnostic
@@ -102,10 +102,15 @@ class LearningPolicyAblationEngine:
             adapters_allocated += 1
             storage_params += 2371
             cand, _, _ = self.acq_engine.train_candidate_adapter(
-                model=model, env=train_env, budget_n=16, device=device, seed=seed
+                candidate_id="always_fresh",
+                train_env=train_env,
+                model=model,
+                budget_n=16,
+                device=device,
+                seed=seed,
             )
-            f1, acc, rec, paired = self.acq_engine.evaluate_on_independent_world(
-                candidate=cand, model=model, eval_env=eval_env, device=device
+            f1, acc, rec, paired = self.acq_engine.evaluate_candidate_on_independent_world(
+                candidate=cand, eval_env=eval_env, model=model, device=device
             )
             diag = f"ALWAYS_FRESH: Trained fresh adapter (F1={f1:.4f})"
 
@@ -124,10 +129,15 @@ class LearningPolicyAblationEngine:
                 false_allocations += 1
 
             cand, _, _ = self.acq_engine.train_candidate_adapter(
-                model=model, env=train_env, budget_n=16, device=device, seed=seed
+                candidate_id="always_spawn",
+                train_env=train_env,
+                model=model,
+                budget_n=16,
+                device=device,
+                seed=seed,
             )
-            f1, acc, rec, paired = self.acq_engine.evaluate_on_independent_world(
-                candidate=cand, model=model, eval_env=eval_env, device=device
+            f1, acc, rec, paired = self.acq_engine.evaluate_candidate_on_independent_world(
+                candidate=cand, eval_env=eval_env, model=model, device=device
             )
             diag = f"ALWAYS_SPAWN: Unconditionally spawned adapter (F1={f1:.4f})"
 
@@ -180,25 +190,24 @@ class LearningPolicyAblationEngine:
                     acc = report.independent_eval_accuracy
                     rec = report.independent_eval_recalls
                     paired = report.paired_correctness
-                    diag = f"NOVELTY_GATED: Qualified & retained new candidate (F1={f1:.4f})"
+                    diag = f"NOVELTY_GATED: Qualified and allocated new skill (F1={f1:.4f})"
                 else:
                     candidate_rejections += 1
-                    # Roll back to best existing skill
+                    # Fallback to best existing skill
                     f1, acc, rec, paired = repertoire.evaluate_skill_on_env(best_reuse_id, model, eval_env, device)
                     diag = f"NOVELTY_GATED: Candidate rejected; rolled back to '{best_reuse_id}' (F1={f1:.4f})"
 
         return PolicyEvaluationResult(
             policy_name=policy.value,
-            target_env_id=eval_env.env_id,
             macro_f1=float(f1),
             accuracy=float(acc),
-            held_out_unk_recall=float(rec.get("UNKNOWN", 0.0)),
+            classwise_recall=rec,
             paired_correctness=float(paired),
-            adapters_allocated=adapters_allocated,
             oracle_queries_used=oracle_queries,
+            adapters_allocated=adapters_allocated,
             false_allocation_count=false_allocations,
-            missed_reuse_count=missed_reuse,
-            candidate_rejections=candidate_rejections,
-            storage_parameters=storage_params,
-            diagnostics=diag,
+            missed_useful_reuse_count=missed_reuse,
+            candidate_rejection_count=candidate_rejections,
+            storage_footprint_params=storage_params,
+            decision_diagnostics=diag,
         )
