@@ -139,13 +139,15 @@ class M72SafeguardsAuditor:
             (36, 88, 124), (27, 95, 122), (79, 43, 122), (84, 57, 141), (95, 68, 163),
         ]
         correct = 0
+        model.eval()
         with torch.no_grad():
             for a, b, expected in test_cases:
                 prompt = f"Calculate: {a} + {b} = "
                 toks = model.tokenizer.encode(prompt)
                 inp = torch.tensor([toks], dtype=torch.long, device=device)
                 out = model(inp)
-                pred_tok = int(torch.argmax(out[0, -1, :]).item())
+                logits = out[0] if isinstance(out, tuple) else (out.logits if hasattr(out, "logits") else out)
+                pred_tok = int(torch.argmax(logits[:, -1, :], dim=-1).item())
                 pred_str = model.tokenizer.decode([pred_tok]).strip()
                 try:
                     if int(pred_str) == expected or pred_str == str(expected)[:len(pred_str)]:
@@ -170,12 +172,14 @@ class M72SafeguardsAuditor:
             ("Rule: Independent disjoint partition. Fact: No edge between P and Q. Question: Does P reach Q? Answer:", "UNKNOWN"),
         ]
         correct = 0
+        model.eval()
         with torch.no_grad():
             for p_text, expected_ans in prompts:
                 toks = model.tokenizer.encode(p_text)
                 inp = torch.tensor([toks], dtype=torch.long, device=device)
                 out = model(inp)
-                pred_tok = int(torch.argmax(out[0, -1, :]).item())
+                logits = out[0] if isinstance(out, tuple) else (out.logits if hasattr(out, "logits") else out)
+                pred_tok = int(torch.argmax(logits[:, -1, :], dim=-1).item())
                 pred_ans = model.tokenizer.decode([pred_tok]).strip()
                 if expected_ans in pred_ans or pred_ans == expected_ans:
                     correct += 1
