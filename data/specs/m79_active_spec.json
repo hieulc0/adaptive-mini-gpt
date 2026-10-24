@@ -1,0 +1,56 @@
+{
+  "milestone": "M79",
+  "name": "Autonomous Active Experimentation and Neural Skill-Gap Recognition",
+  "hypothesis": "When existing neural skill compositions exhibit ambiguous evidence margins (Delta S < 0.08), generating bounded active discriminative probes (budget <= 1-2 queries) that maximize candidate hypothesis disagreement significantly improves plan selection accuracy and end-to-end exact match over random and non-discriminative queries, resolves false abstentions on supported tasks, and preserves >=95% specificity on unsupported tasks, with strictly zero parameter growth.",
+  "architectural_principle": "Adaptive Mini-GPT should learn before growing, reuse before learning, and verify before retaining any change.",
+  "parameters": {
+    "core_backbone": 928512,
+    "task_heads": 46146,
+    "expanded_checkpoint_total": 974658,
+    "primitive_adapter_each": 2592,
+    "new_parameters_allocated": 0,
+    "new_training_steps": 0
+  },
+  "epistemic_states": [
+    "KNOWN_CONFIDENT",
+    "KNOWN_AMBIGUOUS",
+    "SKILL_GAP_UNSUPPORTED",
+    "INCONSISTENT_NOISY"
+  ],
+  "causal_arms": [
+    "A_PASSIVE_M78",
+    "B_RANDOM_QUERY",
+    "C_NON_DISCRIMINATIVE_QUERY",
+    "D_ACTIVE_DISCRIMINATIVE_QUERY",
+    "E_ORACLE_PROBE_UPPER_BOUND",
+    "F_UNSUPPORTED_TASK_CONTROL"
+  ],
+  "evaluation_design": {
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "composable_tasks_per_seed": 16,
+    "uncomposable_tasks_per_seed": 8,
+    "total_tasks_per_seed": 24,
+    "total_evaluations": 120,
+    "probe_budget_per_task": 1,
+    "sealed_test_examples_per_task": 48,
+    "statistical_model": "Paired Student-t test (df=4, t_crit=2.776 at 95% two-tailed)"
+  },
+  "success_criteria": {
+    "probe_budget_bounded": "Mean queries per task <= 1.5",
+    "plan_accuracy_improvement": "Active plan accuracy > Frozen M78 (0.8000)",
+    "query_usefulness": "Active discriminative EM > Random and Non-discriminative",
+    "supported_abstention_reduction": "Supported task false abstention < Frozen M78 (0.0750)",
+    "unsupported_task_specificity": "Unsupported task rejection >= 0.9500",
+    "zero_parameter_growth": "== 0",
+    "zero_training_steps": "== 0",
+    "arithmetic_carry_retention": "== 1.0",
+    "operational_logic_retention": "== 1.0",
+    "statistical_significance": "p < 0.05 paired Student-t vs frozen baseline"
+  }
+}
