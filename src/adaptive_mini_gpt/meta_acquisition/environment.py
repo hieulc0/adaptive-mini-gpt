@@ -39,6 +39,7 @@ class TaskFamily(StrEnum):
 
     # Meta-Validation Families
     MODULAR_NONLINEAR = "MODULAR_NONLINEAR"
+    MODULAR_QUADRATIC = "MODULAR_QUADRATIC"
     BLOCK_TRANSPOSITION = "BLOCK_TRANSPOSITION"
 
     # Sealed Meta-Test Families (unseen during policy training)
@@ -122,6 +123,12 @@ def apply_procedural_rule(
         mult = rule_params.get("mult", 3)
         mask = rule_params.get("mask", 5)
         return tuple(((s * mult) + (s ^ mask)) % vocab_size for s in seq)
+
+    elif family == TaskFamily.MODULAR_QUADRATIC:
+        a = rule_params.get("a", 1)
+        b = rule_params.get("b", 3)
+        c = rule_params.get("c", 1)
+        return tuple((a * s * s + b * s + c) % vocab_size for s in seq)
 
     elif family == TaskFamily.BLOCK_TRANSPOSITION:
         # Swap adjacent pairs: (s0, s1, s2, s3) -> (s1, s0, s3, s2)

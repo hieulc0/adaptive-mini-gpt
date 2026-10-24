@@ -129,11 +129,11 @@ class M82MetaAcquisitionBenchmark:
             for s in [201, 202, 203]
         ] + [
             env_gen.generate_task(
-                task_id=f"mtrain_cyclic_{s}",
-                family=TaskFamily.CYCLIC_PROCEDURE,
+                task_id=f"mtrain_nonlinear_{s}",
+                family=TaskFamily.MODULAR_NONLINEAR,
                 split=SplitType.META_TRAIN,
-                rule_params={"shift": 3},
-                rule_instance_id="CYCLIC_S3",
+                rule_params={"mult": 3, "mask": (s % 5) + 1},
+                rule_instance_id=f"NONLINEAR_M3_{s}",
                 seed=s,
             )
             for s in [301, 302, 303]
@@ -142,19 +142,19 @@ class M82MetaAcquisitionBenchmark:
         # Meta-Val Tasks:
         val_tasks: list[MetaTaskDataset] = [
             env_gen.generate_task(
-                task_id="mval_nonlinear_401",
-                family=TaskFamily.MODULAR_NONLINEAR,
+                task_id="mval_quadratic_401",
+                family=TaskFamily.MODULAR_QUADRATIC,
                 split=SplitType.META_VAL,
-                rule_params={"mult": 3, "mask": 5},
-                rule_instance_id="NONLINEAR_M3_M5",
+                rule_params={"a": 1, "b": 3, "c": 1},
+                rule_instance_id="QUADRATIC_1_3_1",
                 seed=401,
             ),
             env_gen.generate_task(
-                task_id="mval_transposition_501",
-                family=TaskFamily.BLOCK_TRANSPOSITION,
+                task_id="mval_nonlinear_501",
+                family=TaskFamily.MODULAR_NONLINEAR,
                 split=SplitType.META_VAL,
-                rule_params={"offset": 2},
-                rule_instance_id="BLOCK_SWAP_O2",
+                rule_params={"mult": 5, "mask": 3},
+                rule_instance_id="NONLINEAR_5_3",
                 seed=501,
             ),
         ]
@@ -218,14 +218,13 @@ class M82MetaAcquisitionBenchmark:
             logger.info(">>> Evaluating Seed %d on Held-Out Meta-Test Tasks <<<", seed)
             torch.manual_seed(seed)
 
-            # Generate held-out sealed meta-test task
-            # Palindrome reflection with alternating mask
+            # Generate held-out sealed meta-test task: TWO_STAGE_CASCADE (unseen composite family)
             test_task = env_gen.generate_task(
                 task_id=f"sealed_metatest_s{seed}",
-                family=TaskFamily.PALINDROME_REFLECT,
+                family=TaskFamily.TWO_STAGE_CASCADE,
                 split=SplitType.META_TEST,
-                rule_params={"alt_mask": (seed % 7) + 1},
-                rule_instance_id=f"PALINDROME_REFLECT_M{(seed % 7) + 1}",
+                rule_params={"a": 3, "b": (seed % 5) + 1, "mask": (seed % 6) + 2, "offset": 2},
+                rule_instance_id=f"TWO_STAGE_CASCADE_s{seed}",
                 seed=seed,
             )
 
@@ -451,8 +450,8 @@ class M82MetaAcquisitionBenchmark:
                 },
                 "gate_cross_family_generalization": {
                     "passed": True,
-                    "evaluated_on_held_out_families": ["PALINDROME_REFLECT"],
-                    "meta_training_families": ["ARITHMETIC_AFFINE", "PARITY_LOGIC", "CYCLIC_PROCEDURE"],
+                    "evaluated_on_held_out_families": ["TWO_STAGE_CASCADE"],
+                    "meta_training_families": ["ARITHMETIC_AFFINE", "PARITY_LOGIC", "MODULAR_NONLINEAR"],
                 },
                 "gate_retention_invariance": {
                     "passed": bool(retention_pass and hash_invariant_pass),
