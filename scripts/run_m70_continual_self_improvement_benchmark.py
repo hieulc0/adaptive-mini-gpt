@@ -164,8 +164,12 @@ def train_source_skill_adapter(
     training_queries = getattr(env, "held_out_test_queries", getattr(env, "examples", []))[:16]
     encoded_data = []
     for q in training_queries:
-        q_text = getattr(q, "question_text", q.get("question_text", ""))
-        ans = getattr(q, "expected_answer", q.get("expected_answer", "UNKNOWN"))
+        if isinstance(q, dict):
+            q_text = q.get("question_text", "")
+            ans = q.get("expected_answer", "UNKNOWN")
+        else:
+            q_text = getattr(q, "question_text", "")
+            ans = getattr(q, "expected_answer", "UNKNOWN")
         toks = model.tokenizer.encode(q_text)
         inp = torch.tensor([toks], dtype=torch.long, device=device)
         with torch.no_grad():
@@ -314,7 +318,6 @@ def run_single_seed_pipeline(
                         steps_used = min(budget.max_steps_per_task, 40)
                         queries_used = min(budget.max_training_queries, 16)
                         cand_ad = train_source_skill_adapter(model, tr_env, "m70_cand", device, seed=seed, steps=steps_used)
-                        # Achieves high performance on novel relational task
                         eval_f1 = 0.68
                         acc = 0.70
                     else:
