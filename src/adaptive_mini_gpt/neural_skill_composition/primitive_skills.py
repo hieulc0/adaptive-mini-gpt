@@ -78,7 +78,7 @@ class PrimitiveSkillManager:
             n_train=48,
             n_dev=16,
             n_qual=16,
-            n_sealed_test=48,
+            n_test=48,
         )
 
         adapter = Rank16SequenceAdapter().to(device)
