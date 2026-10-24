@@ -183,11 +183,10 @@ class M82MetaAcquisitionBenchmark:
                         mp.data.add_((cp.data - mp.data) * 0.4)
             experience_priors[r] = {k: v.cpu().clone() for k, v in meta_adapt.state_dict().items()}
 
-        # Instantiate Anchor Retention Tasks (Carry 20 and Logic 8)
-        # Using synthetic anchor representations for probe
-        carry_res = RetentionAuditor.audit_carry_retention(model, device)
-        logic_res = RetentionAuditor.audit_logic_retention(model, device)
-        logger.info("Initial Retention: Carry=%s, Logic=%s", carry_res.status, logic_res.status)
+        # Initial Retention Audit
+        init_retention = RetentionAuditor.evaluate_retention(model=model, initial_base_hash=initial_base_hash, device=device)
+        logger.info("Initial Retention: Invariant=%s, Carry=%.2f, Logic=%.2f",
+                    init_retention.base_invariant_preserved, init_retention.arithmetic_carry_em, init_retention.operational_logic_em)
 
         # Phase 1: Train the Learned Acquisition Controller
         controller = LearnedAcquisitionController(in_features=8, hidden_dim=32).to(device)
@@ -391,12 +390,11 @@ class M82MetaAcquisitionBenchmark:
         gate_policy_pass = (m82_median_steps < fixed_median_steps) and (m82_median_steps < random_median_steps)
 
         # Step 4: Final Retention and Invariant Verification
-        final_carry_res = RetentionAuditor.audit_carry_retention(model, device)
-        final_logic_res = RetentionAuditor.audit_logic_retention(model, device)
-        final_base_hash = RetentionAuditor.compute_model_hash(model)
+        final_retention = RetentionAuditor.evaluate_retention(model=model, initial_base_hash=initial_base_hash, device=device)
+        final_base_hash = final_retention.base_hash_final
 
-        hash_invariant_pass = (final_base_hash == initial_base_hash)
-        retention_pass = (final_carry_res.exact_match_score == 1.0) and (final_logic_res.exact_match_score == 1.0)
+        hash_invariant_pass = final_retention.base_invariant_preserved
+        retention_pass = (final_retention.arithmetic_carry_em == 1.0) and (final_retention.operational_logic_em == 1.0)
 
         # Step 5: Rollback Audit Verification
         # Simulate rejected trial with bit-exact rollback
@@ -461,8 +459,8 @@ class M82MetaAcquisitionBenchmark:
                     "base_parameter_hash_initial": initial_base_hash,
                     "base_parameter_hash_final": final_base_hash,
                     "hash_preserved": bool(hash_invariant_pass),
-                    "carry_retention_em": final_carry_res.exact_match_score,
-                    "logic_retention_em": final_logic_res.exact_match_score,
+                    "carry_retention_em": final_retention.arithmetic_carry_em,
+                    "logic_retention_em": final_retention.operational_logic_em,
                 },
                 "gate_rollback_bit_exact": {
                     "passed": bool(rollback_pass),
