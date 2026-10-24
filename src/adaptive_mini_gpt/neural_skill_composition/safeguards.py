@@ -64,6 +64,9 @@ class M76SafeguardsAuditor:
         curr_named = cls.compute_named_param_hash(base_model)
         return curr_unnamed == expected_unnamed_hash and curr_named == expected_named_hash
 
+    # Alias for compatibility with M76 test suite
+    verify_base_invariance = verify_base_model_invariance
+
     @classmethod
     def verify_primitive_adapter_invariance(
         cls,
@@ -83,6 +86,9 @@ class M76SafeguardsAuditor:
             if not found:
                 return False
         return True
+
+    # Alias for compatibility with M76 test suite
+    verify_primitive_invariance = verify_primitive_adapter_invariance
 
     @classmethod
     def verify_arithmetic_carry_retention(cls) -> float:
