@@ -268,11 +268,11 @@ class AutonomousResearchLoopEngine:
                 seed=seed,
             )
 
-            val_gain = acq_report.validation_f1 - best_f1
-            val_f1 = acq_report.validation_f1
+            val_gain = acq_report.f1_gain_over_best_existing
+            val_f1 = acq_report.independent_eval_macro_f1
 
             # Check acceptance condition
-            if acq_report.is_qualified and val_gain >= proposal.min_validation_f1_gain:
+            if acq_report.qualification_passed and val_gain >= proposal.min_validation_f1_gain:
                 verdict = "ACCEPTED"
                 stored_params = 2371
                 repertoire = repertoire_with_cand  # Retain skill!
