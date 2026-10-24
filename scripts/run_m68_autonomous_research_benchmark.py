@@ -357,7 +357,10 @@ def run_seed_benchmark(
                 )
             # 4. M66_NOVELTY_GATED
             elif pol == "M66_NOVELTY_GATED":
-                sprt_llr, _ = diagnostic.run_sprt_on_environment(model, tr_env, device)
+                obs = [(q.source, q.target, q.expected_answer) for q in tr_env.held_out_test_queries[:8]]
+                sprt_llr, _ = diagnostic.compute_sprt_llr(
+                    observations=obs, candidate_hypothesis=tr_env.true_hypothesis, edges=tr_env.base_edges
+                )
                 forced = (
                     ResearchExperimentAction.TRAIN_NEW_SKILL
                     if sprt_llr >= 2.0
@@ -379,7 +382,10 @@ def run_seed_benchmark(
                 # M67 utility logic without multi-episode amortization
                 probe_q = tr_env.held_out_test_queries[:8]
                 _, b_f1 = repertoire.select_best_skill_by_evidence_probe(model, probe_q, device)
-                sprt_llr, _ = diagnostic.run_sprt_on_environment(model, tr_env, device)
+                obs = [(q.source, q.target, q.expected_answer) for q in tr_env.held_out_test_queries[:8]]
+                sprt_llr, _ = diagnostic.compute_sprt_llr(
+                    observations=obs, candidate_hypothesis=tr_env.true_hypothesis, edges=tr_env.base_edges
+                )
                 if is_known or b_f1 >= 0.45:
                     act = ResearchExperimentAction.REUSE_EXISTING
                 elif sprt_llr >= 2.0:

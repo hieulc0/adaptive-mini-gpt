@@ -106,9 +106,15 @@ class AutonomousResearchLoopEngine:
         )
 
         # Evaluate SPRT rule novelty
-        sprt_llr, _ = self.diagnostic.run_sprt_on_environment(
-            model=model, env=target_train_env, device=device
-        )
+        obs = [(q.source, q.target, q.expected_answer) for q in target_train_env.held_out_test_queries[:8]]
+        if hasattr(target_train_env, "true_hypothesis") and target_train_env.true_hypothesis is not None:
+            sprt_llr, _ = self.diagnostic.compute_sprt_llr(
+                observations=obs,
+                candidate_hypothesis=target_train_env.true_hypothesis,
+                edges=target_train_env.base_edges,
+            )
+        else:
+            sprt_llr = 0.0
 
         # Check evidence deficit
         ev_gap = 0.0
