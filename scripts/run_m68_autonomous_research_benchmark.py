@@ -378,7 +378,7 @@ def run_seed_benchmark(
             elif pol == "M67_UTILITY_GATED":
                 # M67 utility logic without multi-episode amortization
                 probe_q = tr_env.held_out_test_queries[:8]
-                _, b_f1, _ = repertoire.select_best_skill_by_evidence_probe(model, probe_q, device)
+                _, b_f1 = repertoire.select_best_skill_by_evidence_probe(model, probe_q, device)
                 sprt_llr, _ = diagnostic.run_sprt_on_environment(model, tr_env, device)
                 if is_known or b_f1 >= 0.45:
                     act = ResearchExperimentAction.REUSE_EXISTING

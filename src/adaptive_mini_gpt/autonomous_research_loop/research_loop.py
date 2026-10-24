@@ -101,7 +101,7 @@ class AutonomousResearchLoopEngine:
 
         # 1. Probe current repertoire capability on target task
         probe_queries = target_train_env.held_out_test_queries[:8]
-        best_skill_id, best_f1, _ = repertoire.select_best_skill_by_evidence_probe(
+        best_skill_id, best_f1 = repertoire.select_best_skill_by_evidence_probe(
             model=model, probe_queries=probe_queries, device=device
         )
 
