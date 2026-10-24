@@ -169,7 +169,8 @@ class LearnedAcquisitionController(nn.Module):
     ) -> AcquisitionAction:
         """Sample or greedily select an acquisition action from policy."""
         self.eval()
-        state_tensor = state.to_tensor().unsqueeze(0)
+        device = next(self.parameters()).device
+        state_tensor = state.to_tensor().unsqueeze(0).to(device)
         with torch.no_grad():
             init_logits, lr_logits, rank_logits, stop_logits = self(state_tensor)
 
@@ -194,10 +195,10 @@ class LearnedAcquisitionController(nn.Module):
                 stop_idx = StoppingChoice.CONTINUE.value
 
             log_prob = (
-                init_dist.log_prob(torch.tensor(init_idx)).item()
-                + lr_dist.log_prob(torch.tensor(lr_idx)).item()
-                + rank_dist.log_prob(torch.tensor(rank_idx)).item()
-                + stop_dist.log_prob(torch.tensor(stop_idx)).item()
+                init_dist.log_prob(torch.tensor(init_idx, device=device)).item()
+                + lr_dist.log_prob(torch.tensor(lr_idx, device=device)).item()
+                + rank_dist.log_prob(torch.tensor(rank_idx, device=device)).item()
+                + stop_dist.log_prob(torch.tensor(stop_idx, device=device)).item()
             )
 
             entropy = (
@@ -222,7 +223,8 @@ class LearnedAcquisitionController(nn.Module):
         actions: list[AcquisitionAction],
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """Compute batch log probabilities and entropy for policy gradient training."""
-        state_tensors = torch.stack([s.to_tensor() for s in states])
+        device = next(self.parameters()).device
+        state_tensors = torch.stack([s.to_tensor() for s in states]).to(device)
         init_logits, lr_logits, rank_logits, stop_logits = self(state_tensors)
 
         init_dist = torch.distributions.Categorical(logits=init_logits)
