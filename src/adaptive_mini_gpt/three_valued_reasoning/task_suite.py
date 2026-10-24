@@ -48,19 +48,25 @@ def create_new_sealed_quantum_teleportation_dag(seed: int = 501, use_evidence_pr
 
 
 def create_new_sealed_metabolic_inhibitor_tree(seed: int = 502, use_evidence_prefix: bool = True) -> GroundedThreeValuedEnvironment:
-    """New Task 2: 10-enzyme branching metabolic flux cascade with active inhibitor nodes."""
+    """New Task 2: 11-enzyme branching metabolic flux cascade with active inhibitor nodes."""
     entities = [
         "PrecursorEnzymeE0",
         "KinasePathwayK1", "KinasePathwayK2", "KinasePathwayK3",
-        "MetaboliteM11", "MetaboliteM12", "MetaboliteM21", "MetaboliteM22", "MetaboliteM31", "MetaboliteM32",
+        "MetaboliteM11", "MetaboliteM12", "MetaboliteM13",
+        "MetaboliteM21", "MetaboliteM22",
+        "MetaboliteM31", "MetaboliteM32",
     ]
     edges = [
         ("PrecursorEnzymeE0", "KinasePathwayK1"),
         ("PrecursorEnzymeE0", "KinasePathwayK2"),
         ("PrecursorEnzymeE0", "KinasePathwayK3"),
-        ("KinasePathwayK1", "MetaboliteM11"), ("KinasePathwayK1", "MetaboliteM12"),
-        ("KinasePathwayK2", "MetaboliteM21"), ("KinasePathwayK2", "MetaboliteM22"),
-        ("KinasePathwayK3", "MetaboliteM31"), ("KinasePathwayK3", "MetaboliteM32"),
+        ("KinasePathwayK1", "MetaboliteM11"),
+        ("KinasePathwayK1", "MetaboliteM12"),
+        ("KinasePathwayK1", "MetaboliteM13"),
+        ("KinasePathwayK2", "MetaboliteM21"),
+        ("KinasePathwayK2", "MetaboliteM22"),
+        ("KinasePathwayK3", "MetaboliteM31"),
+        ("KinasePathwayK3", "MetaboliteM32"),
     ]
     negated = {("KinasePathwayK1", "MetaboliteM12"), ("KinasePathwayK3", "MetaboliteM31")}
 
@@ -79,10 +85,10 @@ def create_new_sealed_metabolic_inhibitor_tree(seed: int = 502, use_evidence_pre
 
 
 def create_new_sealed_consortium_smart_contract(seed: int = 503, use_evidence_prefix: bool = True) -> GroundedThreeValuedEnvironment:
-    """New Task 3: 8-node consortium blockchain partition (non-transitive bipartite protocol)."""
+    """New Task 3: 9-node consortium blockchain partition (non-transitive bipartite protocol)."""
     entities = [
         "ValidatorAuthV0", "EscrowContractE1", "SettlementRelayS2", "ArbiterChamberA3",
-        "ClearingHouseC4", "LiquidityPoolL5", "CollateralVaultV6", "AuditorRegistryR7",
+        "ClearingHouseC4", "LiquidityPoolL5", "CollateralVaultV6", "AuditorRegistryR7", "BridgeRelayB8",
     ]
     edges = [
         ("ValidatorAuthV0", "EscrowContractE1"),
@@ -92,7 +98,9 @@ def create_new_sealed_consortium_smart_contract(seed: int = 503, use_evidence_pr
         ("ClearingHouseC4", "LiquidityPoolL5"),
         ("LiquidityPoolL5", "CollateralVaultV6"),
         ("CollateralVaultV6", "AuditorRegistryR7"),
+        ("AuditorRegistryR7", "BridgeRelayB8"),
     ]
+    levels = {e: i for i, e in enumerate(entities)}
 
     base_env = AutonomousEnvironment(
         env_id="m65_sealed_consortium_smart_contract",
@@ -103,12 +111,13 @@ def create_new_sealed_consortium_smart_contract(seed: int = 503, use_evidence_pr
         true_hypothesis=OUT_OF_HYPOTHESIS_BIPARTITE,
         held_out_test_queries=[],
         minimal_pairs=[],
+        entity_levels=levels,
     )
     return GroundedThreeValuedEnvironment(base_env, use_evidence_prefix=use_evidence_prefix)
 
 
 def create_new_sealed_epigenetic_chromatin_lattice(seed: int = 504, use_evidence_prefix: bool = True) -> GroundedThreeValuedEnvironment:
-    """New Task 4: 8-locus chromatin lattice with open-world incomplete reachability."""
+    """New Task 4: 8-locus chromatin lattice with open-world incomplete reachability and explicit silencers."""
     entities = [f"ChromatinLocusL{i}" for i in range(8)]
     edges = [
         (entities[0], entities[1]), (entities[0], entities[2]),
@@ -116,6 +125,22 @@ def create_new_sealed_epigenetic_chromatin_lattice(seed: int = 504, use_evidence
         (entities[3], entities[5]), (entities[4], entities[6]),
         (entities[5], entities[7]), (entities[6], entities[7]),
     ]
+    negated = {
+        (entities[7], entities[0]), (entities[6], entities[1]),
+        (entities[5], entities[2]), (entities[4], entities[3]),
+        (entities[3], entities[4]), (entities[2], entities[5]),
+        (entities[1], entities[6]), (entities[7], entities[1]),
+    }
+
+    open_world_hyp = RuleHypothesis(
+        hypothesis_id="OPEN_WORLD_EXPLICIT_REFUTATION",
+        name="Open-World Transitive with Explicit Negative Constraints",
+        is_symmetric=False,
+        is_transitive=True,
+        has_explicit_refutation=True,
+        is_open_world=True,
+        description="Open-world relational graph with explicit negative methylation silencing constraints.",
+    )
 
     base_env = AutonomousEnvironment(
         env_id="m65_sealed_epigenetic_chromatin_lattice",
@@ -123,9 +148,10 @@ def create_new_sealed_epigenetic_chromatin_lattice(seed: int = 504, use_evidence
         relation_name="propagates_histone_acetylation_to",
         entities=entities,
         base_edges=edges,
-        true_hypothesis=EXPANDED_HYPOTHESES["OPEN_WORLD_INCOMPLETE"],
+        true_hypothesis=open_world_hyp,
         held_out_test_queries=[],
         minimal_pairs=[],
+        negated_edges=negated,
     )
     return GroundedThreeValuedEnvironment(base_env, use_evidence_prefix=use_evidence_prefix)
 

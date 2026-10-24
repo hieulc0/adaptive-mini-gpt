@@ -13,7 +13,7 @@ from adaptive_mini_gpt.guided_experiment.environment import (
     RuleHypothesis,
 )
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)\
 
 
 class TriValuedState(str, Enum):
@@ -137,7 +137,7 @@ class GroundedThreeValuedEnvironment:
         self.true_hypothesis = base_env.true_hypothesis
 
         # Evidence context
-        unobserved = [f"UnobservedEntity{i}" for i in range(4)]
+        unobserved = [f"UnobservedEntity{i}" for i in range(8)]
         self.evidence_context = ObservableEvidenceContext(
             observed_edges=list(base_env.base_edges),
             negated_edges=list(base_env.negated_edges),
@@ -166,31 +166,35 @@ class GroundedThreeValuedEnvironment:
         no_queries: list[EnvironmentQuery] = []
         unk_queries: list[EnvironmentQuery] = []
 
+        used_pairs: set[tuple[str, str]] = set()
+        all_entities = self.entities
+
         # 1. Reachable YES pairs
         for u, v in self.base_edges:
-            if len(yes_queries) < 8:
-                q_text = self._format_query_text(u, v, evidence_note=f"direct link {u}->{v}")
-                yes_queries.append(
-                    EnvironmentQuery(
-                        query_id=f"test_yes_{u}_{v}",
-                        source=u,
-                        target=v,
-                        query_type="OBSERVED_POSITIVE_EDGE",
-                        question_text=q_text,
-                        expected_answer="YES",
+            if len(yes_queries) < 8 and (u, v) not in used_pairs:
+                ans = self.evaluate_ground_truth(u, v)
+                if ans == "YES":
+                    q_text = self._format_query_text(u, v, evidence_note=f"direct link {u}->{v}")
+                    yes_queries.append(
+                        EnvironmentQuery(
+                            query_id=f"test_yes_{u}_{v}",
+                            source=u,
+                            target=v,
+                            query_type="OBSERVED_POSITIVE_EDGE",
+                            question_text=q_text,
+                            expected_answer="YES",
+                        )
                     )
-                )
+                    used_pairs.add((u, v))
 
-        # Multi-hop transitive YES pairs
-        all_entities = self.entities
         for i in range(len(all_entities)):
             for j in range(len(all_entities)):
                 if i != j and len(yes_queries) < 8:
                     u, v = all_entities[i], all_entities[j]
-                    ans = self.base_env.evaluate_ground_truth(u, v)
-                    if ans == "YES":
-                        q_text = self._format_query_text(u, v, evidence_note=f"path {u}->{v}")
-                        if not any(q.source == u and q.target == v for q in yes_queries):
+                    if (u, v) not in used_pairs:
+                        ans = self.evaluate_ground_truth(u, v)
+                        if ans == "YES":
+                            q_text = self._format_query_text(u, v, evidence_note=f"path {u}->{v}")
                             yes_queries.append(
                                 EnvironmentQuery(
                                     query_id=f"test_trans_yes_{u}_{v}",
@@ -201,89 +205,74 @@ class GroundedThreeValuedEnvironment:
                                     expected_answer="YES",
                                 )
                             )
+                            used_pairs.add((u, v))
 
-        while len(yes_queries) < 8:
-            idx = len(yes_queries)
-            u, v = self.base_edges[idx % len(self.base_edges)]
-            q_text = self._format_query_text(u, v, evidence_note=f"direct link confirmed {idx}")
-            yes_queries.append(
-                EnvironmentQuery(
-                    query_id=f"test_yes_pad_{idx}",
-                    source=u,
-                    target=v,
-                    query_type="OBSERVED_POSITIVE_EDGE_PAD",
-                    question_text=q_text,
-                    expected_answer="YES",
-                )
-            )
-
-        # 2. Refuted NO pairs (reversals in asymmetric DAGs or explicit refutations)
-        for u, v in self.base_edges:
-            if len(no_queries) < 8:
-                rev_ans = self.base_env.evaluate_ground_truth(v, u)
-                if rev_ans == "NO":
-                    q_text = self._format_query_text(v, u, evidence_note=f"direction refuted {v}->{u}")
-                    no_queries.append(
-                        EnvironmentQuery(
-                            query_id=f"test_no_rev_{v}_{u}",
-                            source=v,
-                            target=u,
-                            query_type="DIRECTIONAL_REFUTATION",
-                            question_text=q_text,
-                            expected_answer="NO",
-                        )
-                    )
-
-        for u in all_entities:
-            for v in all_entities:
-                if u != v and len(no_queries) < 8:
-                    ans = self.base_env.evaluate_ground_truth(u, v)
-                    if ans == "NO" and not any(q.source == u and q.target == v for q in no_queries):
-                        q_text = self._format_query_text(u, v, evidence_note=f"structurally prohibited {u}->{v}")
-                        no_queries.append(
-                            EnvironmentQuery(
-                                query_id=f"test_no_struct_{u}_{v}",
-                                source=u,
-                                target=v,
-                                query_type="STRUCTURAL_NO",
-                                question_text=q_text,
-                                expected_answer="NO",
+        # 2. Refuted NO pairs
+        for i in range(len(all_entities)):
+            for j in range(len(all_entities)):
+                if i != j and len(no_queries) < 8:
+                    u, v = all_entities[i], all_entities[j]
+                    if (u, v) not in used_pairs:
+                        ans = self.evaluate_ground_truth(u, v)
+                        if ans == "NO":
+                            q_text = self._format_query_text(u, v, evidence_note=f"refuted {u}->{v}")
+                            no_queries.append(
+                                EnvironmentQuery(
+                                    query_id=f"test_no_{u}_{v}",
+                                    source=u,
+                                    target=v,
+                                    query_type="STRUCTURAL_NO",
+                                    question_text=q_text,
+                                    expected_answer="NO",
+                                )
                             )
-                        )
+                            used_pairs.add((u, v))
 
-        while len(no_queries) < 8:
-            idx = len(no_queries)
-            u = all_entities[-(idx % len(all_entities)) - 1]
-            v = all_entities[idx % len(all_entities)]
-            q_text = self._format_query_text(u, v, evidence_note=f"refuted disconnection {idx}")
-            no_queries.append(
-                EnvironmentQuery(
-                    query_id=f"test_no_pad_{idx}",
-                    source=u,
-                    target=v,
-                    query_type="STRUCTURAL_NO_PAD",
-                    question_text=q_text,
-                    expected_answer="NO",
-                )
-            )
+        # 3. Indeterminate UNKNOWN pairs
+        # First check if any observed pairs have ground truth UNKNOWN (e.g. open world incomplete)
+        for i in range(len(all_entities)):
+            for j in range(len(all_entities)):
+                if i != j and len(unk_queries) < 8:
+                    u, v = all_entities[i], all_entities[j]
+                    if (u, v) not in used_pairs:
+                        ans = self.evaluate_ground_truth(u, v)
+                        if ans == "UNKNOWN":
+                            q_text = self._format_query_text(u, v, evidence_note=f"indeterminate {u}->{v}")
+                            unk_queries.append(
+                                EnvironmentQuery(
+                                    query_id=f"test_unk_internal_{u}_{v}",
+                                    source=u,
+                                    target=v,
+                                    query_type="INSUFFICIENT_EVIDENCE_UNKNOWN",
+                                    question_text=q_text,
+                                    expected_answer="UNKNOWN",
+                                )
+                            )
+                            used_pairs.add((u, v))
 
-        # 3. Indeterminate UNKNOWN pairs (unobserved entities or deleted bridge)
+        # Unobserved external entities outside the observed graph
         ext_nodes = [f"UnobservedEntity{i}" for i in range(8)]
         for i, ext in enumerate(ext_nodes):
             tgt = all_entities[i % len(all_entities)]
-            q_text = self._format_query_text(ext, tgt, evidence_note=f"entity {ext} unobserved")
-            unk_queries.append(
-                EnvironmentQuery(
-                    query_id=f"test_unk_ext_{i}",
-                    source=ext,
-                    target=tgt,
-                    query_type="INSUFFICIENT_EVIDENCE_UNKNOWN",
-                    question_text=q_text,
-                    expected_answer="UNKNOWN",
+            if (ext, tgt) not in used_pairs and len(unk_queries) < 8:
+                q_text = self._format_query_text(ext, tgt, evidence_note=f"entity {ext} unobserved")
+                unk_queries.append(
+                    EnvironmentQuery(
+                        query_id=f"test_unk_ext_{i}",
+                        source=ext,
+                        target=tgt,
+                        query_type="INSUFFICIENT_EVIDENCE_UNKNOWN",
+                        question_text=q_text,
+                        expected_answer="UNKNOWN",
+                    )
                 )
-            )
+                used_pairs.add((ext, tgt))
 
-        test_pool = yes_queries[:8] + no_queries[:8] + unk_queries[:8]
+        assert len(yes_queries) == 8, f"Env {self.env_id} only yielded {len(yes_queries)} YES queries (expected 8)"
+        assert len(no_queries) == 8, f"Env {self.env_id} only yielded {len(no_queries)} NO queries (expected 8)"
+        assert len(unk_queries) == 8, f"Env {self.env_id} only yielded {len(unk_queries)} UNKNOWN queries (expected 8)"
+
+        test_pool = yes_queries + no_queries + unk_queries
         report = ThreeValuedDatasetValidator.validate_query_set(test_pool, f"test_pool_{self.env_id}")
         assert report.validation_passed, f"Validation failed: {report.diagnostics}"
         return test_pool
