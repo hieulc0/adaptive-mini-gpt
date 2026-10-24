@@ -8,7 +8,11 @@ __pycache__/
 *.pt
 *.pth
 *.safetensors
-/data/
 .ipynb_checkpoints/
 project_context.txt
 .agents/
+
+# Data directories: ignore generated/external/packages, keep specs, fixtures, manifests
+/data/generated/
+/data/external/
+/data/packages/

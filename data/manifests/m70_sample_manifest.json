@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "m70_fixture_dataset",
+  "version": "1.0",
+  "dataset_type": "synthetic",
+  "git_commit": "fixtures_initial",
+  "generator_config_hash": "fixtures_hash",
+  "seed": 42,
+  "independent_world_ids": [
+    "fixture_world_1"
+  ],
+  "task_families": [
+    {
+      "family_id": "PARITY_CYCLE",
+      "description": "Fixture Parity Cycle",
+      "relation_name": "dispatches_consist_to",
+      "entity_universe_size": 2,
+      "is_directed": false
+    }
+  ],
+  "partitions": {
+    "train": {
+      "partition_name": "train",
+      "relative_path": "m70_sample_fixture.jsonl",
+      "sha256": "9dc3a18f5aa78b0b450500de364bcd0f3e72167e94c78eb1abdd0a644c79e236",
+      "example_count": 2,
+      "label_distribution": {
+        "YES": 1,
+        "NO": 1
+      }
+    }
+  },
+  "total_examples": 2,
+  "created_at": "2026-10-24T00:00:00Z",
+  "license": "Apache-2.0",
+  "visibility_restrictions": "research_internal"
+}
