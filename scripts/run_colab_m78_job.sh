@@ -4,10 +4,11 @@ set -euo pipefail
 echo "=== System Preflight Check ==="
 python3 -c "import torch; assert torch.cuda.is_available(); print('CUDA Device:', torch.cuda.get_device_name(0), 'PyTorch:', torch.__version__)"
 
-# 1. Unpack checkpoints
+# 1. Checkpoints (optional)
 mkdir -p /content/checkpoints
-tar -xzf /content/m18-checkpoints.tar.gz -C /content/checkpoints
-ls -la /content/checkpoints
+if [ -f /content/m18-checkpoints.tar.gz ]; then
+  tar -xzf /content/m18-checkpoints.tar.gz -C /content/checkpoints
+fi
 
 # 2. Setup repo
 rm -rf /content/adaptive-mini-gpt
