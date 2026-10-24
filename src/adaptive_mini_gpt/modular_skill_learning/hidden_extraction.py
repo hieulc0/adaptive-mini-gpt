@@ -7,7 +7,11 @@ import torch.nn as nn
 
 
 def extract_model_hidden(model: Any, inp: torch.Tensor) -> torch.Tensor:
-    """Extract final layer hidden representation of dimension (B, T, d_model)."""
+    """Extract final layer hidden representation of dimension (B, T, d_model), bounded by context_length."""
+    max_ctx = getattr(getattr(model, "config", None), "context_length", 256)
+    if inp.size(1) > max_ctx:
+        inp = inp[:, -max_ctx:]
+
     if hasattr(model, "blocks") and hasattr(model, "ln_f") and hasattr(model, "wte"):
         b, t = inp.size()
         device = inp.device
