@@ -11,7 +11,6 @@ Orchestrates the 5-phase scientific research evaluation:
 
 from __future__ import annotations
 
-import hashlib
 import logging
 import time
 from typing import Any
@@ -24,12 +23,12 @@ from adaptive_mini_gpt.learning_to_learn.audit_m80 import M80ForensicAuditor
 from adaptive_mini_gpt.learning_to_learn.capacity_adaptation import (
     BottleneckSequenceAdapter,
     CapacityAdaptationManager,
-    CapacityDecision,
 )
 from adaptive_mini_gpt.learning_to_learn.composition_evaluator import (
     CompositionEvaluator,
 )
 from adaptive_mini_gpt.learning_to_learn.learning_to_learn_engine import (
+    QUALIFICATION_THRESHOLD,
     LearningArmTrialResult,
     LearningArmType,
     LearningToLearnEngine,
@@ -113,33 +112,16 @@ class M81LearningToLearnBenchmark:
                 seed=seed + 20,
             )
 
-            # Train curriculum tasks to establish student experience
-            logger.info("Training continual curriculum tasks (T1, T2, T3)...")
-            res_t1 = LearningToLearnEngine.train_arm(
-                model=model, task=t1, arm=LearningArmType.PRETRAINED_BACKBONE,
-                device=device, rank=8, max_steps=40, seed=seed,
-            )
-            res_t2 = LearningToLearnEngine.train_arm(
-                model=model, task=t2, arm=LearningArmType.PRETRAINED_BACKBONE,
-                device=device, rank=8, max_steps=40, seed=seed,
-            )
-            res_t3 = LearningToLearnEngine.train_arm(
-                model=model, task=t3, arm=LearningArmType.PRETRAINED_BACKBONE,
-                device=device, rank=8, max_steps=40, seed=seed,
-            )
-
-            # Re-instantiate trained adapters for experience synthesis
-            # (Extract learned weights from trials)
+            # Retain adapters for primitives
             adapt_t1 = BottleneckSequenceAdapter(model.config.d_model, 8, 16).to(device)
             adapt_t2 = BottleneckSequenceAdapter(model.config.d_model, 8, 16).to(device)
             adapt_t3 = BottleneckSequenceAdapter(model.config.d_model, 8, 16).to(device)
 
-            # Quick lightweight fit to populate weights
             def fit_adapter(adapt: nn.Module, ds: Any) -> None:
-                opt = torch.optim.AdamW(adapt.parameters(), lr=3e-3)
+                opt = torch.optim.AdamW(adapt.parameters(), lr=4e-3)
                 th, ty = extract_features_from_examples(model, ds.train_examples, device)
                 adapt.train()
-                for _ in range(30):
+                for _ in range(35):
                     opt.zero_grad()
                     lg = adapt(th)
                     ls = F.cross_entropy(lg.view(-1, 16), ty.view(-1))
@@ -155,9 +137,15 @@ class M81LearningToLearnBenchmark:
             retained_primitive_adapters["CURRICULUM_T2_PARITY"] = adapt_t2
             retained_primitive_adapters["CURRICULUM_T3_REVERSE"] = adapt_t3
 
-            # Synthesize accumulated structural experience prior
+            # Synthesize accumulated structural experience prior via Reptile meta-updates
+            logger.info("Synthesizing continual experience prior via meta-updates...")
             experience_prior = LearningToLearnEngine.synthesize_experience_prior(
-                [adapt_t1, adapt_t2, adapt_t3]
+                model=model,
+                curriculum_tasks=[t1, t2, t3],
+                device=device,
+                rank=8,
+                inner_steps=25,
+                meta_lr=0.5,
             )
 
             # Phase 2: Target Unfamiliar Rule Task (Evaluate Learning-to-Learn)
@@ -213,7 +201,7 @@ class M81LearningToLearnBenchmark:
             logger.info("Running Minimal Capacity Adaptation Search on Seed %d...", seed)
             def evaluate_rank_candidate(r: int) -> tuple[float, nn.Module]:
                 c_adapter = BottleneckSequenceAdapter(model.config.d_model, r, 16).to(device)
-                c_opt = torch.optim.AdamW(c_adapter.parameters(), lr=3e-3)
+                c_opt = torch.optim.AdamW(c_adapter.parameters(), lr=4e-3)
                 c_th, c_ty = extract_features_from_examples(model, target_task.train_examples, device)
                 c_qh, c_qy = extract_features_from_examples(model, target_task.qualification_examples, device)
                 c_adapter.train()

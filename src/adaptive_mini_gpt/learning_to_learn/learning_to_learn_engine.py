@@ -17,13 +17,10 @@ Measures:
 
 from __future__ import annotations
 
-import copy
 import logging
-import math
 import time
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import Any
 
 import torch
 import torch.nn as nn
@@ -122,7 +119,7 @@ class LearningToLearnEngine:
         experience_prior_weights: dict[str, torch.Tensor] | None = None,
         max_steps: int = 60,
         eval_step_intervals: list[int] | None = None,
-        lr: float = 3e-3,
+        lr: float = 4e-3,
         seed: int = 42,
     ) -> LearningArmTrialResult:
         """Train a candidate adapter under the specified arm and record learning trajectory."""
@@ -150,7 +147,7 @@ class LearningToLearnEngine:
             # Scramble weights to simulate negative/arbitrary transfer
             with torch.no_grad():
                 for p in adapter.parameters():
-                    p.copy_(torch.randn_like(p) * 0.1)
+                    p.copy_(torch.randn_like(p) * 0.15)
 
         elif arm == LearningArmType.ORACLE_GUIDED and experience_prior_weights is not None:
             # Ideal structural initialization
@@ -235,19 +232,37 @@ class LearningToLearnEngine:
     @classmethod
     def synthesize_experience_prior(
         cls,
-        curriculum_adapters: list[nn.Module],
+        model: MiniGPT,
+        curriculum_tasks: list[CurriculumTaskDataset],
+        device: torch.device,
+        rank: int = 8,
+        inner_steps: int = 25,
+        meta_lr: float = 0.5,
     ) -> dict[str, torch.Tensor]:
-        """Synthesize transferable structural experience prior across trained curriculum adapters."""
-        if not curriculum_adapters:
-            return {}
+        """Synthesize transferable structural experience prior across curriculum tasks via Reptile meta-updates."""
+        meta_adapter = BottleneckSequenceAdapter(
+            d_model=model.config.d_model, bottleneck_dim=rank, num_symbols=16
+        ).to(device)
 
-        prior: dict[str, torch.Tensor] = {}
-        first = curriculum_adapters[0]
-        for name, param in first.named_parameters():
-            stacked = torch.stack(
-                [dict(a.named_parameters())[name].detach() for a in curriculum_adapters]
-            )
-            # Compute empirical mean direction across curriculum tasks
-            prior[name] = torch.mean(stacked, dim=0)
+        for task in curriculum_tasks:
+            train_h, train_y = extract_features_from_examples(model, task.train_examples, device)
+            clone = BottleneckSequenceAdapter(
+                d_model=model.config.d_model, bottleneck_dim=rank, num_symbols=16
+            ).to(device)
+            clone.load_state_dict(meta_adapter.state_dict())
 
-        return prior
+            opt = torch.optim.AdamW(clone.parameters(), lr=4e-3)
+            clone.train()
+            for _ in range(inner_steps):
+                opt.zero_grad()
+                lg = clone(train_h)
+                ls = F.cross_entropy(lg.view(-1, 16), train_y.view(-1))
+                ls.backward()
+                opt.step()
+
+            # Reptile outer update: meta <- meta + meta_lr * (clone - meta)
+            with torch.no_grad():
+                for p_meta, p_clone in zip(meta_adapter.parameters(), clone.parameters(), strict=False):
+                    p_meta.add_((p_clone - p_meta) * meta_lr)
+
+        return {k: v.detach().clone() for k, v in meta_adapter.state_dict().items()}
