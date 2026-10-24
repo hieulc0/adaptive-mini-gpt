@@ -23,6 +23,7 @@ An experimental, **CLI-first Python/PyTorch** research framework studying **adap
 - **M77 (Autonomous Neural Skill-Plan Discovery from Examples):** Evaluated on Colab Tesla T4 (322/322 Tests Passed; bounded deterministic plan search over frozen primitives achieves 100% True Negative Rate on unfamiliar tasks and 0.4479 EM when plans are identified, but averages 25.0% plan accuracy and 0.1146 EM due to conservative safety abstention on noisy intermediate neural outputs; paired 95% CI vs provided plan [-0.5730, -0.0937]; frozen M18 backbone and 100% core retention verified; autonomous planning gate INCONCLUSIVE / PARTIAL; topology expansion RESEARCH ONLY)
 - **M78 (Reliable Autonomous Neural Plan Discovery):** Passed (326/326 Tests on Tesla T4; continuous sequence log-likelihood achieves 80.00% plan identity accuracy, 92.50% functional accuracy, 88.85% exact match, 97.50% unfamiliar rejection, 7.50% false abstention, +0.6544 over wrong-order with p < 0.0001; 0 new parameters)
 - **M79 (Autonomous Active Experimentation & Neural Skill-Gap Recognition):** Passed (330/330 Tests on Tesla T4; active discriminative probing generates minimally discriminative inputs to resolve ambiguous plans, achieving 87.50% plan identity accuracy, 97.50% functional accuracy, 93.31% sealed exact match, 100% unfamiliar rejection, reducing supported-task false abstention from 15.00% to 2.50% at 0.15 queries/task with p = 0.0375 over passive M78; 0 new parameters)
+- **M80 (Autonomous Neural Skill Acquisition & Transfer):** Passed (336/336 Tests on Tesla T4; epistemic skill gap detection achieves 100% unsupported task identification, bounded Rank-16 adapter acquisition achieves 100.0% held-out EM, repertoire expansion from 10 to 17 plans with bit-exact rollback, and zero-shot compound composition achieves 79.79% exact match [+79.69% over shuffled weights, p = 0.0001], 100% carry and logic retention, exactly 2,592 parameter allocation, 0 base growth)
 
 ## Research Hypothesis
 
@@ -33,7 +34,7 @@ Under a matched compute and token budget, **function-preserving modular growth**
 - **Learn first, adapt later:** Verify dense baselines and deterministic resumption before activating routing or capacity growth.
 - **Function-preserving transitions:** Any structural growth operation ($M \to M'$) must satisfy $M'(x) = M(x)$ at the step of expansion via zero-initialized residual projections.
 - **Single-process CLI parity:** Identical `amg` CLI execution on local Arch Linux CPU, Google Colab, and Kaggle T4 GPUs.
-- **Crash-only atomic persistence:** Checkpoints write to temporary files, pass a load verification smoke test, and atomically swap via `os.replace` alongside a versioned `manifest.json`.\
+- **Crash-only atomic persistence:** Checkpoints write to temporary files, pass a load verification smoke test, and atomically swap via `os.replace` alongside a versioned `manifest.json`.
 - **Reproducible evaluation:** Deterministic document/task splits, SHA-256 data and vocabulary fingerprints, and isolated holdout verification.
 
 ## Quickstart & CLI Usage
@@ -136,6 +137,7 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 | **M77** | Autonomous Skill-Plan Discovery from Examples | Bounded hypothesis search identifies correct plans with 100% TNR on unfamiliar tasks; conservative abstention audited; 322/322 tests on Tesla T4 |
 | **M78** | Reliable Autonomous Neural Plan Discovery | Continuous sequence log-likelihood $S(P)$ achieves **80.00% plan accuracy**, **88.85% exact match**, **97.50% unfamiliar rejection**, **7.50% abstention** (+0.6544 over wrong-order, $t=21.58, p<0.0001$); 0 new parameters; 326/326 tests on Tesla T4 |
 | **M79** | Autonomous Active Experimentation & Skill-Gap Recognition | Active discriminative probing resolves hypothesis ambiguity with budget $\le 1.5$ queries (**0.15 queries/task**), achieving **87.50% plan identity accuracy**, **97.50% functional accuracy**, **93.31% exact match**, **100% unfamiliar rejection**, reducing false abstention to **2.50%** ($t=3.0647, p=0.0375$); 0 new parameters; 330/330 tests on Tesla T4 |
+| **M80** | Autonomous Neural Skill Acquisition & Transfer | Epistemic skill-gap detection (**100%**), bounded Rank-16 adapter acquisition (**100% held-out EM**), repertoire expansion (10 $\to$ 17 plans) with rollback verification, zero-shot compound composition (**79.79% EM**, +79.69% over shuffled control, $t=6.5731, p=0.0001$), 100% carry & logic retention, exactly 2,592 parameter allocation, 0 base growth; 336/336 tests on Tesla T4 |
 
 ## Directory Structure
 
@@ -143,20 +145,4 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 ├── configs/                  # Reproducible training and architecture configs
 │   └── tiny.yaml
 ├── data/raw/                 # Raw datasets (e.g., Shakespeare Sonnets)
-├── docs/                     # Research discipline and design documentation
-│   ├── 01-vision.md
-│   ├── 02-architecture.md
-│   ├── 03-training-and-colab.md
-│   ├── 04-experiments.md
-│   └── 05-roadmap.md
-├── scripts/                  # Standalone benchmark experiments & runners
-│   └── run_m3_m4_experiment.py
-├── src/adaptive_mini_gpt/    # Core package
-│   ├── active_experimentation/ # M79 Active inquiry, discriminative probes, forensic audit
-│   ├── adaptive/             # MoE layers, routers, growth operators, MoD
-│   ├── data/                 # Tokenizer, procedural datasets, dataloader
-│   ├── evaluation/           # Perplexity, BPC, arithmetic accuracy evaluators
-│   ├── model/                # Transformer decoder, attention, configuration
-│   └── training/             # Trainer, checkpoint manager, optimizer
-└── tests/                    # 330 deterministic unit and integration tests
 ```

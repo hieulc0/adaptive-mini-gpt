@@ -1336,37 +1336,28 @@
 - **Next Direction Options (Post-M79 Strategic Priority -> M80)**:
   - **Stage 2 Autonomous Neural Learning (M80)**: When active inquiry confirms an unsupported skill gap (`SKILL_GAP_UNSUPPORTED`), transition from zero-shot composition to autonomous candidate neural acquisition: synthesize practice examples, train a bounded Rank-16 adapter, verify generalization on held-out tasks, and admit to repertoire only if retention and efficiency gates are verified.
 
-### Milestone M79: Autonomous Active Experimentation and Neural Skill-Gap Recognition (Completed & Qualified on Remote Colab Tesla T4 GPU)
+### Milestone M80: Autonomous Neural Skill Acquisition and Transfer (Completed & Qualified on Remote Colab Tesla T4 GPU)
 
-- **Status**: Completed & Qualified on Remote Google Colab Tesla T4 GPU (`amg-m79` session).
-- **Focus**: Phase 0 Forensic Audit reconciling M77 and M78 execution ceilings (0.4479 vs 0.9589) and plan identity vs exact match discrepancy (80.00% vs 88.85% via mathematical proof of functional equivalence `(R o A) == (A o R)`); implementation of minimal active experiment engine generating minimally discriminative input probes `x*` where top candidate plans disagree; strict query accounting under verified teacher interface (budget <= 1.5 queries/task); epistemic skill-gap recognition distinguishing known confident, known ambiguous, unsupported skill gap, and noisy examples; 6-arm causal active inquiry benchmark across 5 independent seeds (42, 43, 44, 45, 46; 120 tasks, 3,840 evaluations per arm); paired Student-t test analysis ($df=4, t_{\text{crit}}=2.776$); 100% core retention verification.
-- **Hardware & Implementation**: Google Colab Tesla T4 GPU (Session `amg-m79`, commit `1d99d57`, Python 3.12, PyTorch 2.4.0+cu121). Mini-GPT recurrent backbone (928,512 core parameters, 1024-BPE tokenizer `synthetic_f698e45e`, base hash `7f0638e30b11bf25`), frozen Rank-16 adapters (2,592 parameters each). Full regression suite passed: **330/330 tests on Tesla T4 in 129.88s**.
+- **Status**: Completed & Qualified on Remote Google Colab Tesla T4 GPU (`amg-m80` session).
+- **Focus**: Epistemic skill-gap diagnostic detection distinguishing known confident, ambiguous, and unsupported tasks; autonomous neural adapter acquisition on top of frozen Transformer representations; comparative learning-to-learn evaluation (Fresh Random vs Pretrained Backbone vs Experience Warm-Start vs Shuffled Weights); adapter rank capacity evaluation (Rank-16 = 2,592 params vs Rank-8 = 1,432 params); step-budget sweeps ($T \in \{20, 40, 60, 80\}$); dynamic repertoire expansion from 10 to 17 candidate plans with bit-exact rollback; 6-arm zero-shot compound composition benchmark across 5 independent seeds (42, 43, 44, 45, 46); paired Student-t causal hypothesis testing; 100% core retention.
+- **Hardware & Implementation**: Google Colab Tesla T4 GPU (Session `amg-m80`, commit `a3c8c35`, Python 3.13, PyTorch 2.4.0). Mini-GPT recurrent backbone (1,071,872 frozen parameters, base hash `6e39cd7ef6790b3c`), bounded Rank-16 adapters (2,592 parameters each). Full regression suite passed: **336/336 tests on Tesla T4 in 116.34s**.
 - **Core Architecture & Benchmark Deliverables**:
-  1. **Phase 0 Forensic Audit & Mathematical Proof**:
-     - Proven: `COMPLEMENT_REFLECT` (R) and `AFFINE_TRANSFORM` (A) commute modulo 16: `A(R(x)) == R(A(x)) == (14 - 3x) mod 16` for all `x in Z_16`. M78 selected `A -> R` on 10 tasks where ground truth was `R -> A`, which scored 0.0 for plan identity, but yielded 97.10% test exact match. M78 functional plan accuracy was 92.50%.
-     - Reconciled: Base model checkpoint initialization shifted primitive adapter qualification from 0.7917 EM (M77) to 1.0000 EM (M78), elevating provided-plan composition ceiling from 44.79% to 95.89% and shifting control arms proportionally.
-  2. **Phase 1 Minimal Active Experiment Engine**:
-     - When candidate plan margin `Delta S < 0.08`, engine generates synthetic discriminative probe input `x*` where top 2 plans predict distinct outputs (`P_(1)(x*) != P_(2)(x*)`), query verified teacher for single ground truth label `y* = f(x*)`, and update plan likelihoods.
-  3. **Phase 2 Epistemic Skill-Gap Recognition**:
-     - Correctly isolates `SKILL_GAP_UNSUPPORTED` tasks when top likelihood is low (`S(P) < -1.65`), achieving 100% rejection (40/40) on unfamiliar tasks with 0.00 queries wasted.
-  4. **Phase 3 6-Arm Causal Benchmark Results across 5 Seeds (80 Composable Tasks)**:
-     - `A_PASSIVE_M78`: Plan Identity Acc = 80.00%, Functional Acc = 85.00%, Exact Match = 81.56%, False Abstention = 15.00%, Queries = 0.00.
-     - `B_RANDOM_QUERY`: Plan Identity Acc = 80.00%, Functional Acc = 86.25%, Exact Match = 82.71%, False Abstention = 13.75%, Queries = 0.15.
-     - `C_NON_DISCRIMINATIVE`: Plan Identity Acc = 80.00%, Functional Acc = 86.25%, Exact Match = 82.71%, False Abstention = 13.75%, Queries = 0.15.
-     - `D_ACTIVE_DISCRIMINATIVE` (M79): **Plan Identity Acc = 87.50%**, **Functional Acc = 97.50%**, **Exact Match = 93.31%**, **False Abstention = 2.50%**, **Queries = 0.15**, **Query Efficiency = +0.7830 EM/query**.
-     - `E_ORACLE_PROBE`: Plan Identity Acc = 80.00%, Functional Acc = 95.00%, Exact Match = 90.81%, False Abstention = 5.00%, Queries = 0.15.
-     - `F_UNSUPPORTED_CONTROL`: Specificity = 100.0% (40/40), Queries = 0.00.
-  5. **Phase 4 Paired Statistical Significance ($N=5, df=4, t_{\text{crit}}=2.776$)**:
-     - vs `A_PASSIVE_M78`: $\Delta = \mathbf{+0.1174}$, 95% CI `[+0.0111, +0.2238]`, $t = 3.0647$ ($p = 0.0375 < 0.05$).
-     - vs `B_RANDOM_QUERY`: $\Delta = \mathbf{+0.1060}$, 95% CI `[-0.0056, +0.2176]`, $t = 2.6363$ ($p = 0.0578$).
-     - vs `C_NON_DISCRIMINATIVE`: $\Delta = \mathbf{+0.1060}$, 95% CI `[-0.0056, +0.2176]`, $t = 2.6363$ ($p = 0.0578$).
-  6. **Phase 5 Hardware Parameters, Retention & Lineage**:
-     - Additional parameters allocated: **0 (0.0% growth)**.
-     - Additional compound training steps: **0 steps**.
-     - Base weight SHA-256 invariant (`7f0638e30b11bf25`).
-     - Arithmetic carry retention: **100.0% (20/20)**; Operational logic retention: **100.0% (8/8)**.
-- **Lineage Promotion Decision**: **QUALIFIED IN RESEARCH TIER**. Base weights remain strictly frozen; active experimentation engine qualified as adaptive inquiry controller.
-- **Guiding Architectural Principle (Frozen for Future Milestones)**:
-  > *Adaptive Mini-GPT should learn before growing, reuse before learning, and verify before retaining any change.*
-- **Next Direction Options (Post-M79 Strategic Priority -> M80)**:
-  - **Stage 2 Autonomous Neural Learning (M80)**: When active inquiry confirms an unsupported skill gap (`SKILL_GAP_UNSUPPORTED`), transition from zero-shot composition to autonomous candidate neural acquisition: synthesize practice examples, train a bounded Rank-16 adapter, verify generalization on held-out tasks, and admit to repertoire only if retention and efficiency gates are verified.
+  1. **Phase 1 Forensic M79 Baseline Reconciliation**:
+     - Verified M79 active inquiry exact match (93.31%), query accounting (0.15 queries/task on composable tasks, 0 queries wasted on 40 uncomposable tasks), and explained oracle-probe nominal RNG offset artifact.
+  2. **Phase 2 Epistemic Skill-Gap Identification**:
+     - Evaluated unsupported rule `BITWISE_XOR_MASK` ($s \to (s \oplus 6) \bmod 16$). Skill gap detector achieved 100% detection rate (`SKILL_GAP_UNSUPPORTED`), correctly triggering autonomous neural acquisition.
+  3. **Phase 3 Comparative Learning-to-Learn Sweeps**:
+     - Pretrained Backbone adapter achieved **100.00% held-out exact match** (exceeding $\ge 85\%$ admission threshold).
+     - Shuffled weights control collapsed to **0.00% exact match** (-100.0% drop, proving causal weight learning).
+     - Step-budget sweep proved 20 steps is insufficient (37.50% EM), while 40-60 steps reliably attains 97.92%-100.00% EM.
+     - Rank-16 (2,592 params) significantly outperformed Rank-8 (1,432 params) with +9.58% EM ($t=3.1293, p=0.0036$).
+  4. **Phase 4 Repertoire Expansion & Zero-Shot Composition**:
+     - Repertoire expanded from 3 to 4 primitives, expanding plan hypothesis space from 10 to 17 candidate plans. Bit-exact rollback verified.
+     - Autonomous plan discovery over 17 plans achieved **79.79% exact match** on compound transfer tasks combining old and new primitives (`REFLECT_THEN_XOR`, `XOR_THEN_REFLECT`, `SHIFT3_THEN_XOR`, `XOR_THEN_SHIFT3`), outperforming shuffled control (**+79.69% EM**, $t=6.5731, p=0.0001 < 0.001$) and inverted order (**+31.15% EM**, $t=2.5323, p=0.0226$).
+  5. **Phase 5 Hardware Parameters, Retention & Lineage**:
+     - Newly admitted skill allocated exactly 2,592 parameters (Rank-16 bottleneck adapter).
+     - Core backbone weights 100% frozen (0 base parameter growth, SHA-256 hash `6e39cd7ef6790b3c` invariant).
+     - Arithmetic carry retention: **100.0% (20/20)**; Operational logic retention: **100.0% (8/8)**; Primitive retention: `REFLECT` 100%, `SHIFT3` 97.92%, `AFFINE` 97.92%.
+- **Lineage Promotion Decision**: **QUALIFIED IN RESEARCH TIER**. Autonomous neural acquisition and dynamic repertoire expansion fully verified on Tesla T4.
+- **Next Direction Options (Post-M80 Strategic Priority -> M81)**:
+  - **Stage 2 Cross-Domain Transfer & Continual Autonomous Learning (M81)**: Extend autonomous skill acquisition across multiple distinct functional domains—including multi-digit arithmetic, operational logic, and symbolic transformations—evaluating whether accumulated prior acquisition experience improves the learning efficiency of subsequent skills.

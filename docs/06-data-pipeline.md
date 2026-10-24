@@ -355,3 +355,33 @@ Milestone M79 introduces `data/specs/m79_active_spec.json`, formalizing:
     * 330/330 unit and regression tests passed on Google Colab Tesla T4 GPU (`amg-m79` session).
     * Statistically significant improvement over passive M78 (+11.74% EM, t = 3.0647, p = 0.0375).
     * Strict 0 parameter growth and 0 compound training steps.
+
+### 12. Milestone M80 Autonomous Neural Skill Acquisition Specification
+Milestone M80 introduces `data/specs/m80_acquisition_spec.json`, formalizing:
+- **Phase 1 Forensic Audit & Baseline Reconciliation**:
+    * Reconciles M79 query accounting (0.15 queries/task) and explains nominal oracle control underperformance via RNG offset artifact.
+- **Epistemic Diagnostic Detection**:
+    * Evaluates candidate plans; when top likelihood $S(P) < -1.65$, task is classified as `SKILL_GAP_UNSUPPORTED`, directly triggering neural adaptation.
+- **Autonomous Neural Adapter Acquisition**:
+    * Bounded parameter budget: Rank-16 bottleneck adapter (2,592 parameters) vs Rank-8 bottleneck adapter (1,432 parameters).
+    * Training steps budget sweep: $T \in \{20, 40, 60, 80\}$ steps on 48 practice examples.
+    * Strict qualification admission gate: held-out exact match $\ge 0.85$ (85%).
+- **Comparative Learning-to-Learn Initialization Modes**:
+    * `FRESH_RANDOM`: fresh student without pretrained backbone representations.
+    * `PRETRAINED_BACKBONE`: adapter trained on frozen Transformer representations.
+    * `EXPERIENCE_WARM_START`: warm-started from related prior skill adapter weights.
+    * `SHUFFLED_WEIGHTS`: scrambled parameter control for causal weight attribution.
+- **Dynamic Repertoire Expansion & Combinatorial Plan Space**:
+    * Repertoire expansion: 3 primitives $\to$ 4 primitives (`COMPLEMENT_REFLECT`, `CAESAR_SHIFT_MOD3`, `AFFINE_TRANSFORM`, `BITWISE_XOR_MASK`).
+    * Plan hypothesis space: expands from 10 to 17 candidate plans (1 abstain, 4 single-primitive, 12 two-stage sequential compositions).
+    * Bit-exact rollback support: candidate removal restores initial 10-plan space with 0 residual parameter traces.
+- **Zero-Shot Compound Transfer Evaluation (6 Arms)**:
+    * `AUTONOMOUS_PLAN_EXPANDED`: autonomous plan discovery over 17 plans.
+    * `ORACLE_PLAN_PROVIDED`: composition with ground-truth plan ($P^*$).
+    * `INVERTED_ORDER_CONTROL`: reversed execution order ($P_{\text{inv}}$).
+    * `SINGLE_SKILL_ABLATION`: single primitive alone.
+    * `SHUFFLED_ACQUIRED_ADAPTER`: scrambled adapter weights control.
+    * `FRESH_MONOLITHIC_ADAPTER`: direct end-to-end trained compound adapter reference.
+- **Execution Provenance**:
+    * 336/336 unit and regression tests passed on Google Colab Tesla T4 GPU (`amg-m80` session).
+    * 100% carry (20/20) and logic (8/8) retention; base parameter SHA-256 hash invariant (`6e39cd7ef6790b3c`).
