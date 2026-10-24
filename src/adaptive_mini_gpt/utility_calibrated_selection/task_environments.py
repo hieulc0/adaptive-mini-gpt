@@ -110,6 +110,8 @@ def create_chromatin_stage1_train_env(seed: int = 704) -> GroundedThreeValuedEnv
     negated = {
         (entities[7], entities[0]), (entities[6], entities[1]),
         (entities[5], entities[2]), (entities[4], entities[3]),
+        (entities[3], entities[4]), (entities[2], entities[5]),
+        (entities[1], entities[6]), (entities[7], entities[1]),
     }
     hyp = RuleHypothesis(
         hypothesis_id="OPEN_WORLD_EXPLICIT_REFUTATION",
@@ -146,6 +148,8 @@ def create_chromatin_stage2_qual_env(seed: int = 705) -> GroundedThreeValuedEnvi
     negated = {
         (entities[8], entities[0]), (entities[7], entities[1]),
         (entities[6], entities[2]), (entities[5], entities[3]),
+        (entities[4], entities[5]), (entities[3], entities[6]),
+        (entities[2], entities[7]), (entities[1], entities[8]),
     }
     hyp = RuleHypothesis(
         hypothesis_id="OPEN_WORLD_EXPLICIT_REFUTATION",
@@ -183,6 +187,8 @@ def create_chromatin_stage3_eval_env(seed: int = 706) -> GroundedThreeValuedEnvi
     negated = {
         (entities[9], entities[0]), (entities[8], entities[1]),
         (entities[7], entities[2]), (entities[6], entities[3]),
+        (entities[5], entities[4]), (entities[4], entities[5]),
+        (entities[3], entities[6]), (entities[2], entities[7]),
     }
     hyp = RuleHypothesis(
         hypothesis_id="OPEN_WORLD_EXPLICIT_REFUTATION",
