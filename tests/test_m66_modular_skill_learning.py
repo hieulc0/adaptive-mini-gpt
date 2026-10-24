@@ -65,6 +65,7 @@ class MockMiniGPT(torch.nn.Module):
 
 @pytest.fixture
 def mock_setup():
+    torch.manual_seed(42)
     device = torch.device("cpu")
     model = MockMiniGPT()
     adapter = Rank16ResidualAdapter(d_model=128, bottleneck_dim=16, num_classes=3)
