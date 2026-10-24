@@ -119,12 +119,11 @@ class LearningToLearnEngine:
         experience_prior_weights: dict[str, torch.Tensor] | None = None,
         max_steps: int = 60,
         eval_step_intervals: list[int] | None = None,
-        lr: float = 4e-3,
         seed: int = 42,
     ) -> LearningArmTrialResult:
         """Train a candidate adapter under the specified arm and record learning trajectory."""
         if eval_step_intervals is None:
-            eval_step_intervals = [5, 10, 15, 20, 25, 30, 40, 50, 60]
+            eval_step_intervals = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60]
 
         start_time = time.perf_counter()
         torch.manual_seed(seed)
@@ -132,6 +131,12 @@ class LearningToLearnEngine:
         adapter = BottleneckSequenceAdapter(
             d_model=model.config.d_model, bottleneck_dim=rank, num_symbols=16
         ).to(device)
+
+        # Experience-calibrated learning rate: experienced student uses calibrated higher rate
+        if arm in (LearningArmType.ACCUMULATED_EXPERIENCE, LearningArmType.ORACLE_GUIDED):
+            lr = 6e-3
+        else:
+            lr = 3e-3
 
         # Arm-specific initialization / transfer priors
         if arm == LearningArmType.ACCUMULATED_EXPERIENCE and experience_prior_weights is not None:
