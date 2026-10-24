@@ -21,6 +21,7 @@ import copy
 import json
 import logging
 import math
+import time
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
@@ -137,6 +138,8 @@ def build_warmup_experience_history(
         )
         desc = task.compute_observable_descriptors()
         adapter = Rank16SequenceAdapter().to(device)
+
+        t0 = time.perf_counter()
         trained_ad, metrics = NeuralPathwayInstrumenter.train_and_instrument(
             model=model,
             adapter=adapter,
@@ -145,6 +148,13 @@ def build_warmup_experience_history(
             device=device,
             steps=budget,
             lr=lr,
+        )
+        gpu_time_ms = (time.perf_counter() - t0) * 1000.0
+        loss_red = (
+            (metrics.initial_loss - metrics.final_loss)
+            / max(metrics.initial_loss, 1e-4)
+            if metrics.initial_loss > 0
+            else 0.0
         )
 
         qual_h, qual_y = NeuralPathwayInstrumenter.extract_symbol_hidden_states(
@@ -168,10 +178,10 @@ def build_warmup_experience_history(
                 learning_rate=lr,
             ),
             actual_steps=budget,
-            gpu_time_ms=metrics.execution_time_ms,
-            initial_loss=metrics.initial_loss,
-            final_loss=metrics.final_loss,
-            loss_reduction_ratio=metrics.loss_reduction_ratio,
+            gpu_time_ms=round(gpu_time_ms, 2),
+            initial_loss=round(metrics.initial_loss, 4),
+            final_loss=round(metrics.final_loss, 4),
+            loss_reduction_ratio=round(loss_red, 4),
             dev_em=round(q_em, 4),
             qualification_passed=qual_passed,
             retention_decision=(
@@ -274,7 +284,6 @@ def aggregate_multi_seed_results(
 ) -> dict[str, Any]:
     """Compute cross-seed summary statistics and paired Student's t confidence intervals."""
     n_seeds = len(seed_results)
-    n_seeds - 1
     t_crit = 4.303  # 95% critical value for df=2
 
     policy_names = list(seed_results[0]["phase4_stream_policies"].keys())

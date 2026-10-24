@@ -256,7 +256,12 @@ class CausalExperienceBenchmark:
                 gpu_time_ms = (time.perf_counter() - t0) * 1000.0
                 initial_loss = instr_metrics.initial_loss
                 final_loss = instr_metrics.final_loss
-                loss_red = instr_metrics.loss_reduction_ratio
+                loss_red = (
+                    (instr_metrics.initial_loss - instr_metrics.final_loss)
+                    / max(instr_metrics.initial_loss, 1e-4)
+                    if instr_metrics.initial_loss > 0
+                    else 0.0
+                )
 
                 # Qualify on held-out qualification split
                 qual_h, qual_y = NeuralPathwayInstrumenter.extract_symbol_hidden_states(
