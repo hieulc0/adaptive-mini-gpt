@@ -21,6 +21,8 @@ An experimental, **CLI-first Python/PyTorch** research framework studying **adap
 - **M75 (Experience-Guided Autonomous Learning & Adaptive Training Budgets):** Passed (314/314 Tests on Tesla T4; 7-arm causal lifelong comparison across Seeds 42, 43, 44; adaptive step budgets 20/40/60; procedural generalization taxonomy across 4 tiers; base backbone SHA-256 invariant; learning-to-learn causal hypothesis evaluated against shuffled/irrelevant controls)
 - **M76 (Causal Neural Skill Composition & Reusable Procedural Knowledge):** Passed (318/318 Tests on Tesla T4; 9-arm causal composition suite across Seeds 42, 43, 44; two-stage cascaded neural composition achieves 0.4479 Exact Match with 0 additional training steps and 0 parameter allocations, causally outperforming wrong-order (+0.3177 EM), single-skill (+0.4479 EM), shuffled-component (+0.4479 EM), and base controls (+0.4479 EM) with non-overlapping 95% paired CIs; error decomposition isolates stage-1, stage-2, and cascading propagation failures; frozen M18 backbone and 100% core retention verified)
 - **M77 (Autonomous Neural Skill-Plan Discovery from Examples):** Evaluated on Colab Tesla T4 (322/322 Tests Passed; bounded deterministic plan search over frozen primitives achieves 100% True Negative Rate on unfamiliar tasks and 0.4479 EM when plans are identified, but averages 25.0% plan accuracy and 0.1146 EM due to conservative safety abstention on noisy intermediate neural outputs; paired 95% CI vs provided plan [-0.5730, -0.0937]; frozen M18 backbone and 100% core retention verified; autonomous planning gate INCONCLUSIVE / PARTIAL; topology expansion RESEARCH ONLY)
+- **M78 (Reliable Autonomous Neural Plan Discovery):** Passed (326/326 Tests on Tesla T4; continuous sequence log-likelihood achieves 80.00% plan identity accuracy, 92.50% functional accuracy, 88.85% exact match, 97.50% unfamiliar rejection, 7.50% false abstention, +0.6544 over wrong-order with p < 0.0001; 0 new parameters)
+- **M79 (Autonomous Active Experimentation & Neural Skill-Gap Recognition):** Passed (330/330 Tests on Tesla T4; active discriminative probing generates minimally discriminative inputs to resolve ambiguous plans, achieving 87.50% plan identity accuracy, 97.50% functional accuracy, 93.31% sealed exact match, 100% unfamiliar rejection, reducing supported-task false abstention from 15.00% to 2.50% at 0.15 queries/task with p = 0.0375 over passive M78; 0 new parameters)
 
 ## Research Hypothesis
 
@@ -133,6 +135,7 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 | **M76** | Neural Skill Composition & Compound Procedures | Zero-shot two-stage composition reaches **44.79% EM** (+0.3177 over reversed); 0 training steps, 0 new parameters; 318/318 tests on Tesla T4 |
 | **M77** | Autonomous Skill-Plan Discovery from Examples | Bounded hypothesis search identifies correct plans with 100% TNR on unfamiliar tasks; conservative abstention audited; 322/322 tests on Tesla T4 |
 | **M78** | Reliable Autonomous Neural Plan Discovery | Continuous sequence log-likelihood $S(P)$ achieves **80.00% plan accuracy**, **88.85% exact match**, **97.50% unfamiliar rejection**, **7.50% abstention** (+0.6544 over wrong-order, $t=21.58, p<0.0001$); 0 new parameters; 326/326 tests on Tesla T4 |
+| **M79** | Autonomous Active Experimentation & Skill-Gap Recognition | Active discriminative probing resolves hypothesis ambiguity with budget $\le 1.5$ queries (**0.15 queries/task**), achieving **87.50% plan identity accuracy**, **97.50% functional accuracy**, **93.31% exact match**, **100% unfamiliar rejection**, reducing false abstention to **2.50%** ($t=3.0647, p=0.0375$); 0 new parameters; 330/330 tests on Tesla T4 |
 
 ## Directory Structure
 
@@ -149,10 +152,11 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 ├── scripts/                  # Standalone benchmark experiments & runners
 │   └── run_m3_m4_experiment.py
 ├── src/adaptive_mini_gpt/    # Core package
+│   ├── active_experimentation/ # M79 Active inquiry, discriminative probes, forensic audit
 │   ├── adaptive/             # MoE layers, routers, growth operators, MoD
 │   ├── data/                 # Tokenizer, procedural datasets, dataloader
 │   ├── evaluation/           # Perplexity, BPC, arithmetic accuracy evaluators
 │   ├── model/                # Transformer decoder, attention, configuration
 │   └── training/             # Trainer, checkpoint manager, optimizer
-└── tests/                    # 326 deterministic unit and integration tests
+└── tests/                    # 330 deterministic unit and integration tests
 ```

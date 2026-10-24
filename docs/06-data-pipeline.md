@@ -330,3 +330,28 @@ Milestone M78 introduces `data/specs/m78_plan_discovery_spec.json`, formalizing:
     * Paired Student-t test across 5 independent seeds ($df = 4, t_{\text{crit}} = 2.776$ at 95% two-tailed confidence).
 - **Execution Provenance**:
     * Evaluated on Google Colab Tesla T4 GPU (`amg-m78` session) with bit-exact frozen model hash verification.
+
+### 11. Milestone M79 Autonomous Active Experimentation Specification
+Milestone M79 introduces `data/specs/m79_active_spec.json`, formalizing:
+- **Phase 0 Forensic Audit & Lineage Reconciliation**:
+    * Reconciles cross-milestone ceiling shifts via base model initialization and primitive adapter qualification fidelity (0.7917 vs 1.0000 EM).
+    * Mathematically proves functional equivalence of (R o A)(x) == (A o R)(x) == (14 - 3x) mod 16, explaining why test exact match (88.85%) exceeded plan identity accuracy (80.00%) in M78.
+- **Minimal Active Experiment Engine**:
+    * Ambiguity detection triggering: Delta S = S(P_(1)) - S(P_(2)) < 0.08.
+    * Minimally discriminative probe synthesis: searches synthetic sequence space {0, ..., 15}^3 for x* where P_(1)(x*) != P_(2)(x*), prohibiting any access to sealed test sets or hidden family IDs.
+    * Verified environment interaction: budget strictly bounded at <= 1.5 queries/task (observed 0.15 queries/task).
+    * Dynamic hypothesis belief updating with newly acquired evidence (x*, y*).
+- **Epistemic Skill-Gap Classification**:
+    * Four distinct states: `KNOWN_CONFIDENT`, `KNOWN_AMBIGUOUS`, `SKILL_GAP_UNSUPPORTED`, `INCONSISTENT_NOISY`.
+    * Unsupported task detection: low top likelihood (S(P) < -1.65) triggers direct abstention, preventing wasted queries on uncomposable tasks.
+- **6-Arm Causal Active Inquiry Suite**:
+    * `A_PASSIVE_M78`: Frozen M78 likelihood baseline (no queries).
+    * `B_RANDOM_QUERY`: 1 uniformly random probe input.
+    * `C_NON_DISCRIMINATIVE`: 1 agreement placebo probe (P_(1)(x) == P_(2)(x)).
+    * `D_ACTIVE_DISCRIMINATIVE`: M79 maximal disagreement probe (P_(1)(x*) != P_(2)(x*)).
+    * `E_ORACLE_PROBE`: Oracle disambiguation upper bound.
+    * `F_UNSUPPORTED_CONTROL`: Skill-gap recognition and abstention on 40 unfamiliar tasks.
+- **Execution Provenance**:
+    * 330/330 unit and regression tests passed on Google Colab Tesla T4 GPU (`amg-m79` session).
+    * Statistically significant improvement over passive M78 (+11.74% EM, t = 3.0647, p = 0.0375).
+    * Strict 0 parameter growth and 0 compound training steps.
