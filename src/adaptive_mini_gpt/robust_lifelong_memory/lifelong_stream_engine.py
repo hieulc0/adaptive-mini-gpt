@@ -327,11 +327,11 @@ class RobustLifelongStreamEngine:
             # 2. Action Decision (Train Candidate vs Reuse)
             # -------------------------------------------------------------
             if arm_name == "ALWAYS_REUSE":
-                action = RationalActionType.REUSE_EXISTING_SKILL
+                action = RationalActionType.REUSE_QUALIFIED_SKILL
             elif arm_name == "FRESH_ADAPT":
                 action = RationalActionType.EXPERIMENT_AND_ADAPT
             elif arm_name == "OFFLINE_BEST_ROUTE":
-                action = RationalActionType.REUSE_EXISTING_SKILL
+                action = RationalActionType.REUSE_QUALIFIED_SKILL
             else:
                 decision = self.controller.evaluate_action_for_task(
                     task_name=task_name,
