@@ -1,0 +1,83 @@
+{
+  "spec_id": "m75_experience_spec",
+  "version": "1.0",
+  "description": "Standardized benchmark specification for M75 experience-guided autonomous learning, adaptive training budgets, and generalization taxonomy",
+  "default_seeds": [42, 43, 44],
+  "symbol_vocab_size": 16,
+  "symbols": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13", "S14", "S15"],
+  "generalization_categories": [
+    "NEW_INPUTS_KNOWN_RULE",
+    "NEW_PARAMETERIZATION",
+    "COMPOSITIONAL_PROCEDURE",
+    "UNFAMILIAR_FAMILY"
+  ],
+  "policy_modes": [
+    "NO_HISTORY",
+    "RELEVANT_HISTORY",
+    "SHUFFLED_HISTORY",
+    "IRRELEVANT_HISTORY",
+    "CONSERVATIVE_HISTORY",
+    "FIXED_BUDGET_FRESH",
+    "OFFLINE_HINDSIGHT"
+  ],
+  "training_step_budgets": [20, 40, 60],
+  "permitted_learning_rates": [0.001, 0.003, 0.005],
+  "families": [
+    {
+      "family_id": "CAESAR_SHIFT_MOD3",
+      "category": "NEW_INPUTS_KNOWN_RULE",
+      "formula": "si -> (si + 3) mod 16"
+    },
+    {
+      "family_id": "CAESAR_SHIFT_MOD5",
+      "category": "NEW_INPUTS_KNOWN_RULE",
+      "formula": "si -> (si + 5) mod 16"
+    },
+    {
+      "family_id": "AFFINE_TRANSFORM",
+      "category": "NEW_INPUTS_KNOWN_RULE",
+      "formula": "si -> (3 * si + 1) mod 16"
+    },
+    {
+      "family_id": "COMPLEMENT_REFLECT",
+      "category": "NEW_INPUTS_KNOWN_RULE",
+      "formula": "si -> 15 - si"
+    },
+    {
+      "family_id": "NONLINEAR_SBOX",
+      "category": "NEW_INPUTS_KNOWN_RULE",
+      "formula": "si -> SBOX[si]"
+    },
+    {
+      "family_id": "CAESAR_SHIFT_MOD7",
+      "category": "NEW_PARAMETERIZATION",
+      "formula": "si -> (si + 7) mod 16"
+    },
+    {
+      "family_id": "AFFINE_PARAM_5_3",
+      "category": "NEW_PARAMETERIZATION",
+      "formula": "si -> (5 * si + 3) mod 16"
+    },
+    {
+      "family_id": "COMPOSITE_SHIFT_REFLECT",
+      "category": "COMPOSITIONAL_PROCEDURE",
+      "formula": "si -> (15 - si + 4) mod 16"
+    },
+    {
+      "family_id": "BITWISE_XOR_MASK",
+      "category": "UNFAMILIAR_FAMILY",
+      "formula": "si -> si ^ 9"
+    },
+    {
+      "family_id": "DECEPTIVE_INVERSION",
+      "category": "UNFAMILIAR_FAMILY",
+      "formula": "si -> (si + 3) if idx % 2 == 0 else (15 - si)"
+    }
+  ],
+  "split_sizes": {
+    "train": 48,
+    "dev": 16,
+    "qualification": 16,
+    "sealed_test": 48
+  }
+}
