@@ -55,7 +55,7 @@ class M66SafeguardsAuditor:
         for skill_id, rec in repertoire._skills.items():
             hasher = hashlib.sha256()
             for k in sorted(rec.state_dict.keys()):
-                hasher.update(rec.state_dict[k].numpy().tobytes())
+                hasher.update(rec.state_dict[k].detach().cpu().numpy().tobytes())
             hashes[skill_id] = hasher.hexdigest()[:16]
         return hashes
 
