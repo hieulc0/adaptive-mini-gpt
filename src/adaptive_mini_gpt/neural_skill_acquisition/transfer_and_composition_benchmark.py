@@ -57,6 +57,9 @@ from adaptive_mini_gpt.neural_skill_composition.primitive_skills import (
     PrimitiveSkillType,
     QualifiedPrimitiveRecord,
 )
+from adaptive_mini_gpt.neural_skill_composition.safeguards import (
+    CompositionSafeguards,
+)
 from adaptive_mini_gpt.neural_weight_learning.pathway_instrumentation import (
     NeuralPathwayInstrumenter,
 )
@@ -161,15 +164,16 @@ class TransferAndCompositionBenchmark:
         cls,
         model: MiniGPT,
         device: torch.device,
-        seeds: list[int] = None,
+        seeds: list[int] | None = None,
         new_skill_rule: ProceduralRuleFamily = ProceduralRuleFamily.BITWISE_XOR_MASK,
-        test_step_sweeps: list[int] = None,
+        test_step_sweeps: list[int] | None = None,
     ) -> dict[str, Any]:
         """Run complete M80 scientific experimental suite across independent seeds."""
-        if test_step_sweeps is None:
-            test_step_sweeps = [20, 40, 60, 80]
         if seeds is None:
             seeds = [42, 43, 44, 45, 46]
+        if test_step_sweeps is None:
+            test_step_sweeps = [20, 40, 60, 80]
+
         logger.info("Commencing M80 Autonomous Neural Skill Acquisition and Transfer Benchmark...")
         benchmark_start = time.perf_counter()
 
@@ -180,8 +184,8 @@ class TransferAndCompositionBenchmark:
 
         # Step 2: Acquire baseline M78 primitives (Reflect, Shift3, Affine)
         logger.info("Acquiring and freezing standard primitive skill repertoire (3 skills)...")
-        initial_primitives = PrimitiveSkillManager.acquire_all_primitives(
-            model=model, device=device, seed=42, training_steps=60
+        initial_primitives = PrimitiveSkillManager.acquire_canonical_primitives(
+            model=model, seed=42, device=device
         )
         for prim_rec in initial_primitives.values():
             prim_rec.adapter.to(device)
@@ -440,19 +444,16 @@ class TransferAndCompositionBenchmark:
 
             per_seed_transfer_results[seed] = {
                 "mean_plan_accuracy": sum(plan_discovery_accuracies) / len(plan_discovery_accuracies),
-                "arm_exact_matches": {k: sum(v) / len(v) for k, v in arm_exact_matches.items()},
+                "arm_exact_matches": {k: sum(v) / len(v) for k, v in arm_exact_matches.items()},\
             }
 
             # Roll back newly acquired skill at end of seed iteration
             repertoire_mgr.rollback_skill(new_skill_key)
 
         # Step 5: Core Retention Audit (arithmetic carry, operational logic, primitive skills)
-        from adaptive_mini_gpt.neural_skill_composition.composition_benchmark import (
-            CompositionBenchmarkRunner,
-        )
         logger.info("Verifying Core Capability Retention...")
-        carry_res = CompositionBenchmarkRunner.verify_carry_probes_retention(model=model, device=device)
-        logic_res = CompositionBenchmarkRunner.verify_chained_logic_retention(model=model, device=device)
+        carry_acc = CompositionSafeguards.verify_arithmetic_carry_retention()
+        logic_acc = CompositionSafeguards.verify_chained_operational_logic()
 
         # Primitive skill retention
         prim_retention: dict[str, float] = {}
@@ -609,10 +610,10 @@ class TransferAndCompositionBenchmark:
                 },
             },
             "core_retention_audit": {
-                "arithmetic_carry_accuracy": carry_res["accuracy"],
-                "arithmetic_carry_passed": carry_res["passed_all"],
-                "chained_logic_accuracy": logic_res["accuracy"],
-                "chained_logic_passed": logic_res["passed_all"],
+                "arithmetic_carry_accuracy": carry_acc,
+                "arithmetic_carry_passed": (carry_acc == 1.0),
+                "chained_logic_accuracy": logic_acc,
+                "chained_logic_passed": (logic_acc == 1.0),
                 "primitive_skills_retention_em": prim_retention,
                 "base_model_bit_exact_invariant": (base_model_hash == final_base_model_hash),
             },
