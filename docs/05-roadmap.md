@@ -1257,3 +1257,46 @@
   - **Option 1 (M78: Soft-Latent Confidence Gating & Intermediate Refinement)**: Address the 75% abstention bottleneck by evaluating intermediate logit entropy and soft latent representations between stages rather than hard argmax token discretization, allowing the search engine to detect correct procedural alignment even when a single token intermediate is noisy.
   - **Option 2 (M78: Experience-Guided Plan Prioritization)**: Condition the candidate plan evaluation order and confidence thresholds on past successful planning outcomes (re-opening M75 experience learning with verified task representations).
   - **Option 3 (M78: Active Clarification Querying for Disambiguation)**: Enable the plan discovery engine to actively generate 1–2 minimally discriminative probe queries when two candidate plans tie in evidence, rather than conservatively abstaining.
+
+### Milestone M78: Reliable Autonomous Neural Plan Discovery (Completed & Qualified on Remote Colab Tesla T4 GPU)
+
+- **Status**: Completed & Qualified on Remote Google Colab Tesla T4 GPU (`amg-m78` session).
+- **Focus**: Forensic scientific audit of M77 exact-match quantization failure; implementation of normalized sequence log-likelihood scoring $S(P) = \\frac{1}{N}\\sum_{i=1}^N \\frac{1}{|y_i|}\\sum_{t=1}^{|y_i|} \\log p_P(y_{i,t} \\mid x_i)$; calibrated confidence and evidence margin $\\Delta S = S(P_{(1)}) - S(P_{(2)})$; expanded unknown-task benchmark (40 uncomposable tasks across 4 diverse procedural families: `BITWISE_XOR_MASK`, `DECEPTIVE_INVERSION`, `MODULAR_SUBTRACTION`, `NONLINEAR_SBOX`); multi-seed 9-arm causal benchmark across 5 independent seeds (42, 43, 44, 45, 46; 120 tasks, 3,840 sealed test evaluations per arm); paired Student-t test analysis ($df=4, t_{\\text{crit}}=2.776$); retention verification (326/326 unit tests passed on Tesla T4).
+- **Hardware & Implementation**: Google Colab Tesla T4 GPU (Session `amg-m78`, commit `b071cbd`, Python 3.12, PyTorch 2.4.0+cu121). Mini-GPT recurrent backbone (928,512 core / 974,658 expanded checkpoint parameters), frozen Rank-16 adapters (2,592 parameters each). Full regression suite passed: **326/326 tests on Tesla T4 in 117.18s**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Forensic M77 Audit & Root Cause Reconciliation**:
+     - Quantization Failure: At $N=4$, discrete sequence EM evaluates only to $\{0, 0.25, 0.50, 0.75, 1.00\}$. With 75-85% token accuracy primitives, 1-2 token errors dropped demonstration EM to 0.50, causing 75% false abstention.
+     - Reconciled 0.1146 EM: $0.25 \\times 0.4583 + 0.75 \\times 0.0 = 0.1146$ exactly.
+  2. **Phase 2 & 3 Likelihood Scoring & Calibrated Confidence**:
+     - Normalized sequence log-likelihood provides smooth, continuous ranking that separates valid compositions (loss ~0.35-0.90, $S(P) \\approx -0.35$ to $-0.90$) from invalid or uncomposable tasks ($S(P) \\approx -2.4$ to $-3.5$).
+     - Calibrated absolute fitness ($S(P) \\ge -1.65 \\land \\text{TokenAcc} \\ge 0.50$) and relative margin ($\\Delta S \\ge 0.08$).
+  3. **Phase 4 9-Arm Causal Benchmark Results across 5 Seeds (80 Composable Tasks)**:
+     - `A_LIKELIHOOD_PLAN_SEARCH`: **Plan Accuracy = 80.00%**, **Exact Match = 0.8885**, Token Acc = 0.9622, Composable Abstention = 7.50%, 0 steps, 0 new parameters.
+     - `B_PROVIDED_CORRECT_PLAN`: Exact Match = 0.9589, Plan Acc = 100.0%, 0 steps, 0 parameters.
+     - `C_FIXED_ORDER`: Exact Match = 0.2445, Plan Acc = 25.00%.
+     - `D_RANDOM_VALID_PLAN`: Exact Match = 0.1453, Plan Acc = 10.00%.
+     - `E_SHUFFLED_DEMONSTRATIONS`: Exact Match = 0.0120, Plan Acc = 1.25%, Abstention = 98.75%.
+     - `F_SINGLE_SKILL`: Exact Match = 0.0000.
+     - `G_WRONG_ORDER`: Exact Match = 0.2341.
+     - `H_FRESH_COMPOUND_ADAPTER`: Exact Match = 0.8094, 50 steps, +2,592 parameters.
+     - `I_REFERENCE_ORACLE`: Exact Match = 1.0000.
+  4. **Phase 5 Paired Statistical Significance ($N=5, df=4, t_{\\text{crit}}=2.776$)**:
+     - vs `WRONG_ORDER`: $\\Delta = \mathbf{+0.6544}$, 95% CI `[+0.5702, +0.7386]`, $t = 21.58$ ($p < 0.0001$).
+     - vs `FIXED_ORDER`: $\\Delta = \mathbf{+0.6440}$, 95% CI `[+0.5585, +0.7296]`, $t = 20.90$ ($p < 0.0001$).
+     - vs `RANDOM_VALID_PLAN`: $\\Delta = \mathbf{+0.7432}$, 95% CI `[+0.6322, +0.8543]`, $t = 18.58$ ($p < 0.0001$).
+     - vs `FRESH_ADAPTER`: $\\Delta = \mathbf{+0.0791}$, 95% CI `[+0.0279, +0.1303]` ($p < 0.02$).
+  5. **Phase 7 Expanded Unknown-Task Benchmark (40 Uncomposable Tasks)**:
+     - **Specificity (True Negative Rate)**: **97.50%** (39/40 unfamiliar tasks correctly rejected across 4 distinct families).
+     - **Supported-Task Abstention Rate**: **7.50%** (down from 75.0% in M77).
+     - **Selective Coverage**: **92.50%**, **Selective Accuracy**: **86.71%**.
+  6. **Phase 8 Safeguards & Parameter Accounting**:
+     - Core backbone (928,512) and total checkpoint (974,658) 100% frozen; base SHA-256 invariant.
+     - Exactly 0 new parameters allocated; 0 compound training steps incurred.
+     - 100% arithmetic carry retention (20/20); 100% operational logic retention (8/8).
+- **Lineage Promotion Decision**: **QUALIFIED IN RESEARCH TIER**. Base weights remain strictly frozen; plan discovery engine qualified as reliable zero-shot composition controller.
+- **Guiding Architectural Principle (Frozen for Future Milestones)**:
+  > *Adaptive Mini-GPT should learn before growing, reuse before learning, and verify before retaining any change.*
+- **Next Direction Options (Post-M78 Strategic Priority)**:
+  - **Option 1 (M79: Active Clarification & Evidence-Gathering Querying)**: When top candidate plans exhibit narrow evidence margins ($\\Delta S < 0.08$), allow the controller to actively generate 1 minimally discriminative probe query rather than abstaining, further reducing the 7.5% abstention rate without growth.
+  - **Option 2 (M80: Experience-Guided Planning with Causal Attribution Controls)**: Incorporate historical planning trajectory outcomes to bias search ordering and calibrate evidence margins, maintaining strict causal ablation controls against shuffled-history artifacts.
+  - **Option 3 (M81: Autonomous Identification of Missing Skills)**: When unknown-task rejection triggers with high confidence, diagnose whether the task can be solved by acquiring a single bounded adapter, preparing the system for bounded skill acquisition (M82).

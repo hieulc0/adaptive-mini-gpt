@@ -1,0 +1,334 @@
+{
+  "milestone": "M78",
+  "title": "Reliable Autonomous Neural Plan Discovery Benchmark",
+  "seeds_evaluated": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "device": "cuda",
+  "device_name": "Tesla T4",
+  "base_model_hash": "7f0638e30b11bf25",
+  "tokenizer_fingerprint": "synthetic_f698e45e",
+  "audit_report": {
+    "status": "AUDIT_VERIFIED",
+    "reconciled_metrics": {
+      "AUTONOMOUS_PLAN_ACCURACY": 0.25,
+      "AUTONOMOUS_EXACT_MATCH": 0.1146,
+      "PROVIDED_CORRECT_PLAN_EM": 0.4479,
+      "WRONG_ORDER_EM": 0.1163,
+      "FIXED_ORDER_EM": 0.1076,
+      "RANDOM_VALID_PLAN_EM": 0.0955,
+      "UNFAMILIAR_REJECTION_RATE": 1.0,
+      "UNFAMILIAR_CASES_TESTED": 6.0,
+      "COMPOSABLE_ABSTENTION_RATE": 0.75,
+      "CONDITIONAL_PLAN_ACCURACY": 1.0,
+      "ADDITIONAL_PARAMETERS_ALLOCATED": 0.0,
+      "ADDITIONAL_TRAINING_STEPS": 0.0
+    },
+    "root_cause_analysis": {
+      "quantization_failure": "At N=4 demonstrations of length 3 (12 tokens), exact match is quantized in steps of 0.25. Because neural primitives operate at 75-85% token accuracy, a 2-stage composition naturally encounters 1-2 token errors across 12 tokens, reducing sequence exact match to 0.50 (2/4). The discrete Exact-Match threshold of 0.75 and min_margin of 0.05 caused systematic false abstention.",
+      "mathematical_origin_of_autonomous_em": "When the engine abstains, it executes an empty plan resulting in 0.0 exact match. The 25% of tasks where it did not abstain achieved 45.83% exact match. Weighted average: 0.25 * 0.4583 + 0.75 * 0.0 = 0.1146 exactly. Controls (WRONG_ORDER at 0.1163, FIXED_ORDER at 0.1076) never abstained, yielding ~11% EM by chance.",
+      "small_sample_and_wide_confidence_intervals": "Only 6 unfamiliar instances were tested across 3 seeds (2 per seed). With only 3 seeds (df=2), t_crit=4.303 at 95% confidence, creating confidence intervals exceeding +-0.20 and preventing statistical differentiation from controls."
+    },
+    "parameter_reconciliation": {
+      "core_backbone_parameters": 928512,
+      "core_backbone_bytes": 3714048,
+      "task_head_parameters": 46146,
+      "task_head_bytes": 184584,
+      "expanded_total_parameters": 974658,
+      "expanded_total_bytes": 3898632,
+      "additional_parameters_allocated": 0,
+      "additional_training_steps": 0,
+      "reconciliation_note": "Core Transformer backbone contains 928,512 parameters. With task-specific classification heads, total is 974,658 parameters. Plan discovery operates strictly via zero-shot combinatorial search over frozen weights."
+    },
+    "retention_verification": {
+      "arithmetic_carry_probe_passed": 20,
+      "arithmetic_carry_probe_total": 20,
+      "arithmetic_carry_retention_rate": 1.0,
+      "operational_logic_probe_passed": 8,
+      "operational_logic_probe_total": 8,
+      "operational_logic_retention_rate": 1.0
+    },
+    "prescriptions_for_m78": [
+      "Replace discrete exact match scoring with continuous normalized sequence log-likelihood: S(P) = (1/N) * sum_i (1/|y_i|) * sum_t log p_P(y_i,t | x_i).",
+      "Calculate continuous evidence margin Delta S = S(P_(1)) - S(P_(2)) and plan posterior distribution.",
+      "Calibrate abstention thresholds: reject unfamiliar tasks when top likelihood is low (S(P) < S_min), or when candidates are genuinely indistinguishable (Delta S < Delta S_min), rather than on greedy errors.",
+      "Expand unfamiliar task evaluation suite to 4 diverse procedural families and 40+ total instances.",
+      "Scale benchmark to 5 independent seeds (42, 43, 44, 45, 46) to tighten confidence intervals (df=4, t_crit=2.776).",
+      "Enforce strict 0 parameter growth and 0 compound training steps."
+    ],
+    "verdict": "M77 findings fully explained. Plan discovery engine requires sequence likelihood scoring in M78."
+  },
+  "primitive_qualifications": {
+    "COMPLEMENT_REFLECT": {
+      "skill_id": "prim_COMPLEMENT_REFLECT",
+      "rule_family": "COMPLEMENT_REFLECT",
+      "adapter": "Rank16SequenceAdapter(\n  (ln): LayerNorm((128,), eps=1e-05, elementwise_affine=True)\n  (down_proj): Linear(in_features=128, out_features=16, bias=True)\n  (act): GELU(approximate='none')\n  (dropout): Dropout(p=0.0, inplace=False)\n  (up_proj): Linear(in_features=16, out_features=16, bias=True)\n)",
+      "qualification_exact_match": 1.0,
+      "qualification_loss": 0.2741,
+      "trainable_parameters": 0,
+      "parameter_hash": "a5f362903d61db95",
+      "training_steps": 40,
+      "is_frozen": true
+    },
+    "CAESAR_SHIFT_MOD3": {
+      "skill_id": "prim_CAESAR_SHIFT_MOD3",
+      "rule_family": "CAESAR_SHIFT_MOD3",
+      "adapter": "Rank16SequenceAdapter(\n  (ln): LayerNorm((128,), eps=1e-05, elementwise_affine=True)\n  (down_proj): Linear(in_features=128, out_features=16, bias=True)\n  (act): GELU(approximate='none')\n  (dropout): Dropout(p=0.0, inplace=False)\n  (up_proj): Linear(in_features=16, out_features=16, bias=True)\n)",
+      "qualification_exact_match": 1.0,
+      "qualification_loss": 0.2681,
+      "trainable_parameters": 0,
+      "parameter_hash": "f4817e953053d2b6",
+      "training_steps": 40,
+      "is_frozen": true
+    },
+    "AFFINE_TRANSFORM": {
+      "skill_id": "prim_AFFINE_TRANSFORM",
+      "rule_family": "AFFINE_TRANSFORM",
+      "adapter": "Rank16SequenceAdapter(\n  (ln): LayerNorm((128,), eps=1e-05, elementwise_affine=True)\n  (down_proj): Linear(in_features=128, out_features=16, bias=True)\n  (act): GELU(approximate='none')\n  (dropout): Dropout(p=0.0, inplace=False)\n  (up_proj): Linear(in_features=16, out_features=16, bias=True)\n)",
+      "qualification_exact_match": 1.0,
+      "qualification_loss": 0.2668,
+      "trainable_parameters": 0,
+      "parameter_hash": "21984cd0532a36bb",
+      "training_steps": 40,
+      "is_frozen": true
+    }
+  },
+  "demonstration_budget_sweep": {
+    "0": {
+      "mean_plan_accuracy": 0.0,
+      "mean_abstention_rate": 1.0,
+      "mean_evidence_margin": 0.0,
+      "mean_confidence": 0.0
+    },
+    "2": {
+      "mean_plan_accuracy": 1.0,
+      "mean_abstention_rate": 0.0,
+      "mean_evidence_margin": 2.5881,
+      "mean_confidence": 0.95
+    },
+    "4": {
+      "mean_plan_accuracy": 0.75,
+      "mean_abstention_rate": 0.25,
+      "mean_evidence_margin": 2.5152,
+      "mean_confidence": 0.8758
+    },
+    "8": {
+      "mean_plan_accuracy": 0.75,
+      "mean_abstention_rate": 0.25,
+      "mean_evidence_margin": 2.516,
+      "mean_confidence": 0.892
+    }
+  },
+  "total_tasks_evaluated": 120,
+  "composable_tasks_total": 80,
+  "uncomposable_tasks_total": 40,
+  "aggregated_arm_summaries": {
+    "A_LIKELIHOOD_PLAN_SEARCH": {
+      "arm_name": "A_LIKELIHOOD_PLAN_SEARCH",
+      "description": "Causal Arm A_LIKELIHOOD_PLAN_SEARCH",
+      "plan_accuracy": 0.8,
+      "sealed_exact_match": 0.8885,
+      "sealed_token_accuracy": 0.9127,
+      "sealed_loss": 7.8014,
+      "abstention_rate": 0.075,
+      "mean_latency_ms": 37.99,
+      "training_steps": 0,
+      "parameters_allocated": 0
+    },
+    "B_PROVIDED_CORRECT_PLAN": {
+      "arm_name": "B_PROVIDED_CORRECT_PLAN",
+      "description": "Causal Arm B_PROVIDED_CORRECT_PLAN",
+      "plan_accuracy": 1.0,
+      "sealed_exact_match": 0.9589,
+      "sealed_token_accuracy": 0.9862,
+      "sealed_loss": 0.3301,
+      "abstention_rate": 0.0,
+      "mean_latency_ms": 0.0,
+      "training_steps": 0,
+      "parameters_allocated": 0
+    },
+    "C_FIXED_ORDER": {
+      "arm_name": "C_FIXED_ORDER",
+      "description": "Causal Arm C_FIXED_ORDER",
+      "plan_accuracy": 0.25,
+      "sealed_exact_match": 0.2445,
+      "sealed_token_accuracy": 0.2786,
+      "sealed_loss": 3.7039,
+      "abstention_rate": 0.0,
+      "mean_latency_ms": 0.0,
+      "training_steps": 0,
+      "parameters_allocated": 0
+    },
+    "D_RANDOM_VALID_PLAN": {
+      "arm_name": "D_RANDOM_VALID_PLAN",
+      "description": "Causal Arm D_RANDOM_VALID_PLAN",
+      "plan_accuracy": 0.1,
+      "sealed_exact_match": 0.1453,
+      "sealed_token_accuracy": 0.2423,
+      "sealed_loss": 4.1612,
+      "abstention_rate": 0.0,
+      "mean_latency_ms": 0.0,
+      "training_steps": 0,
+      "parameters_allocated": 0
+    },
+    "E_SHUFFLED_DEMONSTRATIONS": {
+      "arm_name": "E_SHUFFLED_DEMONSTRATIONS",
+      "description": "Causal Arm E_SHUFFLED_DEMONSTRATIONS",
+      "plan_accuracy": 0.0125,
+      "sealed_exact_match": 0.012,
+      "sealed_token_accuracy": 0.0123,
+      "sealed_loss": 98.6557,
+      "abstention_rate": 0.9875,
+      "mean_latency_ms": 37.98,
+      "training_steps": 0,
+      "parameters_allocated": 0
+    },
+    "F_SINGLE_SKILL": {
+      "arm_name": "F_SINGLE_SKILL",
+      "description": "Causal Arm F_SINGLE_SKILL",
+      "plan_accuracy": 0.0,
+      "sealed_exact_match": 0.0,
+      "sealed_token_accuracy": 0.0001,
+      "sealed_loss": 5.132,
+      "abstention_rate": 0.0,
+      "mean_latency_ms": 0.0,
+      "training_steps": 0,
+      "parameters_allocated": 0
+    },
+    "G_WRONG_ORDER": {
+      "arm_name": "G_WRONG_ORDER",
+      "description": "Causal Arm G_WRONG_ORDER",
+      "plan_accuracy": 0.0,
+      "sealed_exact_match": 0.2341,
+      "sealed_token_accuracy": 0.2457,
+      "sealed_loss": 4.1688,
+      "abstention_rate": 0.0,
+      "mean_latency_ms": 0.0,
+      "training_steps": 0,
+      "parameters_allocated": 0
+    },
+    "H_FRESH_COMPOUND_ADAPTER": {
+      "arm_name": "H_FRESH_COMPOUND_ADAPTER",
+      "description": "Causal Arm H_FRESH_COMPOUND_ADAPTER",
+      "plan_accuracy": 0.0,
+      "sealed_exact_match": 0.8094,
+      "sealed_token_accuracy": 0.9308,
+      "sealed_loss": 0.3994,
+      "abstention_rate": 0.0,
+      "mean_latency_ms": 0.0,
+      "training_steps": 50,
+      "parameters_allocated": 2592
+    },
+    "I_REFERENCE_ORACLE": {
+      "arm_name": "I_REFERENCE_ORACLE",
+      "description": "Causal Arm I_REFERENCE_ORACLE",
+      "plan_accuracy": 1.0,
+      "sealed_exact_match": 1.0,
+      "sealed_token_accuracy": 1.0,
+      "sealed_loss": 0.0,
+      "abstention_rate": 0.0,
+      "mean_latency_ms": 0.0,
+      "training_steps": 0,
+      "parameters_allocated": 0
+    }
+  },
+  "selective_prediction_summary": {
+    "mean_coverage": 0.925,
+    "mean_selective_risk": 0.1329,
+    "mean_selective_accuracy": 0.8671,
+    "mean_unsupported_rejection_rate": 0.975,
+    "mean_supported_abstention_rate": 0.075
+  },
+  "statistical_comparisons": {
+    "VS_WRONG_ORDER": {
+      "control_name": "G_WRONG_ORDER",
+      "mean_difference": 0.6544,
+      "std_difference": 0.0678,
+      "t_statistic": 21.5758,
+      "p_value_approx": 0.01,
+      "ci_lower": 0.5702,
+      "ci_upper": 0.7386,
+      "is_significant": true
+    },
+    "VS_FIXED_ORDER": {
+      "control_name": "C_FIXED_ORDER",
+      "mean_difference": 0.644,
+      "std_difference": 0.0689,
+      "t_statistic": 20.8975,
+      "p_value_approx": 0.01,
+      "ci_lower": 0.5585,
+      "ci_upper": 0.7296,
+      "is_significant": true
+    },
+    "VS_RANDOM_VALID_PLAN": {
+      "control_name": "D_RANDOM_VALID_PLAN",
+      "mean_difference": 0.7432,
+      "std_difference": 0.0894,
+      "t_statistic": 18.5832,
+      "p_value_approx": 0.01,
+      "ci_lower": 0.6322,
+      "ci_upper": 0.8543,
+      "is_significant": true
+    }
+  },
+  "retention_verification": {
+    "arithmetic_carry_passed": 20,
+    "arithmetic_carry_total": 20,
+    "arithmetic_carry_rate": 1.0,
+    "operational_logic_passed": 8,
+    "operational_logic_total": 8,
+    "operational_logic_rate": 1.0
+  },
+  "target_scorecard": {
+    "autonomous_plan_accuracy": {
+      "metric": 0.8,
+      "target": ">= 0.70",
+      "passed": true
+    },
+    "autonomous_exact_match": {
+      "metric": 0.8885,
+      "target": ">= 0.30",
+      "passed": true
+    },
+    "unknown_task_rejection": {
+      "metric": 0.975,
+      "target": ">= 0.95",
+      "passed": true
+    },
+    "supported_task_abstention": {
+      "metric": 0.075,
+      "target": "<= 0.30",
+      "passed": true
+    },
+    "new_parameters_allocated": {
+      "metric": 0,
+      "target": "== 0",
+      "passed": true
+    },
+    "new_training_steps": {
+      "metric": 0,
+      "target": "== 0",
+      "passed": true
+    },
+    "retention_preservation": {
+      "metric": 1.0,
+      "target": "== 1.0",
+      "passed": true
+    },
+    "statistically_better_than_wrong_order": {
+      "metric": 0.6544,
+      "target": "ci_lower > 0.0",
+      "passed": true
+    },
+    "statistically_better_than_fixed_order": {
+      "metric": 0.644,
+      "target": "ci_lower > 0.0",
+      "passed": true
+    }
+  },
+  "conclusion": "M78 SUCCESS: Autonomous plan discovery achieves reliable composition and robust unfamiliar-task rejection with zero architectural growth."
+}

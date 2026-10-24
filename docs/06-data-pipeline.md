@@ -309,3 +309,24 @@ Milestone M77 introduces `data/specs/m77_plan_discovery_spec.json`, formalizing:
 - Scrambled demonstration generator: Breaks input-output correspondence to establish causal plan selection controls (`SHUFFLED_DEMONSTRATIONS`).
 - Strict partition isolation: `demonstrations` ($N \in \{0, 2, 4, 8\}$), `dev` (16 examples), and `sealed_test` (48 examples).
 - Execution provenance: Full validation on remote Google Colab Tesla T4 GPU (`amg-m77` session) with zero data leakage into planning heuristics.
+
+### 10. Milestone M78 Reliable Plan Discovery Specification
+Milestone M78 introduces `data/specs/m78_plan_discovery_spec.json`, formalizing:
+- **Normalized Sequence Log-Likelihood Scoring Engine**:
+    $$S(P) = \frac{1}{N}\sum_{i=1}^N \frac{1}{|y_i|}\sum_{t=1}^{|y_i|} \log p_P(y_{i,t} \mid x_i)$$
+    Evaluates probability mass assigned to demonstrated outputs, resolving discrete quantization and primitive noise sensitivity.
+- **Evidence Margin & Posterior Plan Distribution**:
+    $$\Delta S = S(P_{(1)}) - S(P_{(2)}), \quad \pi(P_k) = \frac{\exp(\beta \cdot S(P_k))}{\sum_j \exp(\beta \cdot S(P_j))}$$
+- **Expanded Unsupported / Unfamiliar Procedural Families (40 Tasks)**:
+    1. `BITWISE_XOR_MASK`: $y = (x \oplus 9) \bmod 16$
+    2. `DECEPTIVE_INVERSION`: conditional parity reflection
+    3. `MODULAR_SUBTRACTION`: $y = (11 - 2x) \bmod 16$
+    4. `NONLINEAR_SBOX`: nonlinear substitution box $[7, 12, 14, 9, 2, 1, 5, 15, 11, 6, 13, 0, 4, 8, 10, 3]$
+- **Factorial Multi-Seed Benchmark Design**:
+    * 5 independent seeds: 42, 43, 44, 45, 46.
+    * 24 tasks per seed (16 composable across 4 compound pairs $\times$ 4 replications; 8 uncomposable across 4 families $\times$ 2 replications).
+    * Total: 120 task instances ($80$ composable, $40$ uncomposable), with 48 sealed test sequences per task ($3,840$ sealed evaluations per causal arm).
+- **Paired Statistical Modeling**:
+    * Paired Student-t test across 5 independent seeds ($df = 4, t_{\text{crit}} = 2.776$ at 95% two-tailed confidence).
+- **Execution Provenance**:
+    * Evaluated on Google Colab Tesla T4 GPU (`amg-m78` session) with bit-exact frozen model hash verification.

@@ -129,6 +129,10 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 | **M72** | Robust Lifelong Neural Memory & Capacity Efficiency | Long-horizon 20-ep stream; `SELECTIVE_RETAIN` beats `RETAIN_ALL` (**+0.0042 F1**) & `WRONG_ROUTE` (**+0.0036 F1**); 0.0 negative transfers; 299/299 tests on Tesla T4 |
 | **M73** | Cost-Efficient Neural Memory & Verified Cumulative Improvement | Causal lifelong benchmark; `SELECTIVE_NO_EXTRA_PROBES` beats `RESET` (**+0.0056 F1**, **+0.0051 Phys Util**); WRONG_ROUTE reveals 0.67 neg transfers; 304/304 tests on Tesla T4 |
 | **M74** | Verified Neural Weight Learning & High-Information Generalization | Causal weight attribution verified (**+0.6562 EM** over shuffled controls); `SELECTIVE_NO_EXTRA_PROBES` beats `RESET` (**+0.0054 Util**) and `FRESH_ADAPT` (**+0.0252 Util**); 309/309 tests on Tesla T4 |
+| **M75** | Experience-Guided Learning & Adaptive Budgets | 4-tier procedural taxonomy; experience controller saves 120 steps on familiar rules; causal gate isolated; 314/314 tests on Tesla T4 |
+| **M76** | Neural Skill Composition & Compound Procedures | Zero-shot two-stage composition reaches **44.79% EM** (+0.3177 over reversed); 0 training steps, 0 new parameters; 318/318 tests on Tesla T4 |
+| **M77** | Autonomous Skill-Plan Discovery from Examples | Bounded hypothesis search identifies correct plans with 100% TNR on unfamiliar tasks; conservative abstention audited; 322/322 tests on Tesla T4 |
+| **M78** | Reliable Autonomous Neural Plan Discovery | Continuous sequence log-likelihood $S(P)$ achieves **80.00% plan accuracy**, **88.85% exact match**, **97.50% unfamiliar rejection**, **7.50% abstention** (+0.6544 over wrong-order, $t=21.58, p<0.0001$); 0 new parameters; 326/326 tests on Tesla T4 |
 
 ## Directory Structure
 
@@ -150,5 +154,5 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 │   ├── evaluation/           # Perplexity, BPC, arithmetic accuracy evaluators
 │   ├── model/                # Transformer decoder, attention, configuration
 │   └── training/             # Trainer, checkpoint manager, optimizer
-└── tests/                    # 299 deterministic unit and integration tests
+└── tests/                    # 326 deterministic unit and integration tests
 ```
