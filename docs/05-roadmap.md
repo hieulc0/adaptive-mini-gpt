@@ -1395,3 +1395,34 @@
   - **Milestone M84 — Autonomous Capacity Selection and Connection Pruning/Regrowth**: Dynamic neural topology adjustments guided by utility and capacity budgets.
   - **Milestone M85 — Dynamic Ranks, Dimensions, and Neural Module Evolution**: Continuous rank evolution and parameter dimension resizing.
   - **Milestone M86+ — Integrated Continual Learning and Controlled Self-Improvement**: End-to-end autonomous lifelong learning student.
+
+### Milestone M82: Learned Meta-Acquisition and Self-Improving Training Strategies (Completed & Qualified on Remote Colab Tesla T4 GPU)
+
+- **Status**: Completed & Qualified on Remote Google Colab Tesla T4 GPU (`amg-m82-t4` session).
+- **Focus**: Phase 0 forensic audit of M81 findings; minimal learned acquisition controller (< 2,000 parameter budget, 1,835 parameters); dynamic inspection of diagnostic learning signals (loss slope, uncertainty/entropy, gradient magnitude, progress ratio, replay drift); bounded action space (initialization selection, learning rate selection [1e-3, 3e-3, 6e-3, 1e-2], rank selection [4, 8, 16], early-stopping decision); meta-policy optimization via REINFORCE with moving-average baseline and validation monitoring; 6-arm comparative benchmark on held-out sealed meta-test tasks (`TWO_STAGE_CASCADE`) across 5 seeds (`42, 43, 44, 45, 46`); minimal capacity hierarchy and bit-exact rollback verification; 100% core retention.
+- **Hardware & Implementation**: Google Colab Tesla T4 GPU (Session `amg-m82-t4`, branch `m82-acquisition-strategies`, commit `bb73707`, Python 3.13, PyTorch 2.11.0+cu130). Mini-GPT recurrent backbone (1,071,872 frozen parameters, base hash `6e39cd7ef6790b3c`), Learned Acquisition Controller (1,835 trainable parameters, hash `28d18d40e726c2c1`). Full regression suite passed: **345/345 tests on Tesla T4 in 113.96s**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 0 M81 Forensic Audit**:
+     - Verified reported M81 metrics: 30.00% step reduction (median 50 -> 35), paired t(4) = 5.3079, p = 0.0061, 95% CI [+8.59, +27.41].
+     - Clarified scientific distinction: M81 demonstrated representation reuse via Reptile prior weights under fixed human hyperparameters (LR=6e-3, greedy rank search). M82 introduces a learned policy that monitors training dynamics and dynamically selects its own adaptation decisions.
+  2. **Phase 1 Minimal Learned Acquisition Controller**:
+     - Designed and trained a compact 2-layer MLP controller with 1,835 parameters (< 2,000 parameter strict budget).
+     - State feature vector (8 dimensions): dev probe loss, loss slope, prediction entropy, gradient norm, replay loss, progress ratio, candidate capacity ratio, dev token accuracy. Strictly no task IDs, target formulas, or sealed test leakage.
+     - Action heads: initialization (Fresh vs Prior), learning rate (4 discrete rates), adapter rank (Rank-4, 8, 16), early stopping.
+  3. **Phase 2 & 4 Six-Arm Comparative Benchmark on Sealed Meta-Test Tasks**:
+     - **33.33% reduction in median training steps vs M81** (from 45 steps for Frozen M81 Experienced to 30 steps for Learned Controller, exceeding the >= 15.0% target).
+     - Statistically significant step reduction under Student-t ($t = 9.798, \text{df}=4, p = 0.0006 < 0.001$) with strictly positive 95% CI $[+8.6, +15.4]$ steps.
+     - Median step ranking: Learned Controller (30 steps) = Oracle Diagnostic Upper Bound (30 steps) < M81 Experienced (45 steps) < Random Decisions (50 steps) < Fixed Strategy (55 steps) < Reptile with default LR (70 steps).
+     - Mean Area Under the Learning Curve (AUC): Learned Controller achieved 0.5927 vs 0.4299 for M81 (+0.1628 AUC advantage).
+  4. **Phase 3 Capacity Adaptation & Rollback Audit**:
+     - Minimal capacity hierarchy maintained: controller successfully selected Rank-8 adapter (1,432 parameters), avoiding premature Rank-16 expansion.
+     - Bit-exact parameter rollback verified upon trial rejection (hash pre- and post-rollback identical).
+  5. **Phase 5 Retention & Lineage**:
+     - Base transformer weights 100% frozen (0 base parameter growth, SHA-256 hash `6e39cd7ef6790b3c` bit-exact invariant).
+     - Arithmetic carry retention: **100.0% (20/20)**; Operational logic retention: **100.0% (8/8)**.
+- **Lineage Promotion Decision**: **QUALIFIED IN RESEARCH TIER**. Autonomous meta-acquisition and learned adaptation strategies verified on Tesla T4.
+- **Next Direction Options (Post-M82 Strategic Priority -> M83)**:
+  - **Milestone M83 — Self-Distillation and Neural Consolidation of Learned Skills**: Consolidating multiple acquired modular adapters into shared representations while preserving accuracy and preventing catastrophic forgetting.
+  - **Milestone M84 — Autonomous Capacity Selection and Connection Pruning/Regrowth**: Dynamic neural topology adjustments guided by utility and capacity budgets (e.g., RigL-style dynamic sparse training).
+  - **Milestone M85 — Dynamic Ranks, Dimensions, and Neural Module Evolution**: Continuous rank evolution and parameter dimension resizing.
+  - **Milestone M86+ — Integrated Continual Learning and Controlled Self-Improvement**: End-to-end autonomous lifelong learning student.

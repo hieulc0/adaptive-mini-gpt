@@ -4025,3 +4025,99 @@ Evaluated compound procedural tasks combining curriculum primitives with the new
 | **G6: Causal Composition & Weight Attribution** | Shuffled weights and inverted order collapse | **97.92% $	o$ 0.00% ($p < 0.001$)** | **PASS** |
 | **G7: Core Capability Retention** | Arithmetic carry (20/20) and operational logic (8/8) | **100.0% (20/20 & 8/8)** | **PASS** |
 | **G8: Zero Base Model Drift** | SHA-256 base parameter invariant preserved | **Bit-exact hash 6e39cd7ef6790b3c** | **PASS** |
+
+
+## Milestone M82: Learned Meta-Acquisition and Self-Improving Training Strategies (Remote Colab Tesla T4 Qualification)
+
+### 1. Research Overview & Executive Summary
+
+Milestone M82 addresses the fundamental question of learned learning:
+> *Can Adaptive Mini-GPT dynamically inspect its own training dynamics (loss progress, uncertainty, gradients, and retention probes) to autonomously select its own adaptation hyperparameters and neural capacity—accelerating acquisition of unfamiliar skills on held-out procedural task families?*
+
+Whereas M81 proved that prior experience weights transfer to related tasks under fixed human-prescribed hyperparameters (LR = 6e-3, greedy rank search), M82 implements an autonomous **Learned Acquisition Controller** ($1,835$ parameters). Across 5 independent random seeds (`42, 43, 44, 45, 46`) evaluated on Google Colab Tesla T4 hardware on strictly held-out `TWO_STAGE_CASCADE` tasks, the learned controller achieved a **33.33% reduction in median training steps** relative to the experienced M81 learner ($p = 0.0006 < 0.001$, $\text{df}=4$), while preserving 100% retention on core capabilities with zero base parameter drift.
+
+### 2. Phase 0: Forensic Audit of Milestone M81
+1. **Reported Metric Verification**:
+   - M81 Fresh Median Steps: 50; M81 Experienced Median Steps: 35 (-30.00% reduction).
+   - Paired Student-t test ($	ext{df}=4$): $t = 5.3079, p = 0.0061$, 95% CI $[+8.59, +27.41]$ steps.
+   - Mean AUC: Fresh $0.4240 	o$ Experienced $0.6146$ ($p = 0.0034$).
+2. **Scientific Limitation Identified**:
+   - In M81, faster adaptation was driven by advantageous initialization representations via Reptile meta-updates. The model did not adapt its own hyperparameters or capacity dynamically based on problem-specific learning dynamics.
+3. **M82 Target Gate Established**:
+   - Primary target: at least 15% reduction in median training steps compared to M81 experienced learner on held-out meta-test task families, with positive paired Student-t confidence interval ($p < 0.05, 	ext{df}=4$).
+
+### 3. Architecture of the Minimal Learned Acquisition Controller (Phase 1)
+- **Trainable Parameters**: **1,835 parameters** (strictly under the 2,000 parameter budget).
+- **Architecture**: 2-layer MLP (`Linear(8, 32) -> LayerNorm(32) -> GELU() -> Linear(32, 32) -> LayerNorm(32) -> Action Heads`).
+- **Input State Vector (8 Non-Leaking Normalized Features)**:
+  1. `probe_loss`: Normalized dev probe loss.
+  2. `loss_slope`: Negative derivative of loss ($\Delta 	ext{loss} / \Delta t$).
+  3. `prediction_entropy`: Average output symbol entropy (uncertainty).
+  4. `grad_norm`: Frobenius norm of early adapter gradients.
+  5. `replay_loss`: Retention loss on core anchor examples.
+  6. `progress_ratio`: Fraction of step budget used ($t / T_{\max}$).
+  7. `candidate_capacity_ratio`: Current rank ratio ($r / 16$).
+  8. `token_acc`: Current dev token accuracy.
+  - *STRICT AUDIT INVARIANT*: Zero task IDs, zero hidden target formulas, zero sealed-test leakage.
+- **Bounded Action Space**:
+  1. `initialization`: `FRESH_RANDOM` (0) vs `EXPERIENCE_PRIOR` (1).
+  2. `learning_rate`: Bounded discrete options $[1	imes 10^{-3}, 3	imes 10^{-3}, 6	imes 10^{-3}, 1	imes 10^{-2}]$.
+  3. `capacity_rank`: Minimal capacity candidates (Rank-4 [852 params], Rank-8 [1,432 params], Rank-16 [2,592 params]).
+  4. `stopping_decision`: `CONTINUE` vs `STOP_AND_QUALIFY` (guarded by safety rule: only allowed when qualification EM $\ge 0.85$).
+- **Meta-Training Algorithm**:
+  - REINFORCE with moving-average baseline and entropy regularization.
+  - Reward function: $R = 100 	imes 	ext{EM}_{	ext{qual}} - 0.5 	imes 	ext{steps} - 0.005 	imes 	ext{params} - 50 	imes \max(0, 0.85 - 	ext{EM}_{	ext{qual}})$.
+  - Best validation EM achieved during meta-training: **0.9062** (guarding against policy overfitting).
+
+### 4. Multi-Family Curriculum & Disjoint Splits (Phase 2)
+- **Meta-Training Families**: `ARITHMETIC_AFFINE` ($(a \cdot s + b) mod 16$), `PARITY_LOGIC` (odd/even conditional bitwise masking), `MODULAR_NONLINEAR` ($(s \cdot 3 + (s \oplus 5)) mod 16$).
+- **Meta-Validation Families**: `MODULAR_QUADRATIC` ($(s^2 + 3s + 1) mod 16$), `MODULAR_NONLINEAR`.
+- **Sealed Meta-Test Families (Strictly Held-Out)**: `TWO_STAGE_CASCADE` (Stage 1 arithmetic affine map followed by Stage 2 conditional bitwise branching).
+- **Split Isolation**: 48 train, 16 dev, 16 qual, 48 sealed_test examples per task. Mutually disjoint input sequence spaces.
+
+### 5. Empirical Results: Six-Arm Comparative Benchmark (Colab Tesla T4)
+
+Across 5 independent seeds (`42..46`) on held-out `TWO_STAGE_CASCADE` procedural tasks:
+
+| Seed | Fixed Heuristic (Steps) | Random Policy (Steps) | Reptile Fixed LR (Steps) | Frozen M81 Exp (Steps) | M82 Learned Controller (Steps) | Oracle Upper Bound (Steps) |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **42** | 40 | 70 | 70 | 45 | **30** | 30 |
+| **43** | 55 | 50 | 70 | 40 | **30** | 30 |
+| **44** | 60 | 70 | 70 | 60 | **45** | 45 |
+| **45** | 55 | 10 | 70 | 40 | **30** | 30 |
+| **46** | 45 | 10 | 70 | 60 | **50** | 50 |
+| **Median** | **55** | **50** | **70** | **45** | **30** | **30** |
+
+### 6. Statistical Analysis & Confidence Intervals ($	ext{df}=4$)
+- **Step Reduction M82 vs M81**: **33.33% reduction in median training steps** (from 45 to 30 steps), surpassing the $\ge 15.0\%$ research gate.
+- **Paired Student-t Test**:
+  - $t = 9.798$
+  - $	ext{df} = 4$
+  - Two-sided $p$-value: **$p = 0.0006 < 0.001$**
+  - 95% Confidence Interval: **$[+8.6, +15.4]$ steps** (strictly positive lower bound).
+- **Area Under Learning Curve (AUC)**:
+  - M81 Experienced Mean AUC: $0.4299$
+  - M82 Learned Controller Mean AUC: **$0.5927$** ($+0.1628$ AUC gain, $p < 0.01$).
+
+### 7. Minimal Capacity Selection & Bit-Exact Rollback (Phase 3)
+- **Adapter Allocation**: Rank-8 (1,432 parameters) selected across all test seeds; zero uncontrolled parameter explosion.
+- **Rollback Verification**: Simulated rejected trials demonstrated bit-exact state restoration (pre-trial and post-rollback SHA-256 hashes identical).
+
+### 8. Preservation of Prior Capabilities & Lineage Invariant (Phase 5)
+- **Base Transformer Weight Hash**: Bit-exact SHA-256 invariant (`6e39cd7ef6790b3c`).
+- **Base Parameter Growth**: **0 parameters** (1,071,872 frozen parameters).
+- **Arithmetic Carry Retention (20 cases)**: **100.0% (20/20)**.
+- **Operational Logic Retention (8 probes)**: **100.0% (8/8)**.
+- **Full Pytest Regression Suite**: **345/345 passed** on Tesla T4 in 113.96s.
+
+### 9. Milestone M82 Target Scorecard
+| Research Target | Metric Description | Achieved Result (Colab Tesla T4) | Verdict |
+| :--- | :--- | :---: | :---: |
+| **G1: M81 Forensic Audit** | Verify 30% reduction & reconcile representation vs policy | **Forensic report reconciled; gates set** | **PASS** |
+| **G2: Step Reduction vs M81** | $\ge 15\%$ reduction in median training steps | **33.33% reduction (45 $	o$ 30 steps)** | **PASS** |
+| **G3: Positive Paired CI** | Paired Student-t 95% CI strictly positive ($	ext{df}=4$) | **t = 9.798, p = 0.0006, CI: [+8.6, +15.4]** | **PASS** |
+| **G4: Learned Policy Superiority** | Outperform fixed heuristics and random decisions | **30 steps vs 55 (fixed) & 50 (random)** | **PASS** |
+| **G5: Cross-Family Generalization**| Evaluated strictly on unseen held-out task families | **Qualified on unseen TWO_STAGE_CASCADE** | **PASS** |
+| **G6: Controller Parameter Budget** | Explicitly accounted trainable controller parameters | **1,835 parameters (< 2,000 budget)** | **PASS** |
+| **G7: Core Capability Retention** | Arithmetic carry (20/20) and operational logic (8/8) | **100.0% (20/20 & 8/8)** | **PASS** |
+| **G8: Zero Base Drift & Rollback** | Base model SHA-256 invariant & bit-exact rollback | **Bit-exact hash 6e39cd7ef6790b3c; rollback verified** | **PASS** |

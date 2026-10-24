@@ -405,3 +405,24 @@ Milestone M81 introduces continual learning curriculum and sample efficiency spe
     * Primary Target: $\ge 20\%$ reduction in median steps with positive paired confidence interval.
 - **Causal Ablation Suite**:
     * Evaluates Oracle Plan, Inverted Order, and Shuffled Weights on multi-stage compositions.
+
+### 14. Milestone M82 Meta-Acquisition Curriculum & Controller Specification
+Milestone M82 introduces meta-policy environment and learned adaptation specifications:
+- **Disjoint Task Curriculum Architecture**:
+    * **Meta-Training Families**: `ARITHMETIC_AFFINE` ($(a \cdot s + b) \bmod 16$), `PARITY_LOGIC` (odd/even conditional XOR masking and offsets), `MODULAR_NONLINEAR` ($(s \cdot 3 + (s \oplus 5)) \bmod 16$).
+    * **Meta-Validation Families**: `MODULAR_QUADRATIC` ($(s^2 + 3s + 1) \bmod 16$), `MODULAR_NONLINEAR`.
+    * **Sealed Meta-Test Families**: `TWO_STAGE_CASCADE` (Stage 1 arithmetic affine map followed by Stage 2 conditional bitwise branching; completely unseen during meta-training).
+- **Strict Partition Isolation (48/16/16/48 Split)**:
+    * `train` (48): adaptation examples consumed during task training.
+    * `dev` (16): validation & probe observations used to extract diagnostic state signals.
+    * `qualification` (16): admission gate (qualification EM $\ge 0.85$).
+    * `sealed_test` (48): held-out evaluation data, never exposed during training, dev, or policy queries.
+    * Zero sequence overlap across all 4 sets: $\mathcal{D}_{\text{train}} \cap \mathcal{D}_{\text{dev}} = \emptyset$, $\mathcal{D}_{\text{train}} \cap \mathcal{D}_{\text{qual}} = \emptyset$, $\mathcal{D}_{\text{train}} \cap \mathcal{D}_{\text{test}} = \emptyset$, etc.
+- **Learned Acquisition Controller (< 2,000 Parameter Budget)**:
+    * Compact 2-layer MLP with 1,835 trainable parameters.
+    * Input state vector: 8 normalized features (`probe_loss`, `loss_slope`, `prediction_entropy`, `grad_norm`, `replay_loss`, `progress_ratio`, `candidate_capacity_ratio`, `token_acc`).
+    * Action decisions: Initialization (Fresh vs Prior), Learning Rate ($1\times 10^{-3}, 3\times 10^{-3}, 6\times 10^{-3}, 1\times 10^{-2}$), Capacity (Rank-4, Rank-8, Rank-16), Early Stopping.
+    * Audit Invariant: No task IDs, no hidden target equations, no sealed-test data exposed to policy.
+- **Execution Provenance**:
+    * 345/345 unit and regression tests passed on Google Colab Tesla T4 GPU (`amg-m82-t4` session).
+    * 100% carry (20/20) and logic (8/8) retention; base parameter SHA-256 hash invariant (`6e39cd7ef6790b3c`).
