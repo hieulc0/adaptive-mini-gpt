@@ -272,7 +272,7 @@ class LikelihoodPlanDiscoveryEngine:
         # 1. Absolute Fitness: Does the best plan assign adequate likelihood to demonstrations?
         #    If not, the task is unsupported/unfamiliar (outside known primitive repertoire).
         has_adequate_fitness = (
-            best_ll >= min_log_likelihood or best_trace.token_accuracy >= min_token_accuracy
+            best_ll >= min_log_likelihood and best_trace.token_accuracy >= min_token_accuracy
         )
 
         # 2. Relative Margin: Is the best plan clearly separated from the runner-up?
