@@ -1,0 +1,73 @@
+{
+  "spec_id": "m76_composition_spec",
+  "version": "1.0",
+  "description": "Standardized benchmark specification for M76 causal neural skill composition and noncommutative procedural generalization",
+  "default_seeds": [42, 43, 44],
+  "symbol_vocab_size": 16,
+  "symbols": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13", "S14", "S15"],
+  "primitive_skills": [
+    {
+      "primitive_id": "COMPLEMENT_REFLECT",
+      "formula": "s -> 15 - s",
+      "adapter_rank": 16,
+      "trainable_parameters": 2592
+    },
+    {
+      "primitive_id": "CAESAR_SHIFT_MOD3",
+      "formula": "s -> (s + 3) mod 16",
+      "adapter_rank": 16,
+      "trainable_parameters": 2592
+    },
+    {
+      "primitive_id": "AFFINE_TRANSFORM",
+      "formula": "s -> (3*s + 1) mod 16",
+      "adapter_rank": 16,
+      "trainable_parameters": 2592
+    }
+  ],
+  "compound_tasks": [
+    {
+      "compound_id": "REFLECT_THEN_SHIFT3",
+      "stage1": "COMPLEMENT_REFLECT",
+      "stage2": "CAESAR_SHIFT_MOD3",
+      "effective_formula": "s -> (2 - s) mod 16",
+      "noncommutative_partner": "SHIFT3_THEN_REFLECT"
+    },
+    {
+      "compound_id": "SHIFT3_THEN_REFLECT",
+      "stage1": "CAESAR_SHIFT_MOD3",
+      "stage2": "COMPLEMENT_REFLECT",
+      "effective_formula": "s -> (12 - s) mod 16",
+      "noncommutative_partner": "REFLECT_THEN_SHIFT3"
+    },
+    {
+      "compound_id": "REFLECT_THEN_AFFINE",
+      "stage1": "COMPLEMENT_REFLECT",
+      "stage2": "AFFINE_TRANSFORM",
+      "effective_formula": "s -> (14 - 3*s) mod 16"
+    },
+    {
+      "compound_id": "AFFINE_THEN_SHIFT3",
+      "stage1": "AFFINE_TRANSFORM",
+      "stage2": "CAESAR_SHIFT_MOD3",
+      "effective_formula": "s -> (3*s + 4) mod 16"
+    }
+  ],
+  "causal_arms": [
+    "A_NEURAL_COMPOSITION",
+    "B_WRONG_ORDER",
+    "C_SINGLE_SKILL_A",
+    "D_SINGLE_SKILL_B",
+    "E_SHUFFLED_COMPONENT",
+    "F_UNRELATED_COMPONENT",
+    "G_FRESH_MONOLITHIC",
+    "H_UNCHANGED_BASE",
+    "I_DETERMINISTIC_ORACLE"
+  ],
+  "split_sizes": {
+    "train": 48,
+    "dev": 16,
+    "qualification": 16,
+    "sealed_test": 48
+  }
+}
