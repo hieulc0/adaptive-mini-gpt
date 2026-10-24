@@ -48,24 +48,24 @@ class M76SafeguardsAuditor:
         """Compute SHA-256 fingerprint by iterating sorted named parameters."""
         hasher = hashlib.sha256()
         for name, p in sorted(model.named_parameters()):
-            hasher.update(name.encode("utf-8"))
+            hasher.update(name.encode())
             hasher.update(p.detach().cpu().contiguous().numpy().tobytes())
         return hasher.hexdigest()
 
     @classmethod
-    def verify_base_invariance(
+    def verify_base_model_invariance(
         cls,
         base_model: MiniGPT,
-        initial_unnamed_hash: str,
-        initial_named_hash: str,
+        expected_unnamed_hash: str,
+        expected_named_hash: str,
     ) -> bool:
-        """Verify that the base backbone has remained completely unchanged."""
+        """Verify that base model weights have not drifted by even a single bit."""
         curr_unnamed = cls.compute_unnamed_param_hash(base_model)
         curr_named = cls.compute_named_param_hash(base_model)
-        return (curr_unnamed == initial_unnamed_hash) and (curr_named == initial_named_hash)
+        return curr_unnamed == expected_unnamed_hash and curr_named == expected_named_hash
 
     @classmethod
-    def verify_primitive_invariance(
+    def verify_primitive_adapter_invariance(
         cls,
         primitives: dict[Any, QualifiedPrimitiveRecord],
         expected_hashes: dict[str, str],
@@ -193,3 +193,7 @@ class M76SafeguardsAuditor:
             "monolithic_additional_bytes": ad_bytes,
             "parameter_savings_ratio": 1.0,  # 100% parameter allocation savings vs monolithic
         }
+
+
+# Canonical alias
+CompositionSafeguards = M76SafeguardsAuditor
