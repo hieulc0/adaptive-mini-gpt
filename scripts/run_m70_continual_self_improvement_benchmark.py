@@ -237,6 +237,8 @@ def run_single_seed_pipeline(
         repertoire._skills[sk_id].held_out_accuracy = acc
         repertoire._skills[sk_id].classwise_recall = rec
 
+    init_rep_hashes = M70SafeguardsAuditor.compute_repertoire_hashes(repertoire)
+
     # 4. Phase 2: Fair Multi-Budget Benchmark (Small, Med, Large) vs ALWAYS_REUSE
     logger.info("--- Phase 2: Fair Resource-Budgeted Benchmark Across 3 Tiers ---")
     cost_ledger = FairBudgetLedger(expected_life_cycle_episodes=3)
@@ -433,6 +435,9 @@ def run_single_seed_pipeline(
         model=model,
         repertoire=repertoire,
         seed=seed,
+        initial_unnamed_hash=init_unnamed_hash,
+        initial_sorted_named_hash=init_sorted_named_hash,
+        initial_repertoire_hashes=init_rep_hashes,
         device=device,
     )
 

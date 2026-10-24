@@ -145,7 +145,8 @@ class VerifiedContinualLearningStreamEngine:
         device: torch.device,
     ) -> tuple[float, float, dict[str, float]]:
         """Evaluate task environment with a given adapter or base model."""
-        if not hasattr(env, "examples") or not env.examples:
+        queries = getattr(env, "held_out_test_queries", getattr(env, "examples", []))
+        if not queries:
             return 0.3333, 0.3333, {"NO": 0.33, "YES": 0.33, "UNKNOWN": 0.33}
 
         lbl_map = {"NO": 0, "YES": 1, "UNKNOWN": 2}
@@ -153,9 +154,13 @@ class VerifiedContinualLearningStreamEngine:
         targets = []
 
         with torch.no_grad():
-            for ex in env.examples:
-                q = ex.get("question_text", ex.get("text", ""))
-                ans = ex.get("expected_answer", ex.get("answer", "UNKNOWN"))
+            for ex in queries:
+                if isinstance(ex, dict):
+                    q = ex.get("question_text", ex.get("text", ""))
+                    ans = ex.get("expected_answer", ex.get("answer", "UNKNOWN"))
+                else:
+                    q = getattr(ex, "question_text", "")
+                    ans = getattr(ex, "expected_answer", "UNKNOWN")
                 tgt_idx = lbl_map.get(ans, 2)
                 targets.append(tgt_idx)
 
@@ -199,16 +204,20 @@ class VerifiedContinualLearningStreamEngine:
         optimizer = torch.optim.AdamW(adapter.parameters(), lr=1e-3, weight_decay=1e-4)
 
         lbl_map = {"NO": 0, "YES": 1, "UNKNOWN": 2}
-        train_examples = getattr(train_env, "examples", [])
-        if not train_examples:
+        train_queries = getattr(train_env, "held_out_test_queries", getattr(train_env, "examples", []))[:16]
+        if not train_queries:
             return adapter
 
         # Pre-cache hidden states
         cached_data = []
         with torch.no_grad():
-            for ex in train_examples:
-                q = ex.get("question_text", ex.get("text", ""))
-                tgt = lbl_map.get(ex.get("expected_answer", "UNKNOWN"), 2)
+            for ex in train_queries:
+                if isinstance(ex, dict):
+                    q = ex.get("question_text", ex.get("text", ""))
+                    tgt = lbl_map.get(ex.get("expected_answer", "UNKNOWN"), 2)
+                else:
+                    q = getattr(ex, "question_text", "")
+                    tgt = lbl_map.get(getattr(ex, "expected_answer", "UNKNOWN"), 2)
                 toks = model.tokenizer.encode(q)
                 inp = torch.tensor([toks], dtype=torch.long, device=device)
                 h = extract_model_hidden(model, inp)

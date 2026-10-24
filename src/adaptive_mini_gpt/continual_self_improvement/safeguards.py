@@ -170,6 +170,9 @@ class M70SafeguardsAuditor:
         model: MiniGPT,
         repertoire: ModularSkillRepertoire,
         seed: int,
+        initial_unnamed_hash: str | None = None,
+        initial_sorted_named_hash: str | None = None,
+        initial_repertoire_hashes: dict[str, str] | None = None,
         device: torch.device | None = None,
     ) -> M70SafeguardReport:
         """Execute complete Phase 5 safeguards verification."""
@@ -177,11 +180,13 @@ class M70SafeguardsAuditor:
         h_unnamed = cls.compute_unnamed_model_hash(model)
         h_named = cls.compute_sorted_named_model_hash(model)
 
-        exp_unnamed = cls.CANONICAL_M67_UNNAMED_HASHES.get(seed)
-        exp_named = cls.CANONICAL_M68_SORTED_NAMED_HASHES.get(seed)
-
-        # Lineage hash match
-        hash_ok = (h_unnamed == exp_unnamed) and (h_named == exp_named)
+        # Check invariance against initial state if provided, or canonical hashes
+        if initial_unnamed_hash and initial_sorted_named_hash:
+            hash_ok = (h_unnamed == initial_unnamed_hash) and (h_named == initial_sorted_named_hash)
+        else:
+            exp_unnamed = cls.CANONICAL_M67_UNNAMED_HASHES.get(seed)
+            exp_named = cls.CANONICAL_M68_SORTED_NAMED_HASHES.get(seed)
+            hash_ok = (h_unnamed == exp_unnamed) and (h_named == exp_named)
 
         # Test bit-exact rollback
         test_ad = Rank16ResidualAdapter(d_model=128, bottleneck_dim=16, num_classes=3)
