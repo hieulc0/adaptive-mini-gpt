@@ -3023,3 +3023,131 @@ Generalization is demonstrated on unseen symbol combinations across all 5 famili
 | **Retention Safeguards Gate** | Frozen backbone; 100% carry arithmetic; 100% operational logic | Double hashes invariant; 100% carry; 100% logic verified | **PASS (QUALIFIED)** |
 | **Topology Expansion Status** | Autonomous neural growth or module spawning | Unjustified; compact rank-16 default maintained | **RESEARCH ONLY** |
 | **Operational Production Promotion** | Promotion of autonomous learning loop to production tier | Autonomous research loop kept strictly in research tier | **REJECTED (NO-GO)** |
+
+
+---
+
+## Milestone M75 — Experience-Guided Autonomous Learning and Adaptive Training Budgets
+
+### 1. Executive Summary & Verification Lineage
+- **Branch**: `m75-experience-guided-learning`
+- **Pinned Commit**: `00467425e66405e2dc4d34473c380ff484fd8ac1`
+- **Kaggle Kernel**: `sparklinghydraulics0/amg-m75-experience-guided-learning` (Version 2)
+- **Target Hardware**: Kaggle Tesla T4 GPU (CUDA 12.8, PyTorch 2.11.0+cu128)
+- **Seeds Evaluated**: 42, 43, 44 (Canonical Multi-Seed Research Protocol)
+- **Engineering Regression Suite**: **314/314 tests passed on Tesla T4** in 122.87s.
+- **Central Research Question**: Can Adaptive Mini-GPT use verified outcomes from its own previous learning experiments to choose better future learning actions and compute budgets, producing measurably improved neural capability or efficiency on genuinely unseen tasks compared with an otherwise identical learner without that experience?
+
+---
+
+### 2. Phase 1 — M74 Forensic Scientific Audit & Preflight Lineage
+1. **M74 Metric Reconciliation**:
+   - Trained Adapter EM: **0.6562 ± 0.0938**
+   - Shuffled Trained Weights EM: **0.0000**
+   - Reset Adapter EM: **0.0000**
+   - Fresh Random Adapter EM: **0.0000**
+   - Frozen Base EM: **0.0000**
+   - Learned with Shuffled Targets EM: **0.1042 ± 0.0786**
+   - Lifelong Stream: `SELECTIVE_NO_EXTRA_PROBES` Macro EM = **0.7010**, Utility = **0.6627**; `RESET` Macro EM = **0.7073**, Utility = **0.6573**; `FRESH_ADAPT` Utility = **0.6375**.
+2. **Forensic Audit of Shuffled-Target Anomaly (0.1042 EM)**:
+   - Root Cause: In M74, scrambled targets were produced via `rng.permutation(ex.target_tokens)` per 3-token example. For sequences of length 3, a random permutation has a $1/6$ (16.67%) probability of returning the identity mapping. Furthermore, target tokens remained restricted to the true example's valid symbol subset, preserving partial co-occurrence statistics and enabling the adapter to score ~10% test EM.
+   - Remedy for M75: Decoupled target scrambling where training targets are replaced by independent uniformly random symbol sequences sampled across the entire 16-symbol vocabulary, breaking all positional, co-occurrence, and identity correlations.
+3. **Paired Student's t Uncertainty Interval for Lifelong Utility**:
+   - Seed-level deltas ($\Delta U = U_{	ext{SELECTIVE}} - U_{	ext{RESET}}$): Seed 42: +0.0051; Seed 43: -0.0132; Seed 44: +0.0244.
+   - Mean delta: **+0.0054**, sample std: **0.0188**, $N=3, df=2, t_{	ext{crit}}=4.303$.
+   - **Paired 95% Student's t Confidence Interval**: **[-0.0413, +0.0521]**.
+   - Scientific Verdict: The interval spans zero widely. The lifelong utility gain over RESET in M74 was provisional rather than statistically established.
+4. **Parameter Lineage Verification**:
+   - Base M18 pretrain: 928,512 parameters (4 layers, 4 heads, $d_{	ext{model}}=128$, $d_{	ext{ff}}=512$, vocab 400).
+   - BPE token expansion stopped at 578 tokens: `wte.weight` (+22,784), `lm_head.weight` (+22,784), `lm_head.bias` (+578) $\implies$ delta = +46,146 $\implies$ exactly **974,658 backbone parameters**. Verified bit-exact.
+
+---
+
+### 3. Phase 2, 3 & 6 — Verified Experience Records, Controller & Adaptive Step Budgets
+- **Observable Task Descriptors**: Extracted strictly prior to training without inspecting ground truth rules: sample count, sequence length, unique symbol count, input token variance, Shannon entropy, zero-shot dev exact match, zero-shot dev cross-entropy loss, best repertoire skill dev accuracy, and best repertoire dev loss.
+- **Strict Data Isolation**: Sealed test outcomes are recorded strictly post-hoc for audit logging and are mathematically isolated from policy decision functions.
+- **Bounded Action Space**:
+  - Actions: `REUSE_EXISTING`, `FRESH_ADAPT`, `TRAIN_CANDIDATE`.
+  - Step Budgets: 20, 40, 60 optimizer steps.
+  - Learning Rates: 0.001, 0.003, 0.005.
+- **Inference & Fallback Guarantee**: Uses k-NN soft similarity on normalized task descriptors to predict expected development accuracy and compute cost. Falls back seamlessly to memory-free baseline when history is empty or sparse.
+
+---
+
+### 4. Phase 4 — Multi-Arm Causal Evaluation across 7 Policy Regimes
+Evaluated on identical, independent 12-episode procedural streams across Seeds 42, 43, 44 on Kaggle Tesla T4 GPU:
+
+| Policy Regime | Description | Macro Exact Match (Mean $\pm$ Std) | Physical Compute Utility (Mean $\pm$ Std) | Mean Training Steps | Mean Successful Reuses |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **`NO_HISTORY`** | Memory-free baseline (fixed 40 steps, dev threshold reuse) | 0.6366 $\pm$ 0.0195 | 0.5366 $\pm$ 0.0195 | 480.0 | 0.00 |
+| **`RELEVANT_HISTORY`** | Controller using verified prior relevant experiences | 0.6771 $\pm$ 0.0543 | 0.5576 $\pm$ 0.0384 | 573.3 | 1.00 |
+| **`SHUFFLED_HISTORY`** | Identical volume of records with scrambled task/outcome associations | **0.7112 $\pm$ 0.0396** | **0.5890 $\pm$ 0.0175** | 586.7 | 1.00 |
+| **`IRRELEVANT_HISTORY`** | Unrelated synthetic tasks and noisy outcomes | 0.5312 $\pm$ 0.2438 | 0.4354 $\pm$ 0.2015 | 460.0 | 0.33 |
+| **`CONSERVATIVE_HISTORY`**| Lower-confidence-bound uncertainty discounted selection | 0.6175 $\pm$ 0.0078 | 0.5175 $\pm$ 0.0078 | 480.0 | 0.00 |
+| **`FIXED_BUDGET_FRESH`** | Always adapt fresh with fixed 40 steps | 0.6169 $\pm$ 0.0100 | 0.5169 $\pm$ 0.0100 | 480.0 | 0.00 |
+| **`OFFLINE_HINDSIGHT`** | Diagnostic oracle upper bound | 0.6215 $\pm$ 0.0425 | 0.5215 $\pm$ 0.0425 | 480.0 | 0.00 |
+
+#### Paired Student's t Confidence Intervals ($N=3, df=2, t_{	ext{crit}}=4.303$)
+
+| Comparison | Delta Mean | Delta Std | Paired 95% Confidence Interval | Spans Zero? | Causal Superiority Established? |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **`RELEVANT` vs `NO_HISTORY` (Utility)** | **+0.0210** | 0.0579 | [-0.1228, +0.1649] | **YES** | **NO (Inconclusive)** |
+| **`RELEVANT` vs `SHUFFLED_HISTORY` (Utility)** | **-0.0313** | 0.0354 | [-0.1192, +0.0565] | **YES** | **FAIL (Shuffled is higher)** |
+| **`RELEVANT` vs `IRRELEVANT_HISTORY` (Utility)**| **+0.1222** | 0.2331 | [-0.4568, +0.7013] | **YES** | **NO (Inconclusive)** |
+| **`RELEVANT` vs `FIXED_BUDGET_FRESH` (Utility)**| **+0.0408** | 0.0482 | [-0.0789, +0.1604] | **YES** | **NO (Inconclusive)** |
+| **`CONSERVATIVE` vs `NO_HISTORY` (Utility)** | **-0.0191** | 0.0228 | [-0.0758, +0.0375] | **YES** | **NO (Conservative underperforms)** |
+
+**Critical Scientific Finding**:
+1. `RELEVANT_HISTORY` nominal performance (+0.0210 utility over `NO_HISTORY` and +0.0408 over `FIXED_BUDGET_FRESH`) does **not** exceed `SHUFFLED_HISTORY` (0.5576 vs 0.5890).
+2. The paired confidence interval between `RELEVANT_HISTORY` and `NO_HISTORY` is `[-0.1228, +0.1649]`, which includes zero.
+3. Therefore, while experience provides a nominal utility increase over a memory-free baseline, we cannot reject the null hypothesis that the improvement stems from generic exploratory diversity rather than specifically learned task-outcome causal mappings.
+4. Per M75 acceptance guidelines, this hypothesis is formally classified as **FAIL / PROVISIONAL**.
+
+---
+
+### 5. Phase 5 — Procedural Generalization Breakdown (4 Tiers)
+Evaluated across distinct procedural relationship tiers under `RELEVANT_HISTORY`:
+
+| Generalization Category | Procedural Rule Families Tested | Sealed Exact Match | Causal Generalization Interpretation |
+| :--- | :--- | :---: | :--- |
+| **`NEW_INPUTS_KNOWN_RULE`** | Caesar Shift mod 3, mod 5, Affine (3s+1), Complement Reflect | **0.7043** | Strong weight retention and sequence interpolation on unseen symbol inputs. |
+| **`NEW_PARAMETERIZATION`** | Caesar Shift mod 7, Affine (5s+3) | **0.7222** | High transfer within family; adapter weights smoothly adapt to new slope/intercept. |
+| **`COMPOSITIONAL_PROCEDURE`**| Composite Reflect-then-Shift | **0.6667** | Moderate compositional transfer; chaining procedural steps shows minor regression. |
+| **`UNFAMILIAR_FAMILY`** | Bitwise XOR Mask (s ^ 9), Deceptive Parity Inversion | **0.5417** | Sharp capability drop; non-algebraic bitwise and deceptive parity rules require substantial new capacity. |
+
+---
+
+### 6. Phase 7 & 8 — Retention Safeguards, Capacity Diagnostics & Hardware Accounting
+1. **Base Backbone Freezing & Invariance**:
+   - Double SHA-256 parameter digests verified identical across all seeds: 100% invariant.
+2. **Core Domain Retention**:
+   - Multi-digit Arithmetic Carry (20 test cases): **100.0% retention**.
+   - Chained Operational Logic Probes (8 test cases): **100.0% retention**.
+3. **Bit-Exact Rollback**:
+   - Simulated candidate rollback restores initial parameters bit-for-bit: 100% verified.
+4. **Structural Capacity Diagnostic**:
+   - Rank-16 Sequence Adapter (Default): **2,592 parameters** (10,368 bytes).
+   - Rank-32 Sequence Adapter (Diagnostic): **4,912 parameters** (19,648 bytes, ratio = 1.895x).
+   - Capacity Recommendation: Maintain Rank-16 as default; Rank-32 reserved as diagnostic only.
+5. **Hardware Footprint Accounting**:
+   - Frozen Base Backbone: **974,658 parameters** (3,898,632 bytes in fp32).
+   - Trainable Adapter Footprint: **2,592 parameters** (10,368 bytes).
+   - Active Trainable Ratio: **0.00266** (only 0.266% of base parameters updated during learning).
+   - Total Stored Parameters (Base + Repertoire): **977,250 parameters** (3,909,000 bytes).
+
+---
+
+### Milestone M75 Scientific Qualification Scorecard
+
+| Gate | Qualification Criteria | Empirical Result (Kaggle Tesla T4) | Scientific Verdict |
+| :--- | :--- | :--- | :---: |
+| **Engineering Regression Gate** | 314/314 tests on Tesla T4; hashes invariant; bit-exact rollback | 314/314 passed in 122.87s; SHA-256 invariant; rollback 100% | **PASS (QUALIFIED)** |
+| **M74 Forensic Audit Gate** | Reconcile M74 metrics, audit 0.1042 shuffled target EM, compute paired CI | Target leakage identified; paired CI [-0.0413, +0.0521] confirmed | **PASS (QUALIFIED)** |
+| **Weight Learning Gate** | M74 causal weight attribution reproduces (+0.6562 trained vs shuffled) | Confirmed: trained (0.6562) vs shuffled (0.0000) gap preserved | **PASS (QUALIFIED)** |
+| **Causal Experience Gate** | Relevant history statistically outperforms NO, SHUFFLED, and IRRELEVANT | RELEVANT (0.5576) does NOT beat SHUFFLED (0.5890); CI spans zero | **FAIL / INCONCLUSIVE** |
+| **Adaptive Compute Gate** | Experience-guided controller achieves superior compute utility | Nominal gain (+0.0210 vs NO_HISTORY) not statistically significant | **PROVISIONAL** |
+| **Generalization Taxonomy Gate**| Quantify 4 distinct generalization tiers separately | New inputs (0.7043), New params (0.7222), Comp (0.6667), Unfamiliar (0.5417) | **PASS (QUALIFIED)** |
+| **Neural Retention Gate** | 100% arithmetic carry, 100% logic probes, zero-shot reuse on returns | 100% carry, 100% logic, 0.7043 known-rule reuse verified | **PASS (QUALIFIED)** |
+| **Compactness Gate** | Base frozen (974k params); adapter rank-16 default (2,592 params) | Active trainable footprint strictly 0.266% of backbone | **PASS (QUALIFIED)** |
+| **Topology Expansion Status** | Autonomous neural growth or module spawning | Unjustified; compact rank-16 default maintained | **RESEARCH ONLY** |
+| **Operational Production Gate** | Promotion of autonomous learning loop to production tier | Autonomous research loop kept strictly in research tier | **REJECTED (NO-GO)** |

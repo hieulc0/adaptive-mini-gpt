@@ -266,3 +266,19 @@ Milestone M74 introduces `data/specs/m74_high_information_spec.json`, formalizin
 - 5 deterministic procedural sequence transformation families over a controlled 16-symbol discrete alphabet (`CAESAR_SHIFT_MOD3`, `CAESAR_SHIFT_MOD5`, `AFFINE_TRANSFORM`, `COMPLEMENT_REFLECT`, `NONLINEAR_SBOX`).
 - Multi-token sequence Exact Match evaluation with combinatorial random chance $\le 0.024\%$.
 - Strict partition isolation enforcing disjoint symbol combinations across `train`, `dev`, `qualification`, and `sealed_test` sets.
+
+
+### 7. Milestone M75 Experience-Guided Learning Specification
+Milestone M75 introduces `data/specs/m75_experience_spec.json`, formalizing:
+- 10 deterministic procedural sequence transformation families categorized into 4 distinct generalization tiers:
+    1. `NEW_INPUTS_KNOWN_RULE`: Caesar shift mod 3, mod 5, Affine (3s+1), Complement reflect, Nonlinear S-box.
+    2. `NEW_PARAMETERIZATION`: Caesar shift mod 7, Affine (5s+3).
+    3. `COMPOSITIONAL_PROCEDURE`: Composite Reflect-then-Shift ((15 - s + 4) mod 16).
+    4. `UNFAMILIAR_FAMILY`: Bitwise XOR mask (s ^ 9), Deceptive Parity Inversion.
+- Strict 4-way split isolation per task instance:
+    * `train`: 48 adaptation examples.
+    * `dev`: 16 observable examples for pre-adaptation feature extraction and zero-shot probing.
+    * `qualification`: 16 held-out examples for candidate adapter qualification.
+    * `sealed_test`: 48 strictly segregated test examples for post-hoc evaluation.
+- Decoupled target scrambling generator: uniform random replacement across the 16-symbol alphabet, eliminating permutation artifacts and information leakage.
+- Compatible with `PortableDatasetLoader` and `AMG_DATA_ROOT` environment override on Kaggle and Google Colab runtimes.

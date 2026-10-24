@@ -1102,3 +1102,52 @@
   - **Option 1 (M75: Epistemic Active Learning from Past Research Outcomes)**: Leverage historical experiment records to predict candidate training efficiency and autonomously optimize learning rate and step allocations.
   - **Option 2 (M75: Multi-Skill Dynamic Composition on Compound Sequences)**: Enable the router to chain multiple specialized sequence adapters (e.g. `CAESAR_SHIFT` followed by `AFFINE_TRANSFORM`) without joint retraining.
   - **Option 3 (M75: Dimension Adaptation Under Verified Capacity Limits)**: Evaluate reversible Rank-16 vs Rank-32 expansion only on evidence-complete tasks where Rank-16 exhibits empirical capacity saturation.
+
+
+---
+
+### Milestone M75: Experience-Guided Autonomous Learning and Adaptive Training Budgets (Completed & Evaluated on Remote Kaggle Tesla T4 GPU)
+
+- **Status**: Completed & Evaluated on Remote Kaggle Tesla T4 GPU.
+- **Focus**: Forensic audit of M74 and paired Student's t uncertainty intervals; compact learning-experience records and manifests; conservative experience-guided controller and adaptive step budgets (20, 40, 60); 7-arm causal lifelong evaluation (`NO_HISTORY`, `RELEVANT_HISTORY`, `SHUFFLED_HISTORY`, `IRRELEVANT_HISTORY`, `CONSERVATIVE_HISTORY`, `FIXED_BUDGET_FRESH`, `OFFLINE_HINDSIGHT`); procedural generalization taxonomy across 4 relationship tiers; retention safeguards (314/314 regression tests passed on Tesla T4).
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m75-experience-guided-learning`, commit `00467425e66405e2dc4d34473c380ff484fd8ac1`). Mini-GPT recurrent backbone (974,658 parameters), `Rank16SequenceAdapter` (2,592 parameters). Full regression test suite passed: **314/314 tests on Tesla T4 in 122.87s**. Multi-seed benchmark evaluated across Seeds 42, 43, 44.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Forensic M74 Audit & Lineage**:
+     - Identified root cause of M74's 0.1042 shuffled target EM: target token permutation within length-3 sequences had 1/6 identity probability and preserved valid symbol subsets.
+     - Implemented decoupled target scrambling with independent uniform random tokens across 16 symbols.
+     - Computed paired Student's t confidence interval for M74 utility delta: $\Delta U = +0.0054$, sample std 0.0188, $df=2, t=4.303 \implies 95\%$ CI `[-0.0413, +0.0521]`. Spans zero, confirming M74 continual utility advantage was provisional.
+     - Re-verified exact parameter lineage: 928,512 base + 46,146 delta = 974,658 weights.
+  2. **Phase 2 Verified Experience Records**:
+     - Built compact, verifiable in-memory/JSON experience records capturing observable pre-training descriptors (variance, entropy, sample count, dev zero-shot probe metrics), actions, step budgets, executed GPU time, loss reduction, dev qualification, and strictly isolated post-hoc sealed test outcomes.
+  3. **Phase 3 & 6 Adaptive Step Budgets & Controller**:
+     - Bounded action space: `REUSE_EXISTING`, `FRESH_ADAPT`, `TRAIN_CANDIDATE`.
+     - Step budgets: 20, 40, 60 optimizer steps; learning rates: 1e-3, 3e-3, 5e-3.
+     - Soft k-NN similarity on observable pre-training descriptors with lower-confidence-bound uncertainty discounting and memory-free fallback.
+  4. **Phase 4 7-Arm Causal Evaluation on Procedural Streams**:
+     - Evaluated across Seeds 42, 43, 44 on 12-episode streams:
+       * `NO_HISTORY`: Macro EM = 0.6366, Utility = 0.5366, Steps = 480.0
+       * `RELEVANT_HISTORY`: Macro EM = 0.6771, Utility = 0.5576, Steps = 573.3
+       * `SHUFFLED_HISTORY`: Macro EM = 0.7112, Utility = 0.5890, Steps = 586.7
+       * `IRRELEVANT_HISTORY`: Macro EM = 0.5312, Utility = 0.4354, Steps = 460.0
+       * `CONSERVATIVE_HISTORY`: Macro EM = 0.6175, Utility = 0.5175, Steps = 480.0
+       * `FIXED_BUDGET_FRESH`: Macro EM = 0.6169, Utility = 0.5169, Steps = 480.0
+       * `OFFLINE_HINDSIGHT`: Macro EM = 0.6215, Utility = 0.5215, Steps = 480.0
+     - Paired Student's t CI for $\Delta U (	ext{RELEVANT} - 	ext{NO\_HISTORY})$: **[-0.1228, +0.1649]** (Spans zero).
+     - Paired Student's t CI for $\Delta U (	ext{RELEVANT} - 	ext{SHUFFLED})$: **[-0.1192, +0.0565]** (Spans zero; Shuffled is higher).
+     - Scientific Conclusion: Experience provides nominal utility improvement over memory-free baselines (+0.0210), but does not causally outperform shuffled history. The hypothesis that verified task-outcome associations specifically improve learning decisions is **FAIL / PROVISIONAL**.
+  5. **Phase 5 Procedural Generalization Breakdown (4 Tiers)**:
+     - `NEW_INPUTS_KNOWN_RULE`: **0.7043 EM** (strong retention and interpolation on familiar rules with unseen inputs).
+     - `NEW_PARAMETERIZATION`: **0.7222 EM** (strong transfer to novel slopes/intercepts/shifts within family).
+     - `COMPOSITIONAL_PROCEDURE`: **0.6667 EM** (moderate transfer on composite reflect-then-shift).
+     - `UNFAMILIAR_FAMILY`: **0.5417 EM** (significant capability drop on non-algebraic bitwise XOR and deceptive parity).
+  6. **Phase 7 & 8 Safeguards, Capacity Diagnostics & Accounting**:
+     - Base checkpoint invariance: Double SHA-256 parameter digests 100% verified across all seeds.
+     - 100% arithmetic carry retention (20 cases); 100% operational logic retention (8 probes); bit-exact rollback 100% verified.
+     - Rank-16 default (2,592 parameters, 10,368 bytes) maintained; Rank-32 diagnostic (4,912 parameters, 1.895x ratio) reserved as diagnostic.
+     - Active trainable ratio: strictly 0.00266 (0.266% of backbone).
+     - 314/314 regression tests passed on Tesla T4 in 122.87s.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; autonomous research loop remains in research tier.
+- **Next Direction Options (Post-M75 Strategic Priority)**:
+  - **Option 1 (M76: Compositional Procedures & Multi-Adapter Chaining)**: Evaluate dynamic routing across multi-adapter chains on compositional rules without joint retraining.
+  - **Option 2 (M76: Epistemic Feature Disentanglement for Causal Memory)**: Investigate higher-order representation metrics (e.g. Fisher information, curvature, activation geometry) to improve similarity matching between tasks and outcomes so relevant history causally separates from shuffled controls.
+  - **Option 3 (M76: Structural Capacity Diagnostic on Unfamiliar Procedural Families)**: Evaluate reversible Rank-16 vs Rank-32 capacity expansion strictly on the unfamiliar procedural families (`BITWISE_XOR_MASK`, `DECEPTIVE_INVERSION`) where fixed capacity exhibits empirical underfitting.

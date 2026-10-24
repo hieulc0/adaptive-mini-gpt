@@ -18,6 +18,7 @@ An experimental, **CLI-first Python/PyTorch** research framework studying **adap
 - **M72 (Robust Lifelong Neural Memory & Capacity Efficiency):** Passed (299/299 Tests on Tesla T4; Selective Retain beats Retain-All & Wrong-Route)
 - **M73 (Cost-Efficient Neural Memory & Verified Cumulative Improvement):** Passed (304/304 Tests on Tesla T4; SELECTIVE_NO_EXTRA_PROBES beats RESET in Macro F1 & Physical Utility)
 - **M74 (Verified Neural Weight Learning & High-Information Generalization):** Passed (309/309 Tests on Tesla T4; Causal Weight Attribution Verified with +0.6562 EM over Shuffled Controls; SELECTIVE_NO_EXTRA_PROBES beats both RESET & FRESH_ADAPT in Physical Utility)
+- **M75 (Experience-Guided Autonomous Learning & Adaptive Training Budgets):** Passed (314/314 Tests on Tesla T4; 7-arm causal lifelong comparison across Seeds 42, 43, 44; adaptive step budgets 20/40/60; procedural generalization taxonomy across 4 tiers; base backbone SHA-256 invariant; learning-to-learn causal hypothesis evaluated against shuffled/irrelevant controls)
 
 ## Research Hypothesis
 
