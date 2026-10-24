@@ -504,7 +504,7 @@ M52 evaluated 8 rigorous scientific phases across Seeds 42, 43, and 44:
    - Strictly partitioned into Meta-Training (Linguistics Transitive, Legal Symmetric Nontransitive, Software Symmetric Transitive, Bio Taxonomy Hierarchical), Development (Biochem Refutation, Geopolitics Directional Nontransitive), and Sealed Meta-Test (`env_sealed_crypto_blocked_bridge`, `env_sealed_quantum_open_world`, `env_sealed_social_parity_cycle`).
    - Ground-truth oracle labels and sealed test queries strictly isolated from policy training and hyperparameter tuning.
 3. **Phase 3 — Measured Downstream Adaptation Benefit as Policy Reward**:
-   - Formulated reward from fixed-budget held-out development adaptation: $R = \Delta 	ext{Acc}_{	ext{dev}} + \lambda_{	ext{pair}} \Delta 	ext{Pair}_{	ext{dev}} - eta \cdot 	ext{Cost} - \gamma \cdot 	ext{Regression}$.
+   - Formulated reward from fixed-budget held-out development adaptation: $R = \Delta \text{Acc}_{\text{dev}} + \lambda_{\text{pair}} \Delta \text{Pair}_{\text{dev}} - eta \cdot \text{Cost} - \gamma \cdot \text{Regression}$.
    - Reserved full 6-point learning curve AUC exclusively for final sealed evaluation to conserve GPU compute.
 4. **Phase 4 — Minimal Learned Policy & 5 Exploration Arms ($Q=6$ Budget)**:
    - Trained a minimal Contextual Bandit / REINFORCE policy head (`LearningOutcomePolicyHead`, in_features=8, hidden_dim=32) directly on development adaptation reward without PPO complexity.
@@ -534,7 +534,7 @@ M52 evaluated 8 rigorous scientific phases across Seeds 42, 43, and 44:
 - **Unit Test Suite**: **169/169 unit tests passed in 91.51s** on Tesla T4 (including `tests/test_m52_learning_driven_experiment.py` and M25–M51 regression suite).
 
 #### 3. Phase 1 Audit: Resolution of M51 Inconsistencies
-- **Entropy Accounting Formally Reconciled**: Under the 9-state hypothesis space ($P(h_i) = 0.12$ for $i \in [1..8]$, $P(	ext{UNK}) = 0.04$), prior entropy $H_0 = 3.1223$ bits. Collapsing entropy to 0.0125 bits yields $\Delta H = 3.1098$ bits, mathematically verifying M51 reports.
+- **Entropy Accounting Formally Reconciled**: Under the 9-state hypothesis space ($P(h_i) = 0.12$ for $i \in [1..8]$, $P(\text{UNK}) = 0.04$), prior entropy $H_0 = 3.1223$ bits. Collapsing entropy to 0.0125 bits yields $\Delta H = 3.1098$ bits, mathematically verifying M51 reports.
 - **Structural Paired Correctness Diagnosis**: In M51, adapters trained on pointwise triples $(u, v, y)$ learned marginal label distributions rather than edge causality, causing constant predictions across perturbations and yielding 0.0% paired correctness.
 
 #### 4. Phase 4 & 5 — Exploration Arms & Downstream Neural Adaptation Benchmark ($Q=6$ Budget)
@@ -1484,8 +1484,8 @@ Milestone M62 shifted the research direction from discrete historical episode ma
 
 #### 3. Phase 1 — M61 Measurement Protocol Audit Findings
 1. **Truncated Horizon AUC Flaw Reconciled**:
-   - In M61, np.trapz integrated only over evaluated steps $[0, 10, ... T_{	ext{stop}}]/40$. An arm stopping at step 10 was integrated over $[0..0.25]$, effectively zeroing out the remaining 75% of the horizon and penalizing early stopping twice.
-   - Formalized **Horizon Quality AUC**: carries forward the final achieved validation performance across all remaining steps $[T_{	ext{stop}}+10..40]$, providing a true measure of post-adaptation competency.
+   - In M61, np.trapz integrated only over evaluated steps $[0, 10, ... T_{\text{stop}}]/40$. An arm stopping at step 10 was integrated over $[0..0.25]$, effectively zeroing out the remaining 75% of the horizon and penalizing early stopping twice.
+   - Formalized **Horizon Quality AUC**: carries forward the final achieved validation performance across all remaining steps $[T_{\text{stop}}+10..40]$, providing a true measure of post-adaptation competency.
 2. **Safe Controller vs Fixed 40 Discrepancy Reconciled**:
    - Both Safe and Fixed 40 averaged 40 steps, but Safe achieved 0.5080 vs 0.4472 for Fixed 40.
    - Audit confirmed that in 18 out of 30 sealed runs (60.0% reset rate), the safe controller detected transfer conflict and triggered a RESET to a fresh adapter, escaping negative transfer. Fixed 40 remained bound to the conflicting adapter.
@@ -2135,3 +2135,138 @@ Evaluated across a balanced 5-task suite with real non-zero denominators (Known 
 | **Experience Calibration Gate** | Past acquisition outcomes improve future policy utility over memory-free baseline | Memory-free threshold (0.3107) beats naive experience memory (0.2163) | **REJECTED (INCONCLUSIVE / OVERSPAWNING)** |
 | **Topology Expansion Status** | Autonomous neural growth or module spawning | Unjustified; compact rank-16 (2,371 params) proves sufficient | **RESEARCH ONLY** |
 | **Operational Production Promotion** | Promotion of autonomous skill creation to production tier | Autonomous candidate creation kept in research sandbox | **REJECTED (NO-GO)** |
+
+
+---
+
+## Milestone M68: Autonomous Learning Experiment Loop with Verified Utility and Real-Cost Accounting
+
+### Executive Summary & Central Research Question
+Milestone M68 investigates the central research question:
+> **Can Adaptive Mini-GPT autonomously design and evaluate bounded improvements to its own neural learning process, retain successful weight changes, and use verified previous experiment outcomes to perform better on future tasks than an equally resourced learner without those improvements?**
+
+To answer this question rigorously and maintain unimpeachable scientific integrity:
+1. **Mandatory M67 Qualification Correction**: Conducted a thorough forensic audit of the M67 policy evaluation, explaining why `ALWAYS_FRESH` achieved higher Net Utility (0.3368) than `UTILITY_CALIBRATED` (0.3107), reconciling the offline oracle inconsistency, investigating zero adapter allocations, auditing the non-zero missed-reuse denominator, diagnosing the Rail Grid 0% paired correctness anomaly, and formally updating the M67 Policy Decision Gate to **FAIL against the strongest static baseline (`ALWAYS_FRESH`)**.
+2. **Real Learning-Cost Ledger & Amortization**: Implemented a transparent cost accounting ledger incorporating measured oracle queries, optimizer steps, GPU seconds, parameter footprints, and multi-episode life-cycle amortization ($K \ge 2$).
+3. **Autonomous Experiment Proposal & Execution Loop**: Built a closed-loop experiment controller operating over a strictly bounded action space (`REUSE_EXISTING`, `FRESH_ADAPT`, `TRAIN_NEW_SKILL`, `EVIDENCE_REPAIR`) with structured hypothesis contracts, independent dev validation, and bit-exact snapshot rollback.
+4. **Multi-Seed Benchmark Evaluation on Kaggle Tesla T4 GPU**: Evaluated across Seeds 42, 43, 44 on a balanced sequential 5-task suite under real cost constraints.
+5. **Decisive Empirical Result**: `AUTONOMOUS_RESEARCH_LOOP` achieved **0.2286 Amortized Net Utility** with only **36.0 oracle queries** and **40.0 optimizer steps**, outperforming `ALWAYS_REUSE` (0.2166 utility, +0.0120 advantage) and `ALWAYS_SPAWN` (0.2065 utility, +0.0221 advantage) while completely eliminating false allocations (0 vs 6). However, because `ALWAYS_FRESH` achieved higher raw Macro F1 (0.2952 vs 0.2405) by adapting on every task regardless of compute cost (100.0 queries, 200.0 steps), `ALWAYS_FRESH` slightly edged out the autonomous loop in net utility (0.2386 vs 0.2286, a -0.0100 delta). Under our strict qualification criteria, the **Policy Decision Gate remains FAIL against ALWAYS_FRESH**.
+6. **Learning-from-Experience Negative Result**: History-conditioned utility estimation achieved 0.2000 Amortized Utility, underperforming memory-free operation (0.2286), confirming that historical decision memory on small task sets continues to fail to generalize.
+
+---
+
+### Key Empirical Findings
+
+#### 1. Phase 1 — Forensic M67 Correction Audit & Verdict Reconciliation
+A complete forensic investigation into the six contradictions identified in M67:
+
+| Contradiction / Finding | Forensic Root Cause | Empirical Resolution & M68 Fix |
+| :--- | :--- | :--- |
+| **1. ALWAYS_FRESH Won Net Utility in M67** (0.3368 vs 0.3107) | **Unamortized Single-Episode Cost Ledger**: M67 utility formula penalized candidate qualification queries ($\lambda_{\text{query}} = 0.002$) and storage without penalizing optimizer steps or crediting candidate retention for future reuses ($K \ge 2$). Saving 40 queries gave only +0.0160 utility, insufficient to overcome ALWAYS_FRESH's +0.0421 Macro F1 edge. | Implemented life-cycle multi-episode amortization ($K=3$) and penalized optimizer steps ($\lambda_{\text{step}} = 0.0005$) and GPU seconds. |
+| **2. ALWAYS_FRESH Outperformed Macro F1 in M67** (0.3768 vs 0.3347) | **Unconstrained Adaptation**: ALWAYS_FRESH performs gradient updates on every task regardless of compute budget, while UTILITY_CALIBRATED avoided training on Circuit and Chromatin. | Evaluated true compute-efficiency trade-offs: ALWAYS_FRESH spends 5x more optimizer steps (200.0 vs 40.0). |
+| **3. OFFLINE_BEST_ORACLE Scored Only 0.2268** | **Static Hardcoded Actions with Single-Episode Penalties**: M67 oracle hardcoded `PROPOSE_NEW` on novel tasks. Under unamortized penalties, PROPOSE_NEW scored lower than FRESH, violating oracle upper-bound property. | Redefined `OFFLINE_HINDSIGHT_ORACLE` as a true mathematical hindsight upper bound: $\max_{a \in \mathcal{A}} U(a, \text{Task}_i)$. Consistently scores **0.3193 Net Utility**, strictly bounding all policies ($\text{Oracle} \ge \text{All Policies}$). |
+| **4. UTILITY_CALIBRATED Retained 0 Adapters** | **Excessive Threshold Under Single-Episode Accounting**: Required candidate validation gain $\ge 0.15$ over reuse. Without multi-episode amortization, candidates were rejected. | Amortized accounting credits future reuses, setting rational retention hurdles. |
+| **5. Missed Reuse Denominator Audit** | **Non-Zero Denominator Verified**: Balanced suite contained 2 known tasks. Both chose REUSE ($F_1 \ge 0.45$), yielding 0 missed reuses out of 2 valid opportunities (0.0% missed reuse rate). | Maintained balanced suites with explicit known-reusable tasks. |
+| **6. Rail Parity 0% Paired Correctness** | **Symmetric Invariance Contrast Failure**: Undirected grid queries $(u, v)$ and $(v, u)$ share identical parity label ($y(u, v) == y(v, u)$). Query reversals tested identical labels, never satisfying the minimal-pair contrast condition. | Diagnosed contrast failure; introduced parity-flip contrast interventions. |
+
+> [!CAUTION]
+> **Official M67 Policy Decision Gate Correction**:
+> While `UTILITY_CALIBRATED` outperformed `ALWAYS_REUSE` (0.3107 vs 0.2402) and `ALWAYS_SPAWN` (0.3107 vs 0.1703), it failed against the strongest static baseline `ALWAYS_FRESH` (0.3107 vs 0.3368). In accordance with scientific integrity standards, the official M67 Policy Decision Gate is formally corrected to **FAIL against strongest baseline**.
+
+---
+
+#### 2. Phase 2 — Transparent Real Learning-Cost Ledger
+M68 establishes a rigorous per-episode cost ledger that evaluates task performance and compute expenditure transparently:
+
+$$\text{Cost}(a) = \lambda_{\text{query}} \cdot Q + \lambda_{\text{step}} \cdot S + \lambda_{\text{param}} \cdot P + \lambda_{\text{time}} \cdot T + \lambda_{\text{alloc}} \cdot \mathbb{I}[\text{false alloc}]$$
+
+$$\text{Single-Episode Utility} = \text{Macro } F_1 - \text{Cost}(a)$$
+
+$$\text{Amortized Life-Cycle Utility} = \text{Macro } F_1 - \left[ \lambda_{\text{query}} Q_{\text{eval}} + \frac{\text{Acquisition Cost}}{K} + \lambda_{\text{param}} P \right]$$
+
+Parameters: $\lambda_{\text{query}} = 0.002$, $\lambda_{\text{step}} = 0.0005$, $\lambda_{\text{param}} = 10^{-6}$, $\lambda_{\text{time}} = 0.001$, $\lambda_{\text{alloc}} = 0.05$, $K = 3$ future encounters.
+
+---
+
+#### 3. Phase 5 — Multi-Seed Policy Benchmark on Kaggle Tesla T4
+Averaged across Seeds 42, 43, 44 on Kaggle Tesla T4 GPU (Version 5):
+
+| Learning Policy | Macro F1 | Single-Ep Utility | Amortized Life-Cycle Utility | Oracle Queries | Optimizer Steps | Stored Params | False Allocs | Missed Reuses | Candidate Rejections |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| `ALWAYS_REUSE` | 0.2206 $\pm$ 0.1203 | 0.2140 | 0.2166 $\pm$ 0.1203 | **20.0** | **0.0** | **0** | **0** | **0** | **0** |
+| `ALWAYS_FRESH` | 0.2952 $\pm$ 0.1368 | **0.2386** | **0.2386 $\pm$ 0.1291** | 100.0 | 200.0 | **0** | **0** | 4 | **0** |
+| `ALWAYS_SPAWN` | **0.2962 $\pm$ 0.2164** | 0.1653 | 0.2065 $\pm$ 0.1946 | 160.0 | 200.0 | 3,951 | 6 | 4 | 10 |
+| `M66_NOVELTY_GATED` | 0.2206 $\pm$ 0.1203 | 0.2139 | 0.2166 $\pm$ 0.1203 | **20.0** | **0.0** | **0** | **0** | **0** | **0** |
+| `M67_UTILITY_GATED` | 0.2405 $\pm$ 0.1199 | 0.2265 | 0.2286 $\pm$ 0.1193 | 36.0 | 40.0 | **0** | **0** | **0** | **0** |
+| `AUTONOMOUS_RESEARCH_LOOP` | 0.2405 $\pm$ 0.1199 | 0.2265 | 0.2286 $\pm$ 0.1193 | 36.0 | 40.0 | **0** | **0** | **0** | **0** |
+| `HISTORY_CONDITIONED_LOOP` | 0.2145 $\pm$ 0.0863 | 0.1981 | 0.2000 $\pm$ 0.0849 | 41.3 | 53.3 | **0** | **0** | **0** | **0** |
+| `OFFLINE_HINDSIGHT_ORACLE` | 0.3736 $\pm$ 0.1874 | 0.3102 | **0.3193 $\pm$ 0.1512** | 90.7 | 146.7 | 2,371 | 1 | 3 | **0** |
+
+##### Key Policy Benchmark Insights:
+1. **Mathematical Consistency of the Hindsight Oracle**: Unlike M67, the corrected `OFFLINE_HINDSIGHT_ORACLE` scores **0.3193 Amortized Utility**, strictly bounding all policies ($\text{Oracle} \ge \text{All Policies}$), restoring evaluation rigor.
+2. **Autonomous Loop Compute Efficiency**: `AUTONOMOUS_RESEARCH_LOOP` slashes oracle queries by **64%** (36.0 vs 100.0) and optimizer steps by **80%** (40.0 vs 200.0) compared to `ALWAYS_FRESH`. It decisively outperforms `ALWAYS_REUSE` (+0.0120 utility) and `ALWAYS_SPAWN` (+0.0221 utility), and achieves **0 false allocations** (vs 6 for ALWAYS_SPAWN).
+3. **Strongest Baseline Verdict**: Because `ALWAYS_FRESH` adapts on every single episode without restraint, it achieves higher raw task accuracy (0.2952 vs 0.2405). Under the evaluated penalty weights, this raw accuracy advantage (+0.0547 Macro F1) marginally exceeds the compute penalty savings (+0.0447), leaving `ALWAYS_FRESH` ahead by 0.0100 net utility (0.2386 vs 0.2286).
+4. **Qualification Gate**: The Policy Decision Gate is graded **FAIL against ALWAYS_FRESH**.
+
+---
+
+#### 4. Phase 6 — Causal History Calibration Ablation
+Evaluating whether prior experiment outcomes improve future decision-making across 5 history modes:
+
+| History Mode | Conditioning Mechanism | Mean Amortized Utility | Std Amortized Utility | Empirical Conclusion |
+| :--- | :--- | :---: | :---: | :--- |
+| `NO_HISTORY` | Memory-free deterministic utility threshold | **0.2286** | 0.0374 | **Strongest baseline** |
+| `RELEVANT` | Topology-conditioned prior updates | 0.2000 | 0.0043 | **-0.0286 regression** |
+| `SHUFFLED` | Shuffled task-outcome associations | **0.2286** | 0.0374 | Equal to no-history |
+| `IRRELEVANT` | Synthetic irrelevant past histories | **0.2286** | 0.0374 | Equal to no-history |
+| `CONSERVATIVE` | Uncertainty-discounted utility priors | **0.2286** | 0.0374 | Equal to no-history |
+
+> [!IMPORTANT]
+> **Scientific Verdict on Learning From Experience**:
+> Memory-free operation (`NO_HISTORY`: 0.2286) outperforms conditioning on historical experiment outcomes (`RELEVANT`: 0.2000). Prior learning outcomes from synthetic tasks fail to generalize predictably to novel relational structures, leading to suboptimal adaptation decisions. The **Learning-from-Experience Gate remains FAIL**.
+
+---
+
+#### 5. Phase 7 — Causal Neural Parameter Attribution
+To verify that retained adapter weights causally drive performance improvements (rather than optimizer noise or architecture regularization), we compared learned adapter weights against fresh random initialization, shuffled weights, and unrelated qualified skills:
+
+- **Seed 42 (Positive Causal Demonstration)**:
+  - Learned Adapter Macro F1: **0.5456**
+  - Fresh Random Initialization Macro F1: **0.2438** ($\Delta = \mathbf{+0.3018}$ causal gain)
+  - Shuffled Weights Control Macro F1: **0.4074** ($\Delta = \mathbf{+0.1382}$ causal gain)
+  - Unrelated Adapter Macro F1: **0.3657**
+  - Result: Retained learned weights causally improve task performance over untrained and randomized baselines.
+- **Seeds 43 & 44 (Candidate Rejection & Rollback)**:
+  - On Seeds 43 and 44, candidate adaptation did not produce positive transfer over baselines (gains $\le 0$), triggering automatic candidate rejection and state rollback.
+  - Multi-Seed Aggregate Gate: **FAIL** across all seeds due to strict simultaneous multi-seed thresholding.
+
+---
+
+#### 6. Phase 8 & 9 — Retention Safeguards, Topology Controls & Scientific Integrity
+- **Base Parameter Hash Invariance**: SHA-256 base hashes strictly invariant across all seeds before and after adaptation (`8736b364...`, `de762175...`, `c7bd81ae...`).
+- **Repertoire Checksum Invariance**: Qualified source skill parameter hashes strictly invariant (`source_consortium_bipartite`: `bcbf5b3b8344b910`, `source_dag_transitive`: `51ced95a94f2fa47`, `source_metabolic_inhibitor`: `ad55197b4a91974f`).
+- **Knowledge Retention**:
+  - **100.0% Arithmetic Carry Retention** across all seeds.
+  - **100.0% Chained Logic Retention** across expanded 8-prompt operational regression suite.
+- **Rollback Verification**: Bit-exact snapshot rollback verified with 100% parameter restoration on candidate rejection.
+- **Compactness & Topology Controls**:
+  - Default rank-16 adapter architecture maintained (2,371 parameters per candidate).
+  - Stored permanent adapters: **0** (no unnecessary parameter growth).
+  - Topology Expansion: strictly **RESEARCH ONLY**.
+  - Production Promotion: strictly **NO-GO**.
+
+---
+
+#### 7. Milestone M68 Scientific Qualification Scorecard
+| Gate | Qualification Criteria | Empirical Result | Scientific Verdict |
+| :--- | :--- | :--- | :---: |
+| **Engineering Qualification Gate** | 275/275 tests on Tesla T4; hashes invariant; rollback verified | 275/275 passed in 116.84s; SHA-256 invariant; rollback 100% | **PASS (QUALIFIED)** |
+| **M67 Correction Audit Gate** | Forensic audit of 6 M67 anomalies; correct policy gate | All 6 anomalies audited and reconciled; gate corrected to FAIL | **PASS (QUALIFIED)** |
+| **Oracle Consistency Gate** | Hindsight oracle strictly bounds all policies ($U_{\text{oracle}} \ge \max U_{\text{policy}}$) | Oracle achieves 0.3193 $\ge$ all policies (0.2386 max) | **PASS (QUALIFIED)** |
+| **Policy Decision Gate** | Outperform strongest static baseline (`ALWAYS_FRESH`) in net utility | Loop (0.2286) loses to ALWAYS_FRESH (0.2386) by -0.0100 delta | **FAIL (REJECTED)** |
+| **Allocation Accuracy Gate** | 0 false allocations on familiar tasks; eliminate over-spawning | 0 false allocations (vs 6 for ALWAYS_SPAWN) | **PASS (QUALIFIED)** |
+| **Learning from Experience Gate** | Relevant history improves future net utility over memory-free control | NO_HISTORY (0.2286) beats RELEVANT history (0.2000) | **FAIL (REJECTED)** |
+| **Causal Neural Attribution Gate** | Learned weights causally outperform fresh and shuffled controls | Verified on Seed 42 (+0.3018 over fresh), but rejected on Seeds 43/44 | **FAIL (REJECTED)** |
+| **Retention Safeguards Gate** | Base frozen; 100% carry; 100% expanded 8-prompt logic; rollback | Base hashes invariant; 100% carry; 100% logic; rollback verified | **PASS (QUALIFIED)** |
+| **Topology Expansion Status** | Autonomous neural growth or module spawning | Unjustified; compact rank-16 maintained; zero permanent growth | **RESEARCH ONLY** |
+| **Operational Production Promotion** | Promotion of autonomous learning loop to production tier | Autonomous research loop kept strictly in research tier | **REJECTED (NO-GO)** |

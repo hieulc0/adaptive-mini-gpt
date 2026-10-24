@@ -176,11 +176,11 @@
   - **Option 3 (M52: Epistemic Out-of-Distribution Calibration for Unknown Rule Detection)**: Calibrate the Bayesian tracker and neural ranking policy with an explicit evidence-density threshold to reliably detect when an environment is governed by an unmodeled rule family (`UNKNOWN_RULE`).
 
 ### M52: Learning-Outcome-Driven Experiment Selection (Completed & Evaluated)
-- **Objective**: Develop Adaptive Mini-GPT toward an autonomous learner that directly optimizes experiment selection for downstream neural learning benefit on unfamiliar tasks rather than intermediate symbolic information gain; conduct scientific forensic audit reconciling M51 entropy accounting ($H_0 = 3.1223$ bits, $\Delta H = 3.1098$ bits); establish rigidly segregated meta-train, dev, and sealed meta-test benchmark worlds; formulate training reward from fixed-budget held-out development adaptation ($R = \Delta 	ext{Acc} + \lambda_{	ext{pair}} \Delta 	ext{Pair} - 	ext{Cost}$); benchmark minimal REINFORCE policy head against 4 baselines (Random Valid, Deterministic EIG, M51 Neural Ranking, Policy Ablation); solve M51's 0% structural paired correctness failure via balanced minimal-pair contrastive supervision; calibrate Bayesian belief tracking with dynamic predictive likelihoods for out-of-hypothesis detection; and evaluate sequential multi-world retention on Kaggle Tesla T4 GPU.
+- **Objective**: Develop Adaptive Mini-GPT toward an autonomous learner that directly optimizes experiment selection for downstream neural learning benefit on unfamiliar tasks rather than intermediate symbolic information gain; conduct scientific forensic audit reconciling M51 entropy accounting ($H_0 = 3.1223$ bits, $\Delta H = 3.1098$ bits); establish rigidly segregated meta-train, dev, and sealed meta-test benchmark worlds; formulate training reward from fixed-budget held-out development adaptation ($R = \Delta \text{Acc} + \lambda_{\text{pair}} \Delta \text{Pair} - \text{Cost}$); benchmark minimal REINFORCE policy head against 4 baselines (Random Valid, Deterministic EIG, M51 Neural Ranking, Policy Ablation); solve M51's 0% structural paired correctness failure via balanced minimal-pair contrastive supervision; calibrate Bayesian belief tracking with dynamic predictive likelihoods for out-of-hypothesis detection; and evaluate sequential multi-world retention on Kaggle Tesla T4 GPU.
 - **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m52-learning-driven-study`, commit `df3bcff51bbbe551fd937ed85fe59250fd633f74`). Mini-GPT recurrent backbone (1,089,280 parameters, 1024-BPE tokenizer `f698e45e209b7fe6`), `M51ScientificAuditor`, `NormalizedEpistemicTracker`, `MinimalPairEngine`, `LearningOutcomeEvaluator`, `LearningOutcomePolicyHead`, and `LearningDrivenArmsRunner`. Unit test suite passed 169/169 on Tesla T4 in 91.51s.
 - **Core Architecture & Benchmark Deliverables**:
   1. **Phase 1 Forensic Audit & Entropy Reconciliation**:
-     - Formally resolved the 3.1098 vs 3.0000 bit discrepancy: under the 9-state hypothesis space ($P(h_i) = 0.12$ for $i \in [1..8]$, $P(	ext{UNK}) = 0.04$), prior entropy $H_0 = 3.1223$ bits. Deterministic EIG collapsed entropy to 0.0125 bits, yielding $\Delta H = 3.1098$ bits, mathematically verifying M51 empirical accounting.
+     - Formally resolved the 3.1098 vs 3.0000 bit discrepancy: under the 9-state hypothesis space ($P(h_i) = 0.12$ for $i \in [1..8]$, $P(\text{UNK}) = 0.04$), prior entropy $H_0 = 3.1223$ bits. Deterministic EIG collapsed entropy to 0.0125 bits, yielding $\Delta H = 3.1098$ bits, mathematically verifying M51 empirical accounting.
      - Diagnosed M51's 0% structural paired correctness: caused by training candidate adapters exclusively on pointwise triples without causal sensitivity to edge presence.
   2. **Phase 2 Rigidly Segregated Multi-Environment Suite**:
      - Fully decoupled training environments (`env_train_ling_dir_trans`, `env_train_legal_sym_nontrans`, `env_train_soft_sym_trans`, `env_train_bio_hierarchical`), dev environments (`env_dev_chem_refutation`, `env_dev_geo_dir_nontrans`), and sealed test environments (`env_sealed_crypto_blocked_bridge`, `env_sealed_quantum_open_world`, `env_sealed_social_parity_cycle`).
@@ -812,3 +812,49 @@
   - **Option 1 (M68: Regularized Experience Memory & Cross-Family Structural Similarity)**: Resolve why experience calibration over-spawned by conditioning utility priors on observed relational graph topology (e.g. cycle vs lattice vs tree) rather than global scalar priors.
   - **Option 2 (M68: Redundancy Detection & Autonomous Repertoire Pruning)**: Address the redundant allocation observed on Circuit Fault Cascade by implementing subspace alignment / Fisher information overlap to prune or reject candidate adapters that duplicate existing repertoire competencies.
   - **Option 3 (M68: Compositional Multi-Skill Routing)**: Investigate composition of qualified skills (e.g., combining parity routing with inhibitory cascading) on multi-rule benchmark environments without retraining.
+
+
+### M68: Autonomous Learning Experiment Loop and Verified Self-Improvement (Completed & Qualified)
+- **Objective**: Establish the first trustworthy end-to-end autonomous research and learning loop in Adaptive Mini-GPT. Formally audit and correct M67 policy evaluation contradictions; construct a real per-episode learning-cost ledger with multi-episode amortization ($K=3$); build a closed-loop experiment proposal and execution engine over a bounded action space (`REUSE_EXISTING`, `FRESH_ADAPT`, `TRAIN_NEW_SKILL`, `EVIDENCE_REPAIR`); execute multi-seed benchmarks across Seeds 42, 43, 44 on Kaggle Tesla T4; ablate history calibration modes; verify causal neural parameter attribution against fresh/shuffled controls; enforce strict retention safeguards with bit-exact rollback.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m68-autonomous-research-loop`, Version 5, commit `08ad494a1ac1459a66f0cbf0bac675f66f61b1c0`). Mini-GPT recurrent backbone (1,089,280 parameters), `M67QualificationCorrectionAuditor`, `RealLearningCostLedger`, `ExperimentProposalEngine`, `AutonomousResearchLoopEngine`, `VerifiedExperimentHistoryTracker`, `CausalNeuralAttributionAuditor`, `M68SafeguardsAuditor`. Passed **275/275 unit and regression tests on Tesla T4 in 116.84s**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Forensic M67 Audit & Correction**:
+     - Proven: `ALWAYS_FRESH` achieved 0.3368 vs 0.3107 in M67 because unamortized single-episode accounting penalized candidate qualification without penalizing training compute or crediting future reuse.
+     - Proven: `OFFLINE_BEST_ORACLE` scored only 0.2268 due to hardcoded actions with unamortized penalties. Redefined `OFFLINE_HINDSIGHT_ORACLE` as a true mathematical hindsight upper bound ($\max_{a \in \mathcal{A}} U(a, \text{Task}_i)$) scoring **0.3193 Net Utility**, consistently bounding all policies ($\text{Oracle} \ge \text{All Policies}$).
+     - Proven: Rail Grid 0% paired correctness was an artifact of symmetric parity in undirected graphs ($y(u, v) == y(v, u)$) violating minimal-pair contrast conditions by construction.
+     - Formal Verdict Correction: M67 Policy Decision Gate corrected to **FAIL against strongest baseline (`ALWAYS_FRESH`)**.
+  2. **Phase 2 Real Cost Accounting & Amortization**:
+     - Formulated unamortized single-episode utility and amortized life-cycle utility ($K=3$).
+     - Measured oracle queries ($\lambda_{\text{query}} = 0.002$), optimizer steps ($\lambda_{\text{step}} = 0.0005$), adapter parameters ($\lambda_{\text{param}} = 10^{-6}$), GPU seconds ($\lambda_{\text{time}} = 0.001$), false allocation penalty ($\lambda_{\text{alloc}} = 0.05$).
+  3. **Phase 3 & 4 Bounded Experiment Proposal & Autonomous Closed-Loop**:
+     - Structured hypothesis contracts over 4 bounded actions with observable triggering criteria, independent dev validation, and bit-exact snapshot rollback on failure.
+  4. **Phase 5 Multi-Seed Policy Benchmark on Kaggle Tesla T4**:
+     - `AUTONOMOUS_RESEARCH_LOOP` achieved **0.2286 Amortized Utility** with only **36.0 oracle queries** and **40.0 optimizer steps**, beating `ALWAYS_REUSE` (0.2166 utility, +0.0120) and `ALWAYS_SPAWN` (0.2065 utility, +0.0221) while eliminating false allocations (0 vs 6).
+     - However, `ALWAYS_FRESH` scored **0.2386 Amortized Utility** (0.2952 Macro F1, 100 queries, 200 steps). Because `ALWAYS_FRESH` trains on every episode without restraint, its raw accuracy gain (+0.0547 Macro F1) marginally exceeded its compute penalty, defeating the autonomous loop by -0.0100 net utility.
+     - Policy Decision Gate: **FAIL against ALWAYS_FRESH**.
+  5. **Phase 6 Causal History Calibration Ablation**:
+     - `NO_HISTORY` (0.2286) beat `RELEVANT` history (0.2000). Historical experiment outcomes from synthetic environments failed to improve future decisions on novel relational tasks.
+  6. **Phase 7 Causal Neural Attribution**:
+     - On Seed 42, learned adapter weights demonstrated causal gain of **+0.3018 F1** over fresh random initialization and **+0.1382 F1** over shuffled weights. On Seeds 43 and 44, candidates failing positive transfer were rejected and rolled back. Aggregate causal gate: **FAIL** across all seeds due to simultaneous thresholding.
+  7. **Phase 8 & 9 Retention Safeguards & Controls**:
+     - Base parameter SHA-256 hashes strictly invariant across all seeds before and after adaptation (`8736b364...`, `de762175...`, `c7bd81ae...`).
+     - Repertoire checksums strictly invariant.
+     - Arithmetic carry retention: **100.0%**. Chained logic retention: **100.0%** (expanded 8-prompt suite).
+     - Bit-exact rollback: **100.0% verified**.
+     - Rank-16 default maintained; 0 permanent adapters added; 0 false allocations.
+  8. **Task-Specific Qualification Gates**:
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (275/275 tests on Tesla T4; hashes invariant; rollback verified).
+     - M67 Correction Audit Gate: **PASS (QUALIFIED)** (All 6 anomalies audited; M67 gate corrected to FAIL).
+     - Oracle Consistency Gate: **PASS (QUALIFIED)** (Hindsight oracle 0.3193 strictly bounds all policies).
+     - Policy Decision Gate: **FAIL (REJECTED)** (Loop 0.2286 loses to ALWAYS_FRESH 0.2386 by -0.0100 delta).
+     - Allocation Accuracy Gate: **PASS (QUALIFIED)** (0 false allocations vs 6 for ALWAYS_SPAWN).
+     - Learning from Experience Gate: **FAIL (REJECTED)** (NO_HISTORY 0.2286 beats RELEVANT 0.2000).
+     - Causal Neural Attribution Gate: **FAIL (REJECTED)** (Verified on Seed 42, rejected on Seeds 43/44).
+     - Retention Safeguards Gate: **PASS (QUALIFIED)** (100% carry; 100% expanded 8-prompt logic; rollback verified).
+     - Topology Expansion Status: **RESEARCH ONLY** (Zero permanent capacity growth; rank-16 default maintained).
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Autonomous research loop kept strictly in research tier.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; autonomous research loop remains in research tier.
+- **Next Direction Options (Post-M68 Strategic Priority)**:
+  - **Option 1 (M69: Cost-Aware Pareto Front & Adaptive Query Budgets)**: Investigate why ALWAYS_FRESH won: at current utility penalty weights, raw accuracy dominates compute savings. Implement multi-objective Pareto optimization that balances sample complexity, training compute, and accuracy under strict, diminishing query budgets where ALWAYS_FRESH becomes economically unfeasible.
+  - **Option 2 (M69: Task-Distribution Clustering for Experience Memory)**: Address the failure of experience calibration by replacing task-level scalar priors with hierarchical task clustering based on spectral graph embeddings, ensuring past learning history is only applied to tasks with verified structural isomorphism.
+  - **Option 3 (M69: Compositional Hybrid Routing)**: Investigate composing existing qualified skills (e.g. Parity Grid + Transitive DAG) through multi-head adapter gating, achieving higher raw accuracy without full retraining.
