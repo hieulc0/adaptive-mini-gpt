@@ -1361,3 +1361,37 @@
 - **Lineage Promotion Decision**: **QUALIFIED IN RESEARCH TIER**. Autonomous neural acquisition and dynamic repertoire expansion fully verified on Tesla T4.
 - **Next Direction Options (Post-M80 Strategic Priority -> M81)**:
   - **Stage 2 Cross-Domain Transfer & Continual Autonomous Learning (M81)**: Extend autonomous skill acquisition across multiple distinct functional domains—including multi-digit arithmetic, operational logic, and symbolic transformations—evaluating whether accumulated prior acquisition experience improves the learning efficiency of subsequent skills.
+
+### Milestone M81: Learning-to-Learn Through Transfer and Experience (Completed & Qualified on Remote Colab Tesla T4 GPU)
+
+- **Status**: Completed & Qualified on Remote Google Colab Tesla T4 GPU (`amg-m81-t4` session).
+- **Focus**: Phase 0 forensic audit and statistical correction of M80 (Student-t with df=4, parameter reconciliation); continual skill learning curriculum spanning arithmetic, conditional logic, symbolic sequence procedures, and compositions with unseen rule instances; comparative 5-arm learning-to-learn benchmark measuring sample efficiency and training trajectories (Fresh Baseline, Pretrained Backbone, Accumulated Experience, Irrelevant Experience, Oracle Guided); minimal capacity adaptation hierarchy (evaluating Rank-4, Rank-8, Rank-16 with bounded expansion); multi-stage compound skill composition with causal weight and order ablations; 100% core retention.
+- **Hardware & Implementation**: Google Colab Tesla T4 GPU (Session `amg-m81-t4`, commit `3543cec`, Python 3.13, PyTorch 2.11.0+cu130). Mini-GPT recurrent backbone (1,071,872 frozen parameters, base hash `6e39cd7ef6790b3c`), minimal capacity adapters (Rank-8 = 1,432 params, Rank-16 = 2,592 params). Full regression suite passed: **340/340 tests on Tesla T4 in 122.42s**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 0 Forensic Audit & Statistical Corrections**:
+     - Recalculated M80 paired significance tests under exact Student-t ($	ext{df}=4$): Rank-16 vs Rank-8 ($p=0.0352$), Acquired vs Shuffled ($p=0.0028$), Discovered vs Inverted ($p=0.0645$, rectifying M80's unsupported claim of significance at $lpha=0.05$).
+     - Reconciled parameter counts: Core transformer layers are bit-for-bit identical (793,088 params); $+143,360$ parameter difference caused by `vocab_size=1024, ctx=128` vs `vocab_size=400, ctx=256`.
+     - Rectified M80's ungrounded learning-to-learn claim ($\Delta = 0.00$ pp, $p=1.0$ at step 60 saturation).
+  2. **Phase 1 Continual Skill Learning Curriculum**:
+     - Structured 4-family curriculum evaluated on unseen rule instances across seeds `42..46`. Strictly isolated disjoint partitions (`train=48, dev=16, qual=16, test=48`).
+  3. **Phase 2 Learning-to-Learn Sample Efficiency**:
+     - **30.00% reduction in median training steps** (from 50 steps for Fresh Baseline to 35 steps for Experienced Learner, exceeding the $\ge 20\%$ target).
+     - Statistically significant step reduction ($t=5.3079, 	ext{df}=4, p=0.0061 < 0.01$) with strictly positive 95% CI $[+8.59, +27.41]$ steps.
+     - Area Under Curve (AUC) advantage: Experienced learner mean AUC $0.6146$ vs $0.4240$ for fresh baseline ($p=0.0034 < 0.01$).
+  4. **Phase 3 Minimal Capacity Adaptation Hierarchy**:
+     - System evaluated Rank-4 (852 params) and Rank-8 (1,432 params) before considering Rank-16 (2,592 params).
+     - Successfully selected Rank-8 for 80% of seeds (100% qualification EM), bounding capacity growth and allocating Rank-16 only when Rank-8 fell below 85% EM (Seed 45: 81.25%).
+  5. **Phase 4 Compound Skill Composition & Causal Ablation Suite**:
+     - Oracle plan achieved **97.92% exact match** on compound transfer tasks combining curriculum primitives with the newly learned target skill.
+     - Inverted order collapsed to **0.00% EM** ($p < 0.001$), confirming strict noncommutative ordering.
+     - Shuffled acquired adapter collapsed to **0.00% EM** ($p < 0.001$), confirming causal neural weight attribution.
+  6. **Phase 5 Retention & Lineage**:
+     - Base transformer weights 100% frozen (0 base parameter growth, SHA-256 hash `6e39cd7ef6790b3c` bit-exact invariant).
+     - Arithmetic carry retention: **100.0% (20/20)**; Operational logic retention: **100.0% (8/8)**; Primitive retention: 100%.
+- **Lineage Promotion Decision**: **QUALIFIED IN RESEARCH TIER**. Learning-to-learn through transfer and experience verified on Tesla T4.
+- **Next Direction Options (Post-M81 Strategic Priority -> M82)**:
+  - **Milestone M82 — Learn Better Acquisition Strategies Using Previous Experience**: Moving beyond fixed adaptation rates to learn meta-acquisition policies, gradient subspace projection, and dynamic exploration budgets from previous task learning histories.
+  - **Milestone M83 — Self-Distillation, Merging, and Pruning of Learned Skills**: Consolidating multiple acquired adapters into shared modular layers without catastrophic forgetting.
+  - **Milestone M84 — Autonomous Capacity Selection and Connection Pruning/Regrowth**: Dynamic neural topology adjustments guided by utility and capacity budgets.
+  - **Milestone M85 — Dynamic Ranks, Dimensions, and Neural Module Evolution**: Continuous rank evolution and parameter dimension resizing.
+  - **Milestone M86+ — Integrated Continual Learning and Controlled Self-Improvement**: End-to-end autonomous lifelong learning student.

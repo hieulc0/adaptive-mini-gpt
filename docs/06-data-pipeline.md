@@ -385,3 +385,23 @@ Milestone M80 introduces `data/specs/m80_acquisition_spec.json`, formalizing:
 - **Execution Provenance**:
     * 336/336 unit and regression tests passed on Google Colab Tesla T4 GPU (`amg-m80` session).
     * 100% carry (20/20) and logic (8/8) retention; base parameter SHA-256 hash invariant (`6e39cd7ef6790b3c`).
+
+### 13. Milestone M81 Learning-to-Learn Specification
+Milestone M81 introduces continual learning curriculum and sample efficiency specifications:
+- **Phase 0 Forensic Audit & Statistical Corrections**:
+    * Reconciles base parameter counts (928k vs 1.07M) and enforces Student-t tests with $	ext{df} = 4$ for 5-seed benchmarks.
+- **Continual Skill Learning Curriculum (4 Progressive Families)**:
+    * `ARITHMETIC`: Modular affine transformations $(a \cdot s + b) mod 16$ with unseen parameter pairs.
+    * `CONDITIONAL_LOGIC`: Parity-dependent branching with bitwise XOR masking and additive offsets.
+    * `SYMBOLIC_PROCEDURE`: Position-dependent sequence reversal and cyclic transformations.
+    * `COMPOSITION`: Two-stage sequential pipelines testing cross-family integration.
+- **Disjoint Partition Guarantees**:
+    * `train` (48), `dev` (16), `qualification` (16), `sealed_test` (48). Strictly zero token-level overlap.
+- **Minimal Capacity Hierarchy**:
+    * Evaluates Rank-4 (852 params) $	o$ Rank-8 (1,432 params) $	o$ Rank-16 (2,592 params).
+    * Chooses smallest candidate satisfying $\ge 85\%$ qualification exact match threshold.
+- **Learning-to-Learn Efficiency Metrics**:
+    * Steps to $\ge 85\%$ EM: Evaluated at 5-step intervals ($T \in \{5, 10, \dots, 60\}$).
+    * Primary Target: $\ge 20\%$ reduction in median steps with positive paired confidence interval.
+- **Causal Ablation Suite**:
+    * Evaluates Oracle Plan, Inverted Order, and Shuffled Weights on multi-stage compositions.
