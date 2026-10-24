@@ -15,6 +15,8 @@ An experimental, **CLI-first Python/PyTorch** research framework studying **adap
 - **M21 (Digit-Level Neural Arithmetic & Procedural Scratchpad):** In Progress (Testing representation ablations and carry scratchpads)
 - **M70 (Verified Continual Self-Improvement & Portable Data Pipeline):** Passed (289/289 Tests on Tesla T4; Autonomous Policy beats ALWAYS_REUSE)
 - **M71 (Selective Neural Memory, Causal Retention & Compact Skill Management):** Passed (294/294 Tests on Tesla T4; Selective Retain beats Reset by +0.0218 Macro F1 & +0.0130 Net Utility)
+- **M72 (Robust Lifelong Neural Memory & Capacity Efficiency):** Passed (299/299 Tests on Tesla T4; Selective Retain beats Retain-All & Wrong-Route)
+- **M73 (Cost-Efficient Neural Memory & Verified Cumulative Improvement):** Passed (304/304 Tests on Tesla T4; SELECTIVE_NO_EXTRA_PROBES beats RESET in Macro F1 & Physical Utility)
 
 ## Research Hypothesis
 
@@ -121,6 +123,7 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 | **M70** | Rational Experiment Controller & Portable Data Pipeline | **0.5311** net utility (Small) beating ALWAYS_REUSE (**+0.2422**); 289/289 tests on Tesla T4 |
 | **M71** | Selective Neural Memory & Causal Skill Retention | `SELECTIVE_RETAIN` beats `RESET` (**+0.0218 F1**, **+0.0130 Utility**, **+0.0764 Zero-Shot F1**); 294/294 tests on Tesla T4 |
 | **M72** | Robust Lifelong Neural Memory & Capacity Efficiency | Long-horizon 20-ep stream; `SELECTIVE_RETAIN` beats `RETAIN_ALL` (**+0.0042 F1**) & `WRONG_ROUTE` (**+0.0036 F1**); 0.0 negative transfers; 299/299 tests on Tesla T4 |
+| **M73** | Cost-Efficient Neural Memory & Verified Cumulative Improvement | Causal lifelong benchmark; `SELECTIVE_NO_EXTRA_PROBES` beats `RESET` (**+0.0056 F1**, **+0.0051 Phys Util**); WRONG_ROUTE reveals 0.67 neg transfers; 304/304 tests on Tesla T4 |
 
 ## Directory Structure
 

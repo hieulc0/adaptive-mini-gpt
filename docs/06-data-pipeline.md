@@ -252,3 +252,10 @@ A standalone validation script is provided to verify dataset loading in Google C
 uv run python scripts/smoke_test_colab_data_loading.py
 ```
 This script verifies local synthesis, manifest creation, and `PortableDatasetLoader` resolution in both clean and fallback environments.
+
+
+### 5. Milestone M73 Causal Neural Memory Specification
+Milestone M73 introduces `data/specs/m73_cost_efficient_memory_spec.json`, formalizing:
+- Multi-world relational tasks including modular arithmetic congruence (`MOD_3_CONGRUENCE`, `MOD_5_CONGRUENCE`) and relational subsumption alongside graph traversals.
+- Exact split isolation and disjoint relation keys across train, development, and sealed test partitions.
+- Prompt-observable relation tokens enabling `SELECTIVE_NO_EXTRA_PROBES` to perform zero-query routing without extra observation queries.
