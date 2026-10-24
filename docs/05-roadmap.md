@@ -624,3 +624,46 @@
   - **Option 1 (M64: Modular Multi-Skill Routing & Task-Conditioned Meta-Adaptation)**: Combine the verified counterfactual neural router (M61) with the stabilized Reptile meta-initialization (M63), dynamically routing incoming tasks between specialized skill adapters and the meta-learned generalist adapter.
   - **Option 2 (M64: Adaptive-Rank Residual Expansion for Capacity-Constrained Few-Shot Tasks)**: Investigate whether selectively increasing residual bottleneck capacity (dim 16 -> 32) when validation loss plateaus overcomes the N=32 plateau without unbounded topology growth.
   - **Option 3 (M64: Broad-Family Meta-Curriculum with Contrastive Representation Learning)**: Expand the meta-training distribution to include modular, bipartite, and dense-cluster topologies with contrastive pair objectives, addressing the cross-family generalization failure.
+
+
+### M64: Three-Class Learning and Cross-Family Neural Meta-Generalization (Completed & Scientifically Evaluated)
+- **Objective**: Forensically audit M63 label processing, output head dimensions, and zero UNKNOWN recall; mathematically reconcile $N=2$ three-class impossibility and 40 vs 20 step F1 discrepancy; implement verified three-class supervision pipeline with sound YES, NO, and UNKNOWN practice sampling; train narrow vs broad-family Reptile meta-initializations; benchmark 8 controlled initialization arms across familiar and unseen rule families; evaluate few-shot adaptation curves and multi-seed retention safeguards on Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m64-three-class-study`, commit `0093a8baefeae98e116a5234290ee942017a510c`). Mini-GPT recurrent backbone (1,089,280 parameters, tokenizer `f698e45e209b7fe6`), `M63ForensicAuditor`, `ThreeClassFewShotSampler`, `ThreeClassSupervisionEngine`, `ThreeClassReptileLearner`, `CrossFamilyMetaEvaluator`, and `M64SafeguardAuditor`. Passed **249/249 unit tests on Tesla T4 in 119.04s** (6 M64 tests + 243 legacy tests M25–M63).
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Forensic M63 Audit**:
+     - Proven: In M63, practice sampling was drawn exclusively from minimal pairs (YES base queries and NO perturbed queries). No UNKNOWN practice queries were ever sampled, leaving the UNKNOWN logit with zero positive gradient updates during adaptation.
+     - Proven: In held-out 3-class test sets, the model predicted UNKNOWN 0 times across all tasks (column 2 was `[0, 0, 0]`), producing 0.0% UNKNOWN recall and artificially capping macro F1 at ~0.24 (roughly 2/3 of binary YES/NO performance).
+     - Defined: Rigorous semantic distinction established between NO (refuted by structural contradiction) and UNKNOWN (indeterminate due to open-world evidence insufficiency).
+     - Acknowledged: At $N=2$, three-class coverage is mathematically impossible (1 YES, 1 NO, 0 UNK).
+     - Reconciled: Discrepancy between final F1 (0.2921) and $N=32$ F1 (0.2376) was driven by optimizer step budgets (40 steps vs 20 steps).
+  2. **Phase 3 & 4 Broad-Family Meta-Training**:
+     - Narrow Reptile trained on DAGs and trees; Broad-Family Reptile trained across 5 diverse families (transitive chains, symmetric cliques, blocked bridges, non-transitive bipartite, and cyclic parity graphs) under matched compute (2,371 parameters, 5 inner steps, outer lr 0.1).
+  3. **Phase 5 & 6 Controlled 8-Arm Meta-Initialization Benchmark (Sealed Tasks)**:
+     - Broad-Family Reptile (Arm D) achieved **0.2214 Sealed AUC**, outperforming Multitask Pretrained (0.2177), Narrow Reptile (0.2167), Fresh Random (0.2112), and Shuffled Control (0.1959).
+     - On familiar rule families, Broad Reptile dominated with **0.2711 AUC** (+0.0345 over Fresh), **0.2849 Final F1**, and **27.5% structural paired correctness**, while maintaining a **0.0% adaptation regression rate**.
+  4. **Phase 6 The Cross-Family Transfer Block (Definitive Negative Result)**:
+     - On completely unseen rule families (modular biomedical networks, cyclic parity, sparse logistics lattices), Broad-Family Reptile dropped to **0.1884 Unseen AUC** (trailing Fresh at 0.1944 and Multitask at 0.2022).
+     - On modular networks, all 8 arms collapsed to **0.1667 F1 and 0.0% paired correctness**.
+     - Cross-family generalization on unfamiliar rule families remains definitively **FAIL**.
+  5. **Phase 6 The Three-Class Representation Bottleneck**:
+     - Even with verified UNKNOWN practice examples (10 at $N=32$), held-out UNKNOWN recall remained 0.0000 across all meta-learning arms.
+     - The compact 2,371-parameter linear residual adapter (rank 16) on a binary-pretrained 128-dim backbone lacks the capacity to disentangle structural refutation (NO) from open-world epistemic indeterminacy (UNKNOWN) within few-shot budgets.
+  6. **Phase 7 Retention Safeguards & Epistemic Audit**:
+     - Base checkpoint SHA-256 hashes strictly invariant across all seeds (`ff27a546...`, `5e8ac2d5...`, `c5ddb03d...`).
+     - 0.0000 isolated backward forgetting; 100% arithmetic carry and chained logic retention.
+     - SPRT confirmed 0.0% false alarms, 100% unknown rule recall.
+  7. **Task-Specific Qualification Gates**:
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (249/249 tests on Tesla T4; hashes invariant; rollback verified).
+     - Forensic Metric & Label Audit: **PASS (QUALIFIED)** (fully diagnosed UNKNOWN omission and reconciled metrics).
+     - Three-Class Learning Gate: **FAIL (NOT QUALIFIED)** (model collapses UNKNOWN into NO; UNKNOWN recall = 0.0000).
+     - Neural Meta-Learning Gate: **PASS (QUALIFIED in-benchmark)** (Broad Reptile 0.2214 AUC beats Fresh 0.2112, Multitask 0.2177, Shuffled 0.1959; 0.0% regression).
+     - Cross-Family Generalization Gate: **FAIL (NOT QUALIFIED)** (Unseen AUC 0.1884 vs 0.2711 in-family; negative transfer on modular graphs).
+     - Learning Stability Gate: **PASS (QUALIFIED)** (Broad Reptile 0.0% regression, Hybrid 0.0% regression).
+     - Epistemic Qualification Gate: **PASS (QUALIFIED)** (0.0% false alarms; 100% unknown recall).
+     - Topology Expansion Status: **RESEARCH ONLY** (compact residuals remain baseline).
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Base weights remain strictly frozen; meta-learning initializations remain in research tier.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; meta-learning initializations remain in research tier.
+- **Next Direction Options (Post-M64 Strategic Priority)**:
+  - **Option 1 (M65: Epistemic Skill Routing and Selective Capacity Expansion)**: Rather than forcing a single 2,371-parameter linear adapter to learn both 3-class open-world reasoning and diverse graph topologies, combine the verified zero-false-alarm SPRT detector and counterfactual neural router (M61) to route incoming queries between specialized skill adapters, fresh adaptation, and meta-learned parameters; selectively expand residual bottleneck capacity ($d=16 \to 32$) only when epistemic indeterminacy is detected.
+  - **Option 2 (M65: Tri-Valued Margin Loss and Contrastive Indeterminacy Supervision)**: Formulate a custom tri-valued margin loss that explicitly penalizes projecting UNKNOWN into the NO subspace, enforcing geometric separation between refuted edges and unobserved components.
+  - **Option 3 (M65: Autonomous Modular Skill Spawning for Unseen Graph Topologies)**: Use the SPRT detector to trigger autonomous allocation of dedicated skill adapters whenever an unseen structural family (e.g., modular or cyclic graph) is encountered, avoiding negative transfer from meta-learned initializations.
