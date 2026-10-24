@@ -1,0 +1,59 @@
+{
+  "spec_id": "m77_plan_discovery_spec",
+  "version": "1.0",
+  "description": "Standardized benchmark specification for M77 autonomous neural skill-plan discovery from observable demonstrations",
+  "default_seeds": [42, 43, 44],
+  "demonstration_budgets": [0, 2, 4, 8],
+  "symbol_vocab_size": 16,
+  "symbols": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13", "S14", "S15"],
+  "available_primitives": [
+    "COMPLEMENT_REFLECT",
+    "CAESAR_SHIFT_MOD3",
+    "AFFINE_TRANSFORM"
+  ],
+  "composable_tasks": [
+    {
+      "task_id": "REFLECT_THEN_SHIFT3",
+      "ground_truth_stages": ["COMPLEMENT_REFLECT", "CAESAR_SHIFT_MOD3"],
+      "depth": 2
+    },
+    {
+      "task_id": "SHIFT3_THEN_REFLECT",
+      "ground_truth_stages": ["CAESAR_SHIFT_MOD3", "COMPLEMENT_REFLECT"],
+      "depth": 2
+    },
+    {
+      "task_id": "REFLECT_THEN_AFFINE",
+      "ground_truth_stages": ["COMPLEMENT_REFLECT", "AFFINE_TRANSFORM"],
+      "depth": 2
+    },
+    {
+      "task_id": "AFFINE_THEN_SHIFT3",
+      "ground_truth_stages": ["AFFINE_TRANSFORM", "CAESAR_SHIFT_MOD3"],
+      "depth": 2
+    }
+  ],
+  "uncomposable_tasks": [
+    {
+      "task_id": "BITWISE_XOR_MASK",
+      "ground_truth_stages": [],
+      "depth": 0
+    },
+    {
+      "task_id": "DECEPTIVE_INVERSION",
+      "ground_truth_stages": [],
+      "depth": 0
+    }
+  ],
+  "causal_arms": [
+    "A_AUTONOMOUS_PLAN_SEARCH",
+    "B_PROVIDED_CORRECT_PLAN",
+    "C_FIXED_ORDER",
+    "D_RANDOM_VALID_PLAN",
+    "E_SHUFFLED_DEMONSTRATIONS",
+    "F_SINGLE_SKILL",
+    "G_WRONG_ORDER",
+    "H_FRESH_COMPOUND_ADAPTER",
+    "I_REFERENCE_ORACLE"
+  ]
+}
