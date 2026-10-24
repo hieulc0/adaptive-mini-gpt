@@ -1205,3 +1205,55 @@
   - **Option 1 (M77: Autonomous Skill-Selection and Plan Inference from Unfamiliar Examples)**: Move from explicit operator composition instructions to inferring multi-stage skill execution plans directly from a few input-output demonstrations, testing whether Mini-GPT can autonomously identify and route the correct sequence of learned skills without being told the decomposition.
   - **Option 2 (M77: Error-Correction Intermediate Refinement & Soft Feature Routing)**: Address the 21.53% error propagation bottleneck by investigating latent-state residual coupling or confidence-guided intermediate beam correction between cascaded adapters.
   - **Option 3 (M77: Experience-Guided Compositional Routing)**: Re-open the M75 experience learning gate by conditioning routing decisions on verified historical composition successes rather than single-adapter tuning budgets.
+
+---
+
+### Milestone M77: Autonomous Neural Skill-Plan Discovery from Examples (Completed & Evaluated on Remote Colab Tesla T4 GPU)
+
+- **Status**: Completed & Evaluated on Remote Google Colab Tesla T4 GPU (`amg-m77` session).
+- **Focus**: Forensic audit of M76 metrics and parameter lineage reconciliation (928,512 core backbone vs 974,658 expanded checkpoint); bounded deterministic plan-search engine over candidate hypothesis space (10 plans: 1 abstain, 3 single, 6 two-stage); demonstration budget sweep ($N \in \{0, 2, 4, 8\}$); 9-arm causal plan discovery suite (`A_AUTONOMOUS_PLAN_SEARCH`, `B_PROVIDED_CORRECT_PLAN`, `C_FIXED_ORDER`, `D_RANDOM_VALID_PLAN`, `E_SHUFFLED_DEMONSTRATIONS`, `F_SINGLE_SKILL`, `G_WRONG_ORDER`, `H_FRESH_COMPOUND_ADAPTER`, `I_REFERENCE_ORACLE`); unknown-procedure abstention benchmark on `BITWISE_XOR_MASK` and `DECEPTIVE_INVERSION`; retention safeguards (322/322 regression tests passed on Tesla T4).
+- **Hardware & Implementation**: Google Colab Tesla T4 GPU (Session `amg-m77`, commit `5694484`, Python 3.13, PyTorch 2.11.0+cu130). Mini-GPT recurrent backbone (928,512 core / 974,658 total parameters), `Rank16SequenceAdapter` (2,592 parameters). Full regression test suite passed: **322/322 tests on Tesla T4 in 118.4s**. Multi-seed benchmark evaluated across Seeds 42, 43, 44.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Forensic M76 Audit & Parameter Lineage**:
+     - Proven: Core transformer backbone has 928,512 parameters (4 layers, 4 heads, $d=128$, intermediate 512, 1024 token embeddings).
+     - Proven: Task-specific linear classification and auxiliary projection heads account for 46,146 parameters ($928,512 + 46,146 = 974,658$ expanded parameters). Both figures describe identical model weights.
+     - Reconciled why error decomposition success is 44.44% while aggregate EM is 44.79%: 44.44% was computed strictly across the 3 noncommutative diagnostic pairs, whereas 44.79% includes `AFFINE_THEN_SHIFT3` (45.83% EM).
+     - Lifetime cost: 120 acquisition steps (3 primitives $\times$ 40 steps) stored in 7,776 parameters (31,104 bytes).
+  2. **Phase 2 & 3 Autonomous Plan Discovery & Demonstration Sweeps**:
+     - Demonstration Budget Sweep ($N \in \{0, 2, 4, 8\}$):
+       * $N=0$: Plan Acc = 0.00%, Abstention Rate = 100.0%, Test EM = 0.0000 (correctly recognizes zero evidence).
+       * $N=2$: Plan Acc = 8.33%, Abstention Rate = 83.33%, Test EM = 0.0677 (latency 38.60 ms, 30 forward passes).
+       * $N=4$: Plan Acc = 16.67%, Abstention Rate = 75.00%, Test EM = 0.0972 (latency 35.39 ms, 60 forward passes).
+       * $N=8$: Plan Acc = 8.33%, Abstention Rate = 83.33%, Test EM = 0.0712 (latency 37.47 ms, 120 forward passes).
+     - Critical Finding: Because individual neural primitives achieve 75–85% token accuracy and ~45% compound sequence EM, small demonstration sets (length 3–4) frequently yield intermediate errors that depress candidate scores below the safety threshold $\tau_{\text{plan}} = 0.75$, triggering conservative safety abstention in 75–83% of cases.
+  3. **Phase 4 9-Arm Causal Benchmark Results (at $N=4$ Demonstrations)**:
+     - `A_AUTONOMOUS_PLAN_SEARCH`: Mean EM = **0.1146 $\pm$ 0.1076**, Token Acc = **0.1991 $\pm$ 0.1946**, Plan Acc = **0.2500 $\pm$ 0.2500**, Latency = 36.40 ms, 0 training steps, 0 parameters allocated.
+     - `B_PROVIDED_CORRECT_PLAN`: Mean EM = **0.4479 $\pm$ 0.0208**, Token Acc = **0.7778 $\pm$ 0.0213**, Plan Acc = **1.0000**, 0 steps, 0 parameters allocated. (Replicates M76 execution ceiling).
+     - `C_FIXED_ORDER`: Mean EM = 0.1076 $\pm$ 0.0080, Token Acc = 0.2136 $\pm$ 0.0063, Plan Acc = 0.2500.
+     - `D_RANDOM_VALID_PLAN`: Mean EM = 0.0330 $\pm$ 0.0571, Token Acc = 0.1389 $\pm$ 0.1038, Plan Acc = 0.0833.
+     - `E_SHUFFLED_DEMONSTRATIONS`: Mean EM = 0.0000 $\pm$ 0.0000, Token Acc = 0.0000 $\pm$ 0.0000, Plan Acc = 0.0000.
+     - `F_SINGLE_SKILL`: Mean EM = 0.0000 $\pm$ 0.0000, Token Acc = 0.0115 $\pm$ 0.0044, Plan Acc = 0.0000.
+     - `G_WRONG_ORDER`: Mean EM = 0.1163 $\pm$ 0.0384, Token Acc = 0.2031 $\pm$ 0.0187, Plan Acc = 0.0000.
+     - `H_FRESH_COMPOUND_ADAPTER`: Mean EM = 0.5173 $\pm$ 0.0131, Token Acc = 0.8050 $\pm$ 0.0026, 50 steps, +2,592 parameters.
+     - `I_REFERENCE_ORACLE`: Mean EM = 1.0000, Token Acc = 1.0000.
+  4. **Phase 4 Paired Student's t Confidence Intervals ($N=3, df=2, t_{\text{crit}}=4.303$)**:
+     - `PLAN_SEARCH` vs `PROVIDED_CORRECT_PLAN`: $\Delta = \mathbf{-0.3333}$, 95% CI `[-0.5730, -0.0937]` (Statistically trails the provided plan).
+     - `PLAN_SEARCH` vs `FIXED_ORDER`: $\Delta = +0.0069$, 95% CI `[-0.2719, +0.2858]` (Spans zero).
+     - `PLAN_SEARCH` vs `RANDOM_VALID_PLAN`: $\Delta = +0.0816$, 95% CI `[-0.2048, +0.3680]` (Spans zero).
+     - `PLAN_SEARCH` vs `SHUFFLED_DEMONSTRATIONS`: $\Delta = +0.1146$, 95% CI `[-0.1528, +0.3819]` (Spans zero).
+     - `PLAN_SEARCH` vs `WRONG_ORDER`: $\Delta = -0.0017$, 95% CI `[-0.1980, +0.1946]` (Spans zero).
+  5. **Phase 7 Unknown Procedures & Bounded Abstention**:
+     - Evaluated on mixed streams of 4 composable tasks + 2 uncomposable tasks (`BITWISE_XOR_MASK`, `DECEPTIVE_INVERSION`):
+     - **True Negative Rate (TNR)**: **1.0000 (100.0%)**! The controller achieved 100% correct abstention on unfamiliar, uncomposable tasks, never falsely forcing an invalid composition plan.
+     - **True Positive Rate (TPR)**: **0.5000 (50.0%)** on composable tasks.
+     - **Abstention Decision Accuracy**: **66.67%**.
+  6. **Phase 9 & 11 Safeguards & Hardware Footprint**:
+     - Double SHA-256 base hashes invariant across all seeds before and after benchmark.
+     - 100% primitive adapter freezing verified.
+     - 100% arithmetic carry retention (20 cases); 100% operational logic retention (8 probes); bit-exact rollback 100% verified.
+     - Plan search execution latency: 36.40 ms per task on Tesla T4 GPU (60 forward passes total across candidate space).
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; plan discovery engine remains in research tier.
+- **Next Direction Options (Post-M77 Strategic Priority)**:
+  - **Option 1 (M78: Soft-Latent Confidence Gating & Intermediate Refinement)**: Address the 75% abstention bottleneck by evaluating intermediate logit entropy and soft latent representations between stages rather than hard argmax token discretization, allowing the search engine to detect correct procedural alignment even when a single token intermediate is noisy.
+  - **Option 2 (M78: Experience-Guided Plan Prioritization)**: Condition the candidate plan evaluation order and confidence thresholds on past successful planning outcomes (re-opening M75 experience learning with verified task representations).
+  - **Option 3 (M78: Active Clarification Querying for Disambiguation)**: Enable the plan discovery engine to actively generate 1–2 minimally discriminative probe queries when two candidate plans tie in evidence, rather than conservatively abstaining.

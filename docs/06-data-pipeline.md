@@ -298,3 +298,14 @@ Milestone M76 introduces `data/specs/m76_composition_spec.json`, formalizing:
 - 9-Arm causal evaluation suite: `A_NEURAL_COMPOSITION`, `B_WRONG_ORDER`, `C_SINGLE_SKILL_A`, `D_SINGLE_SKILL_B`, `E_SHUFFLED_COMPONENT`, `F_UNRELATED_COMPONENT`, `G_FRESH_MONOLITHIC`, `H_UNCHANGED_BASE`, `I_DETERMINISTIC_ORACLE`.
 - Two-stage error decomposition: `STAGE_1_DEFECT`, `STAGE_2_DEFECT`, `ERROR_PROPAGATION`, and `DUAL_DEFECT` using teacher-forced reference intermediates.
 - Reversible candidate rollback and frozen backbone double SHA-256 parameter invariance.
+
+### 9. Milestone M77 Autonomous Plan Discovery Specification
+Milestone M77 introduces `data/specs/m77_plan_discovery_spec.json`, formalizing:
+- Task identifiability benchmark across varying demonstration budgets ($N \in \{0, 2, 4, 8\}$).
+- Candidate composition hypothesis space over 3 qualified primitives (`COMPLEMENT_REFLECT`, `CAESAR_SHIFT_MOD3`, `AFFINE_TRANSFORM`), yielding 10 candidate plans (1 abstain, 3 single-primitive, 6 two-stage compositions).
+- Benchmark tasks:
+    1. Four composable noncommutative compound tasks: `REFLECT_THEN_SHIFT3`, `SHIFT3_THEN_REFLECT`, `REFLECT_THEN_AFFINE`, `AFFINE_THEN_SHIFT3`.
+    2. Two unfamiliar uncomposable procedural families: `BITWISE_XOR_MASK` ($s \to s \oplus 9$), `DECEPTIVE_INVERSION` ($s \to 15-s$ if even else $(s+7)\bmod 16$).
+- Scrambled demonstration generator: Breaks input-output correspondence to establish causal plan selection controls (`SHUFFLED_DEMONSTRATIONS`).
+- Strict partition isolation: `demonstrations` ($N \in \{0, 2, 4, 8\}$), `dev` (16 examples), and `sealed_test` (48 examples).
+- Execution provenance: Full validation on remote Google Colab Tesla T4 GPU (`amg-m77` session) with zero data leakage into planning heuristics.
