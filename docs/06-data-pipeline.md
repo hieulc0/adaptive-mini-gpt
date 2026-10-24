@@ -259,3 +259,10 @@ Milestone M73 introduces `data/specs/m73_cost_efficient_memory_spec.json`, forma
 - Multi-world relational tasks including modular arithmetic congruence (`MOD_3_CONGRUENCE`, `MOD_5_CONGRUENCE`) and relational subsumption alongside graph traversals.
 - Exact split isolation and disjoint relation keys across train, development, and sealed test partitions.
 - Prompt-observable relation tokens enabling `SELECTIVE_NO_EXTRA_PROBES` to perform zero-query routing without extra observation queries.
+
+
+### 6. Milestone M74 High-Information Procedural Specification
+Milestone M74 introduces `data/specs/m74_high_information_spec.json`, formalizing:
+- 5 deterministic procedural sequence transformation families over a controlled 16-symbol discrete alphabet (`CAESAR_SHIFT_MOD3`, `CAESAR_SHIFT_MOD5`, `AFFINE_TRANSFORM`, `COMPLEMENT_REFLECT`, `NONLINEAR_SBOX`).
+- Multi-token sequence Exact Match evaluation with combinatorial random chance $\le 0.024\%$.
+- Strict partition isolation enforcing disjoint symbol combinations across `train`, `dev`, `qualification`, and `sealed_test` sets.

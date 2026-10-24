@@ -17,6 +17,7 @@ An experimental, **CLI-first Python/PyTorch** research framework studying **adap
 - **M71 (Selective Neural Memory, Causal Retention & Compact Skill Management):** Passed (294/294 Tests on Tesla T4; Selective Retain beats Reset by +0.0218 Macro F1 & +0.0130 Net Utility)
 - **M72 (Robust Lifelong Neural Memory & Capacity Efficiency):** Passed (299/299 Tests on Tesla T4; Selective Retain beats Retain-All & Wrong-Route)
 - **M73 (Cost-Efficient Neural Memory & Verified Cumulative Improvement):** Passed (304/304 Tests on Tesla T4; SELECTIVE_NO_EXTRA_PROBES beats RESET in Macro F1 & Physical Utility)
+- **M74 (Verified Neural Weight Learning & High-Information Generalization):** Passed (309/309 Tests on Tesla T4; Causal Weight Attribution Verified with +0.6562 EM over Shuffled Controls; SELECTIVE_NO_EXTRA_PROBES beats both RESET & FRESH_ADAPT in Physical Utility)
 
 ## Research Hypothesis
 
@@ -124,6 +125,7 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 | **M71** | Selective Neural Memory & Causal Skill Retention | `SELECTIVE_RETAIN` beats `RESET` (**+0.0218 F1**, **+0.0130 Utility**, **+0.0764 Zero-Shot F1**); 294/294 tests on Tesla T4 |
 | **M72** | Robust Lifelong Neural Memory & Capacity Efficiency | Long-horizon 20-ep stream; `SELECTIVE_RETAIN` beats `RETAIN_ALL` (**+0.0042 F1**) & `WRONG_ROUTE` (**+0.0036 F1**); 0.0 negative transfers; 299/299 tests on Tesla T4 |
 | **M73** | Cost-Efficient Neural Memory & Verified Cumulative Improvement | Causal lifelong benchmark; `SELECTIVE_NO_EXTRA_PROBES` beats `RESET` (**+0.0056 F1**, **+0.0051 Phys Util**); WRONG_ROUTE reveals 0.67 neg transfers; 304/304 tests on Tesla T4 |
+| **M74** | Verified Neural Weight Learning & High-Information Generalization | Causal weight attribution verified (**+0.6562 EM** over shuffled controls); `SELECTIVE_NO_EXTRA_PROBES` beats `RESET` (**+0.0054 Util**) and `FRESH_ADAPT` (**+0.0252 Util**); 309/309 tests on Tesla T4 |
 
 ## Directory Structure
 

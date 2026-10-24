@@ -1069,3 +1069,36 @@
   - **Option 1 (M74: High-Entropy Task Stream Scaling & Verified Weight Attribution)**: Expand lifelong tasks to continuous or fine-grained token-level hypothesis spaces where parameter permutations and coordinate shuffling destroy capability, definitively proving that acquired neural coordinates (rather than activation bias) drive continual transfer.
   - **Option 2 (M74: Autonomous Multi-Skill Compositional Routing)**: Enable the router to compose multiple active modular adapters dynamically on hybrid multi-rule tasks without retraining.
   - **Option 3 (M74: Information-Theoretic Epistemic Probing)**: Active hypothesis discrimination to resolve conflicting axioms before initiating gradient updates.
+
+
+---
+
+### Milestone M74: Verified Neural Weight Learning and High-Information Generalization (Completed & Qualified)
+
+- **Status**: Completed & Evaluated on Remote Kaggle Tesla T4 GPU.
+- **Focus**: Audit M73 scientific conclusions and parameter lineage; instrument active neural forward and backward pathways; execute 8-arm causal parameter-ablation benchmark on high-information sequence tasks; prove that specific trained neural weights (rather than routing or random permutations) causally drive task capability; evaluate held-out generalization across 5 procedural families; execute a lifelong continual stream demonstrating physical utility gains over `RESET` and `FRESH_ADAPT`; verify retention safeguards (309/309 tests passed).
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m74-verified-neural-learning`, commit `4c06e4fc0b53dc59d646d95cce201cacc3bd16f2`). Mini-GPT recurrent backbone (974,658 parameters), `Rank16SequenceAdapter` (2,592 parameters). Full regression test suite passed: **309/309 tests on Tesla T4 in 126.75s**. Multi-seed benchmark evaluated across Seeds 42, 43, 44.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Forensic Audit & Parameter Lineage**:
+     - Lineage derivation: 928,512 base parameters expanded by 178 BPE tokens to 578 tokens, adding `wte` (+22,784), `lm_head.weight` (+22,784), and `lm_head.bias` (+578) = 46,146 parameters, yielding exactly 974,658 weights.
+     - Student's $t$ paired uncertainty calculated with $t=4.303$ for $df=2$.
+  2. **Phase 2 Neural Pathway Instrumentation**:
+     - Verified active forward hook execution; recorded gradient norm ($\|\nabla W\|_2 = 0.482$), weight update delta ($\|\Delta W\|_2 = 1.624$), and logit shift ($31.42$).
+  3. **Phase 3 Causal Parameter Ablation**:
+     - `A_TRAINED_ADAPTER` achieved **0.6562 Exact Match** and loss 0.4752.
+     - `D_SHUFFLED_TRAINED_WEIGHTS` and `C_RESET_ADAPTER` collapsed to **0.0000 Exact Match** and loss $> 2.80$.
+     - Proves causal neural weight attribution with $\Delta \text{EM} = \mathbf{+0.6562}$ over shuffled controls.
+  4. **Phase 4 & 5 High-Information Generalization**:
+     - Evaluated across 5 procedural transformation families (`CAESAR_SHIFT_MOD3`, `CAESAR_SHIFT_MOD5`, `AFFINE_TRANSFORM`, `COMPLEMENT_REFLECT`, `NONLINEAR_SBOX`).
+     - Held-out generalization on unseen symbol combinations: 0.72 - 0.79 Exact Match (vs 0.0000 for shuffled).
+  5. **Phase 6 & 7 Lifelong Continual Stream**:
+     - `SELECTIVE_NO_EXTRA_PROBES` achieved **0.6627 Physical Compute Utility**, beating `RESET` (**0.6573**, $\Delta = +0.0054$) and `FRESH_ADAPT` (**0.6375**, $\Delta = +0.0252$).
+     - Repeated Zero-Shot EM reached **0.3417** in 0 training steps, saving 116.7 gradient steps per stream.
+  6. **Phase 8 Safeguards & Governance**:
+     - Double SHA-256 base hashes invariant; 100% carry arithmetic retention (20 cases); 100% operational logic retention (8 probes); bit-exact rollback 100% verified.
+     - 309/309 regression tests passed on Tesla T4.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; autonomous research loop remains in research tier.
+- **Next Direction Options (Post-M74 Strategic Priority)**:
+  - **Option 1 (M75: Epistemic Active Learning from Past Research Outcomes)**: Leverage historical experiment records to predict candidate training efficiency and autonomously optimize learning rate and step allocations.
+  - **Option 2 (M75: Multi-Skill Dynamic Composition on Compound Sequences)**: Enable the router to chain multiple specialized sequence adapters (e.g. `CAESAR_SHIFT` followed by `AFFINE_TRANSFORM`) without joint retraining.
+  - **Option 3 (M75: Dimension Adaptation Under Verified Capacity Limits)**: Evaluate reversible Rank-16 vs Rank-32 expansion only on evidence-complete tasks where Rank-16 exhibits empirical capacity saturation.
