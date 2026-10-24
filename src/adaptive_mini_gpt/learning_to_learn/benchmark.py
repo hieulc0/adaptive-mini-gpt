@@ -37,6 +37,7 @@ from adaptive_mini_gpt.learning_to_learn.learning_to_learn_engine import (
 from adaptive_mini_gpt.learning_to_learn.retention_auditor import RetentionAuditor
 from adaptive_mini_gpt.learning_to_learn.statistics import compute_paired_t_test
 from adaptive_mini_gpt.learning_to_learn.task_curriculum import (
+    CurriculumExample,
     CurriculumFamily,
     CurriculumTaskGenerator,
     apply_curriculum_rule,
@@ -228,19 +229,34 @@ class M81LearningToLearnBenchmark:
             # Phase 4: Compound Skill Composition
             # Stage 1: T1 Affine (3s + 5) -> Stage 2: Target Acquired (7s + 3)
             logger.info("Evaluating Compound Skill Composition on Seed %d...", seed)
-            comp_examples = task_gen.generate_task(
+            comp_base_ds = task_gen.generate_task(
                 task_id=f"compound_eval_s{seed}",
-                family=CurriculumFamily.COMPOSITION,
-                rule_instance={"a": 3, "b": 5, "mask": 6, "offset": 2},
+                family=CurriculumFamily.ARITHMETIC,
+                rule_instance={"a": 3, "b": 5},
                 rule_instance_id="COMPOUND_T1_THEN_TARGET",
                 seed=seed + 200,
-            ).sealed_test_examples
+            )
 
             def s1_func(seq: tuple[int, ...]) -> tuple[int, ...]:
-                return apply_curriculum_rule(CurriculumFamily.ARITHMETIC, {"a": 3, "b": 5}, seq, 16)
+                return tuple((3 * s + 5) % 16 for s in seq)
+
+            def s2_func(seq: tuple[int, ...]) -> tuple[int, ...]:
+                return tuple((7 * s + 3) % 16 for s in seq)
+
+            comp_examples = [
+                CurriculumExample(
+                    example_id=f"comp_{i}",
+                    family=CurriculumFamily.COMPOSITION,
+                    rule_instance_id="COMPOUND_T1_THEN_TARGET",
+                    input_tokens=ex.input_tokens,
+                    target_tokens=s2_func(s1_func(ex.input_tokens)),
+                    input_text=ex.input_text,
+                    target_text=" ".join(f"S{s}" for s in s2_func(s1_func(ex.input_tokens))),
+                )
+                for i, ex in enumerate(comp_base_ds.sealed_test_examples)
+            ]
 
             def feat_func(seqs: list[tuple[int, ...]]) -> torch.Tensor:
-                from adaptive_mini_gpt.learning_to_learn.task_curriculum import CurriculumExample
                 dummy_exs = [
                     CurriculumExample(
                         example_id=f"d_{i}",
