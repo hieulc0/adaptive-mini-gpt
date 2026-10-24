@@ -20,6 +20,7 @@ import logging
 import os
 import sys
 import time
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
@@ -27,7 +28,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from adaptive_mini_gpt.model import MiniGPT
+from adaptive_mini_gpt.data.bpe_scaling import expand_model_vocabulary, train_scaled_bpe_tokenizer
+from adaptive_mini_gpt.data.language_corpus import PRETRAIN_PROSE_CORPUS
+from adaptive_mini_gpt.model.config import ModelConfig
+from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.modular_skill_learning import (
     ControlledSkillAcquisitionEngine,
     EpistemicUncertaintyDiagnostic,
@@ -53,6 +57,76 @@ from adaptive_mini_gpt.training.checkpoint import CheckpointManager
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("m66_benchmark")
+
+
+def build_m66_tokenizer(target_vocab_size: int = 1024) -> Any:
+    """Build BPE tokenizer covering all relational domains including M66 new vocabularies."""
+    domain_texts = [
+        "GeneMasterA activates_transcription_of OperonUnitB PromoterRegionC RnaPolymeraseD ExonCodingE ProteinProductF. ",
+        "MeshNodeA1 replicates_state_to MeshNodeA2 MeshNodeA3 MeshNodeB1 MeshNodeB2 MeshNodeB3. ",
+        "ComponentStageC1 feeds_downstream_stage_to AssemblyUnitA2 SubsystemModuleS3 CalibrationRigR4 IntegrationBayI5 AvionicsHousingH6 PropulsionCouplerP7 OrbitalPayloadO8. ",
+        "ClusterRootR0 delegates_workload_to SubClusterA1 SubClusterB2 SubClusterC3 LeafWorkerA11 LeafWorkerA12 LeafWorkerB21 LeafWorkerC31. ",
+        "JuniorAnalystJ1 reports_transitively_to SeniorAssociateS2 TeamLeadT3 EngineeringDirectorD4 VicePresidentV5 ChiefExecutiveC6. ",
+        "CoreSecurityNode1 in_same_security_zone CoreSecurityNode2 CoreSecurityNode3 CoreSecurityNode4 PeripheralSensorNode5 IsolatedGatewayNode6. ",
+        "StateAlpha1 holds_mutual_pact_with StateBeta2 StateGamma3 StateDelta4 StateEpsilon5 StateZeta6. ",
+        "AeroModuleM0 assembles_into_subsystem AeroModuleM1 AeroModuleM2 AeroModuleM3 AeroModuleM4 AeroModuleM5 AeroModuleM6 AeroModuleM7 AeroModuleM8 AeroModuleM9. ",
+        "GatewayGW routes_traffic_payload_to IngressRouterIR AuthSvcA1 BillingSvcB2 CatalogSvcC3 DbWorkerD1 DbWorkerD2 CacheWorkerC1 QueueWorkerQ1 AuditWorkerA2. ",
+        "NationN0 ratifies_bilateral_treaty_with NationN1 NationN2 NationN3 NationN4 NationN5 NationN6 NationN7. ",
+        "ProteinP0 catalyzes_phosphorylation_of ProteinP1 ProteinP2 ProteinP3 ProteinP4 ProteinP5 ProteinP6 ProteinP7. ",
+        "LogisticsHubH0 forwards_container_consignment_to LogisticsHubH1 LogisticsHubH2 LogisticsHubH3 LogisticsHubH4 LogisticsHubH5 LogisticsHubH6 LogisticsHubH7. ",
+        "QubitStateQ0 teleports_quantum_state_to QubitStateQ1 QubitStateQ2 QubitStateQ3 QubitStateQ4 QubitStateQ5 QubitStateQ6 QubitStateQ7 QubitStateQ8 QubitStateQ9. ",
+        "PrecursorEnzymeE0 catalyzes_metabolic_cascade_to KinasePathwayK1 KinasePathwayK2 KinasePathwayK3 MetaboliteM11 MetaboliteM12 MetaboliteM21 MetaboliteM22 MetaboliteM31 MetaboliteM32. ",
+        "ValidatorAuthV0 executes_cross_shard_transaction_to EscrowContractE1 SettlementRelayS2 ArbiterChamberA3 ClearingHouseC4 LiquidityPoolL5 CollateralVaultV6 AuditorRegistryR7. ",
+        "ChromatinLocusL0 propagates_histone_acetylation_to ChromatinLocusL1 ChromatinLocusL2 ChromatinLocusL3 ChromatinLocusL4 ChromatinLocusL5 ChromatinLocusL6 ChromatinLocusL7. ",
+        "TerminalStationT0 dispatches_high_speed_consist_to TerminalStationT1 TerminalStationT2 TerminalStationT3 TerminalStationT4 TerminalStationT5 TerminalStationT6 TerminalStationT7. ",
+        "Evidence: [QubitStateQ0->QubitStateQ1, NOT(QubitStateQ1->QubitStateQ0), UNOBS(UnobservedEntity0)]. Does QubitStateQ0 teleports_quantum_state_to QubitStateQ1? ",
+    ]
+    all_prose = " ".join(PRETRAIN_PROSE_CORPUS) if isinstance(PRETRAIN_PROSE_CORPUS, list) else str(PRETRAIN_PROSE_CORPUS)
+    training_data = all_prose + "\n" + "\n".join(domain_texts)
+    return train_scaled_bpe_tokenizer(training_data, target_vocab_size=target_vocab_size)
+
+
+def load_base_model_and_tokenizer(
+    checkpoint_dir: Path,
+    seed: int,
+    device: torch.device,
+) -> tuple[MiniGPT, Any]:
+    """Load canonical M18 base checkpoint, expand vocabulary with 1024-BPE tokenizer, and return (model, tokenizer)."""
+    relative_path = Path(f"seed_{seed}/base_pretrain/best.pt")
+    full_path = checkpoint_dir / relative_path
+
+    tokenizer = build_m66_tokenizer(target_vocab_size=1024)
+
+    if full_path.exists():
+        logger.info("Loading pre-trained base model from %s", full_path)
+        raw_ckpt = CheckpointManager.load_raw_checkpoint(full_path)
+        base_tok = CheckpointManager.load_tokenizer(raw_ckpt)
+        state_dict = raw_ckpt.get("model_state_dict", raw_ckpt.get("model_state"))
+        cfg_dict = raw_ckpt["model_config"]
+        cfg = ModelConfig(**cfg_dict) if isinstance(cfg_dict, dict) else cfg_dict
+        base_model_orig = MiniGPT(cfg)
+        base_model_orig.load_state_dict(state_dict)
+
+        model = expand_model_vocabulary(
+            model=base_model_orig,
+            old_tokenizer=base_tok,
+            new_tokenizer=tokenizer,
+        ).to(device)
+    else:
+        logger.warning("Checkpoint %s not found. Initializing fresh model for benchmark.", full_path)
+        cfg = ModelConfig(
+            vocab_size=tokenizer.vocab_size,
+            d_model=128,
+            n_layers=4,
+            n_heads=4,
+            d_ff=256,
+            context_length=256,
+        )
+        model = MiniGPT(cfg).to(device)
+
+    model.tokenizer = tokenizer
+    model.eval()
+    return model, tokenizer
 
 
 def train_source_skill_adapter(
@@ -145,11 +219,9 @@ def run_seed_benchmark(
     logger.info(f"Starting M66 Modular Skill Benchmark for Seed {seed}")
     logger.info(f"==================================================")
 
-    # Load canonical M18 base checkpoint
+    # Load canonical M18 base checkpoint with 1024-BPE tokenizer
     ckpt_path = checkpoint_dir / f"seed_{seed}/base_pretrain/best.pt"
-    raw_ckpt = CheckpointManager.load_raw_checkpoint(ckpt_path)
-    model = CheckpointManager.load_model(raw_ckpt).to(device)
-    model.eval()
+    model, tokenizer = load_base_model_and_tokenizer(checkpoint_dir, seed, device)
 
     # Freeze base model parameters
     for p in model.parameters():
