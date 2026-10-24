@@ -210,3 +210,45 @@ print("Dataset verified successfully on Colab:", manifest.dataset_id)
 - **Never commit Kaggle API tokens** or Colab secret keys to Git.
 - Use Colab's native Secrets manager (`userdata.get('KAGGLE_KEY')`) for private dataset downloads.
 - Training outputs and experiment logs can optionally be written to `/content/drive/MyDrive/amg_runs`, but raw training data must remain on runtime-local disk for fast throughput.
+
+
+---
+
+## 7. Milestone M71 Packaging Allowlist & Security Enhancements
+
+Milestone M71 introduced explicit security and isolation audits for dataset generation and packaging:
+
+### 1. Strict File Extension Allowlist
+To prevent unintended binary, code, or secret leakage, dataset packaging enforces an explicit allowlist in `src/adaptive_mini_gpt/data_pipeline/packaging.py`:
+```python
+ALLOWED_DATASET_EXTENSIONS = {
+    ".json",
+    ".jsonl",
+    ".txt",
+    ".csv",
+    ".tsv",
+    ".parquet",
+}
+```
+Any unlisted file extensions encountered during dataset packaging raise a security exception and abort packaging immediately.
+
+### 2. Automated Content Security & Credential Scanning
+Before bundling or uploading, each file is scanned via `audit_file_content_security()`. Any occurrence of pattern fingerprints (e.g., `api_key`, `kaggle_key`, `secret_key`, `BEGIN PRIVATE KEY`, `hf_token`) immediately triggers an error, preventing confidential keys or tokens from being committed or uploaded.
+
+### 3. Cross-Split World Isolation Verification
+The dataset manifest verifier (`verify_dataset_integrity`) now audits inter-partition isolation to ensure disjoint world seeds and prevent leaking graph templates between training and sealed evaluation worlds:
+```python
+# Verified automatically by verify_dataset_integrity(manifest, dataset_dir)
+# Checks:
+# 1. SHA-256 partition digests
+# 2. Example counts and class distributions
+# 3. Disjoint question inputs between train, dev, and sealed_test
+# 4. Independent world instance segregation
+```
+
+### 4. Cross-Platform Colab Smoke Test
+A standalone validation script is provided to verify dataset loading in Google Colab or remote GPU environments:
+```bash
+uv run python scripts/smoke_test_colab_data_loading.py
+```
+This script verifies local synthesis, manifest creation, and `PortableDatasetLoader` resolution in both clean and fallback environments.

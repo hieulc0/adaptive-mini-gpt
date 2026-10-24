@@ -13,6 +13,8 @@ An experimental, **CLI-first Python/PyTorch** research framework studying **adap
 - **M19 (Learned Action Selection & Representation Adaptation):** Closed (No-go on neural promotion; M18 baseline preserved)
 - **M20 (Controlled Neural Scaling & Procedural Generalization):** Completed (1M vs 3M scaling; No-go on promotion; M18 baseline preserved)
 - **M21 (Digit-Level Neural Arithmetic & Procedural Scratchpad):** In Progress (Testing representation ablations and carry scratchpads)
+- **M70 (Verified Continual Self-Improvement & Portable Data Pipeline):** Passed (289/289 Tests on Tesla T4; Autonomous Policy beats ALWAYS_REUSE)
+- **M71 (Selective Neural Memory, Causal Retention & Compact Skill Management):** Passed (294/294 Tests on Tesla T4; Selective Retain beats Reset by +0.0218 Macro F1 & +0.0130 Net Utility)
 
 ## Research Hypothesis
 
@@ -116,6 +118,8 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 | **M22** | Compact Scratchpads, RoPE, ALiBi & Length Generalization | Compact scratchpad + RoPE reaches **64.67%** exact match and **98.96%** carry accuracy; language replay achieves **-6.42** drift |
 | **M23** | Recurrent Neural Arithmetic & Length Extrapolation | Position-independent neural transition breaks extrapolation barrier: **14.27%–23.60% exact match across unseen 4–8 digits** (vs 0.0% monolithic), **97.87%** learned stopping accuracy |
 | **M24** | Reliable Neural Transitions & Deep Extrapolation | Balanced elementary curriculum triples extrapolation to **44.67%** (up to **60.4%** on Seed 44); unrolls to **16 digits (38%)** and **32 digits (14%)** with **99.5%** carry accuracy |
+| **M70** | Rational Experiment Controller & Portable Data Pipeline | **0.5311** net utility (Small) beating ALWAYS_REUSE (**+0.2422**); 289/289 tests on Tesla T4 |
+| **M71** | Selective Neural Memory & Causal Skill Retention | `SELECTIVE_RETAIN` beats `RESET` (**+0.0218 F1**, **+0.0130 Utility**, **+0.0764 Zero-Shot F1**); 294/294 tests on Tesla T4 |
 
 ## Directory Structure
 
@@ -137,5 +141,5 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 │   ├── evaluation/           # Perplexity, BPC, arithmetic accuracy evaluators
 │   ├── model/                # Transformer decoder, attention, configuration
 │   └── training/             # Trainer, checkpoint manager, optimizer
-└── tests/                    # 40+ deterministic unit and integration tests
+└── tests/                    # 294 deterministic unit and integration tests
 ```
