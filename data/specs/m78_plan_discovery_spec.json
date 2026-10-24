@@ -1,0 +1,47 @@
+{
+  "milestone": "M78",
+  "name": "Reliable Autonomous Neural Plan Discovery",
+  "hypothesis": "Replacing discrete exact-match sequence filtering with normalized sequence log-likelihood S(P) enables reliable neural plan selection (>=70% plan accuracy, >=30% end-to-end exact match) while preserving specificity (>=95% rejection on uncomposable tasks) and reducing false abstention on supported composable tasks (<=30% at N=4), with strictly zero parameter growth and zero compound training steps.",
+  "architectural_principle": "Adaptive Mini-GPT should learn before growing, reuse before learning, and verify before retaining any change.",
+  "parameters": {
+    "core_backbone": 928512,
+    "task_heads": 46146,
+    "expanded_checkpoint_total": 974658,
+    "primitive_adapter_each": 2592,
+    "new_parameters_allocated": 0,
+    "new_training_steps": 0
+  },
+  "scoring_formula": "S(P) = (1/N) * sum_{i=1}^N (1/|y_i|) * sum_{t=1}^{|y_i|} log p_P(y_{i,t} | x_i)",
+  "decision_rules": {
+    "min_log_likelihood": -1.65,
+    "min_evidence_margin": 0.08,
+    "min_token_accuracy": 0.5
+  },
+  "evaluation_design": {
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "composable_tasks_per_seed": 16,
+    "uncomposable_tasks_per_seed": 8,
+    "total_tasks_per_seed": 24,
+    "total_evaluations": 120,
+    "sealed_test_examples_per_task": 48,
+    "statistical_model": "Paired Student-t test (df=4, t_crit=2.776 at 95% two-tailed)"
+  },
+  "success_criteria": {
+    "autonomous_plan_accuracy": ">= 0.70",
+    "autonomous_exact_match": ">= 0.30",
+    "unknown_task_rejection": ">= 0.95",
+    "supported_task_abstention": "<= 0.30",
+    "new_parameters_allocated": "== 0",
+    "new_training_steps": "== 0",
+    "arithmetic_carry_retention": "== 1.0",
+    "operational_logic_retention": "== 1.0",
+    "statistical_superiority_vs_wrong_order": "ci_lower > 0.0",
+    "statistical_superiority_vs_fixed_order": "ci_lower > 0.0"
+  }
+}
