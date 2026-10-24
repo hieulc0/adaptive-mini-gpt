@@ -290,7 +290,16 @@ def run_m77_benchmark_for_seed(
     return {
         "seed": seed,
         "phase1_audit": asdict(audit_report),
-        "phase2_primitives": {k.value: asdict(v) for k, v in primitives.items()},
+        "phase2_primitives": {
+            k.value: {
+                "skill_id": v.skill_id,
+                "exact_match": v.qualification_exact_match,
+                "loss": v.qualification_loss,
+                "hash": v.parameter_hash,
+                "parameters": v.trainable_parameters,
+            }
+            for k, v in primitives.items()
+        },
         "phase3_budget_sweep": budget_sweep_results,
         "phase4_arm_aggregates": arm_aggregates,
         "phase4_task_results": task_level_results,
