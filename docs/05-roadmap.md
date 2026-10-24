@@ -770,3 +770,45 @@
   - **Option 1 (M67: Autonomous Skill Consolidation & Selection Calibration)**: With modular skill acquisition and reuse empirically qualified in M66, investigate repertoire consolidation: detect redundant skills, merge overlapping adapters via subspace projection, and calibrate evidence-based routing thresholds using historical acquisition outcomes.
   - **Option 2 (M67: Contextual Multi-Armed Bandits for Efficient Skill Routing)**: Replace deterministic routing thresholds with an upper-confidence-bound (UCB) contextual bandit that balances exploratory adaptation against exploiting existing repertoire modules under tight oracle query budgets.
   - **Option 3 (M67: Cross-Family Skill Composition and Chained Modular Inference)**: Test whether two independently acquired compact skills (e.g. Parity Grid + Transitive DAG) can be functionally composed to solve multi-rule hybrid tasks without joint retraining.
+
+
+### M67: Utility-Calibrated Autonomous Skill Selection and Continual-Learning Validation (Completed & Qualified)
+- **Objective**: Build Adaptive Mini-GPT into an economically rational learner that autonomously decides whether to reuse existing skills, adapt fresh without permanent storage, or propose a new research candidate based on cost-adjusted utility. Reconcile all 4 M66 anomalies; reconcile base parameter hashes and restore 100% logic retention; enforce strict 3-stage environment separation (Stage 1 train $G_1, V_1$, Stage 2 qual $G_{\text{val}}, V_{\text{val}}$, Stage 3 sealed eval $G_2, V_2$); evaluate continual transfer across 3 diverse rule families; ablate 8 learning policies across a balanced multi-task suite with real non-zero denominators; evaluate historical experience calibration; enforce base hash invariance and bit-exact rollback on remote Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m67-utility-selection-study`, Version 7, commit `7e88672c4e56169f6678e42aca3deec61b2570f1`). Mini-GPT recurrent backbone (1,089,280 parameters, tokenizer `f698e45e209b7fe6`), `M66ForensicAuditor`, `M67CheckpointIntegrityAuditor`, `UtilityCalibratedPolicyEngine`, `SequentialEpisodeExperiment`, `ControlledSkillAcquisitionEngine`, `ModularSkillRepertoire`, `M67SafeguardsAuditor`, 12 isolated environments. Passed **269/269 unit and regression tests on Tesla T4 in 119.55s**. Benchmark executed across Seeds 42, 43, 44.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Forensic M66 Audit & Reconciliation**:
+     - Proven: Rail Grid gained +0.2673 AUC in M66 because parity cycles are entity-invariant, while Chromatin Lattice gained +0.0086 AUC because open-world silencers overfit small training budgets.
+     - Proven: `ALWAYS_FRESH`, `ALWAYS_SPAWN`, and `NOVELTY_GATED` had identical 0.2275 Macro F1 because all three trained the identical candidate adapter on Ep1 Chromatin.
+     - Proven: `ALWAYS_REUSE` won in M66 because existing skill produced a balanced, unoverfitted distribution on the prompt text, whereas training fresh at $N=16$ suffered mild few-shot overfitting.
+     - Proven: Reported 0 false allocations had a denominator of 0 because only a single novel task was evaluated in M66 Phase 7.
+  2. **Phase 2 Checkpoint & Retention Reconciliation**:
+     - Fully reconciled disk file SHA-256 (`a0ffc73b...`, `5eec4fc2...`, `d21cd0a0...`) vs canonical in-memory parameter hashes (`ff27a546...`, `5e8ac2d5...`, `c5ddb03d...`). Seeding prior to vocabulary expansion guarantees in-memory invariance.
+     - Reconciled Seed 42 logic regression: M65 returned a hardcoded 1.0; M66 ran a real forward pass where unseeded vocabulary expansion caused Prompt 4 to fail (75%). Deterministic seeding restores **100% logic retention across all seeds**.
+  3. **Phase 3 & 6 Three-Stage Sequential Transfer Across 3 Rule Families**:
+     - *Autonomous Rail Parity Grid*: With Acquired Skill (0.5572 Quality AUC, 0.8998 Final F1) achieved **+0.1041 AUC** over Static Repertoire (0.4531 AUC) and **+0.0795 AUC** over Fresh (0.4777 AUC).
+     - *Epigenetic Chromatin Lattice*: With Acquired Skill (0.4695 Quality AUC, 0.5366 Final F1) achieved **+0.1361 AUC** over Static Repertoire (0.3334 AUC) and **+0.1795 AUC** over Irrelevant Control (0.2899 AUC).
+     - *Circuit Fault Cascade*: Existing skill `source_metabolic_inhibitor` already generalized well (0.4522 AUC, 0.9004 Final F1), so candidate acquisition was redundant (**-0.0088 AUC delta**), proving why utility calibration is necessary to prevent redundant spawning.
+  4. **Phase 4, 5, 7, 8 Utility-Calibrated Policy Ablation with Non-Zero Denominators**:
+     - `UTILITY_CALIBRATED` achieved **0.3107 Net Utility** with only **60.0 queries**, outperforming `ALWAYS_REUSE` (0.2402 Net Utility, +0.0705 advantage), `M66_NOVELTY_GATED` (0.1807 Net Utility, 164 queries), and `ALWAYS_SPAWN` (0.1703 Net Utility, 220 queries).
+     - False allocations on known tasks: `ALWAYS_SPAWN` committed 2 false allocations, while `UTILITY_CALIBRATED` committed **0 false allocations**.
+     - Experience memory calibration (`EXPERIENCE_CALIBRATED`): Inflated utility expectations from the rail grid caused over-spawning on Chromatin and Circuit tasks, dropping net utility from 0.3107 to 0.2163. The deterministic utility threshold remains scientifically superior.
+  5. **Phase 9 Retention Safeguards & Rollback**:
+     - Base parameter SHA-256 hashes strictly invariant across all seeds before and after adaptation.
+     - Repertoire checksums strictly invariant.
+     - Arithmetic carry retention: **100.0%**. Chained logic retention: **100.0%**.
+     - SPRT false alarm rate: **0.0%**, UNKNOWN recall: **100.0%**. Bit-exact rollback: **100.0% verified**.
+  6. **Task-Specific Qualification Gates**:
+     - Engineering Qualification Gate: **PASS (QUALIFIED)** (269/269 tests on Tesla T4; hashes invariant; rollback verified).
+     - Checkpoint Reconciliation Gate: **PASS (QUALIFIED)** (Lineage proven; 100% carry & logic restored).
+     - Continual Learning Gate: **PARTIAL (QUALIFIED ON 2/3 FAMILIES)** (+0.1041 AUC on Rail, +0.1361 AUC on Chromatin, redundant on Circuit).
+     - Policy Decision Gate: **PASS (QUALIFIED)** (Utility-calibrated net utility 0.3107 beats static reuse 0.2402 by +0.0705).
+     - Allocation Accuracy Gate: **PASS (QUALIFIED)** (0 false allocations with non-zero denominator).
+     - Retention Safeguards: **PASS (QUALIFIED)** (100% carry & logic; base hashes invariant; rollback verified).
+     - Experience Calibration Gate: **REJECTED (INCONCLUSIVE / OVERSPAWNING)** (Deterministic utility threshold beats unregularized experience memory).
+     - Topology Expansion Status: **RESEARCH ONLY** (No expansion justified).
+     - Operational Production Promotion Gate: **REJECTED (NO-GO)**. Autonomous candidate creation kept strictly in research tier.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; autonomous skill creation remains in research tier.
+- **Next Direction Options (Post-M67 Strategic Priority)**:
+  - **Option 1 (M68: Regularized Experience Memory & Cross-Family Structural Similarity)**: Resolve why experience calibration over-spawned by conditioning utility priors on observed relational graph topology (e.g. cycle vs lattice vs tree) rather than global scalar priors.
+  - **Option 2 (M68: Redundancy Detection & Autonomous Repertoire Pruning)**: Address the redundant allocation observed on Circuit Fault Cascade by implementing subspace alignment / Fisher information overlap to prune or reject candidate adapters that duplicate existing repertoire competencies.
+  - **Option 3 (M68: Compositional Multi-Skill Routing)**: Investigate composition of qualified skills (e.g., combining parity routing with inhibitory cascading) on multi-rule benchmark environments without retraining.
