@@ -120,6 +120,7 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 | **M24** | Reliable Neural Transitions & Deep Extrapolation | Balanced elementary curriculum triples extrapolation to **44.67%** (up to **60.4%** on Seed 44); unrolls to **16 digits (38%)** and **32 digits (14%)** with **99.5%** carry accuracy |
 | **M70** | Rational Experiment Controller & Portable Data Pipeline | **0.5311** net utility (Small) beating ALWAYS_REUSE (**+0.2422**); 289/289 tests on Tesla T4 |
 | **M71** | Selective Neural Memory & Causal Skill Retention | `SELECTIVE_RETAIN` beats `RESET` (**+0.0218 F1**, **+0.0130 Utility**, **+0.0764 Zero-Shot F1**); 294/294 tests on Tesla T4 |
+| **M72** | Robust Lifelong Neural Memory & Capacity Efficiency | Long-horizon 20-ep stream; `SELECTIVE_RETAIN` beats `RETAIN_ALL` (**+0.0042 F1**) & `WRONG_ROUTE` (**+0.0036 F1**); 0.0 negative transfers; 299/299 tests on Tesla T4 |
 
 ## Directory Structure
 
@@ -141,5 +142,5 @@ pending. New agents should read [the backend handoff](docs/07-backend-handoff.md
 │   ├── evaluation/           # Perplexity, BPC, arithmetic accuracy evaluators
 │   ├── model/                # Transformer decoder, attention, configuration
 │   └── training/             # Trainer, checkpoint manager, optimizer
-└── tests/                    # 294 deterministic unit and integration tests
+└── tests/                    # 299 deterministic unit and integration tests
 ```

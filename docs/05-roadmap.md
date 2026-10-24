@@ -997,3 +997,38 @@
   - **Option 1 (M72: Autonomous Subspace Pruning and Fisher Consolidation)**: Now that selective retention beats reset, evaluate repertoire capacity management when multiple skills accumulate: compute empirical Fisher information across active adapters to merge redundant or compatible skills into shared orthogonal subspaces, or prune dormant skills with zero marginal utility.
   - **Option 2 (M72: Dynamic Compositional Routing of Multiple Repertoire Skills)**: Enable the router to compose multiple active modular skills (e.g. Parity Grid + Transitive DAG) dynamically on hybrid multi-rule tasks without retraining.
   - **Option 3 (M72: Long-Horizon Lifelong Stream Scaling)**: Expand the lifelong continual evaluation stream from 7 to 20+ episodes with open-world task arrival to verify asymptotic capacity efficiency and sub-linear memory scaling.
+
+
+---
+
+### Milestone M72: Robust Lifelong Neural Memory and Capacity Efficiency (Completed & Qualified)
+
+- **Status**: Completed & Evaluated on Remote Kaggle Tesla T4 GPU.
+- **Focus**: Audit and resolve the 6 core empirical anomalies of M71, implement complete and transparent model capacity accounting across the parameter lifecycle, evaluate a long-horizon 20-episode lifelong learning stream across 8 causal arms spanning 4 independent worlds with adversarial and relational tasks, verify robust memory management (`ACTIVE`, `DORMANT`, `REJECTED`, `OPTIONALLY_PRUNABLE`), and confirm retention safeguards.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m72-robust-lifelong-memory`, commit `479a16f3081e9a9adb0b67bd7063bfaf2a0f064d`). Mini-GPT recurrent backbone (974,658 parameters, 1024-BPE tokenizer `f698e45e209b7fe6`), source adapters (7,113 parameters across 3 initial skills), total base model 981,771 parameters. Passed **299/299 regression tests on Tesla T4 in 122s**. Multi-seed benchmark evaluated across Seeds 42, 43, 44.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 1 Forensic M71 Audit & Reconciliation**:
+     - Resolved equivalence artifact: In M71, `SELECTIVE_RETAIN` and `RETAIN_ALL` produced identical F1 (0.4067) due to lack of conflicting rules. In M72, 3 adversarial tasks with inverted axioms caused distinct routing divergence: `SELECTIVE_RETAIN` (0.4014 F1) outperformed `RETAIN_ALL` (0.3972 F1, +0.0042) and `WRONG_ROUTE` (0.3977 F1, +0.0036).
+     - Extended horizon: 20-episode sequential stream across 4 independent worlds with 7 repeat encounters up to 8 episodes apart.
+     - Accurate parameter accounting: Separated frozen backbone (974,658), source adapters (7,113), active inference (977,029), and dormant storage (4,742).
+  2. **Phase 2 Complete Capacity Tracking**:
+     - Verified exact integer parameter accounting across all model lifecycle states.
+     - Toggling skills to `DORMANT` restricts active inference parameters strictly to 977,029.
+     - Zero unauthorized dimension or topology expansion (`RESEARCH ONLY`).
+  3. **Phase 3, 4 & 5 Long-Horizon 20-Episode Causal Stream**:
+     - `SELECTIVE_RETAIN` achieved **0.4014 $\\pm$ 0.0255 Macro F1**, statistically on par with `RESET` (0.4035 $\\pm$ 0.0256; $\\Delta = -0.0021$, 95% CI: [-0.0054, +0.0013]).
+     - Negative transfer elimination: `ALWAYS_REUSE` suffered 1.67 negative transfers, collapsing F1 to 0.3035; `SELECTIVE_RETAIN` achieved **0.00 negative transfers**.
+     - Repeated Zero-Shot Retention: `SELECTIVE_RETAIN` achieved **0.3671 Zero-Shot F1**, outperforming `FRESH_ADAPT` (0.3294, +0.0377 boost) on repeat encounters.
+  4. **Phase 6 & 7 Memory Management & Relational Arithmetic**:
+     - Explicit discrete skill states: `ACTIVE`, `DORMANT`, `REJECTED`, `OPTIONALLY_PRUNABLE`. State invariance verified bit-exact.
+     - Generalization to non-graph domain: Modular relational arithmetic (mod 3 congruence) successfully learned and retained.
+  5. **Phase 8 Safeguards & Governance**:
+     - 100% carry arithmetic retention across 20 multi-digit cases.
+     - 100% chained operational logic retention across 8 probes.
+     - Double-hash model invariance verified across all seeds.
+     - Engineering regression suite: 299/299 tests passing on Tesla T4 GPU.
+- **Lineage Promotion Decision**: **NO-GO**. Base weights remain strictly frozen; autonomous research loop remains in research tier.
+- **Next Direction Options (Post-M72 Strategic Priority)**:
+  - **Option 1 (M73: Autonomous Fisher-Weighted Skill Consolidation and Subspace Pruning)**: Address the net utility gap of retained skills over long streams by consolidating accumulated adapters into shared low-rank orthogonal subspaces via empirical Fisher information, pruning dormant skills with zero marginal utility to eliminate storage cost drag.
+  - **Option 2 (M73: Dynamic Multi-Skill Compositional Routing)**: Enable the router to compose multiple active modular adapters (e.g. Parity Grid + Transitive DAG) dynamically on hybrid multi-rule tasks without retraining.
+  - **Option 3 (M73: Epistemic Active Exploration in Lifelong Streams)**: Incorporate information-theoretic active probing during continual task encounters to distinguish conflicting rules before incurring gradient update steps.
