@@ -187,7 +187,7 @@ def main() -> None:
     ]:
         rec = PrimitiveSkillManager.train_and_qualify_primitive(
             model=model_0,
-            rule_family=p_type.value,
+            rule_family=p_type,
             seed=seed_0,
             device=device,
             steps=40,
