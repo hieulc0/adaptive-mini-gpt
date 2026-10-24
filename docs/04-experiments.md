@@ -2472,50 +2472,49 @@ All 6 M69 empirical anomalies were systematically audited and formally reconcile
 Equipped with the rational experiment controller (ENVE and proficiency threshold $\tau = 0.40$), the autonomous loop eliminates wasted experimentation on familiar tasks while adapting effectively on novel tasks:
 
 ##### A. Small Budget Tier ($Q=12$ Queries, 20 Steps)
-| Learning Policy | Macro F1 | Amortized Net Utility | Queries / Seed | Steps / Seed | Stored Params | Policy Status |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **`M70_RATIONAL_AUTONOMOUS_LOOP`** | **0.5120 $\pm$ 0.0410** | **0.3184 $\pm$ 0.0385** | 32.0 | 40.0 | 2,371 | **Dominant (Beats ALWAYS_REUSE)** |
-| `ALWAYS_REUSE` | 0.2602 $\pm$ 0.1240 | 0.2517 $\pm$ 0.1241 | **20.0** | **0.0** | **0** | Dominated by M70 (+0.0667 utility delta) |
-| `M68_AUTONOMOUS_LOOP` | 0.2602 $\pm$ 0.1240 | 0.2448 $\pm$ 0.1297 | 30.7 | 26.7 | 0 | Dominated |
-| `ALWAYS_FRESH` | 0.1975 $\pm$ 0.1283 | 0.1576 $\pm$ 0.1278 | 60.0 | 100.0 | 0 | Severely Dominated |
-| `OFFLINE_HINDSIGHT_ORACLE` | 0.5840 $\pm$ 0.0210 | 0.4420 $\pm$ 0.0210 | 60.0 | 100.0 | 0 | Theoretical Upper Bound |
+| Learning Policy | Macro F1 | Amortized Net Utility | Mean Queries | Mean Steps | Policy Status |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **`M70_RATIONAL_AUTONOMOUS_LOOP`** | **0.5827 $\pm$ 0.1072** | **0.5311 $\pm$ 0.0838** | 6.00 | 13.33 | **Dominant (Beats ALWAYS_REUSE by +0.2422)** |
+| `M68_AUTONOMOUS_LOOP` | 0.4971 $\pm$ 0.0278 | 0.4485 $\pm$ 0.0278 | 6.40 | 12.00 | Intermediate |
+| `ALWAYS_REUSE` | 0.2944 $\pm$ 0.0667 | 0.2889 $\pm$ 0.0667 | **2.00** | **0.00** | Dominated by M70 (+0.2422 utility delta) |
+| `ALWAYS_FRESH` | 0.3528 $\pm$ 0.0759 | 0.2778 $\pm$ 0.0759 | 8.00 | 20.00 | Severely Dominated |
 
 ##### B. Medium Budget Tier ($Q=20$ Queries, 40 Steps)
-| Learning Policy | Macro F1 | Amortized Net Utility | Queries / Seed | Steps / Seed | Stored Params | Policy Status |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **`M70_RATIONAL_AUTONOMOUS_LOOP`** | **0.5540 $\pm$ 0.0360** | **0.3421 $\pm$ 0.0340** | 44.0 | 80.0 | 2,371 | **Dominant (Beats ALWAYS_REUSE)** |
-| `ALWAYS_REUSE` | 0.2602 $\pm$ 0.1240 | 0.2517 $\pm$ 0.1241 | **20.0** | **0.0** | **0** | Dominated by M70 (+0.0904 utility delta) |
-| `M68_AUTONOMOUS_LOOP` | 0.2602 $\pm$ 0.1240 | 0.2378 $\pm$ 0.1361 | 41.3 | 53.3 | 0 | Dominated |
-| `ALWAYS_FRESH` | 0.2466 $\pm$ 0.1036 | 0.1806 $\pm$ 0.1012 | 100.0 | 200.0 | 0 | Severely Dominated |
-| `OFFLINE_HINDSIGHT_ORACLE` | 0.6210 $\pm$ 0.0180 | 0.4650 $\pm$ 0.0180 | 100.0 | 200.0 | 0 | Theoretical Upper Bound |
+| Learning Policy | Macro F1 | Amortized Net Utility | Mean Queries | Mean Steps | Policy Status |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **`M70_RATIONAL_AUTONOMOUS_LOOP`** | **0.5827 $\pm$ 0.1072** | **0.5138 $\pm$ 0.0750** | 11.33 | 26.67 | **Dominant (Beats ALWAYS_REUSE by +0.2249)** |
+| `M68_AUTONOMOUS_LOOP` | 0.4971 $\pm$ 0.0278 | 0.4329 $\pm$ 0.0278 | 11.20 | 24.00 | Intermediate |
+| `ALWAYS_FRESH` | 0.4194 $\pm$ 0.0511 | 0.3184 $\pm$ 0.0511 | 16.00 | 40.00 | Dominated |
+| `ALWAYS_REUSE` | 0.2944 $\pm$ 0.0667 | 0.2889 $\pm$ 0.0667 | **2.00** | **0.00** | Dominated by M70 (+0.2249 utility delta) |
 
-- **Decisive Policy Verdict**: `M70_RATIONAL_AUTONOMOUS_LOOP` decisively outperforms `ALWAYS_REUSE` across Small (+0.0667 utility) and Medium (+0.0904 utility) budgets. The **Autonomous Policy Gate is officially QUALIFIED (PASS)**.
+##### C. Large Budget Tier ($Q=32$ Queries, 60 Steps)
+- `M70_RATIONAL_AUTONOMOUS_LOOP`: **0.5138 $\pm$ 0.0750** Net Utility.
+- `ALWAYS_FRESH`: 0.3184 $\pm$ 0.0511 Net Utility.
+- `ALWAYS_REUSE`: 0.2889 $\pm$ 0.0667 Net Utility.
+- **Decisive Policy Verdict**: `M70_RATIONAL_AUTONOMOUS_LOOP` decisively outperforms `ALWAYS_REUSE` across Small (+0.2422 utility), Medium (+0.2249 utility), and Large (+0.2249 utility) budgets. The **Autonomous Policy Gate is officially QUALIFIED (PASS)**.
 
 ---
 
 #### 3. Phase 3 & 4 — Six-Arm Causal Ablation on Multi-Episode Streams
-Evaluated across 5 sequential episodes with repeated task encounters on independent unseen worlds:
+Evaluated across 5 sequential episodes with repeated task encounters on independent unseen worlds (World Alpha, World Beta, World Gamma):
 
 | Causal Arm | Mean Macro F1 | Zero-Shot Repeated F1 | Realized Transfers ($K$) | Amortized Net Utility | Causal Attribution |
 | :--- | :---: | :---: | :---: | :---: | :--- |
-| **Arm A: RETAINED_LEARNING** | **0.5482 $\pm$ 0.0280** | **0.6840 $\pm$ 0.0310** | **2.0 $\pm$ 0.0** | **0.3245 $\pm$ 0.0250** | **Retained Learner (Wins All Controls)** |
-| **Arm B: RESET_WEIGHTS** | 0.3812 $\pm$ 0.0320 | 0.2410 $\pm$ 0.0420 | 0.0 $\pm$ 0.0 | 0.2415 $\pm$ 0.0290 | Retained beats Reset by **+0.1670 F1** & **+0.0830 utility** |
-| **Arm C: FRESH_ADAPTATION** | 0.2840 $\pm$ 0.0450 | 0.2110 $\pm$ 0.0380 | 0.0 $\pm$ 0.0 | 0.1860 $\pm$ 0.0340 | Retained beats Fresh by **+0.2642 F1** & **+0.1385 utility** |
-| **Arm D: IRRELEVANT_WEIGHTS** | 0.2750 $\pm$ 0.0390 | 0.2610 $\pm$ 0.0350 | 0.0 $\pm$ 0.0 | 0.2180 $\pm$ 0.0310 | Retained beats Irrelevant by **+0.2732 F1** |
-| **Arm E: SHUFFLED_WEIGHTS** | 0.2680 $\pm$ 0.0310 | 0.2350 $\pm$ 0.0290 | 0.0 $\pm$ 0.0 | 0.2120 $\pm$ 0.0280 | Retained beats Shuffled by **+0.2802 F1** |
-| **Arm F: UNCHANGED_REPERTOIRE**| 0.2910 $\pm$ 0.0240 | 0.2850 $\pm$ 0.0260 | 0.0 $\pm$ 0.0 | 0.2610 $\pm$ 0.0220 | Retained beats Unchanged by **+0.2572 F1** |
+| **Arm A: RETAINED_LEARNING** | 0.4250 $\pm$ 0.0476 | 0.3889 $\pm$ 0.0000 | **1.0 $\pm$ 0.0** | 0.2316 $\pm$ 0.0719 | Retained candidate skills realize $K=1.0$ transfer |
+| **Arm B: RESET_WEIGHTS** | **0.4500 $\pm$ 0.0758** | **0.4097 $\pm$ 0.0000** | 0.0 $\pm$ 0.0 | **0.2792 $\pm$ 0.0921** | Resetting between episodes beats Retained by **+0.0250 F1** & **+0.0476 utility** |
+| **Arm C: FRESH_ADAPTATION** | 0.3889 $\pm$ 0.0039 | 0.3333 $\pm$ 0.0000 | 0.0 $\pm$ 0.0 | 0.1799 $\pm$ 0.0057 | Fresh adaptation without skill memory trails |
+| **Arm D: IRRELEVANT_WEIGHTS** | 0.3833 $\pm$ 0.0476 | 0.3472 $\pm$ 0.0000 | 0.0 $\pm$ 0.0 | 0.2359 $\pm$ 0.0476 | Mismatched weights trail |
+| **Arm E: SHUFFLED_WEIGHTS** | 0.3306 $\pm$ 0.0387 | 0.3264 $\pm$ 0.0000 | 0.0 $\pm$ 0.0 | 0.1831 $\pm$ 0.0387 | Permuted weights damage representation |
+| **Arm F: UNCHANGED_REPERTOIRE**| 0.4250 $\pm$ 0.0557 | 0.4167 $\pm$ 0.0000 | 0.0 $\pm$ 0.0 | 0.2776 $\pm$ 0.0557 | Static baseline achieves high utility via zero parameter overhead |
 
-- **Decisive Causal Finding**: On repeated task encounters across independent unseen test worlds, `RETAINED_LEARNING` achieves **0.6840 zero-shot Macro F1** without spending a single optimizer step, producing an observed **$K=2$ realized transfers**.
-- In contrast, `RESET_WEIGHTS` collapses to **0.2410 zero-shot F1** because its learned parameters were discarded.
-- Overall across the full stream, `RETAINED_LEARNING` beats `RESET_WEIGHTS` by **+0.1670 Macro F1** and **+0.0830 Net Utility**.
-- The **Causal Retained-Weights Gate is officially QUALIFIED (PASS)**.
+- **Decisive Causal Finding**: While `RETAINED_LEARNING` successfully realized 1.0 zero-shot transfer on repeated encounters, across a 5-episode stream on independent worlds, accumulating candidate adapters without pruning or consolidation incurred parameter penalties and slight cross-task interference. As a result, `RESET_WEIGHTS` achieved higher mean Macro F1 (0.4500 vs 0.4250, $\Delta = -0.0250$) and higher net utility (0.2792 vs 0.2316, $\Delta = -0.0476$).
+- **Scientific Verdict**: Persistent neural self-improvement via unconstrained retention remains **FAIL** on the causal benchmark. Accumulating learned parameters without consolidation/pruning does not yet beat resetting to clean source skills. This establishes the critical requirement for future milestones (M71/M72) to introduce skill consolidation and redundancy reduction.
 
 ---
 
 #### 4. Phase 5 — Retention Safeguards and Lineage Audit
 - **Double Base Hash Invariance**:
-  * Unnamed M67 formula: `ff27a546...` (Seed 42), `5e8ac2d5...` (Seed 43), `c5ddb03d...` (Seed 44) — 100% invariant.
-  * Sorted named M68 formula: `8736b364...` (Seed 42), `de762175...` (Seed 43), `c7bd81ae...` (Seed 44) — 100% invariant.
+  * Unnamed M67 formula and Sorted named M68 formula: 100% invariant throughout adaptation (`safeguards_gate_passed: True`).
 - **Knowledge Retention**:
   * **100.0% Arithmetic Carry Retention** (verified across 20 multi-digit carry addition cases).
   * **100.0% Chained Logic Retention** (verified across 8 standard operational logic prompts).
@@ -2529,18 +2528,18 @@ Evaluated across 5 sequential episodes with repeated task encounters on independ
 - **Integrity & Split Disjointness**: Verified 100% SHA-256 checksums and inter-partition split disjointness (0 data leakage between train, dev, sealed_test).
 - **Cross-Platform Portability**: Verified `AMG_DATA_ROOT` path resolution and dataset loading across Local, Kaggle, and Colab workflows.
 - **Private Packaging**: Verified `prepare_kaggle_dataset_package` with automated rejection of code/secret leakage (`.py`, `.env`, `.sh`, `.key`, `.pt`).
-- **Comprehensive Regression Suite**: **289/289 regression tests passed** on Tesla T4 GPU in 88.19s.
+- **Comprehensive Regression Suite**: **289/289 regression tests passed** on Tesla T4 GPU in 118s.
 
 ---
 
 ### Milestone M70 Scientific Qualification Scorecard
 
-| Gate | Qualification Criteria | Empirical Result | Scientific Verdict |
+| Gate | Qualification Criteria | Empirical Result (Kaggle Tesla T4) | Scientific Verdict |
 | :--- | :--- | :--- | :---: |
-| **Engineering Regression Gate** | 289/289 tests on Tesla T4; hashes invariant; rollback verified | 289/289 passed in 88.19s; SHA-256 invariant; rollback 100% | **PASS (QUALIFIED)** |
+| **Engineering Regression Gate** | 289/289 tests on Tesla T4; hashes invariant; rollback verified | 289/289 passed; SHA-256 invariant; rollback 100% | **PASS (QUALIFIED)** |
 | **M69 Forensic Correction Gate** | Reconcile 6 anomalies; correct policy & causal gates | All 6 anomalies formally reconciled & corrected | **PASS (QUALIFIED)** |
-| **Autonomous Policy Gate** | Outperform strongest static policy (`ALWAYS_REUSE`) in net utility | M70 Loop beats ALWAYS_REUSE by **+0.0667** (Small) and **+0.0904** (Med) | **PASS (QUALIFIED)** |
-| **Causal Retained-Weights Gate** | Retained weights outperform `RESET_WEIGHTS` with realized transfers | Retained beats Reset by **+0.1670 F1** & **+0.0830 utility** ($K=2$) | **PASS (QUALIFIED)** |
+| **Autonomous Policy Gate** | Outperform strongest static policy (`ALWAYS_REUSE`) in net utility | M70 Loop beats ALWAYS_REUSE by **+0.2422** (Small) and **+0.2249** (Med) | **PASS (QUALIFIED)** |
+| **Causal Retained-Weights Gate** | Retained weights outperform `RESET_WEIGHTS` with realized transfers | Retained trails Reset: **-0.0250 F1** & **-0.0476 utility** ($K=1$) | **FAIL** |
 | **Portable Data Pipeline Gate** | Pinned specs, manifests, SHA-256 verification, portable loading | Manifest verified; split disjoint; Kaggle/Colab loaders tested | **PASS (QUALIFIED)** |
 | **Retention Safeguards Gate** | Base frozen; 100% carry; 100% expanded 8-prompt logic; rollback | Double hashes invariant; 100% carry; 100% logic; rollback OK | **PASS (QUALIFIED)** |
 | **Compactness Gate** | Stored capacity justified; default rank-16 maintained | Rank-16 default preserved; 0 unverified parameter growth | **PASS (QUALIFIED)** |
