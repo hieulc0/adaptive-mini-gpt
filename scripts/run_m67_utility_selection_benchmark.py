@@ -244,16 +244,19 @@ def run_seed_benchmark(
 
     for sk_id, rule_fam, s_env in source_envs:
         ad = train_source_skill_adapter(model, s_env, sk_id, device, seed=seed)
-        f1, acc, rec, paired = repertoire.evaluate_skill_on_env(sk_id, model, s_env, device, adapter=ad)
         repertoire.register_skill(
             skill_id=sk_id,
             rule_family=rule_fam,
             source_env_id=s_env.env_id,
             adapter=ad,
-            macro_f1=f1,
-            accuracy=acc,
-            classwise_recall=rec,
+            macro_f1=0.0,
+            accuracy=0.0,
+            classwise_recall={},
         )
+        f1, acc, rec, paired = repertoire.evaluate_skill_on_env(sk_id, model, s_env, device)
+        repertoire._skills[sk_id].macro_f1 = f1
+        repertoire._skills[sk_id].accuracy = acc
+        repertoire._skills[sk_id].classwise_recall = rec
 
     init_rep_hashes = M67SafeguardsAuditor.compute_repertoire_hashes(repertoire)
 
