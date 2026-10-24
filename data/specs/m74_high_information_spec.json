@@ -1,0 +1,46 @@
+{
+  "spec_id": "m74_high_information_spec",
+  "version": "1.0",
+  "description": "Standardized benchmark specification for M74 verified neural weight learning, high-information sequence transformations, and causal attribution",
+  "default_seed": 42,
+  "symbol_vocab_size": 16,
+  "symbols": ["S0", "S1", "S2", "S3", "S4", "S5", "S6", "S7", "S8", "S9", "S10", "S11", "S12", "S13", "S14", "S15"],
+  "families": [
+    {
+      "family_id": "CAESAR_SHIFT_MOD3",
+      "description": "Modular symbol translation si -> (si + 3) mod 16",
+      "sequence_length": 3,
+      "rule_type": "modular_shift"
+    },
+    {
+      "family_id": "CAESAR_SHIFT_MOD5",
+      "description": "Modular symbol translation si -> (si + 5) mod 16",
+      "sequence_length": 3,
+      "rule_type": "modular_shift"
+    },
+    {
+      "family_id": "AFFINE_TRANSFORM",
+      "description": "Affine modular mapping si -> (3 * si + 1) mod 16",
+      "sequence_length": 3,
+      "rule_type": "affine"
+    },
+    {
+      "family_id": "COMPLEMENT_REFLECT",
+      "description": "Symbol space reflection si -> 15 - si",
+      "sequence_length": 3,
+      "rule_type": "reflection"
+    },
+    {
+      "family_id": "NONLINEAR_SBOX",
+      "description": "Nonlinear bijective S-box permutation pi(si)",
+      "sequence_length": 3,
+      "rule_type": "sbox_permutation"
+    }
+  ],
+  "split_proportions": {
+    "train": 0.4,
+    "dev": 0.2,
+    "qualification": 0.2,
+    "sealed_test": 0.2
+  }
+}
