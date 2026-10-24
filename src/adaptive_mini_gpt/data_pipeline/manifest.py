@@ -1,4 +1,4 @@
-"""Dataset manifest schema, hashing, and verification utilities for M70."""
+"""Dataset manifest schema, hashing, and verification utilities for M70 & M71."""
 
 from __future__ import annotations
 
@@ -35,9 +35,10 @@ class DatasetPartitionInfo:
 class DatasetFamilyInfo:
     """Metadata describing a relational task family."""
     family_id: str
-    rule_name: str
-    relation_name: str
+    rule_name: str = ""
+    relation_name: str = ""
     description: str = ""
+    entity_universe_size: int = 0
 
 
 @dataclass
@@ -74,9 +75,15 @@ class DatasetManifest:
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        families = [DatasetFamilyInfo(**fam) for fam in data.get("task_families", [])]
+        known_family_fields = {"family_id", "rule_name", "relation_name", "description", "entity_universe_size"}
+        families = [
+            DatasetFamilyInfo(**{k: v for k, v in fam.items() if k in known_family_fields})
+            for fam in data.get("task_families", [])
+        ]
+
+        known_partition_fields = {"partition_name", "relative_path", "sha256", "example_count", "label_distribution"}
         partitions = {
-            p_name: DatasetPartitionInfo(**p_info)
+            p_name: DatasetPartitionInfo(**{k: v for k, v in p_info.items() if k in known_partition_fields})
             for p_name, p_info in data.get("partitions", {}).items()
         }
 
@@ -111,6 +118,7 @@ def verify_dataset_integrity(
 
     # 1. Verify existence and SHA-256 for each partition
     seen_examples: dict[str, str] = {}
+    seen_worlds: dict[str, str] = {}
 
     for p_name, p_info in manifest.partitions.items():
         file_path = dataset_dir / p_info.relative_path
@@ -151,6 +159,13 @@ def verify_dataset_integrity(
                                 f"Duplicate example within partition '{p_name}': '{q_text}'"
                             )
                     seen_examples[q_text] = p_name
+
+                # World-split isolation check
+                w_id = record.get("world_id")
+                if w_id:
+                    if p_name.startswith("train") and "sealed" in seen_worlds.get(w_id, ""):
+                        errors.append(f"World leakage: world '{w_id}' appears in both training and sealed partitions!")
+                    seen_worlds[w_id] = p_name
 
         if count != p_info.example_count:
             errors.append(
