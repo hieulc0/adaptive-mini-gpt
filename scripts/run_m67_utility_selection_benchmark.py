@@ -263,13 +263,15 @@ def run_seed_benchmark(
     # 5. Diagnostic and Acquisition Engines
     diagnostic = EpistemicUncertaintyDiagnostic()
     acq_engine = ControlledSkillAcquisitionEngine(
-        d_model=128, bottleneck_dim=16, num_classes=3, lr=5e-4, weight_decay=1e-4
+        d_model=128, bottleneck_dim=16, num_classes=3, lr=5e-4, max_steps=40, qualification_threshold_f1=0.40
     )
     seq_experiment = SequentialEpisodeExperiment(
-        model=model,
         acquisition_engine=acq_engine,
-        repertoire=repertoire,
-        steps_per_episode=40,
+        d_model=128,
+        bottleneck_dim=16,
+        num_classes=3,
+        lr=5e-4,
+        max_steps=40,
     )
 
     # 6. Phase 3 & 6: Fully Isolated 3-Stage Sequential Transfer Benchmark
@@ -278,7 +280,9 @@ def run_seed_benchmark(
 
     # Family 1: Autonomous Rail Parity Grid
     logger.info("Evaluating Sequential Transfer on Autonomous Rail Parity Grid...")
-    rail_transfer_results = seq_experiment.run_sequential_episode_transfer(
+    rail_transfer_results = seq_experiment.run_sequential_episode(
+        model=model,
+        base_repertoire=copy.deepcopy(repertoire),
         ep1_train_env=create_rail_stage1_train_env(),
         ep1_eval_env=create_rail_stage2_qual_env(),    # Stage 2 Qualification!
         ep2_target_env=create_rail_stage3_eval_env(),  # Stage 3 Sealed Future Encounter!
@@ -290,7 +294,9 @@ def run_seed_benchmark(
 
     # Family 2: Epigenetic Chromatin Lattice
     logger.info("Evaluating Sequential Transfer on Epigenetic Chromatin Lattice...")
-    chromatin_transfer_results = seq_experiment.run_sequential_episode_transfer(
+    chromatin_transfer_results = seq_experiment.run_sequential_episode(
+        model=model,
+        base_repertoire=copy.deepcopy(repertoire),
         ep1_train_env=create_chromatin_stage1_train_env(),
         ep1_eval_env=create_chromatin_stage2_qual_env(),
         ep2_target_env=create_chromatin_stage3_eval_env(),
@@ -302,7 +308,9 @@ def run_seed_benchmark(
 
     # Family 3: Circuit Fault Cascade
     logger.info("Evaluating Sequential Transfer on Circuit Fault Cascade...")
-    circuit_transfer_results = seq_experiment.run_sequential_episode_transfer(
+    circuit_transfer_results = seq_experiment.run_sequential_episode(
+        model=model,
+        base_repertoire=copy.deepcopy(repertoire),
         ep1_train_env=create_circuit_stage1_train_env(),
         ep1_eval_env=create_circuit_stage2_qual_env(),
         ep2_target_env=create_circuit_stage3_eval_env(),
@@ -331,7 +339,7 @@ def run_seed_benchmark(
             candidate_qualified=True,
             train_queries=16,
             validation_f1_gain=0.45,
-            episode2_transfer_auc=rail_transfer_results[SequentialTransferArm.WITH_ACQUIRED_SKILL.value].learning_curve_auc,
+            episode2_transfer_auc=rail_transfer_results[SequentialTransferArm.WITH_ACQUIRED_SKILL.value].quality_auc,
             net_utility=0.40,
         )
     )
@@ -412,10 +420,10 @@ def aggregate_m67_results(seed_results: list[dict[str, Any]]) -> dict[str, Any]:
             SequentialTransferArm.IRRELEVANT_SKILL_CONTROL.value,
             SequentialTransferArm.FRESH_ADAPTATION_CONTROL.value,
         ]:
-            zero_shots = [s[key][arm]["zero_shot_macro_f1"] for s in seed_results]
-            aucs = [s[key][arm]["learning_curve_auc"] for s in seed_results]
+            zero_shots = [s[key][arm]["zero_shot_f1"] for s in seed_results]
+            aucs = [s[key][arm]["quality_auc"] for s in seed_results]
             finals = [s[key][arm]["final_macro_f1"] for s in seed_results]
-            unkn_recs = [s[key][arm]["classwise_recalls"].get("UNKNOWN", 0.0) for s in seed_results]
+            unkn_recs = [s[key][arm]["classwise_recall"].get("UNKNOWN", 0.0) for s in seed_results]
             paireds = [s[key][arm]["paired_correctness"] for s in seed_results]
 
             summary[arm] = {
