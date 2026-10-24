@@ -587,7 +587,7 @@ def main() -> None:
     device = torch.device(args.device)
     logger.info("Using device: %s", device)
 
-    data_root = resolve_data_root()
+    data_root = resolve_data_root(writable=True)
     data_root.mkdir(parents=True, exist_ok=True)
 
     seed_results = []
