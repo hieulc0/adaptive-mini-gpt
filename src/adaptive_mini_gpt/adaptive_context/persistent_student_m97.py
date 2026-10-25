@@ -181,9 +181,6 @@ class PersistentAdaptiveStudentM97:
             op = torch.tensor([intermediate_steps[0][1]], device=self.device)
             v = torch.tensor([intermediate_steps[0][2]], device=self.device)
 
-            if retrieved_val is not None and isinstance(retrieved_val, int):
-                v = torch.tensor([retrieved_val % MODULUS], device=self.device)
-
             with torch.no_grad():
                 self.substrate.eval()
                 logits = self.substrate.forward_transition(s, op, v, domain_key=str(domain_id))
@@ -250,12 +247,12 @@ class PersistentAdaptiveStudentM97:
         substrate = CrossDomainReasoningSubstrate(budget_ceiling=20_000)
         substrate.load_state_dict(state["substrate_state_dict"])
 
-        student = cls(
-            substrate=substrate,
-            memory_store=store,
-            device=device,
-            base_context_len=state.get("base_context_len", 128),
-            max_context_len=state.get("max_context_len", 1024),
+        student = cls(\
+            substrate=substrate,\
+            memory_store=store,\
+            device=device,\
+            base_context_len=state.get("base_context_len", 128),\
+            max_context_len=state.get("max_context_len", 1024),\
         )
         student.step_counter = state["step_counter"]
         student.skill_catalog = state["skill_catalog"]
