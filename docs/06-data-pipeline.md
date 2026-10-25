@@ -535,3 +535,22 @@ Milestone M86 unifies the discrete acquisition, consolidation, connection rewiri
 - **Execution Provenance**:
     * Full 373/373 regression suite passed on Google Colab Tesla T4 GPU (`amg-m86-t4` session).
     * Base model parameter invariant preserved (SHA-256: `6e39cd7ef6790b3c`, 1,071,872 weights unchanged); 100% carry (20/20) and logic (8/8) retention.
+
+
+### 19. Milestone M87 100-Episode Continual Task Curriculum & Evaluation Matrix Specification
+Milestone M87 scales the lifelong task stream from a 10-episode integration test to a **frozen 100-episode continual task curriculum** across 4 distinct phases, evaluating lifelong plasticity and capacity regulation under a strict **20,000-parameter budget ceiling**:
+- **Four-Phase Curriculum Architecture**:
+    * **Phase 1: Foundational Skill Acquisition (Episodes 0–24)**: Introduces 25 diverse procedural tasks across 9 families: arithmetic affine ($a \cdot s + b \bmod 16$), parity logic ($s \oplus \text{mask}$ or $s + \text{offset}$), cyclic procedures, modular nonlinear transformations, modular quadratic polynomials ($a \cdot s^2 + b \cdot s + c \bmod 16$), block transpositions, palindrome reflections, and two-stage cascades. Establishes the foundational skill repertoire.
+    * **Phase 2: Reuse & Compound Composition (Episodes 25–49)**: Introduces exact duplicates of Phase 1 tasks with novel seed instances, multi-stage cascaded compositions, and parameter-shifted variants. Tests autonomous zero-shot reuse ($EM \ge 85\%$, 0 training steps, 0 parameter allocations).
+    * **Phase 3: Conflicts & Capacity Pressure (Episodes 50–74)**: Injects opposing polarity logic tasks designed to test conflict detection and bit-exact rollback restoration. Evaluates dynamic rank expansion (Rank $4 \to 8 \to 16$) on complex tasks and rank contraction (Rank $4 \to 2$) on simple rules. Total parameters approach the 20,000 ceiling, triggering autonomous capacity regulation.
+    * **Phase 4: Lifelong Adaptation & Long-Delayed Revisits (Episodes 75–99)**: Evaluates long-delayed revisits to foundational tasks introduced in Episodes 0–10 (delay $\ge 50$ episodes). Evaluates autonomous LRU module retirement under acute capacity pressure and late-stage skill acquisition.
+- **Lifelong Knowledge Evaluation Matrix ($R[i, j]$)**:
+    * Matrix $R \in \mathbb{R}^{100 \times 100}$ where $R[i, j]$ denotes the Exact Match on task $j$ after completing episode $i$.
+    * Formally measures Average Accuracy ($ACC$), Backward Transfer ($BWT$), Forward Transfer ($FWT$), and Average Forgetting ($F$).
+- **Autonomous Memory Manager & Capacity Regulation**:
+    * Tracks real-time capacity pressure: $\rho = \frac{\text{params}}{20,000}$.
+    * When $\rho \ge 0.85$, triggers energy-preserving rank shrinkage of converged modules and LRU module retirement.
+    * Maintains system parameter footprint strictly under 20,000 parameters (observed: 17,757 parameters across all 100 tasks).
+- **Execution Provenance**:
+    * Full 380/380 regression suite passed on Google Colab Tesla T4 GPU (`amg-m87-t4` session).
+    * Base model parameter invariant preserved (SHA-256: `6e39cd7ef6790b3c`, 1,071,872 weights unchanged); 100% carry (20/20) and logic (8/8) retention.

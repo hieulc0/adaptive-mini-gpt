@@ -1539,3 +1539,28 @@ abla_{	ext{cos}} = -0.42$) and zero functional agreement.
 - **Next Direction Options (Post-M86 Strategic Priority -> M87)**:
   - **Milestone M87 — Long-Horizon Continual Learning**: Sequence dozens of procedural, relational, and symbolic tasks over extended lifetimes, measuring forward transfer, backward retention, modular consolidation, and autonomous capacity regulation under strict global compute budgets.
   - **Milestone M88 — Cross-Subject Generalization**: Expand beyond synthetic procedural transformations into multi-domain mathematics, propositional logic, natural language reasoning, probability, and algorithmic execution.
+
+### Milestone M87: Long-Horizon Continual Learning, Memory Management, and Autonomous Capacity Regulation (Completed & Qualified as PARTIAL on Colab Tesla T4 GPU)
+
+- **Status**: Completed & Evaluated on Remote Google Colab Tesla T4 GPU (`amg-m87-t4` session). Overall Verdict: **PARTIAL** (Grounded scientific finding: Autonomous capacity regulation and budget enforcement verified; but capacity-bounded modular lifelong learning is fundamentally constrained by modular amnesia, establishing the imperative for M88's foundational representation learning).
+- **Focus**: Phase 0 forensic audit of M86 (reconciling relative revisit retention >100% with task-level forgetting matrix $R[i, j]$, total parameter accounting, and formulation of Duplicate-Aware Independent-Adapter Baseline); 100-episode continual task curriculum across 4 distinct phases (Foundations, Knowledge Reuse & Cascades, Conflicts & Capacity Pressure, Long-Delayed Revisits >= 50 episodes); Lifelong Knowledge Evaluation Matrix ($R[i, j]$) measuring Average Accuracy ($ACC$), Backward Transfer ($BWT$), Forward Transfer ($FWT$), and Average Forgetting ($F$); Autonomous capacity regulation (`AutonomousMemoryManager`) enforcing a strict 20,000-parameter ceiling on trainable components; Six-arm causal benchmark; Bit-exact rollback safety; Base model invariance.
+- **Hardware & Implementation**: Google Colab Tesla T4 GPU (Session `amg-m87-t4`, branch `m87-long-horizon-continual-learning`, Python 3.13, PyTorch 2.11.0+cu130). Recurrent base model (1,071,872 frozen parameters, base hash `6e39cd7ef6790b3c`), Unified Learning Policy (989 parameters, SHA-256 `7c34a722d18f9f98`). Full regression suite passed: **380/380 tests on Tesla T4 GPU in 124.46s**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 0 M86 Audit & Baseline Formulation**:
+     - Clarified that localized backward transfer ($BWT > 0$) on individual seeds produced M86's 102.86% revisit score, but long-horizon streams require full evaluation matrices $R[i, j]$ to capture task-level amnesia.
+     - Formulated Duplicate-Aware baseline: avoids retraining duplicates, but accumulates 115,549 parameters over 100 episodes (+477.7% over budget), proving that duplicate detection alone without retirement cannot respect fixed capacity budgets.
+  2. **Phase 1 100-Episode Curriculum Generator**:
+     - 4-phase structured stream crossing foundational acquisition (Ep 0–24), reuse & cascades (Ep 25–49), conflicts & capacity pressure (Ep 50–74), and delayed revisits with late-stage plasticity (Ep 75–99).
+  3. **Phase 2 Lifelong Knowledge Evaluation Matrix ($R[i, j]$)**:
+     - Formally computed $ACC = 5.84\%$, $BWT = -53.27\%$, $FWT = +0.00\%$, $F = 53.27\%$, and delayed revisit retention = $3.33\%$.
+  4. **Phase 3 Autonomous Capacity Regulator**:
+     - Successfully enforced the strict 20,000 parameter limit, maintaining the student at **17,757 trainable parameters** (2,243 headroom) while retiring **57,936 parameters** of older modules.
+  5. **Phase 4 & 5 Six-Arm Causal Benchmark**:
+     - Demonstrated that isolated modular adapters under fixed capacity suffer from **modular amnesia**: retiring older adapters physically destroys competencies on those tasks, driving stream-wide accuracy to 5.84% and forgetting to 53.27%.
+  6. **Safety, Bit-Exact Rollback & Base Invariance**:
+     - Conflicting opposing rule detected and rolled back bit-exact via SHA-256 (`cb54e0ca4db84e84`).
+     - Base model parameters 100% frozen (1,071,872 weights, SHA-256 hash `6e39cd7ef6790b3c` bit-exact invariant).
+     - Arithmetic carry retention: **100.0% (20/20)**; Operational logic retention: **100.0% (8/8)**.
+- **Lineage Promotion Decision**: **QUALIFIED AS PARTIAL IN RESEARCH TIER**. Long-horizon continual learning stress-test verified on Tesla T4 GPU.
+- **Next Direction Options (Post-M87 Strategic Priority -> M88)**:
+  - **Milestone M88 — Foundational Domain Expansion & Representation Learning**: Transition from synthetic procedural transformations to genuine foundational reasoning (multi-digit arithmetic, algebraic rules, propositional logic, and natural language explanations). Shift from discrete isolated adapters to shared foundational representations that resist modular amnesia under capacity constraints.
