@@ -81,6 +81,13 @@ class AutonomousLearningCycleM100:
             st = diagnostics[g.goal_id]
             # Neural scoring head
             score = self.student.curriculum_policy.score_goal(st, device=self.student.device)
+
+            # Deprioritize already mastered/acquired skills or unlearnable noise to progress curriculum
+            if g.goal_id in self.student.acquired_skills:
+                score -= 100.0
+            if not g.is_learnable and len(self.student.diagnostic_history.get(g.goal_id, [])) > 0:
+                score -= 200.0
+
             if score > best_score:
                 best_score = score
                 best_goal = g
