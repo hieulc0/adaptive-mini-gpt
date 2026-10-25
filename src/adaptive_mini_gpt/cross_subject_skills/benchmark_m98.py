@@ -126,8 +126,8 @@ class M98CrossSubjectBenchmark:
         device: torch.device,
         seeds: list[int] = [42, 43, 44, 45, 46],
         output_dir: str = "runs/m98_output",
-        epochs_trunk: int = 80,
-        lr_trunk: float = 0.03,
+        epochs_trunk: int = 150,
+        lr_trunk: float = 0.01,
     ) -> dict[str, Any]:
         """Execute full Milestone M98 multi-seed evaluation."""
         print("=== Milestone M98: Autonomous Cross-Subject Skill Acquisition & Continual Learning ===")

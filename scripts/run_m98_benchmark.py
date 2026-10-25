@@ -17,8 +17,8 @@ def main() -> None:
     parser.add_argument("--seeds", nargs="+", type=int, default=[42, 43, 44, 45, 46])
     parser.add_argument("--device", type=str, default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--output-dir", type=str, default="runs/m98_output")
-    parser.add_argument("--epochs-trunk", type=int, default=80)
-    parser.add_argument("--lr-trunk", type=float, default=0.03)
+    parser.add_argument("--epochs-trunk", type=int, default=150)
+    parser.add_argument("--lr-trunk", type=float, default=0.01)
 
     args = parser.parse_args()
 

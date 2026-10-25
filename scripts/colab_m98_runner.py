@@ -45,7 +45,7 @@ def main() -> None:
 
     # 4. Run Milestone M98 Benchmark
     print("=== Executing Milestone M98 Master Benchmark on Tesla T4 ===")
-    run_cmd("python3 scripts/run_m98_benchmark.py --seeds 42 43 44 45 46 --device cuda --output-dir /content/runs/m98_output --epochs-trunk 80 --lr-trunk 0.03")
+    run_cmd("python3 scripts/run_m98_benchmark.py --seeds 42 43 44 45 46 --device cuda --output-dir /content/runs/m98_output --epochs-trunk 150 --lr-trunk 0.01")
 
     # 5. Tar results for download
     print("=== Packaging Benchmark Outputs ===")

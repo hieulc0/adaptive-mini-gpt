@@ -1,9 +1,13 @@
-"""Autonomous Cross-Subject Skill Acquisition & Tri-Student Benchmark for Milestone M98.
+"""Autonomous Skill Acquisition & Learning Policy Orchestration for Milestone M98.
 
-Implements the decisive 3-student causal comparison:
-- Student A: Fresh baseline student (0 prior training, adapts from scratch with fixed heuristic).
-- Student B: Experienced student with retained knowledge, but using frozen original acquisition policy (measures pure knowledge transfer).
-- Student C: Experienced student with retained knowledge AND learned adaptive acquisition policy (measures true learning-to-learn / meta-learning advantage).
+Implements:
+1. Three-armed causal evaluation separating knowledge reuse from true meta-learning:
+   - Student A: Fresh baseline student learning from scratch (0 prior knowledge).
+   - Student B: Experienced student with retained weights, but fixed acquisition policy.
+   - Student C: Experienced student with retained weights AND learned adaptive policy.
+2. Sample efficiency measurement (learning curves, steps to reach 80% qualification).
+3. Meta-learning advantage attribution (comparing Student C vs Student B on unfamiliar tasks).
+4. Continuous anchor replay safeguarding historical neural capabilities from catastrophic forgetting.
 """
 
 from __future__ import annotations
@@ -14,10 +18,11 @@ from enum import Enum
 from typing import Any
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 
-from adaptive_mini_gpt.cross_domain_transfer.neural_cross_domain_transfer import MODULUS
+from adaptive_mini_gpt.cross_domain_transfer.neural_cross_domain_transfer import (
+    MODULUS,
+)
 from adaptive_mini_gpt.cross_subject_skills.cross_subject_substrate import (
     CrossSubjectReasoningSubstrate,
 )
@@ -28,7 +33,7 @@ from adaptive_mini_gpt.meta_acquisition.controller import (
 
 
 class StudentType(str, Enum):
-    """The three student conditions compared in Milestone M98."""
+    """Experimental arms for causal attribution of knowledge transfer vs meta-learning."""
 
     STUDENT_A_FRESH = "student_a_fresh"
     STUDENT_B_EXPERIENCED_FIXED = "student_b_experienced_fixed"
@@ -37,15 +42,14 @@ class StudentType(str, Enum):
 
 @dataclass(frozen=True)
 class AdaptationOutcome:
-    """Detailed results of adapting a student to an unfamiliar task family."""
+    """Quantitative results from an autonomous adaptation episode."""
 
     student_type: StudentType
-    task_subject: str
+    subject: str
     steps_taken: int
     qualification_step: int | None
-    qualified: bool
-    final_train_loss: float
     held_out_accuracy: float
+    final_loss: float
     sample_efficiency_auc: float
     retained_source_skills_acc: float
     meta_advantage_over_fixed_steps: int
@@ -84,8 +88,13 @@ class AutonomousSkillLearner:
         v_te = torch.tensor([ex[2] for ex in test_examples], device=self.device)
         y_te = torch.tensor([ex[3] for ex in test_examples], device=self.device)
 
-        # Baseline learning rate and optimizer
-        lr = 0.01
+        s_anc = torch.tensor([ex[0] for ex in anchor_replay_examples], device=self.device)
+        op_anc = torch.tensor([ex[1] for ex in anchor_replay_examples], device=self.device)
+        v_anc = torch.tensor([ex[2] for ex in anchor_replay_examples], device=self.device)
+        y_anc = torch.tensor([ex[3] for ex in anchor_replay_examples], device=self.device)
+
+        # Learning rate: Experienced warm-start uses fine-tuning lr, fresh uses training lr
+        lr = 0.001 if student_type != StudentType.STUDENT_A_FRESH else 0.03
         opt = torch.optim.AdamW(substrate.substrate.parameters(), lr=lr, weight_decay=1e-5)
 
         loss_history: list[float] = []
@@ -93,10 +102,18 @@ class AutonomousSkillLearner:
         qualification_step: int | None = None
 
         prev_loss = 2.5
+        steps_taken = max_steps
         for step in range(1, max_steps + 1):
             substrate.train()
-            logits = substrate.forward_transition(s_tr, op_tr, v_tr)
-            loss = F.cross_entropy(logits, y_tr)
+            logits_tr = substrate.forward_transition(s_tr, op_tr, v_tr)
+            loss_tr = F.cross_entropy(logits_tr, y_tr)
+
+            if len(anchor_replay_examples) > 0:
+                logits_anc = substrate.forward_transition(s_anc, op_anc, v_anc)
+                loss_anc = F.cross_entropy(logits_anc, y_anc)
+                loss = loss_tr + 0.5 * loss_anc
+            else:
+                loss = loss_tr
 
             opt.zero_grad()
             loss.backward()
@@ -136,19 +153,21 @@ class AutonomousSkillLearner:
                 action: AcquisitionAction = substrate.evaluate_controller(state)
                 # Dynamic early stopping when qualified and loss converged
                 if test_acc >= qualification_threshold and step >= 10:
+                    steps_taken = step
                     break
 
             elif student_type == StudentType.STUDENT_B_EXPERIENCED_FIXED:
                 # Student B uses fixed step threshold (standard 20 steps)
                 if test_acc >= qualification_threshold and step >= 20:
+                    steps_taken = step
                     break
 
             else:
                 # Student A (Fresh): runs full standard budget or stops at 35 steps
                 if test_acc >= qualification_threshold and step >= 35:
+                    steps_taken = step
                     break
 
-        steps_taken = len(loss_history)
         final_loss = loss_history[-1] if loss_history else 0.0
 
         # Measure final held-out accuracy
@@ -159,10 +178,6 @@ class AutonomousSkillLearner:
             final_acc = float((final_preds == y_te).float().mean().item()) * 100.0
 
             # Measure replay retention on previous anchor skills
-            s_anc = torch.tensor([ex[0] for ex in anchor_replay_examples], device=self.device)
-            op_anc = torch.tensor([ex[1] for ex in anchor_replay_examples], device=self.device)
-            v_anc = torch.tensor([ex[2] for ex in anchor_replay_examples], device=self.device)
-            y_anc = torch.tensor([ex[3] for ex in anchor_replay_examples], device=self.device)
             anc_logits = substrate.forward_transition(s_anc, op_anc, v_anc)
             anc_preds = anc_logits.argmax(dim=-1) % MODULUS
             retained_acc = float((anc_preds == y_anc).float().mean().item()) * 100.0
@@ -172,14 +187,13 @@ class AutonomousSkillLearner:
 
         return AdaptationOutcome(
             student_type=student_type,
-            task_subject=subject,
+            subject=subject,
             steps_taken=steps_taken,
-            qualification_step=qualification_step if qualification_step is not None else steps_taken,
-            qualified=(final_acc >= qualification_threshold),
-            final_train_loss=round(final_loss, 4),
-            held_out_accuracy=round(final_acc, 2),
-            sample_efficiency_auc=round(auc, 4),
-            retained_source_skills_acc=round(retained_acc, 2),
-            meta_advantage_over_fixed_steps=0,  # Computed at benchmark level
+            qualification_step=qualification_step,
+            held_out_accuracy=final_acc,
+            final_loss=final_loss,
+            sample_efficiency_auc=auc,
+            retained_source_skills_acc=retained_acc,
+            meta_advantage_over_fixed_steps=0,
             meta_advantage_pct=0.0,
         )
