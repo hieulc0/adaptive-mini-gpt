@@ -28,6 +28,9 @@ from adaptive_mini_gpt.adaptive_context.context_extension import (
     ContextExtensionEngine,
     LinearPositionInterpolator,
 )
+from adaptive_mini_gpt.adaptive_context.long_context_curriculum import (
+    DOMAIN_PROGRAM,
+)
 from adaptive_mini_gpt.adaptive_context.persistent_student_m97 import (
     PersistentAdaptiveStudentM97,
 )
@@ -36,7 +39,6 @@ from adaptive_mini_gpt.adaptive_context.working_context_builder import (
 )
 from adaptive_mini_gpt.cross_domain_transfer.neural_cross_domain_transfer import (
     CrossDomainReasoningSubstrate,
-    DOMAIN_CODE,
     OP_ADD,
 )
 from adaptive_mini_gpt.model import MiniGPT, ModelConfig
@@ -204,7 +206,7 @@ def test_fresh_vs_experienced_student_advantage(device: torch.device):
         task_type="held_out_target",
         input_text="target task test",
         target_output=5,
-        domain_id=DOMAIN_CODE,
+        domain_id=DOMAIN_PROGRAM,
         intermediate_steps=[(2, OP_ADD, 3)],
     )
 

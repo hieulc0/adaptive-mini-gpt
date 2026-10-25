@@ -18,15 +18,16 @@ from enum import Enum
 from typing import Any
 
 from adaptive_mini_gpt.cross_domain_transfer.neural_cross_domain_transfer import (
-    DOMAIN_CODE,
-    DOMAIN_NL,
-    DOMAIN_PLANNING,
     MODULUS,
     OP_ADD,
     OP_ASSIGN,
     OP_IF_GT,
     OP_SUB,
 )
+
+DOMAIN_PROGRAM = "PROGRAM"
+DOMAIN_NL = "NATURAL_LANGUAGE"
+DOMAIN_PLANNING = "PLANNING"
 
 
 class TaskType(str, Enum):
@@ -49,7 +50,7 @@ class LongContextTask:
     task_type: TaskType
     input_text: str
     target_output: Any
-    domain_id: int
+    domain_id: str
     has_supported_entity: bool
     is_contradictory: bool
     requires_retrieval: bool
@@ -103,7 +104,7 @@ class LongContextCurriculumGenerator:
                     task_type=TaskType.SHORT_FACT,
                     input_text=f"compute {comp} scale adjustment state={s0} op={op0} delta={v0}",
                     target_output=target_val,
-                    domain_id=DOMAIN_CODE,
+                    domain_id=DOMAIN_PROGRAM,
                     has_supported_entity=True,
                     is_contradictory=False,
                     requires_retrieval=True,
@@ -199,7 +200,7 @@ class LongContextCurriculumGenerator:
                     task_type=TaskType.UNSUPPORTED_ABSTAIN,
                     input_text=q,
                     target_output="ABSTAIN",
-                    domain_id=DOMAIN_CODE,
+                    domain_id=DOMAIN_PROGRAM,
                     has_supported_entity=has_entity,
                     is_contradictory=is_contradictory,
                     requires_retrieval=False,
@@ -225,7 +226,7 @@ class LongContextCurriculumGenerator:
                     task_type=TaskType.HELD_OUT_TARGET,
                     input_text=f"target_held_out_algorithm step_start s={s0} add={v1} conditional_filter threshold=8",
                     target_output=s2,
-                    domain_id=DOMAIN_CODE,
+                    domain_id=DOMAIN_PROGRAM,
                     has_supported_entity=True,
                     is_contradictory=False,
                     requires_retrieval=False,

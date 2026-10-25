@@ -35,17 +35,18 @@ from adaptive_mini_gpt.adaptive_context.context_extension import (
     ContextExtensionEngine,
     LinearPositionInterpolator,
 )
+from adaptive_mini_gpt.adaptive_context.long_context_curriculum import (
+    DOMAIN_NL,
+    DOMAIN_PLANNING,
+    DOMAIN_PROGRAM,
+)
 from adaptive_mini_gpt.adaptive_context.working_context_builder import (
     WorkingContextBuilder,
     WorkingContextDocument,
 )
 from adaptive_mini_gpt.cross_domain_transfer.neural_cross_domain_transfer import (
     CrossDomainReasoningSubstrate,
-    DOMAIN_CODE,
-    DOMAIN_NL,
-    DOMAIN_PLANNING,
     MODULUS,
-    OP_ABSTAIN,
 )
 from adaptive_mini_gpt.model import MiniGPT, ModelConfig
 from adaptive_mini_gpt.persistent_memory.knowledge_store import (
@@ -126,7 +127,7 @@ class PersistentAdaptiveStudentM97:
         task_type: str,
         input_text: str,
         target_output: Any,
-        domain_id: int = DOMAIN_CODE,
+        domain_id: str = DOMAIN_PROGRAM,
         has_supported_entity: bool = True,
         is_contradictory: bool = False,
         requires_retrieval: bool = False,
@@ -178,14 +179,13 @@ class PersistentAdaptiveStudentM97:
             s = torch.tensor([intermediate_steps[0][0]], device=self.device)
             op = torch.tensor([intermediate_steps[0][1]], device=self.device)
             v = torch.tensor([intermediate_steps[0][2]], device=self.device)
-            d = torch.tensor([domain_id], device=self.device)
 
             if retrieved_val is not None and isinstance(retrieved_val, int):
                 v = torch.tensor([retrieved_val % MODULUS], device=self.device)
 
             with torch.no_grad():
                 self.substrate.eval()
-                logits = self.substrate(s, op, v, domain_idx=d)
+                logits = self.substrate.forward_transition(s, op, v, domain_key=str(domain_id))
                 pred_token = int(logits.argmax(dim=-1).item())
                 predicted = pred_token % MODULUS
         elif retrieved_val is not None:
