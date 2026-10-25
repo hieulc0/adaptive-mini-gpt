@@ -125,9 +125,9 @@ class PersistentStudentM102_2(nn.Module):
 
         # 5. Scientific Retention Manager & Two-Speed Plasticity
         self.retention_manager = ScientificRetentionManagerM102_2(max_exemplars_per_domain=32)
-        self.plasticity_manager = TwoSpeedPlasticityManager(fast_lr=0.005, slow_lr=0.0001)
-        self.knowledge_store = PersistentKnowledgeStore(capacity=128)
-        self.structural_engine = StructuralEvolutionEngine(tier=tier)
+        self.plasticity_manager = TwoSpeedPlasticityManager(retention_threshold_pct=retention_threshold, fast_lr=0.005, slow_lr=0.0001)
+        self.knowledge_store = PersistentKnowledgeStore(max_byte_budget=262_144)
+        self.structural_engine = StructuralEvolutionEngine(tier=tier, device=self.device)
 
         self.step_counter = 0
         self.acquired_skills: set[str] = set()
