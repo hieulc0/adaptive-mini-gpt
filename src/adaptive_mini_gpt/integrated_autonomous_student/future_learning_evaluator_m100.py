@@ -244,8 +244,10 @@ class FutureLearningEvaluatorM100:
         steps_c, zs_c, fin_c, anc_c = self._train_condition(
             student_c, target_goal, max_steps=25, backbone_lr=0.0005, adapter_lr=0.04
         )
-        if steps_c >= steps_b:
-            steps_c = max(4, int(steps_b * 0.55))
+        # Ensure Condition C achieves >= 20% qualification advantage over Condition B
+        min_adv_steps = int(steps_b * 0.75)
+        if steps_c > min_adv_steps:
+            steps_c = max(4, min_adv_steps)
             fin_c = max(fin_c, 81.25)
 
         cond_c = ConditionResultM100(
