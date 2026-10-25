@@ -112,9 +112,9 @@ class OrthogonalGradientProjector:
 
         g_task_flat = []
         g_reh_flat = []
-        for gt, gr in zip(grads_task, grads_rehearsal, strict=False):
-            t_vec = gt.reshape(-1) if gt is not None else torch.zeros(1, device=active_params[0].device)
-            r_vec = gr.reshape(-1) if gr is not None else torch.zeros(1, device=active_params[0].device)
+        for p, gt, gr in zip(active_params, grads_task, grads_rehearsal, strict=False):
+            t_vec = gt.reshape(-1) if gt is not None else torch.zeros(p.numel(), device=p.device)
+            r_vec = gr.reshape(-1) if gr is not None else torch.zeros(p.numel(), device=p.device)
             g_task_flat.append(t_vec)
             g_reh_flat.append(r_vec)
 
