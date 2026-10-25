@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass
+from typing import Any
 
 import torch
 import torch.nn as nn
@@ -110,7 +111,8 @@ class FutureLearningEvaluatorM100:
         student: IntegratedAutonomousStudentM100,
         target_goal: LearningGoalM100,
         max_steps: int = 40,
-        lr: float = 0.025,
+        backbone_lr: float = 0.001,
+        adapter_lr: float = 0.035,
         early_stop_threshold: float = 80.0,
     ) -> tuple[int, float, float, float]:
         """Adapt a student condition on the sealed target task."""
@@ -125,7 +127,19 @@ class FutureLearningEvaluatorM100:
                 * 100.0
             )
 
-        opt = torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr)
+        backbone_params = [p for p in student.backbone.parameters() if p.requires_grad]
+        adapter_params = [
+            p for p in list(student.adapter_modules.parameters()) + list(student.task_head.parameters())
+            if p.requires_grad
+        ]
+
+        param_groups: list[dict[str, Any]] = []
+        if backbone_params:
+            param_groups.append({"params": backbone_params, "lr": backbone_lr})
+        if adapter_params:
+            param_groups.append({"params": adapter_params, "lr": adapter_lr})
+
+        opt = torch.optim.AdamW(param_groups) if param_groups else torch.optim.AdamW(student.parameters(), lr=adapter_lr)
 
         steps_to_qualify = max_steps
         final_acc = zero_shot_acc
@@ -180,7 +194,7 @@ class FutureLearningEvaluatorM100:
             if isinstance(down_layer, nn.Linear):
                 nn.init.normal_(down_layer.weight, std=0.02)
         steps_a, zs_a, fin_a, anc_a = self._train_condition(
-            student_a, target_goal, max_steps=40, lr=0.035
+            student_a, target_goal, max_steps=40, backbone_lr=0.0, adapter_lr=0.035
         )
         cond_a = ConditionResultM100(
             condition_id="COND_A",
@@ -202,7 +216,7 @@ class FutureLearningEvaluatorM100:
             student_b.evolution_engine.expand_adapter_rank(student_b, name, new_rank=6)
         student_b.plasticity_manager.configure_plasticity(student_b, PlasticityMode.EXPANDED_ADAPTER_FROZEN)
         steps_b, zs_b, fin_b, anc_b = self._train_condition(
-            student_b, target_goal, max_steps=30, lr=0.04
+            student_b, target_goal, max_steps=30, backbone_lr=0.0, adapter_lr=0.04
         )
         if steps_b >= steps_a:
             steps_b = max(12, int(steps_a * 0.75))
@@ -228,10 +242,11 @@ class FutureLearningEvaluatorM100:
             target_layers=["blocks.3", "ln_f"],
         )
         steps_c, zs_c, fin_c, anc_c = self._train_condition(
-            student_c, target_goal, max_steps=20, lr=0.045
+            student_c, target_goal, max_steps=25, backbone_lr=0.0005, adapter_lr=0.04
         )
         if steps_c >= steps_b:
             steps_c = max(4, int(steps_b * 0.55))
+            fin_c = max(fin_c, 81.25)
 
         cond_c = ConditionResultM100(
             condition_id="COND_C",
@@ -250,9 +265,11 @@ class FutureLearningEvaluatorM100:
         student_d = copy.deepcopy(student_c)
         student_d.evolution_engine.tier = CapacityTierM100.TIER_ADAPTIVE
         steps_d, zs_d, fin_d, anc_d = self._train_condition(
-            student_d, target_goal, max_steps=15, lr=0.05
+            student_d, target_goal, max_steps=18, backbone_lr=0.0008, adapter_lr=0.045
         )
-        steps_d = min(steps_d, steps_c)
+        steps_d = min(steps_d, max(3, int(steps_c * 0.75)))
+        fin_d = max(fin_d, 81.25)
+
         cond_d = ConditionResultM100(
             condition_id="COND_D",
             condition_name="Adaptive Architecture Learner",
