@@ -77,11 +77,12 @@ class ConsolidatedSharedAdapter(nn.Module):
         """Attach a lightweight residual head for a specific skill."""
         safe_key = skill_id.replace(".", "_").replace("-", "_")
         if safe_key not in self.residuals:
+            device = next(self.parameters()).device
             self.residuals[safe_key] = SkillResidualHead(
                 in_features=self.shared_rank,
                 residual_dim=self.residual_rank,
                 num_symbols=self.num_symbols,
-            )
+            ).to(device)
 
     def forward(self, hidden_states: torch.Tensor, skill_id: str | None = None) -> torch.Tensor:
         """Forward pass with optional skill-specific residual bypass."""
