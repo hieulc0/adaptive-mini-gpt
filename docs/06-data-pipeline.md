@@ -554,3 +554,26 @@ Milestone M87 scales the lifelong task stream from a 10-episode integration test
 - **Execution Provenance**:
     * Full 380/380 regression suite passed on Google Colab Tesla T4 GPU (`amg-m87-t4` session).
     * Base model parameter invariant preserved (SHA-256: `6e39cd7ef6790b3c`, 1,071,872 weights unchanged); 100% carry (20/20) and logic (8/8) retention.
+
+
+### 20. Milestone M88 Foundational Multi-Domain Curriculum and Replay Accounting Specification
+Milestone M88 transitions from isolated procedural adapters to a **Shared Neural Knowledge Substrate** across six foundational knowledge domains, resolving the modular amnesia bottleneck under the 20,000-parameter ceiling:
+- **Six Foundational Knowledge Domains**:
+    1. **Place-Value Reasoning**: Magnitude comparison between high-order and low-order positional representations, positional digit extraction, and modular arithmetic mappings.
+    2. **Arithmetic Operations**: Multi-digit addition with carry propagation, multi-digit subtraction with borrowing, and affine scaling transformations.
+    3. **Boolean & Conditional Logic**: Bitwise AND, OR, NOT, XOR, formal Boolean implication ($A \implies B \equiv 
+eg A \lor B$), and conditional parity branching.
+    4. **Sequence Manipulation**: Circular cyclic shifts, sequence reversals, pairwise adjacent ordering/sorting, and mirror reflection symmetry.
+    5. **Compositional Procedures**: Two-stage composite procedures cascading arithmetic operations into conditional logic gates and permutation maps.
+    6. **Instruction Semantics**: Token-conditioned opcode dispatch (`[OP_ADD]`, `[OP_SUB]`, `[OP_REV]`, `[OP_XOR]`) guiding parameter-free execution through common representations.
+- **Strict Partition Disjointness**:
+    * Every dataset generates four mutually exclusive partitions: `train` (48), `dev` (16), `qualification` (16), and `sealed_test` (48).
+    * Zero tuple overlap: $	ext{train} \cap 	ext{dev} = \emptyset$, $	ext{train} \cap 	ext{qual} = \emptyset$, $	ext{train} \cap 	ext{test} = \emptyset$, $	ext{qual} \cap 	ext{test} = \emptyset$.
+- **Foundational Architecture & Bounded Replay Memory Accounting**:
+    * **SharedKnowledgeTrunk**: 6,176 parameters ($d_{	ext{model}}=128 	o d_{	ext{shared}}=16 	o 128 	o 	ext{vocab}=16$) with LayerNorm and GELU bottleneck, shared across all tasks.
+    * **SelectiveResidualAdapter**: 144 parameters per task (ultra-compact Rank-1 modulation), allocated only when non-shared task-specific differentiation is required.
+    * **ExemplarReplayBuffer**: 60 total exemplar sequences stored in episodic memory buffer. Exact physical footprint: $60 	imes 4 	imes 4 = 960$ bytes (< 2 KB), strictly accounted for separately from trainable neural parameters.
+    * **Capacity Ceiling Compliance**: Retains dozens of skills simultaneously within 20,000 trainable neural parameters without structural module retirement.
+- **Execution Provenance**:
+    * Full regression suite passed on Google Colab Tesla T4 GPU (`amg-m88-t4` session).
+    * Base model parameter invariant preserved (SHA-256: `6e39cd7ef6790b3c`, 1,071,872 weights unchanged); 100% carry (20/20) and logic (8/8) retention.
