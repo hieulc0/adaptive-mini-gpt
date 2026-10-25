@@ -70,6 +70,7 @@ def test_m99_forensic_audit_and_causal_ablation(device: torch.device):
 
 def test_backbone_integrated_forward_and_causal_ablation(device: torch.device):
     """Verify in M100 that the 1,071,872 backbone participates directly in forward inference."""
+    torch.manual_seed(42)
     student = IntegratedAutonomousStudentM100(tier=CapacityTierM100.TIER_20K, device=device)
     assert sum(p.numel() for p in student.backbone.parameters()) == 1_071_872
 
@@ -88,6 +89,7 @@ def test_backbone_integrated_forward_and_causal_ablation(device: torch.device):
 
 def test_two_speed_plasticity_and_consolidation_rollback(device: torch.device):
     """Verify fast adapter updates and safe selective backbone consolidation with rollback."""
+    torch.manual_seed(42)
     student = IntegratedAutonomousStudentM100(tier=CapacityTierM100.TIER_20K, device=device)
     gen = MultiSubjectCurriculumGenerator(seed=42, device=device)
     gen.generate_full_curriculum()[0]
@@ -122,6 +124,7 @@ def test_two_speed_plasticity_and_consolidation_rollback(device: torch.device):
 
 def test_verified_structural_evolution_tiers(device: torch.device):
     """Verify configurable capacity tiers (20k, 30k, 50k, 100k, adaptive) and expansion."""
+    torch.manual_seed(42)
     student = IntegratedAutonomousStudentM100(tier=CapacityTierM100.TIER_20K, device=device)
     acct_20k = student.evolution_engine.get_accounting(student)
     assert acct_20k.backbone_weights == 1_071_872
@@ -170,6 +173,7 @@ def test_multi_subject_curriculum_and_verifiers(device: torch.device):
 
 def test_autonomous_learning_cycle_10_steps(device: torch.device):
     """Verify execution of the 10-step autonomous learning cycle."""
+    torch.manual_seed(42)
     student = IntegratedAutonomousStudentM100(tier=CapacityTierM100.TIER_20K, device=device)
     gen = MultiSubjectCurriculumGenerator(seed=42, device=device)
     goals = gen.generate_full_curriculum()
@@ -187,6 +191,7 @@ def test_autonomous_learning_cycle_10_steps(device: torch.device):
 
 def test_causal_controls_future_learning_comparison(device: torch.device):
     """Verify Condition C outperforms Condition B on sealed target tasks."""
+    torch.manual_seed(42)
     student = IntegratedAutonomousStudentM100(tier=CapacityTierM100.TIER_20K, device=device)
     evaluator = FutureLearningEvaluatorM100(device=device)
 
@@ -201,6 +206,7 @@ def test_causal_controls_future_learning_comparison(device: torch.device):
 
 def test_persistent_operation_and_crash_recovery(device: torch.device):
     """Verify bit-exact checkpoint serialization, process interruption, and reload."""
+    torch.manual_seed(42)
     with tempfile.TemporaryDirectory() as tmp_dir:
         student = IntegratedAutonomousStudentM100(tier=CapacityTierM100.TIER_20K, device=device)
         student.step_counter = 42
@@ -222,3 +228,4 @@ def test_persistent_operation_and_crash_recovery(device: torch.device):
         p1 = student.forward(sample).argmax(dim=-1)
         p2 = reloaded.forward(sample).argmax(dim=-1)
         assert (p1 == p2).all().item() is True
+        torch.manual_seed(42)
