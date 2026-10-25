@@ -224,8 +224,8 @@ def test_four_student_future_learning_evaluation(device: torch.device):
     substrate.eval()
 
     evaluator = FutureLearningEvaluator(device=device)
-    tgt_train = [(x, OP_ADD, (x + 7) % MODULUS, (2 * x + 7) % MODULUS) for x in range(12)]
-    tgt_test = [(x, OP_ADD, (x + 7) % MODULUS, (2 * x + 7) % MODULUS) for x in range(12, 16)]
+    tgt_train = [(x, OP_ADD, (x * 2 + 5) % MODULUS, (3 * x + 5) % MODULUS) for x in range(12)]
+    tgt_test = [(x, OP_ADD, (x * 2 + 5) % MODULUS, (3 * x + 5) % MODULUS) for x in range(12, 16)]
     anchor_ex = [(x, OP_ADD, 2, (x + 2) % MODULUS) for x in range(4)]
 
     res = evaluator.evaluate_target_family(

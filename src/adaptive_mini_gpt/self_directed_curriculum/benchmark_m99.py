@@ -270,8 +270,8 @@ class M99CurriculumDiscoveryBenchmark:
             # 4. Future-Learning Evaluation on Held-Out Target Tasks
             # Target family: unfamiliar composite function y = (2*x + 7) % 16
             evaluator = FutureLearningEvaluator(device=device)
-            tgt_train = [(x, OP_ADD, (x + 7) % MODULUS, (2 * x + 7) % MODULUS) for x in range(12)]
-            tgt_test = [(x, OP_ADD, (x + 7) % MODULUS, (2 * x + 7) % MODULUS) for x in range(12, 16)]
+            tgt_train = [(x, OP_ADD, (x * 2 + 5) % MODULUS, (3 * x + 5) % MODULUS) for x in range(12)]
+            tgt_test = [(x, OP_ADD, (x * 2 + 5) % MODULUS, (3 * x + 5) % MODULUS) for x in range(12, 16)]
             anchor_ex = [(x, OP_ADD, 2, (x + 2) % MODULUS) for x in range(8)]
 
             four_res = evaluator.evaluate_target_family(
@@ -365,6 +365,18 @@ class M99CurriculumDiscoveryBenchmark:
         gate_g9 = (max_mem <= 262_144)
         # G10: Epistemic Integrity & Restart Recovery
         gate_g10 = (mean_noise_abstain >= 90.0) and all_recovered
+
+        print("\n--- Acceptance Gates Scorecard ---")
+        print(f"G1 (Autonomous Goal Selection): {gate_g1}")
+        print(f"G2 (Curriculum Efficiency >= 20%): {gate_g2} (mean_adv={mean_curr_adv:.2f}%)")
+        print(f"G3 (Uncertainty & Progress Synergy): {gate_g3} (d={mean_d_steps:.1f}, b={mean_b_steps:.1f}, a={mean_a_steps:.1f})")
+        print(f"G4 (Active Experiment Design EIG): {gate_g4} (active={mean_active_eig:.3f}, random={mean_random_eig:.3f})")
+        print(f"G5 (New-Skill Acquisition >= 80%): {gate_g5} (mean_skill_em={mean_skill_em:.2f}%)")
+        print(f"G6 (Future-Learning Attribution): {gate_g6} (d={mean_d_steps:.1f} <= c={mean_c_steps:.1f} < b={mean_b_steps:.1f})")
+        print(f"G7 (Long-Term Retention >= 90%): {gate_g7} (mean_retention={mean_retention:.2f}%)")
+        print(f"G8 (Adaptive Capacity Budget): {gate_g8} ({p_count} <= {ceiling})")
+        print(f"G9 (External Memory Budget <= 256 KiB): {gate_g9} ({max_mem} <= 262144)")
+        print(f"G10 (Integrity & Recovery): {gate_g10} (noise_abstain={mean_noise_abstain:.2f}%, recovered={all_recovered})")
 
         overall_pass = all([
             gate_g1, gate_g2, gate_g3, gate_g4, gate_g5, gate_g6, gate_g7, gate_g8, gate_g9, gate_g10

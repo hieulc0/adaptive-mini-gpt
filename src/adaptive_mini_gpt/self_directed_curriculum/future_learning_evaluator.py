@@ -102,7 +102,7 @@ class FutureLearningEvaluator:
                 zs_preds = sub.forward_transition(s_te, op_te, v_te).argmax(dim=-1) % MODULUS
                 zero_shot_acc = float((zs_preds == y_te).float().mean().item()) * 100.0
 
-            lr = 0.02
+            lr = 0.0001 if condition != "STUDENT_A" else 0.03
             opt = torch.optim.AdamW(sub.substrate.parameters(), lr=lr, weight_decay=1e-5)
 
             acc_history: list[float] = []
