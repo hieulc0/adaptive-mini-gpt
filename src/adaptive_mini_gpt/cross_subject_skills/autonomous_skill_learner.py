@@ -139,8 +139,8 @@ class AutonomousSkillLearner:
                     break
 
             elif student_type == StudentType.STUDENT_B_EXPERIENCED_FIXED:
-                # Student B uses fixed step threshold (e.g. standard 25 steps)
-                if test_acc >= qualification_threshold and step >= 25:
+                # Student B uses fixed step threshold (standard 20 steps)
+                if test_acc >= qualification_threshold and step >= 20:
                     break
 
             else:

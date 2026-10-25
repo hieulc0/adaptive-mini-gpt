@@ -126,8 +126,8 @@ class M98CrossSubjectBenchmark:
         device: torch.device,
         seeds: list[int] = [42, 43, 44, 45, 46],
         output_dir: str = "runs/m98_output",
-        epochs_trunk: int = 250,
-        lr_trunk: float = 0.01,
+        epochs_trunk: int = 80,
+        lr_trunk: float = 0.03,
     ) -> dict[str, Any]:
         """Execute full Milestone M98 multi-seed evaluation."""
         print("=== Milestone M98: Autonomous Cross-Subject Skill Acquisition & Continual Learning ===")
@@ -155,30 +155,27 @@ class M98CrossSubjectBenchmark:
             # 1. Initialize Substrate with pre-trained foundational trunk
             substrate = CrossSubjectReasoningSubstrate(budget_ceiling=20_000, device=device)
 
-            # Pretrain concept trunk on foundational operations
-            S = torch.arange(MODULUS, device=device)
-            V = torch.arange(MODULUS, device=device)
-            all_s = torch.cat([S, S, S, S, S, S, S, S])
+            # Pretrain concept trunk on all 16x16 pairs of foundational operations
+            grid_s, grid_v = torch.meshgrid(
+                torch.arange(MODULUS, device=device),
+                torch.arange(MODULUS, device=device),
+                indexing="ij",
+            )
+            grid_s = grid_s.reshape(-1)
+            grid_v = grid_v.reshape(-1)
+            all_s = torch.cat([grid_s, grid_s, grid_s, grid_s])
             all_op = torch.cat([
-                torch.full_like(S, OP_ASSIGN),
-                torch.full_like(S, OP_ADD),
-                torch.full_like(S, OP_SUB),
-                torch.full_like(S, OP_IF_GT),
-                torch.full_like(S, OP_ASSIGN),
-                torch.full_like(S, OP_ADD),
-                torch.full_like(S, OP_SUB),
-                torch.full_like(S, OP_ASSIGN),
+                torch.full_like(grid_s, OP_ASSIGN),
+                torch.full_like(grid_s, OP_ADD),
+                torch.full_like(grid_s, OP_SUB),
+                torch.full_like(grid_s, OP_IF_GT),
             ])
-            all_v = torch.cat([V, V, V, V, V, V, V, V])
+            all_v = torch.cat([grid_v, grid_v, grid_v, grid_v])
             all_y = torch.cat([
-                V,
-                (S + V) % MODULUS,
-                (S - V) % MODULUS,
-                torch.where(S > V, torch.ones_like(S), torch.zeros_like(S)),
-                V,
-                (S + V) % MODULUS,
-                (S - V) % MODULUS,
-                V,
+                grid_v,
+                (grid_s + grid_v) % MODULUS,
+                (grid_s - grid_v) % MODULUS,
+                torch.where(grid_s > grid_v, torch.ones_like(grid_s), torch.zeros_like(grid_s)),
             ])
             opt_trunk = torch.optim.AdamW(substrate.substrate.parameters(), lr=lr_trunk, weight_decay=1e-5)
             for _ in range(epochs_trunk):
@@ -212,7 +209,7 @@ class M98CrossSubjectBenchmark:
 
             # Student B: Experienced student with retained weights, but fixed heuristic policy
             res_b = learner.adapt_student(
-                student_substrate=substrate,
+                student_substrate=copy.deepcopy(substrate),
                 student_type=StudentType.STUDENT_B_EXPERIENCED_FIXED,
                 subject="algebra",
                 train_examples=train_examples,
@@ -223,7 +220,7 @@ class M98CrossSubjectBenchmark:
 
             # Student C: Experienced student with retained weights AND learned adaptive policy
             res_c = learner.adapt_student(
-                student_substrate=substrate,
+                student_substrate=copy.deepcopy(substrate),
                 student_type=StudentType.STUDENT_C_EXPERIENCED_LEARNED,
                 subject="algebra",
                 train_examples=train_examples,
@@ -322,7 +319,7 @@ class M98CrossSubjectBenchmark:
         gate_g2 = (mean_comp >= 75.0)
         # G3: Experience Advantage >= 20%
         gate_g3 = (mean_exp_adv >= 20.0)
-        # G4: Meta-Learning Attribution: Student C outperforms Student B (meta_adv > 0)
+        # G4: Meta-Learning Attribution: Student C outperforms Student B (meta_adv >= 10%)
         gate_g4 = (mean_meta_adv >= 10.0)
         # G5: Previous Skill Retention >= 90%
         gate_g5 = (mean_retention >= 90.0)
@@ -459,8 +456,7 @@ Key Breakthroughs:
 ## 4. Phase 5 — Resource Accounting
 
 | Resource Category | Budget Ceiling | Actual Footprint | Utilization (%) | Safety Margin |
-| :--- | :---: | :---: | :---: | :---: |
-| **Substrate Parameters** | — | **17,116 params** | — | — |
+| :--- | :---: | :---: | :---: | :---: |\n| **Substrate Parameters** | — | **17,116 params** | — | — |
 | **Acquisition Controller** | — | **1,835 params** | — | — |
 | **Total Persistent Trainable Parameters** | 20,000 params | **{report.trainable_neural_parameters:,} params** | **{(report.trainable_neural_parameters / 20000)*100:.1f}%** | **{report.budget_headroom:,} headroom** |
 | **External Memory Footprint** | 262,144 Bytes (256 KiB) | **{report.external_memory_bytes:,} Bytes** | **{(report.external_memory_bytes / 262144)*100:.1f}%** | **{(262144 - report.external_memory_bytes)/1024:.1f} KiB headroom** |
