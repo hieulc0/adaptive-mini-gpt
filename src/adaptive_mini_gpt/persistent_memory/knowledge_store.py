@@ -209,11 +209,15 @@ class PersistentKnowledgeStore:
 
     def search_facts(self, query: str) -> list[FactualRecord]:
         """Find active factual records matching query tokens."""
-        tokens = [t.strip().lower() for t in query.split() if len(t.strip()) > 1]
+        clean_q = query.replace("_", " ").replace("-", " ").lower()
+        tokens = [t.strip() for t in clean_q.split() if len(t.strip()) > 1]
         matching_ids: set[str] = set()
         for tok in tokens:
             if tok in self.inverted_index:
                 matching_ids.update(self.inverted_index[tok])
+            for indexed_tok, rids in self.inverted_index.items():
+                if tok in indexed_tok or indexed_tok in tok:
+                    matching_ids.update(rids)
 
         results = []
         for rid in matching_ids:
@@ -272,8 +276,9 @@ class PersistentKnowledgeStore:
         self.enforce_budget()
 
     def _index_tokens(self, record_id: str, text: str) -> None:
-        for word in text.split():
-            clean = word.strip().lower()
+        clean_text = text.replace("_", " ").replace("-", " ").lower()
+        for word in clean_text.split():
+            clean = word.strip()
             if len(clean) > 1:
                 if clean not in self.inverted_index:
                     self.inverted_index[clean] = set()
