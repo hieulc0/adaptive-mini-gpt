@@ -35,7 +35,7 @@ from adaptive_mini_gpt.integrated_autonomous_student.two_speed_plasticity_manage
 from adaptive_mini_gpt.self_directed_curriculum.curriculum_policy import (
     CurriculumDiscoveryPolicy,
 )
-from adaptive_mini_gpt.meta_acquisition.learned_acquisition_controller import (
+from adaptive_mini_gpt.meta_acquisition.controller import (
     LearnedAcquisitionController,
 )
 from adaptive_mini_gpt.model.config import ModelConfig
