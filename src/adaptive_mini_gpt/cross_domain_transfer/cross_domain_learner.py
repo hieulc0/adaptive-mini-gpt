@@ -57,7 +57,7 @@ class CrossDomainLearner:
         device: torch.device,
         is_experienced: bool = True,
         max_steps: int = 60,
-        eval_every: int = 10,
+        eval_every: int = 5,
         lr: float = 0.02,
         qualification_threshold_em: float = 80.0,
     ) -> AdaptationTrajectory:
@@ -74,7 +74,12 @@ class CrossDomainLearner:
             sub.add_domain_residual(dom_key)
 
         res_mod = sub.domain_residuals[dom_key]
-        optimizer = torch.optim.AdamW(res_mod.parameters(), lr=lr, weight_decay=1e-4)
+        if is_experienced:
+            # Experienced student has frozen concept trunk and only adapts domain perception
+            optimizer = torch.optim.AdamW(res_mod.parameters(), lr=lr, weight_decay=1e-4)
+        else:
+            # Fresh student has no prior computational concepts and must train from scratch
+            optimizer = torch.optim.AdamW(sub.parameters(), lr=0.01, weight_decay=1e-4)
 
         # Extract training transitions
         s_list, op_list, v_list, y_list = [], [], [], []

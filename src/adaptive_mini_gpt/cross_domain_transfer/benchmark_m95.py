@@ -248,7 +248,7 @@ class M95CrossDomainBenchmark:
                 device=device,
                 is_experienced=False,
                 max_steps=60,
-                eval_every=10,
+                eval_every=5,
             )
 
             traj_exp_nl = CrossDomainLearner.evaluate_learning_trajectory(
@@ -259,7 +259,7 @@ class M95CrossDomainBenchmark:
                 device=device,
                 is_experienced=True,
                 max_steps=60,
-                eval_every=10,
+                eval_every=5,
             )
 
             step_red_pct = 0.0
@@ -276,26 +276,25 @@ class M95CrossDomainBenchmark:
             auc_adv = round(traj_exp_nl.auc - traj_fresh_nl.auc, 4)
 
             # Adapt substrate domain residuals for target domains NL & Planning
-            opt_targets = torch.optim.AdamW(
-                list(substrate.domain_residuals[Domain.NATURAL_LANGUAGE.value].parameters())
-                + list(substrate.domain_residuals[Domain.PLANNING.value].parameters()),
-                lr=0.02,
-            )
-            target_trans = []
-            for ex in suite_nl["train"] + suite_plan["train"]:
-                target_trans.extend(CrossDomainTransferEngine.decompose_example_steps(ex))
-            if target_trans:
-                ts = torch.tensor([t[0] for t in target_trans], dtype=torch.long, device=device)
-                top = torch.tensor([t[1] for t in target_trans], dtype=torch.long, device=device)
-                tv = torch.tensor([t[2] for t in target_trans], dtype=torch.long, device=device)
-                ty = torch.tensor([t[3] for t in target_trans], dtype=torch.long, device=device)
-                for _ in range(40):
-                    substrate.train()
-                    l_t = substrate.forward_transition(ts, top, tv)
-                    loss_t = F.cross_entropy(l_t, ty)
-                    opt_targets.zero_grad()
-                    loss_t.backward()
-                    opt_targets.step()
+            for dom, suite in [(Domain.NATURAL_LANGUAGE, suite_nl), (Domain.PLANNING, suite_plan)]:
+                opt_d = torch.optim.AdamW(
+                    substrate.domain_residuals[dom.value].parameters(), lr=0.02
+                )
+                trans = []
+                for ex in suite["train"]:
+                    trans.extend(CrossDomainTransferEngine.decompose_example_steps(ex))
+                if trans:
+                    ts = torch.tensor([t[0] for t in trans], dtype=torch.long, device=device)
+                    top = torch.tensor([t[1] for t in trans], dtype=torch.long, device=device)
+                    tv = torch.tensor([t[2] for t in trans], dtype=torch.long, device=device)
+                    ty = torch.tensor([t[3] for t in trans], dtype=torch.long, device=device)
+                    for _ in range(40):
+                        substrate.train()
+                        l_t = substrate.forward_transition(ts, top, tv, domain_key=dom.value)
+                        loss_t = F.cross_entropy(l_t, ty)
+                        opt_d.zero_grad()
+                        loss_t.backward()
+                        opt_d.step()
 
             # 5. Phase 2: 7-Arm Evaluation on Combined Held-Out Sets
             all_held_out = suite_prog["held_out"] + suite_nl["held_out"] + suite_plan["held_out"]
@@ -607,7 +606,7 @@ Evaluated across 5 independent seeds on held-out tasks:
 
 | Evaluation Metric | Fresh Student (Arm 1) | Experienced Student (Arm 3) | Transfer Advantage |
 | :--- | :---: | :---: | :---: |
-| **Steps to Qualification ($\\ge 80\\%$)** | **{r.mean_fresh_steps_to_qual:.1f} steps** | **{r.mean_experienced_steps_to_qual:.1f} steps** | **-{r.mean_step_reduction_pct}% steps** |
+| **Steps to Qualification ($\\ge 80\\%$)** | **{r.mean_fresh_steps_to_qual:.1f} steps** | **{r.mean_experienced_steps_to_qual:.1f} steps** | **{r.mean_step_reduction_pct}% reduction** |
 | **Normalized Area Under Curve (AUC)** | Lower initial progress | Rapid few-shot convergence | **+{r.mean_auc_advantage} AUC advantage** |
 
 ---
@@ -630,7 +629,7 @@ Evaluated across 5 independent seeds on held-out tasks:
 | Gate | Target Requirement | Measured Result | Verdict |
 | :--- | :--- | :---: | :---: |
 | **G1: Cross-Domain Zero-Shot Transfer** | Above memorization control ($> Arm 6 + 5.0\\%$) | **{r.mean_arm2_zero_shot_em}% vs {r.mean_arm6_memorization_em}%** | **{"PASS" if r.gate_zero_shot_passed else "FAIL"}** |
-| **G2: Few-Shot Positive Transfer** | Reduce steps to qualification by $\\ge 20.0\\%$ vs Fresh | **-{r.mean_step_reduction_pct}% steps** | **{"PASS" if r.gate_few_shot_reduction_passed else "FAIL"}** |
+| **G2: Few-Shot Positive Transfer** | Reduce steps to qualification by $\\ge 20.0\\%$ vs Fresh | **{r.mean_step_reduction_pct}% reduction** | **{"PASS" if r.gate_few_shot_reduction_passed else "FAIL"}** |
 | **G3: Compositional Generalization** | $\\ge 80.0\\%$ on held-out compositions | **{r.mean_compositional_em}%** | **{"PASS" if r.gate_compositional_passed else "FAIL"}** |
 | **G4: Concept Reuse & Causal Attribution** | Ablating source concept weights drops $\\ge 50.0\\%$ | **-{r.mean_causal_ablation_drop_pct}%** | **{"PASS" if r.gate_causal_concept_reuse_passed else "FAIL"}** |
 | **G5: Transfer Beyond Surface Syntax** | $\\ge 85.0\\%$ on unseen rephrasings/templates | **{r.mean_unseen_syntax_em}%** | **{"PASS" if r.gate_unseen_syntax_passed else "FAIL"}** |

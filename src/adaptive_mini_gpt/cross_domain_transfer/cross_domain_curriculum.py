@@ -338,6 +338,7 @@ class CrossDomainCurriculumGenerator:
             token_ids=CrossDomainTokenizer.tokenize(text),
             expected_output=out,
             intermediate_trace=trace,
+            metadata={"val": out, "var_name": var_name},
         )
 
     def _make_arithmetic_example(
@@ -366,6 +367,7 @@ class CrossDomainCurriculumGenerator:
             token_ids=CrossDomainTokenizer.tokenize(text),
             expected_output=out,
             intermediate_trace=trace,
+            metadata={"v0": v0_mod, "op": op, "k": k_mod, "out": out},
         )
 
     def _make_condition_example(
@@ -401,6 +403,15 @@ class CrossDomainCurriculumGenerator:
             token_ids=CrossDomainTokenizer.tokenize(text),
             expected_output=out,
             intermediate_trace=trace,
+            metadata={
+                "v0": v0_mod,
+                "cmp_op": cmp_op,
+                "thresh": th_mod,
+                "delta_true": 3,
+                "delta_false": 1,
+                "cond": cond,
+                "out": out,
+            },
         )
 
     def _make_loop_example(
@@ -428,6 +439,7 @@ class CrossDomainCurriculumGenerator:
             token_ids=CrossDomainTokenizer.tokenize(text),
             expected_output=curr,
             intermediate_trace=trace,
+            metadata={"v0": v0 % MODULUS, "reps": reps, "step": step, "out": curr},
         )
 
     def _make_nested_example(
@@ -435,7 +447,7 @@ class CrossDomainCurriculumGenerator:
     ) -> CrossDomainExample:
         curr = v0 % MODULUS
         trace = [curr]
-        # Repetition sequence: items are [2, 5, 1, 6][:reps]
+        # Repetition sequence: items are [2, 5, 1, 6, 3][:reps]
         items = [2, 5, 1, 6, 3][:reps]
         for it in items:
             if it > thresh:
@@ -458,6 +470,7 @@ class CrossDomainCurriculumGenerator:
             token_ids=CrossDomainTokenizer.tokenize(text),
             expected_output=curr,
             intermediate_trace=trace,
+            metadata={"v0": v0 % MODULUS, "items": items, "thresh": thresh, "out": curr},
         )
 
     def _make_unsupported_example(

@@ -60,8 +60,7 @@ class ModularRank2Residual(nn.Module):
         nn.init.zeros_(self.up.weight)  # Zero initialization preserves base output
 
     def forward(self, h: torch.Tensor) -> torch.Tensor:
-        z = F.gelu(self.norm(self.down(h)))
-        return self.up(z)
+        z = F.gelu(self.norm(self.down(h)))\n        return self.up(z)
 
     def count_parameters(self) -> int:
         return sum(p.numel() for p in self.parameters())
@@ -209,67 +208,57 @@ class CrossDomainTransferEngine:
 
         text = example.raw_text.lower()
         concept = example.concept
+        m = example.metadata or {}
 
         if concept == ComputationalConcept.ASSIGN:
-            # Extract target value
-            out = example.expected_output if example.expected_output is not None else 0
+            out = m.get("val", example.expected_output if example.expected_output is not None else 0)
             transitions.append((0, OP_ASSIGN, out, out))
 
         elif concept == ComputationalConcept.ARITHMETIC:
-            t = example.intermediate_trace
-            v0 = t[0] if len(t) > 0 else 0
-            out = t[1] if len(t) > 1 else v0
-            op = OP_SUB if ("sub" in text or "-" in text or "decrease" in text) else OP_ADD
-            # k = (out - v0) or (v0 - out)
-            k = (out - v0) % MODULUS if op == OP_ADD else (v0 - out) % MODULUS
-            transitions.append((v0, op, k, out))
+            v0 = m.get("v0", example.intermediate_trace[0] if example.intermediate_trace else 0)
+            op_str = m.get("op", "+" if ("add" in text or "+" in text or "increase" in text) else "-")
+            op_code = OP_ADD if op_str == "+" else OP_SUB
+            k = m.get("k", (example.intermediate_trace[1] - v0) % MODULUS if len(example.intermediate_trace) > 1 else 1)
+            out = m.get("out", (v0 + k) % MODULUS if op_code == OP_ADD else (v0 - k) % MODULUS)
+            transitions.append((v0, op_code, k, out))
 
         elif concept == ComputationalConcept.CONDITION:
-            t = example.intermediate_trace
-            v0 = t[0] if len(t) > 0 else 0
-            cond_bit = t[1] if len(t) > 1 else 1
-            out = t[2] if len(t) > 2 else v0
-
-            # Determine comparison operator
-            if "gt" in text or ">" in text or "greater" in text or "exceeds" in text:
-                cmp_op = OP_IF_GT
-            elif "lt" in text or "<" in text or "less" in text:
-                cmp_op = OP_IF_LT
-            else:
-                cmp_op = OP_IF_EQ
-
-            # Extract threshold from text
-            words = text.replace("(", " ").replace(")", " ").replace(":", " ").split()
-            thresh = 3
-            for idx, w in enumerate(words):
-                if w in [">", "<", "==", "than", "to", "gt", "lt", "eq"] and idx + 1 < len(words):
-                    nxt = words[idx + 1]
-                    if nxt.isdigit():
-                        thresh = int(nxt) % MODULUS
-                        break
+            v0 = m.get("v0", example.intermediate_trace[0] if example.intermediate_trace else 0)
+            cmp_str = m.get("cmp_op", ">" if ("greater" in text or ">" in text or "gt" in text or "exceeds" in text) else ("<" if ("less" in text or "<" in text or "lt" in text) else "=="))
+            cmp_op = OP_IF_GT if cmp_str == ">" else (OP_IF_LT if cmp_str == "<" else OP_IF_EQ)
+            thresh = m.get("thresh", 3)
+            delta_true = m.get("delta_true", 3)
+            delta_false = m.get("delta_false", 1)
+            cond = m.get("cond", v0 > thresh if cmp_str == ">" else (v0 < thresh if cmp_str == "<" else v0 == thresh))
+            cond_bit = 1 if cond else 0
+            delta = delta_true if cond else delta_false
+            out = m.get("out", (v0 + delta) % MODULUS)
 
             transitions.append((v0, cmp_op, thresh, cond_bit))
-            delta = 3 if cond_bit == 1 else 1
             transitions.append((v0, OP_ADD, delta, out))
 
         elif concept == ComputationalConcept.LOOP:
-            t = example.intermediate_trace
-            v0 = t[0] if len(t) > 0 else 0
+            v0 = m.get("v0", example.intermediate_trace[0] if example.intermediate_trace else 0)
+            reps = m.get("reps", len(example.intermediate_trace) - 1 if example.intermediate_trace else 2)
+            step = m.get("step", 2)
             curr = v0
-            for next_v in t[1:]:
-                step = (next_v - curr) % MODULUS
+            for _ in range(reps):
+                next_v = (curr + step) % MODULUS
                 transitions.append((curr, OP_FOR_STEP, step, next_v))
                 curr = next_v
 
         elif concept == ComputationalConcept.NESTED_FILTER:
-            t = example.intermediate_trace
-            curr = t[0] if len(t) > 0 else 0
-            for next_v in t[1:]:
-                step = (next_v - curr) % MODULUS
-                if step > 0:
-                    transitions.append((curr, OP_IF_GT, 2, 1))
-                    transitions.append((curr, OP_ADD, step, next_v))
-                curr = next_v
+            v0 = m.get("v0", example.intermediate_trace[0] if example.intermediate_trace else 0)
+            items = m.get("items", [2, 5, 1, 6, 3][:3])
+            thresh = m.get("thresh", 2)
+            curr = v0
+            for it in items:
+                is_gt = 1 if it > thresh else 0
+                transitions.append((it, OP_IF_GT, thresh, is_gt))
+                if is_gt == 1:
+                    next_curr = (curr + it) % MODULUS
+                    transitions.append((curr, OP_ADD, it, next_curr))
+                    curr = next_curr
 
         return transitions
 
@@ -292,38 +281,131 @@ class CrossDomainTransferEngine:
                 is_abstention=True,
             )
 
-        transitions = cls.decompose_example_steps(example)
-        if not transitions:
-            return CrossDomainExecutionResult(0, [0], 1.0, False)
-
-        curr_state = transitions[0][0]
-        trace: list[int] = [curr_state]
-        conf_scores: list[float] = []
-
-        for step_idx, (_s_in, op_c, op_v, _tgt) in enumerate(transitions):
-            if perturb_step is not None and step_idx == perturb_step:
-                curr_state = (curr_state + 7) % MODULUS  # Causal perturbation
-
-            s_t = torch.tensor([curr_state], dtype=torch.long, device=device)
-            op_t = torch.tensor([op_c], dtype=torch.long, device=device)
-            v_t = torch.tensor([op_v], dtype=torch.long, device=device)
-
+        def step_neural(s_in: int, op_c: int, op_v: int) -> tuple[int, float]:
+            s_t = torch.tensor([s_in % MODULUS], dtype=torch.long, device=device)
+            op_t = torch.tensor([op_c % 8], dtype=torch.long, device=device)
+            v_t = torch.tensor([op_v % MODULUS], dtype=torch.long, device=device)
             logits = substrate.forward_transition(
                 s_t, op_t, v_t, domain_key=domain_key, concept_key=concept_key
             )
             pred = int(logits.argmax(dim=-1).item())
-            curr_state = pred % MODULUS
-            trace.append(curr_state)
+            prob = float(F.softmax(logits, dim=-1)[0, pred].item())
+            return pred, prob
 
-            probs = F.softmax(logits, dim=-1)
-            conf_scores.append(float(probs[0, pred].item()))
+        concept = example.concept
+        text = example.raw_text.lower()
+        m = example.metadata or {}
+        conf_scores: list[float] = []
 
-        mean_conf = sum(conf_scores) / max(len(conf_scores), 1) if conf_scores else 1.0
-        final_out = trace[-1]
+        if concept == ComputationalConcept.ASSIGN:
+            val = m.get("val", example.expected_output if example.expected_output is not None else 0)
+            pred, p = step_neural(0, OP_ASSIGN, val)
+            conf_scores.append(p)
+            out = pred % MODULUS
+            return CrossDomainExecutionResult(
+                predicted_output=out,
+                intermediate_trace=[out],
+                confidence=p,
+                is_abstention=out == 16,
+            )
 
-        return CrossDomainExecutionResult(
-            predicted_output=final_out,
-            intermediate_trace=trace,
-            confidence=mean_conf,
-            is_abstention=final_out == 16,
-        )
+        elif concept == ComputationalConcept.ARITHMETIC:
+            v0 = m.get("v0", example.intermediate_trace[0] if example.intermediate_trace else 0)
+            op_str = m.get("op", "+" if ("add" in text or "+" in text or "increase" in text) else "-")
+            op_code = OP_ADD if op_str == "+" else OP_SUB
+            k = m.get("k", (example.intermediate_trace[1] - v0) % MODULUS if len(example.intermediate_trace) > 1 else 1)
+            if perturb_step == 0:
+                v0 = (v0 + 7) % MODULUS
+            pred, p = step_neural(v0, op_code, k)
+            conf_scores.append(p)
+            out = pred % MODULUS
+            return CrossDomainExecutionResult(
+                predicted_output=out,
+                intermediate_trace=[v0, out],
+                confidence=p,
+                is_abstention=out == 16,
+            )
+
+        elif concept == ComputationalConcept.CONDITION:
+            v0 = m.get("v0", example.intermediate_trace[0] if example.intermediate_trace else 0)
+            cmp_str = m.get("cmp_op", ">" if ("greater" in text or ">" in text or "gt" in text or "exceeds" in text) else ("<" if ("less" in text or "<" in text or "lt" in text) else "=="))
+            cmp_op = OP_IF_GT if cmp_str == ">" else (OP_IF_LT if cmp_str == "<" else OP_IF_EQ)
+            thresh = m.get("thresh", 3)
+            delta_true = m.get("delta_true", 3)
+            delta_false = m.get("delta_false", 1)
+
+            if perturb_step == 0:
+                v0 = (v0 + 7) % MODULUS
+
+            # Neural condition evaluation
+            cond_pred, p1 = step_neural(v0, cmp_op, thresh)
+            conf_scores.append(p1)
+            cond_bit = 1 if cond_pred == 1 else 0
+
+            # Neural state update based on evaluated condition branch
+            delta = delta_true if cond_bit == 1 else delta_false
+            pred_out, p2 = step_neural(v0, OP_ADD, delta)
+            conf_scores.append(p2)
+            out = pred_out % MODULUS
+            return CrossDomainExecutionResult(
+                predicted_output=out,
+                intermediate_trace=[v0, cond_bit, out],
+                confidence=sum(conf_scores) / len(conf_scores),
+                is_abstention=out == 16,
+            )
+
+        elif concept == ComputationalConcept.LOOP:
+            v0 = m.get("v0", example.intermediate_trace[0] if example.intermediate_trace else 0)
+            reps = m.get("reps", len(example.intermediate_trace) - 1 if example.intermediate_trace else 2)
+            step = m.get("step", 2)
+            curr = v0
+            trace = [curr]
+            for rep in range(reps):
+                if perturb_step == rep:
+                    curr = (curr + 7) % MODULUS
+                pred, p = step_neural(curr, OP_FOR_STEP, step)
+                conf_scores.append(p)
+                curr = pred % MODULUS
+                trace.append(curr)
+
+            mean_conf = sum(conf_scores) / len(conf_scores) if conf_scores else 1.0
+            return CrossDomainExecutionResult(
+                predicted_output=curr,
+                intermediate_trace=trace,
+                confidence=mean_conf,
+                is_abstention=curr == 16,
+            )
+
+        elif concept == ComputationalConcept.NESTED_FILTER:
+            m = example.metadata or {}
+            v0 = m.get("v0", example.intermediate_trace[0] if example.intermediate_trace else 0)
+            items = m.get("items", [2, 5, 1, 6, 3][:3])
+            thresh = m.get("thresh", 2)
+            curr = v0
+            trace = [curr]
+            step_idx = 0
+            for it in items:
+                step_idx += 1
+                if perturb_step == step_idx:
+                    curr = (curr + 7) % MODULUS
+
+                # Step 1: Neural condition evaluation on item
+                cond_pred, p1 = step_neural(it, OP_IF_GT, thresh)
+                conf_scores.append(p1)
+
+                # Step 2: Neural accumulator update if condition satisfied
+                if cond_pred == 1:
+                    acc_pred, p2 = step_neural(curr, OP_ADD, it)
+                    conf_scores.append(p2)
+                    curr = acc_pred % MODULUS
+                trace.append(curr)
+
+            mean_conf = sum(conf_scores) / len(conf_scores) if conf_scores else 1.0
+            return CrossDomainExecutionResult(
+                predicted_output=curr,
+                intermediate_trace=trace,
+                confidence=mean_conf,
+                is_abstention=curr == 16,
+            )
+
+        return CrossDomainExecutionResult(0, [0], 1.0, False)
