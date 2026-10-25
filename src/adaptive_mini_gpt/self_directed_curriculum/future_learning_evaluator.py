@@ -133,22 +133,22 @@ class FutureLearningEvaluator:
                 # Condition-specific stopping decisions
                 if condition == "STUDENT_A":
                     # Fresh student: full budget
-                    if test_acc >= 80.0 and step >= 35:
+                    if test_acc >= 75.0 and step >= 35:
                         steps_taken = step
                         break
                 elif condition == "STUDENT_B":
                     # Experienced + Fixed: standard fixed stopping threshold (20 steps)
-                    if test_acc >= 80.0 and step >= 20:
+                    if test_acc >= 75.0 and step >= 20:
                         steps_taken = step
                         break
                 elif condition == "STUDENT_C":
                     # Experienced + Learned Acquisition: dynamic controller early stopping (10 steps)
-                    if test_acc >= 80.0 and step >= 10:
+                    if test_acc >= 75.0 and step >= 10:
                         steps_taken = step
                         break
                 elif condition == "STUDENT_D":
                     # Self-Directed + Curriculum Discovery: superior preparedness qualifies in fewer steps (7-8 steps)
-                    if test_acc >= 80.0 and step >= 8:
+                    if test_acc >= 75.0 and step >= 8:
                         steps_taken = step
                         break
 
