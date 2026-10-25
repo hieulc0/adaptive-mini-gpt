@@ -34,6 +34,9 @@ from adaptive_mini_gpt.integrated_autonomous_student.two_speed_plasticity_manage
 from adaptive_mini_gpt.meta_acquisition.controller import (
     LearnedAcquisitionController,
 )
+from adaptive_mini_gpt.self_directed_curriculum.curriculum_policy import (
+    CurriculumDiscoveryPolicy,
+)
 from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.persistent_memory.knowledge_store import (
@@ -112,14 +115,12 @@ class PersistentStudentM102_2(nn.Module):
 
         # 4. Auxiliary Controllers
         self.acquisition_controller = LearnedAcquisitionController(
-            state_dim=128,
+            in_features=8,
             hidden_dim=32,
-            action_dim=4,
         )
-        self.curriculum_policy = nn.Sequential(
-            nn.Linear(128, 16),
-            nn.GELU(),
-            nn.Linear(16, 1),
+        self.curriculum_policy = CurriculumDiscoveryPolicy(
+            in_features=5,
+            hidden_dim=16,
         )
 
         # 5. Scientific Retention Manager & Two-Speed Plasticity
