@@ -61,11 +61,10 @@ class CrossSubjectReasoningSubstrate(nn.Module):
     ) -> torch.Tensor:
         """Execute neural transition step through the substrate."""
         return self.substrate.forward_transition(
-            s=s,
-            op=op,
-            v=v,
+            state_val=s,
+            op_code=op,
+            op_val=v,
             domain_key=domain_key,
-            concept_keys=concept_keys,
         )
 
     def evaluate_controller(self, state: AcquisitionState) -> AcquisitionAction:

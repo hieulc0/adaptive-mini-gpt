@@ -70,7 +70,7 @@ class M97ForensicAuditor:
             context_length=128,
             d_model=128,
             n_heads=4,
-            n_layers=2,
+            n_layers=4,
             d_ff=512,
             pos_encoding="absolute",
         )
