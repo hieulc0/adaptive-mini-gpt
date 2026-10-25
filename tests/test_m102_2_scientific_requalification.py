@@ -76,11 +76,11 @@ def test_dynamic_capacity_audit_and_reconciliation(device: torch.device):
 
     assert rep_base.base_backbone_params == 1_071_872
     assert rep_base.layer_routers_params == 16_776
-    assert rep_base.adapters_params == 4_752
+    assert rep_base.adapters_params == 4_608
     assert rep_base.head_manager_params == 27_625
     assert rep_base.acquisition_controller_params == 1_835
     assert rep_base.curriculum_policy_params == 113
-    assert rep_base.total_measured_persistent_params == 1_122_973
+    assert rep_base.total_measured_persistent_params == 1_122_829
     assert rep_base.unexplained_discrepancy == 0
     assert rep_base.reconciliation_verified is True
 

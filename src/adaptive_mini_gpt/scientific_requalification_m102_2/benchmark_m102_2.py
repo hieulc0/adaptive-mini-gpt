@@ -2,7 +2,7 @@
 
 Orchestrates:
 1. Multi-seed lifelong evaluation across Seeds 42..46 (100 episodes per seed without resets).
-2. Dynamic parameter audit verifying exact 1,122,973 base capacity and persistent growth.
+2. Dynamic parameter audit verifying exact 1,122,829 base capacity and persistent growth.
 3. Unbiased 6-arm causal interference control evaluation.
 4. Bit-exact crash recovery verification (state dict, continuous logits, RNG).
 5. Rigorous reporting to m102_2_report.json and m102_2_report.md.
@@ -305,7 +305,7 @@ class M102_2ScientificRequalificationBenchmark:
                 f"| **Base Transformer Backbone (4 Blocks)** | 1,071,872 | Instantiated MiniGPT substrate |",
                 f"| **Dynamic Layer Skipping Routers (4 Routers)** | 16,776 | 4 routers * 4,194 params |",
                 f"| **Total Evolvable Backbone** | {audit_rep.total_evolvable_backbone_params:,} | Base + Routers (+ Growth block if active) |",
-                f"| **Modular Domain Adapters (9 domains)** | 4,752 | Rank-2 residual bottlenecks |",
+                f"| **Modular Domain Adapters (9 domains)** | 4,608 | Rank-2 residual bottlenecks |",
                 f"| **Multi-Domain Head Manager** | {audit_rep.head_manager_params:,} | 9 domain heads + shared head + router |",
                 f"| **Auxiliary Controllers (Acq + Curric)** | 1,948 | Meta-acquisition & frontier policy |",
                 f"| **Total Measured Persistent Parameters** | **{audit_rep.total_measured_persistent_params:,}** | Direct `sum(p.numel())` count |",

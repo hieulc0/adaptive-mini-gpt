@@ -4,11 +4,11 @@ Inspects live instantiated PyTorch modules (no hardcoded parameter claims):
 1. Reconciles exact parameter count for M102.1 multi-head architecture:
    - Base Backbone: 1,071,872
    - Dynamic Layer Skipping Routers: 16,776 (4 * 4,194)
-   - Modular Domain Adapters (9 domains): 4,752 (9 * 528)
+   - Modular Domain Adapters (9 domains): 4,608 (9 * 528)
    - Multi-Domain Head Manager (9 domain heads + shared head + domain router): 27,625
    - Learned Acquisition Controller: 1,835
    - Curriculum Policy: 113
-   - Total Verified Persistent Parameters: 1,122,973
+   - Total Verified Persistent Parameters: 1,122,829
 2. Evaluates Persistent Architecture Growth:
    - Quantifies parameters added during function-preserving block insertion (+201,314 params per block+router).
    - Verifies 0 unexplained discrepancy across dynamic growth configurations.

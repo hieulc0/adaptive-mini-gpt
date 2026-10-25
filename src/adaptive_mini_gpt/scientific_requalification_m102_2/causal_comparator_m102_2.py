@@ -25,6 +25,9 @@ from adaptive_mini_gpt.scientific_requalification_m102_2.curriculum_m102_2 impor
 from adaptive_mini_gpt.scientific_requalification_m102_2.persistent_student_m102_2 import (
     PersistentStudentM102_2,
 )
+from adaptive_mini_gpt.scientific_requalification_m102_2.rehearsal_buffer_m102_2 import (
+    ScientificRetentionManagerM102_2,
+)
 
 MODULUS = 16
 
