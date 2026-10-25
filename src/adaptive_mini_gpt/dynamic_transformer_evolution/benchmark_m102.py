@@ -59,7 +59,7 @@ class M102DynamicTransformerBenchmark:
 
         # Phase 0: Forensic Audit of M101 Worst-Family Collapse
         print("[*] Running Phase 0: Forensic Audit of M101 catastrophic worst-family failure...")
-        audit = M101ForensicAuditor.audit_historical_results()
+        audit = M101ForensicAuditor.audit_historical_results(device=device)
         print(f"    [+] Audit Status: {audit.status}")
         print(f"    [+] M101 Aggregate Retention: {audit.m101_aggregate_retention_pct:.1f}%")
         print(f"    [+] M101 Worst-Family Retention: {audit.m101_worst_family_retention_pct:.1f}%")

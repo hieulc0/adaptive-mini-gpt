@@ -50,7 +50,6 @@ class M101ForensicAuditor:
         goals = curric_gen.generate_full_curriculum()
 
         # 2. Inspect anchor structure in M101
-        # In M101, every domain goal shared the exact same anchor (Foundational ADD)
         sample_anchor = goals[0].anchor_tokens
         all_anchors_identical = all(
             torch.equal(g.anchor_tokens, sample_anchor) for g in goals
@@ -91,3 +90,8 @@ class M101ForensicAuditor:
             remedy_prescription=remedy,
             notes=notes,
         )
+
+    @classmethod
+    def audit_historical_results(cls, device: torch.device | None = None) -> M101ForensicAuditResult:
+        """Alias for execute_audit."""
+        return cls.execute_audit(device=device)
