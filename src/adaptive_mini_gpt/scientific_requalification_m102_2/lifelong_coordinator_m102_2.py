@@ -51,9 +51,10 @@ class LifelongExecutionSummaryM102_2:
     mean_novel_generalization_accuracy: float
     mean_independent_retention: float
     worst_family_independent_retention: float
-    mean_unlabeled_retention: float
-    mean_domain_routing_accuracy: float
-    per_family_retention: dict[str, float]
+    worst_family_domain: str = ""
+    mean_unlabeled_retention: float = 0.0
+    mean_domain_routing_accuracy: float = 0.0
+    per_family_retention: dict[str, float] = field(default_factory=dict)
     episode_census: list[EpisodeTelemetryM102_2] = field(default_factory=list)
 
 
@@ -137,6 +138,7 @@ class LifelongCoordinatorM102_2:
             mean_novel_generalization_accuracy=round(mean_novel, 2),
             mean_independent_retention=final_ret.mean_independent_retention,
             worst_family_independent_retention=final_ret.worst_family_independent_retention,
+            worst_family_domain=final_ret.worst_family_domain,
             mean_unlabeled_retention=final_ret.mean_unlabeled_retention,
             mean_domain_routing_accuracy=final_ret.mean_domain_routing_accuracy,
             per_family_retention=per_fam,
