@@ -99,6 +99,13 @@ Write checkpoints to local temporary paths, verify serialization integrity, and 
 
 ## 2. Headless Google Colab Workflow (`google-colab-cli`)
 
+> [!IMPORTANT]
+> **Colab 503 / Resource Unavailable Fallback Policy**:
+> Google Colab T4 free GPU instances frequently encounter `ColabRequestError: 503 Service Unavailable` or temporary compute pool exhaustion.
+> When allocating a session (`colab new`) returns a 503 error, agents must **NOT** loop or retry Colab.
+> Immediately pivot to **Kaggle Tesla T4 GPU batch execution** as documented in [docs/06-kaggle.md](06-kaggle.md) and `AGENTS.md`.
+
+
 For single-GPU training and qualification on NVIDIA Tesla T4 GPUs, this project uses the headless CLI tool `google-colab-cli` via `uvx`.
 
 ### Key Mental Model for Agents

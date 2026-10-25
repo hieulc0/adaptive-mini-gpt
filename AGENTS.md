@@ -50,28 +50,116 @@ uv run pytest -q tests/<mock_only_test_file>.py
 
 ## 3. Remote execution discipline
 
-### Kaggle (preferred for milestone benchmarks)
+### Remote Platform Selection & Fallback Protocol
 
-- Follow the existing repository's Kaggle CLI/kernel scripts and documented dataset attachment conventions. Pin the precise Git commit and environment; do not invent a second runner.
-- Submit the source and necessary small configs; attach immutable dataset versions or generate inexpensive synthetic worlds from pinned specifications inside Kaggle.
-- Run the **full regression suite and actual GPU benchmark on Kaggle**, including independent seeds/worlds and the required matched controls.
-- Download and inspect machine-readable results, logs, test counts, device details and checkpoint hashes before reporting PASS/FAIL.
-- A submitted or RUNNING kernel is **not** a completed experiment.
+Agents can run on either **Google Colab T4** or **Kaggle Tesla T4**. Follow this strict fallback rule:
+1. **Colab Check**: If attempting Colab, run `uvx --from google-colab-cli colab new -s <session> --gpu T4`. If it returns `503 Service Unavailable`, quota exhaustion, or fails to allocate a GPU, **DO NOT RETRY OR POLL COLAB**.
+2. **Immediate Kaggle Switch**: Instantly pivot to the Kaggle GPU batch workflow described below. Never remain stuck waiting for Colab.
+3. **Kaggle Credentials**: The active Kaggle username is `sparklinghydraulics0`. Repository URL is `https://github.com/hieulc0/adaptive-mini-gpt.git`.
 
-### Google Colab (alternative remote GPU)
+---
 
-- Use the existing **headless, non-interactive** CLI flow; do not require a manual notebook UI during agent execution.
-- Use the supported project command pattern:
+### Kaggle GPU Batch Workflow (Canonical Proven Pattern from M76 & M99)
 
+Kaggle executes remote jobs as script kernels with `enable_gpu: true` and `enable_internet: true`.
+Instead of manually packaging zips or datasets, the runner clones the pinned branch directly from GitHub.
+
+#### Step 1: Git Precondition (MANDATORY)
+Because Kaggle clones directly from GitHub, **you must commit your changes and push the branch to `origin` before submitting the Kaggle job**:
+```bash
+git add <files>
+git commit -m "feat(m<X>): ..."
+git push origin <branch-name>
+```
+*Failure to push to `origin` will cause Kaggle to test stale code.*
+
+#### Step 2: Prepare Job Directory (`runs/kaggle-m<X>/job/`)
+Create two files:
+1. `runs/kaggle-m<X>/job/kernel-metadata.json`:
+```json
+{
+  "id": "sparklinghydraulics0/amg-m<X>-<slug>",
+  "title": "amg-m<X>-<slug>",
+  "code_file": "launch.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": "true",  "enable_gpu": "true",  "enable_tpu": "false",  "enable_internet": "true",  "dataset_sources": ["sparklinghydraulics0/amg-m18-checkpoints"],  "competition_sources": [],  "kernel_sources": [],  "model_sources": []}
+```
+2. `runs/kaggle-m<X>/job/launch.py`:
+```python
+from __future__ import annotations
+import json, os, shutil, subprocess, sys
+from pathlib import Path
+import torch
+
+REPO_URL = "https://github.com/hieulc0/adaptive-mini-gpt.git"
+BRANCH = "<branch-name>"
+REPO = Path("/tmp/adaptive-mini-gpt")
+OUTPUT = Path("/kaggle/working/runs/m<X>_output")
+
+def run(cmd: list[str], cwd: Path | None = None) -> None:
+    env = os.environ.copy()
+    if REPO.exists():
+        env["PYTHONPATH"] = f"{REPO / 'src'}:{env.get('PYTHONPATH', '')}".rstrip(":")
+    subprocess.run(cmd, cwd=cwd, env=env, check=True)
+
+def main() -> None:
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA is required; refusing to run on CPU")
+    if REPO.exists(): shutil.rmtree(REPO)
+    run(["git", "clone", "--depth", "1", "--branch", BRANCH, REPO_URL, str(REPO)])
+    
+    # 1. Run full test suite on GPU
+    run([sys.executable, "-m", "pytest", "-v", "tests/test_m<X>_..."] , cwd=REPO)
+    
+    # 2. Run master benchmark
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+    run([sys.executable, "scripts/run_m<X>_benchmark.py", "--device", "cuda", "--output-dir", str(OUTPUT)], cwd=REPO)
+    
+    # 3. Copy outputs to /kaggle/working for direct download
+    for f in OUTPUT.glob("*"):
+        if f.is_file(): shutil.copy(f, Path("/kaggle/working") / f.name)
+
+if __name__ == "__main__":
+    main()
+```
+
+#### Step 3: Launch & Monitor
+```bash
+# Submit kernel
+kaggle kernels push -p runs/kaggle-m<X>/job
+
+# Check status
+kaggle kernels status sparklinghydraulics0/amg-m<X>-<slug>
+
+# Inspect streaming or completed logs
+kaggle kernels logs sparklinghydraulics0/amg-m<X>-<slug>
+```
+
+#### Step 4: Download Results & Copy to Brain
+Once status is `KernelWorkerStatus.COMPLETE`:
+```bash
+mkdir -p runs/kaggle-m<X>/output
+kaggle kernels output sparklinghydraulics0/amg-m<X>-<slug> -p runs/kaggle-m<X>/output
+
+# Copy deliverables to brain artifact directory
+cp runs/kaggle-m<X>/output/m<X>_report.json <appDataDir>/brain/<conversation-id>/m<X>_scientific_report.json
+cp runs/kaggle-m<X>/output/m<X>_report.md <appDataDir>/brain/<conversation-id>/m<X>_scientific_report.md
+```
+
+---
+
+### Google Colab (Headless CLI Flow)
+
+When Colab is available:
+- Use the non-interactive CLI:
 ```bash
 uvx --from google-colab-cli colab exec -s <session> -f <remote_script>
 # ALWAYS release the remote session after execution, including failures:
 uvx --from google-colab-cli colab stop -s <session>
 ```
-
-- Use a shell `trap`/`finally` cleanup wrapper so `colab stop` is attempted even if execution fails. Never leave a GPU session running needlessly.
-- Confirm CUDA device availability from within Colab before model training. Record the GPU type; do not assume every runtime is a T4.
-- A Colab-compatible **local** loader mock is not evidence of a real Colab execution. Label it accurately.
+- Use a shell `trap`/`finally` wrapper so `colab stop` is always called.
+- Confirm CUDA availability before training. If Colab returns `503`, immediately switch to Kaggle.
 
 ### Required remote result provenance
 

@@ -1,9 +1,139 @@
 # Kaggle GPU execution backend
 
 Kaggle and Colab call the same `amg train` CLI, configuration schema, trainer,
-and checkpoint manager. There is no Kaggle training engine. Start with the smoke
-job; it runs four tiny CLI steps across two processes, plus one FP16 diagnostic
-update. Real Kaggle execution has **not yet been qualified** in this change.
+and checkpoint manager. There is no custom Kaggle training engine.
+
+The canonical execution workflow on Kaggle uses **direct Git branch cloning** (`enable_internet: true`),
+which provides reproducible, deterministic batch execution for milestones on remote Tesla T4 GPUs.
+
+---
+
+## 1. Modern Canonical Workflow: Git-Clone Batch Execution
+
+Instead of packaging zip files or creating local code datasets, Kaggle kernels clone the pinned branch
+directly from GitHub at runtime. This was proven in milestones M76 and M99.
+
+### Step 1: Git Precondition (MANDATORY)
+Because Kaggle clones directly from GitHub, **you must commit your changes and push the branch to `origin` before submitting the Kaggle job**:
+```bash
+git add <files>
+git commit -m "feat(m<X>): ..."
+git push origin <branch-name>
+```
+*If you do not push to `origin`, Kaggle will clone stale code from GitHub.*
+
+### Step 2: Prepare Job Directory (`runs/kaggle-m<X>/job/`)
+Create two files:
+
+1. `runs/kaggle-m<X>/job/kernel-metadata.json`:
+```json
+{
+  "id": "sparklinghydraulics0/amg-m<X>-<slug>",
+  "title": "amg-m<X>-<slug>",
+  "code_file": "launch.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": "true",
+  "enable_gpu": "true",
+  "enable_tpu": "false",
+  "enable_internet": "true",
+  "dataset_sources": [
+    "sparklinghydraulics0/amg-m18-checkpoints"
+  ],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}
+```
+
+2. `runs/kaggle-m<X>/job/launch.py`:
+```python
+"""Clone pinned branch and run tests and master benchmark on Kaggle GPU."""
+from __future__ import annotations
+import json, os, shutil, subprocess, sys
+from pathlib import Path
+import torch
+
+REPO_URL = "https://github.com/hieulc0/adaptive-mini-gpt.git"
+BRANCH = "<branch-name>"
+REPO = Path("/tmp/adaptive-mini-gpt")
+OUTPUT = Path("/kaggle/working/runs/m<X>_output")
+
+def run(command: list[str], cwd: Path | None = None) -> None:
+    print("+", " ".join(command), flush=True)
+    env = os.environ.copy()
+    if REPO.exists():
+        src_path = str(REPO / "src")
+        env["PYTHONPATH"] = f"{src_path}:{env.get('PYTHONPATH', '')}".rstrip(":")
+    subprocess.run(command, cwd=cwd, env=env, check=True)
+
+def main() -> None:
+    if not torch.cuda.is_available():
+        raise RuntimeError("CUDA is required; refusing to run on CPU")
+    gpu = torch.cuda.get_device_name(0)
+    print(json.dumps({"gpu": gpu, "torch": torch.__version__}), flush=True)
+
+    if REPO.exists():
+        shutil.rmtree(REPO)
+
+    run(["git", "clone", "--depth", "1", "--branch", BRANCH, REPO_URL, str(REPO)])
+
+    # 1. Run unit and regression test suite on GPU
+    print("=== Running Pytest Unit and Integration Suite on GPU ===", flush=True)
+    run([
+        sys.executable, "-m", "pytest", "-v",
+        "tests/test_m<X>_....py",
+    ], cwd=REPO)
+
+    # 2. Run Milestone Master Benchmark on GPU
+    print("=== Launching Milestone Master Benchmark on GPU ===", flush=True)
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+    run([
+        sys.executable, "scripts/run_m<X>_benchmark.py",
+        "--device", "cuda",
+        "--seeds", "42", "43", "44", "45", "46",
+        "--output-dir", str(OUTPUT),
+    ], cwd=REPO)
+
+    # 3. Copy output artifacts to /kaggle/working root for direct download
+    for f in OUTPUT.glob("*"):
+        if f.is_file():
+            shutil.copy(f, Path("/kaggle/working") / f.name)
+
+    print("=== Execution Successfully Finished ===", flush=True)
+
+if __name__ == "__main__":
+    main()
+```
+
+### Step 3: Launch and Monitor
+```bash
+# Push kernel
+kaggle kernels push -p runs/kaggle-m<X>/job
+
+# Check status
+kaggle kernels status sparklinghydraulics0/amg-m<X>-<slug>
+
+# Stream or view logs
+kaggle kernels logs sparklinghydraulics0/amg-m<X>-<slug>
+```
+
+### Step 4: Download Outputs and Save Deliverables
+Once the kernel status reaches `KernelWorkerStatus.COMPLETE`:
+```bash
+mkdir -p runs/kaggle-m<X>/output
+kaggle kernels output sparklinghydraulics0/amg-m<X>-<slug> -p runs/kaggle-m<X>/output
+
+# Copy deliverables to brain directory
+cp runs/kaggle-m<X>/output/m<X>_report.json <appDataDir>/brain/<conversation-id>/m<X>_scientific_report.json
+cp runs/kaggle-m<X>/output/m<X>_report.md <appDataDir>/brain/<conversation-id>/m<X>_scientific_report.md
+```
+
+---
+
+## 2. Legacy Offline Workflow (Datasets & Zip Archive)
+
+*(Preserved for historical reference or when `enable_internet: false` is required)*
 
 ## Account and Arch Linux setup
 
