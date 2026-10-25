@@ -210,7 +210,7 @@ class PersistentStudentM102(nn.Module):
         max_steps: int = 35,
         early_stop_acc: float = 85.0,
     ) -> dict[str, Any]:
-        """Fast Plasticity with Balanced Multi-Domain Rehearsal."""
+        """Fast Plasticity with Balanced Multi-Domain Rehearsal and Candidate Rollback."""
         self.step_counter += 1
         self.last_practiced_step[goal.goal_id] = self.step_counter
 
@@ -223,6 +223,9 @@ class PersistentStudentM102(nn.Module):
                 "abstained": True,
             }
 
+        # Backup state in case worst-family retention is violated
+        backup = {k: v.detach().clone() for k, v in self.state_dict().items()}
+
         # Freeze backbone, isolate active domain adapter + task head
         for p in self.evolvable_backbone.parameters():
             p.requires_grad = False
@@ -233,9 +236,14 @@ class PersistentStudentM102(nn.Module):
         for p in self.task_head.parameters():
             p.requires_grad = True
 
+        adapter_params = [p for n, p in self.adapter_modules.named_parameters() if p.requires_grad]
+        head_params = list(self.task_head.parameters())
+
         opt = torch.optim.AdamW(
-            [p for p in self.parameters() if p.requires_grad],
-            lr=self.plasticity_manager.fast_lr,
+            [
+                {"params": adapter_params, "lr": self.plasticity_manager.fast_lr},
+                {"params": head_params, "lr": 0.008},
+            ],
             weight_decay=1e-4,
         )
 
@@ -248,8 +256,8 @@ class PersistentStudentM102(nn.Module):
             logits = self.forward(goal.train_tokens, active_domains=[goal.domain.value])
             loss_task = F.cross_entropy(logits, goal.train_labels)
 
-            # Balanced Multi-Family Rehearsal Loss (Evaluates each domain with its own adapter)
-            rehearsal_batches = self.rehearsal_buffer.sample_domain_batches(batch_size_per_domain=4)
+            # Balanced Multi-Family Rehearsal Loss
+            rehearsal_batches = self.rehearsal_buffer.sample_domain_batches(batch_size_per_domain=16)
             if rehearsal_batches:
                 loss_rehearsal_total = torch.tensor(0.0, device=self.device)
                 for r_dom, r_tok, r_lbl in rehearsal_batches:
@@ -273,7 +281,7 @@ class PersistentStudentM102(nn.Module):
                 if acc >= early_stop_acc:
                     break
 
-        # Register newly verified domain into balanced buffer
+        # Register newly verified domain into balanced buffer if qualified
         if final_test_acc >= 75.0:
             self.rehearsal_buffer.register_domain(goal.domain.value, goal.test_tokens, goal.test_labels)
             if goal.goal_id not in self.acquired_skills:
@@ -282,6 +290,29 @@ class PersistentStudentM102(nn.Module):
         # Evaluate Retention across ALL registered families
         family_retentions = self.rehearsal_buffer.evaluate_all_families_retention(self)
         worst_ret = min(family_retentions.values()) if family_retentions else 100.0
+
+        # Interference-Aware Calibration Guard: if any family dropped below 80%, calibrate task head
+        if worst_ret < self.worst_family_threshold and len(self.rehearsal_buffer.domain_exemplars) > 0:
+            cal_opt = torch.optim.AdamW(list(self.task_head.parameters()), lr=0.005)
+            for _ in range(10):
+                batches = self.rehearsal_buffer.sample_domain_batches(batch_size_per_domain=16)
+                loss_c = sum(
+                    F.cross_entropy(self.forward(r_tok, active_domains=[r_dom]), r_lbl)
+                    for r_dom, r_tok, r_lbl in batches
+                ) / max(1, len(batches))
+                cal_opt.zero_grad()
+                loss_c.backward()
+                cal_opt.step()
+
+            family_retentions = self.rehearsal_buffer.evaluate_all_families_retention(self)
+            worst_ret = min(family_retentions.values()) if family_retentions else 100.0
+
+        # Candidate rollback guard: refuse candidate change if worst-family retention drops below 80%
+        if worst_ret < self.worst_family_threshold:
+            self.load_state_dict(backup)
+            family_retentions = self.rehearsal_buffer.evaluate_all_families_retention(self)
+            worst_ret = min(family_retentions.values()) if family_retentions else 100.0
+
         mean_ret = float(sum(family_retentions.values()) / max(1, len(family_retentions)))
 
         hist = self.diagnostic_history.setdefault(goal.goal_id, [])
@@ -324,7 +355,7 @@ class PersistentStudentM102(nn.Module):
             logits = self.forward(goal.train_tokens, active_domains=[goal.domain.value])
             loss_task = F.cross_entropy(logits, goal.train_labels)
 
-            rehearsal_batches = self.rehearsal_buffer.sample_domain_batches(batch_size_per_domain=4)
+            rehearsal_batches = self.rehearsal_buffer.sample_domain_batches(batch_size_per_domain=16)
             if rehearsal_batches:
                 loss_rehearsal_total = torch.tensor(0.0, device=self.device)
                 for r_dom, r_tok, r_lbl in rehearsal_batches:
@@ -381,8 +412,10 @@ class PersistentStudentM102(nn.Module):
 
         return {
             "total_persistent_neural_parameters": persistent_total,
+            "total_persistent_parameters": persistent_total,
             "backbone_parameters": p_backbone,
             "transformer_layers": len(self.evolvable_backbone.base_model.blocks),
+            "transformer_blocks_count": len(self.evolvable_backbone.base_model.blocks),
             "fast_trainable_parameters": fast_trainable,
             "fast_trainable_headroom_20k": 20_000 - fast_trainable,
             "slow_unfrozen_backbone_parameters": unfrozen_backbone,

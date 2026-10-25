@@ -28,16 +28,19 @@ class BalancedPerFamilyRehearsalBuffer:
             labels=labels[:n].detach().clone(),
         )
 
-    def sample_domain_batches(self, batch_size_per_domain: int = 4) -> list[tuple[str, torch.Tensor, torch.Tensor]]:
+    def sample_domain_batches(self, batch_size_per_domain: int = 16) -> list[tuple[str, torch.Tensor, torch.Tensor]]:
         """Sample distinct per-domain batches with their matching domain key."""
         batches = []
         for domain, batch in self.domain_exemplars.items():
             k = min(batch_size_per_domain, batch.tokens.size(0))
-            idx = torch.randperm(batch.tokens.size(0), device=batch.tokens.device)[:k]
-            batches.append((domain, batch.tokens[idx], batch.labels[idx]))
+            if k == batch.tokens.size(0):
+                batches.append((domain, batch.tokens, batch.labels))
+            else:
+                idx = torch.randperm(batch.tokens.size(0), device=batch.tokens.device)[:k]
+                batches.append((domain, batch.tokens[idx], batch.labels[idx]))
         return batches
 
-    def sample_balanced_batch(self, batch_size_per_domain: int = 4) -> tuple[torch.Tensor, torch.Tensor] | None:
+    def sample_balanced_batch(self, batch_size_per_domain: int = 16) -> tuple[torch.Tensor, torch.Tensor] | None:
         """Sample an equal number of exemplars from every registered domain."""
         if not self.domain_exemplars:
             return None
@@ -46,9 +49,13 @@ class BalancedPerFamilyRehearsalBuffer:
         all_lbl = []
         for _, batch in self.domain_exemplars.items():
             k = min(batch_size_per_domain, batch.tokens.size(0))
-            idx = torch.randperm(batch.tokens.size(0), device=batch.tokens.device)[:k]
-            all_tok.append(batch.tokens[idx])
-            all_lbl.append(batch.labels[idx])
+            if k == batch.tokens.size(0):
+                all_tok.append(batch.tokens)
+                all_lbl.append(batch.labels)
+            else:
+                idx = torch.randperm(batch.tokens.size(0), device=batch.tokens.device)[:k]
+                all_tok.append(batch.tokens[idx])
+                all_lbl.append(batch.labels[idx])
 
         return torch.cat(all_tok, dim=0), torch.cat(all_lbl, dim=0)
 
