@@ -1510,7 +1510,32 @@ abla_{	ext{cos}} = -0.42$) and zero functional agreement.
      - Base model parameters 100% frozen (1,071,872 weights, SHA-256 hash `6e39cd7ef6790b3c` bit-exact invariant).
      - Arithmetic carry retention: **100.0% (20/20)**; Operational logic retention: **100.0% (8/8)**.
 - **Lineage Promotion Decision**: **QUALIFIED IN RESEARCH TIER**. Autonomous neural dimension adaptation and dynamic module evolution verified on Tesla T4.
-- **Next Direction Options (Post-M85 Strategic Priority -> M86)**:
-  - **Milestone M86 — Integrate Learning Mechanisms into One Continuous Student**: Shift development from isolated mechanisms to unifying what we have built: an autonomous continuous student loop (Acquire $\to$ Evaluate $\to$ Consolidate $\to$ Grow/Shrink $\to$ Retain $\to$ Repeat) operating across an ongoing sequence of unfamiliar problems under a fixed resource budget.
-  - **Milestone M87 — Long-Horizon Continual Learning**: Sequence dozens of procedural and symbolic tasks, measuring forward transfer, backward retention, and autonomous capacity regulation over extended lifetimes.
-  - **Milestone M88 — Cross-Subject Generalization**: Expand beyond synthetic transformations into arithmetic, propositional logic, natural language reasoning, probability, and algorithmic execution.
+
+### Milestone M86: Integrated Autonomous Continual Learning and Self-Improvement (Completed & Qualified on Remote Colab Tesla T4 GPU)
+
+- **Status**: Completed & Qualified on Remote Google Colab Tesla T4 GPU (`amg-m86-t4` session).
+- **Focus**: Phase 0 forensic audit of M85 (reconciling isolated adapter parameter savings against net system footprint, establishing multi-module amortization scaling reaching 37.12% at $K=5$ and 40.94% at $K=10$); Unified learning loop (`UnifiedContinualStudent`) integrating zero-shot reuse, dynamic acquisition, capacity expansion, consolidation, retirement, and conflict rollback; Persistent student state (`PersistentStudentState`) managing modular registry, skill repertoire, experience memory, global resource budget, and bit-exact SHA-256 checkpoints; Unified continual learning policy (`UnifiedLearningPolicy`, 989 parameters < 1,000 parameter budget, SHA-256 `7c34a722d18f9f98`) mapping diagnostic signals to continuous capacity actions; 10-episode continual task stream across 5 seeds factorially crossing novel primitives, duplicate/supported tasks, compound cascades, compressible polynomials, overlapping structures, opposing conflicts, long-horizon revisits, and unseen transfer tasks; 4-arm causal benchmark (Integrated Student, Fixed Rank-8 Continual, Independent Adapter Stacking, Random Action Policy); backward retention audit ($\ge 95\%$ relative retention); bit-exact multi-module rollback restoration via SHA-256 state hashing; base model invariance.
+- **Hardware & Implementation**: Google Colab Tesla T4 GPU (Session `amg-m86-t4`, branch `m86-continual-student`, Python 3.13, PyTorch 2.11.0+cu130). Recurrent base model (1,071,872 frozen parameters, base hash `6e39cd7ef6790b3c`), Unified Learning Policy (989 parameters, SHA-256 `7c34a722d18f9f98`). Full regression suite passed: **373/373 tests on Tesla T4 GPU in 110s**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 0 M85 Forensic Audit & Amortization**:
+     - System amortization verified: 6.60% net 1-module savings $\to$ 37.12% at $K=5$ $\to$ 40.94% at $K=10$ $\to$ 44.75% marginal limit.
+     - Reconciled sample efficiency vs parameter footprint: starting with compact rank-4 (852 params) and expanding only upon diagnostic stall optimizes the Pareto frontier.
+  2. **Phase 1 Unified Continual Student Engine**:
+     - Autonomous decision execution: zero-shot reuse for supported tasks, dynamic rank-4 allocation for new tasks, function-preserving rank-8 expansion for complex tasks, and conflict detection with rollback.
+  3. **Phase 2 Persistent Student State**:
+     - Holistic state persistence encapsulating modular adapter registry, skill repertoire, episodic experience log, resource budget, and bit-exact SHA-256 fingerprints.
+  4. **Phase 3 Long-Horizon Continual Task Stream**:
+     - 10-episode lifelong stream challenging the student with novel primitives, duplicate tasks, compound compositions, capacity-demanding cascades, compressible polynomials, overlapping skills, conflicting axioms, and long-horizon revisits.
+  5. **Phase 4 & 5 Multi-Seed Causal Benchmark**:
+     - **Cumulative Steps**: Integrated student achieved **148.4 mean cumulative steps**, significantly faster than Fixed Rank-8 (195.0 steps) and Random Action Policy (279.0 steps, 130.6 steps faster with $p = 0.0001, t = 18.6648$).
+     - **Zero-Shot Knowledge Reuse**: Achieved **92.08% EM** on supported/duplicate tasks with **0 training steps and 0 parameter allocations**.
+     - **Global Capacity Efficiency**: Cumulative final parameters reached **10,024 parameters** vs. 25,920 for independent adapter accumulation (**61.33% total parameter reduction**).
+     - **Backward Skill Retention**: Achieved **102.86% relative retention** on long-horizon revisited tasks (zero catastrophic forgetting).
+  6. **Safety, Bit-Exact Rollback & Base Invariance**:
+     - Opposing rule conflict detected and restored bit-exact via SHA-256 state restore (`580a2cc741f1b7e2`).
+     - Base model parameters 100% frozen (1,071,872 weights, SHA-256 hash `6e39cd7ef6790b3c` bit-exact invariant).
+     - Arithmetic carry retention: **100.0% (20/20)**; Operational logic retention: **100.0% (8/8)**.
+- **Lineage Promotion Decision**: **QUALIFIED IN RESEARCH TIER**. Autonomous continual lifelong learning and self-improvement verified on Tesla T4.
+- **Next Direction Options (Post-M86 Strategic Priority -> M87)**:
+  - **Milestone M87 — Long-Horizon Continual Learning**: Sequence dozens of procedural, relational, and symbolic tasks over extended lifetimes, measuring forward transfer, backward retention, modular consolidation, and autonomous capacity regulation under strict global compute budgets.
+  - **Milestone M88 — Cross-Subject Generalization**: Expand beyond synthetic procedural transformations into multi-domain mathematics, propositional logic, natural language reasoning, probability, and algorithmic execution.

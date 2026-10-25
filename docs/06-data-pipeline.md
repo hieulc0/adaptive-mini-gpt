@@ -505,3 +505,33 @@ Milestone M85 introduces physical bottleneck tensor resizing (ranks 2, 4, 8, 16)
 - **Execution Provenance**:
     * Full 366/366 regression suite passed on Google Colab Tesla T4 GPU (`amg-m85-t4` session).
     * Base model parameter invariant preserved (SHA-256: `6e39cd7ef6790b3c`, 1,071,872 weights unchanged); 100% carry (20/20) and logic (8/8) retention.
+
+### 18. Milestone M86 Integrated Autonomous Continual Learning Stream Specification
+Milestone M86 unifies the discrete acquisition, consolidation, connection rewiring, and dynamic dimension adaptation mechanisms into a single persistent student evaluated across a 10-episode lifelong stream:
+- **Long-Horizon Multi-Regime Task Stream Architecture**:
+    * **Episode 0 (Novel Primitive 1)**: `MODULAR_NONLINEAR` ($s \cdot 3 + (s \oplus 5) \bmod 16$). Requires fresh neural weight allocation (`ACQUIRE_NEW_SKILL`).
+    * **Episode 1 (Novel Primitive 2)**: `PARITY_LOGIC` (odd $\to s \oplus 6$, even $\to (s+2) \bmod 16$). Requires fresh modular acquisition.
+    * **Episode 2 (Zero-Shot Knowledge Reuse)**: `MODULAR_NONLINEAR` duplicate with distinct input-output instances. Evaluates zero-shot repertoire recognition without parameter updates (`REUSE_OR_COMPOSE`).
+    * **Episode 3 (Capacity-Demanding Cascade)**: `TWO_STAGE_CASCADE` (stage-1 affine followed by stage-2 conditional logic). Evaluates dynamic capacity expansion ($4 \to 8$).
+    * **Episode 4 (Simple Compressible Task)**: `MODULAR_NONLINEAR` simple variant. Evaluates dimension contraction ($8 \to 4$) and zero-shot reuse.
+    * **Episode 5 (Overlapping Structure)**: Affine transformation sharing multiplicative slope ($a=3$) with novel offset ($b=9$). Evaluates structural reuse and consolidation.
+    * **Episode 6 (Opposing Conflicting Axiom)**: Incompatible polarity logic. Triggers qualification stall, conflict detection, and bit-exact rollback restoration.
+    * **Episode 7 & 8 (Long-Horizon Backward Revisit)**: Re-evaluates Episode 0 and Episode 1 tasks after multiple intervening adaptations, quantifying backward retention and absence of catastrophic forgetting.
+    * **Episode 9 (Unseen Transfer Rule)**: `PERMUTATION_INVERSION` ($15 - s + 3 \bmod 16$). Measures forward transfer on completely unseen task family.
+- **Persistent Student State Architecture**:
+    * **Base Backbone**: 100% frozen transformer (1,071,872 weights, SHA-256 invariant `6e39cd7ef6790b3c`).
+    * **Dynamic Modular Head Registry**: `DynamicModuleManager` managing dynamic ranks ($2, 4, 8, 16$).
+    * **Knowledge Repertoire**: Registry indexing acquired skill descriptors, qualification exact match, and revisit frequencies.
+    * **Holistic SHA-256 State Checkpointing**: Fingerprints all active module weights and repertoire structure (`580a2cc741f1b7e2`).
+- **Unified Continual Learning Policy (< 1,000 Parameter Bound)**:
+    * Compact 2-layer MLP with 989 trainable parameters (SHA-256: `7c34a722d18f9f98`).
+    * 6 Observable Diagnostic Input Signals: `max_existing_skill_em`, `current_loss`, `loss_slope`, `prediction_entropy`, `capacity_pressure`, `repertoire_overlap_score`.
+    * 5 Categorical Student Actions: `REUSE_OR_COMPOSE`, `ACQUIRE_NEW_SKILL`, `EXPAND_CAPACITY`, `CONSOLIDATE_SHRINK`, `RETIRE_OBSOLETE`.
+- **Four Comparative Experimental Arms**:
+    1. `INTEGRATED_AUTONOMOUS_STUDENT`: Full M86 autonomous student (zero-shot reuse, dynamic rank expansion, conflict rollback).
+    2. `FIXED_RANK_CONTINUAL_LEARNER`: Continual baseline fixed at Rank-8 without dimension scaling.
+    3. `INDEPENDENT_ADAPTER_ACCUMULATION`: Static independent Rank-16 adapters for every task without reuse or retirement.
+    4. `RANDOM_ACTION_POLICY`: Stochastic action choices.
+- **Execution Provenance**:
+    * Full 373/373 regression suite passed on Google Colab Tesla T4 GPU (`amg-m86-t4` session).
+    * Base model parameter invariant preserved (SHA-256: `6e39cd7ef6790b3c`, 1,071,872 weights unchanged); 100% carry (20/20) and logic (8/8) retention.

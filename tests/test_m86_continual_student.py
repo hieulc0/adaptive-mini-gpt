@@ -14,8 +14,6 @@ from __future__ import annotations
 
 import pytest
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 
 from adaptive_mini_gpt.continual_student.audit_m85 import (
     M85ForensicAuditor,

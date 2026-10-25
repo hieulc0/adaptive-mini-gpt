@@ -11,20 +11,14 @@ Encapsulates:
 
 from __future__ import annotations
 
-import copy
 import hashlib
-import json
 import logging
 from dataclasses import asdict, dataclass, field
-from pathlib import Path
 from typing import Any
 
 import torch
 import torch.nn as nn
 
-from adaptive_mini_gpt.dimension_evolution.dynamic_adapter import (
-    DynamicDimensionAdapter,
-)
 from adaptive_mini_gpt.dimension_evolution.module_registry import (
     DynamicModuleManager,
 )

@@ -14,7 +14,6 @@ Generates a controlled, diverse sequence of continual learning tasks:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from adaptive_mini_gpt.meta_acquisition.environment import (
     MetaEnvironmentGenerator,
