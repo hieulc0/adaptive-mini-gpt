@@ -90,6 +90,11 @@ class WorkingContextBuilder:
             if clean_entity in clean_q:
                 sim += 0.4
 
+            # Attribute match boost
+            clean_attr = rec.attribute.replace("_", " ").lower()
+            if clean_attr in clean_q or any(tok in clean_attr for tok in query_tokens):
+                sim += 0.5
+
             if sim >= self.relevance_threshold:
                 scored_records.append((sim, rec))
             else:
@@ -119,7 +124,11 @@ class WorkingContextBuilder:
                                 h2_map[k2] = h2
                     for h2 in h2_map.values():
                         if h2.record_id not in [f.record_id for f in final_facts]:
-                            final_facts.append(h2)
+                            clean_h2_attr = h2.attribute.replace("_", " ").lower()
+                            if clean_h2_attr in clean_q or any(tok in clean_h2_attr for tok in query_tokens):
+                                final_facts.insert(0, h2)
+                            else:
+                                final_facts.append(h2)
                             hops_resolved = max(hops_resolved, 2)
 
         # 5. Format compact working context text

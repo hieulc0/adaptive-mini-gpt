@@ -171,7 +171,7 @@ class PersistentAdaptiveStudentM97:
             )
             if working_ctx.retrieved_facts:
                 # The latest relevant retrieved value
-                retrieved_val = working_ctx.retrieved_facts[-1]["value"]
+                retrieved_val = working_ctx.retrieved_facts[0]["value"]
 
         # 4. Neural Procedural Reasoning
         predicted = None
