@@ -1972,3 +1972,30 @@ abla_{	ext{cos}} = -0.42$) and zero functional agreement.
 - **Next Direction Options (Post-M100)**:
   - Scale lifelong curriculum to 100+ episodes across open-ended task generators.
   - Explore dynamic depth/width expansion and pruning under autonomous epistemic routing.
+
+---
+
+### Milestone M101: Sustainable Lifelong Neural Learning, Selective Backbone Plasticity, and Resource-Aware Consolidation (Completed & Qualified PASS)
+
+- **Status**: Completed & Evaluated on multi-seed master benchmark across 5 seeds (`42..46`) on Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m101-sustainable-learning`). Overall Verdict: **M101_QUALIFIED_PASS** (All 10 scientific acceptance gates certified: 100/100 sequential episodes completed without ordinary resets across all seeds; 100.0% causal forward backbone impact; Condition C [Selective Backbone: 13.0 steps] beats Condition B [Expanded Adapters: 24.6 steps] by +46.7% at matched compute on novel non-linear target mechanisms; 90.2% held-out test exact match across 8 diverse reasoning domains; 97.2% aggregate foundational retention [worst family disclosed at 2.5%]; Permanent Architecture tiers 20k, 30k, 50k, 100k, and Adaptive validated with safe allocation and rollback; transparent resource accounting separating persistent total [1,080,124 params], fast trainable [8,252 params, 11,748 headroom under 20k baseline], and slow trainable total [206,780 params including 198,528 unfrozen backbone weights]; 33,837 Bytes external memory <= 256 KiB ceiling; 100.0% bit-exact reload recovery; 140/140 unit and historical regression tests passing on GPU).
+- **Focus**: Phase 0 forensic audit of M100 reconciling parameter accounting and mechanism diversity; Permanent Architecture Principle enforcement (no permanent 20k ceiling, no fixed 1.07M backbone, with explicit resource envelope tracking); 100-episode persistent student without ordinary resets; 8 diverse reasoning domains (Quadratic modular mapping, 2-hop DAG reachability, Propositional majority logic, Stateful programming accumulators, DFA state tracking, Temporal factual revisions, Multi-step planning, Cross-subject composition); Two-speed plasticity with active domain adapter gradient isolation and anchor rehearsal protected slow consolidation; 5-condition future learning evaluation on sealed non-linear quadratic targets; Checkpoint persistence and crash recovery.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU. Persistent Mini-GPT student (1,071,872 Transformer backbone + 8,252 modular weights). Full historical regression suite passed: **140/140 tests passed (M80–M101)**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 0 Forensic Audit & Parameter Reconciliation**:
+     - Resolved M100 parameter accounting ambiguity: distinguished persistent total (1,080,124), fast-mode trainable (8,252 params within 20,000 baseline tier), and slow-mode trainable (206,780 params with 198,528 unfrozen weights in `blocks.3` and `ln_f`).
+     - Reconciled external memory to 33,837 Bytes <= 256 KiB.
+  2. **100-Episode Sustainable Lifelong Learning**:
+     - Sustained 100 sequential autonomous learning episodes per seed without process resets.
+     - Preserved **97.2% aggregate foundational retention** with worst-family retention disclosed at **2.5%** (identifying specific domains subject to interference).
+  3. **Decisive Causal Future-Learning Advantage on Novel Mechanisms**:
+     - Evaluated on sealed non-linear quadratic target $y = (3x^2 + 7x + 5) \bmod 16$:
+       - Condition A (Historical Frozen Adapters): 26.6 steps.
+       - Condition B (Expanded Rank Adapters, Frozen Backbone): 24.6 steps.
+       - **Condition C (Selective Backbone Plasticity)**: **13.0 steps** (**+46.7% advantage** over Condition B at matched compute).
+       - **Condition D (Adaptive Architecture)**: **7.8 steps**.
+       - Condition E (Diagnostic Oracle): 1.0 step ceiling.
+  4. **Permanent Architecture Principle Validated**:
+     - Successfully decoupled research baselines from rigid architectural caps. Tiers 20k, 30k, 50k, 100k, and adaptive evolution demonstrated safe allocation, rank expansion, and rollback.
+- **Lineage Promotion Decision**: **QUALIFIED PASS IN RESEARCH TIER**.
+- **Next Direction Options (Post-M101 Roadmap -> M102)**:
+  - **Milestone M102 — Controlled Dynamic Transformer Topology, Depth, Width, and Compute**: Controlled dynamic Transformer layer adding/skipping, hidden dimension expansion, and autonomous compute routing based on verified epistemic complexity.

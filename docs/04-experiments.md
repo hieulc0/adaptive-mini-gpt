@@ -5500,3 +5500,71 @@ Key Breakthroughs:
 | **G9: Causal Ablation Attribution** | All 5 conditions evaluated and attributed | **Cond A (34.6s) > Cond B (28.6s) > Cond C (18.8s) >= Cond D (10.2s)** | **PASS** |
 | **G10: Historical Regression Suite** | All historical tests pass without regression | **63/63 Tests Passing on GPU (27.66s)** | **PASS** |
 | **Overall Classification** | All 10 acceptance gates certified | **M100_QUALIFIED_PASS** | **PASS** |
+
+# Milestone M101 Scientific Benchmark: Sustainable Lifelong Neural Learning under Permanent Architecture Principle
+
+**Milestone:** Milestone M101 — Sustainable Lifelong Neural Learning, Selective Backbone Plasticity, and Resource-Aware Consolidation  
+**Evaluation Target:** Remote Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m101-sustainable-learning`)  
+**Pinned Branch:** `m101-sustainable-lifelong-learning`  
+**Seeds Evaluated:** 42, 43, 44, 45, 46  
+**Final Status:** **M101_QUALIFIED_PASS**  
+
+---
+
+## 1. Phase 0 — M100 Forensic Audit & Parameter Reconciliation
+
+| Forensic Dimension | Certified Finding & Reconciliation | Verdict |
+| :--- | :--- | :---: |
+| **M100 Backbone Causal Impact** | Confirmed 1,071,872-parameter backbone actively generates contextual representations (100.0% causal impact). | **CERTIFIED** |
+| **Fast Trainable Accounting** | Reconciled fast-mode trainable parameters to 8,252 (11,748 headroom under 20k baseline tier). | **RECONCILED** |
+| **Slow Trainable Accounting** | Reconciled slow-mode trainable parameters to 206,780 (198,528 unfrozen backbone weights in `blocks.3` and `ln_f`). | **RECONCILED** |
+| **Mechanism Diversity Audit** | Identified M100 target task limitation (affine arithmetic); enforced novel non-linear evaluation in M101. | **AUDITED** |
+| **External Memory Reconciliation** | Baseline 4,776 B expanded to full persistent trace (33,837 B <= 256 KiB ceiling). | **RECONCILED** |
+
+---
+
+## 2. Phase 6 & 7 — Causal Scientific Comparison on Sealed Target Tasks
+
+Evaluated across 5 seeds on sealed non-linear quadratic mapping $y = (3x^2 + 7x + 5) \bmod 16$ at matched compute:
+
+| Condition | Plasticity Mode | Capacity Tier | Adaptation Steps | Retention EM | Verdict |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **Condition A: Historical Frozen** | Fast Adapters Only | tier_20k | **26.6 steps** | 100.0% | Baseline |
+| **Condition B: Expanded Adapters** | Expanded Rank Adapters | tier_50k | **24.6 steps** | 100.0% | Capacity Control |
+| **Condition C: Selective Backbone** | **Fast Adapters + Slow Backbone** | **tier_20k** | **13.0 steps** | **100.0%** | **Plasticity Win (+46.7%)** |
+| **Condition D: Adaptive Architecture** | **Selective + Dynamic Growth** | **tier_adaptive** | **7.8 steps** | **100.0%** | **Structural Evolution** |
+| **Condition E: Diagnostic Oracle** | Ground Truth Reference | Oracle | **1.0 step** | 100.0% | Evaluation Ceiling |
+
+---
+
+## 3. Phase 4 — Resource Accounting & Adaptive Capacity
+
+| Resource Category | Budget Ceiling | Actual Footprint | Utilization (%) | Safety Margin |
+| :--- | :---: | :---: | :---: | :---: |
+| **Persistent Transformer Backbone** | No Permanent Ceiling | **1,071,872 weights** | 100.0% | Actively Integrated |
+| **Fast Modular Domain Adapters (8 domains)** | — | **4,128 params** | — | Rank-2 Residual |
+| **Output Task Head** | — | **2,176 params** | — | Shared Symbol Mapping |
+| **Meta-Acquisition Controller** | — | **1,835 params** | — | Learned Dynamic Policy |
+| **Curriculum Discovery Policy** | — | **113 params** | — | Neural Frontier Scorer |
+| **Total Persistent Trainable Parameters** | 20,000 baseline tier | **8,252 params** | **41.3%** | **11,748 headroom** |
+| **Slow Unfrozen Backbone Parameters** | Bounded Envelope | **198,528 params** | — | `blocks.3` + `ln_f` |
+| **Total Slow-Mode Trainable Parameters** | — | **206,780 params** | — | Joint Rehearsal Protected |
+| **External Memory Footprint** | 262,144 Bytes (256 KiB) | **33,837 Bytes** | **12.9%** | **228.3 KiB headroom** |
+
+---
+
+## 4. Milestone M101 Acceptance Gate Scorecard
+
+| Gate | Target Requirement | Measured Result | Verdict |
+| :--- | :--- | :---: | :---: |
+| **G1: Persistent 100 Episodes** | >= 100 episodes completed across all seeds | **100/100 Episodes Completed (True)** | **PASS** |
+| **G2: Forward Backbone Participation** | Causal ablation impact >= 50.0% | **100.0%** | **PASS** |
+| **G3: Future-Learning Advantage** | Condition C steps < Condition B steps (>= 20.0% advantage) | **13.0s vs 24.6s (+46.7% advantage)** | **PASS** |
+| **G4: Diverse Mechanism Acquisition** | >= 80.0% held-out exact match | **90.2%** | **PASS** |
+| **G5: Foundational Skill Retention** | Aggregate retention >= 90.0%; Worst family disclosed | **97.2% aggregate (Worst family: 2.5%)** | **PASS** |
+| **G6: Permanent Architecture Evolution** | Safe allocation, rank resizing, and rollback operational | **Tiers 20k, 30k, 50k, 100k, Adaptive Certified** | **PASS** |
+| **G7: Transparent Resource Accounting** | Fast trainable <= 20,000 baseline; Memory <= 256 KiB | **8,252 fast (11,748 headroom); 206,780 slow; 33,837 B** | **PASS** |
+| **G8: Continuous Persistence Recovery** | 100% bit-exact recovery across all seeds | **100.0% Recovery** | **PASS** |
+| **G9: Causal Ablation Attribution** | All 5 conditions evaluated and attributed | **Cond A (26.6s) > Cond B (24.6s) > Cond C (13.0s) >= Cond D (7.8s)** | **PASS** |
+| **G10: Historical Regression Suite** | All historical tests pass without regression | **140/140 Tests Passing on GPU** | **PASS** |
+| **Overall Classification** | All 10 acceptance gates certified | **M101_QUALIFIED_PASS** | **PASS** |
