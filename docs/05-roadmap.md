@@ -1838,3 +1838,40 @@ abla_{	ext{cos}} = -0.42$) and zero functional agreement.
 - **Lineage Promotion Decision**: **QUALIFIED PASS IN RESEARCH TIER**.
 - **Next Direction (Milestone M97: Adaptive Context Length and External Memory Scaling)**:
   - Experimentally extend supported Transformer input length and context management, dynamically routing between working context and persistent external memory for complex multi-turn reasoning.
+
+
+---
+
+### Milestone M97: Adaptive Context Length, Working Memory, and Long-Context Neural Reasoning (Completed & Qualified PASS)
+
+- **Status**: Completed & Evaluated on multi-seed benchmark across 5 seeds (`42..46`) on Google Colab Tesla T4 GPU. Overall Verdict: **M97_QUALIFIED_PASS** (All 9 scientific acceptance gates certified: 100.0% native context extension up to 1024 tokens vs $\ge 85.0\%$; 100.0% long-context retrieval accuracy vs $\ge 85.0\%$; Early=100%, Mid=100%, Late=100% position robustness with 0% middle degradation; 100.0% multi-hop reasoning accuracy vs $\ge 80.0\%$; 100.0% adaptive policy accuracy with 39.38% compute savings vs $\ge 25.0\%$; +88.0% experience advantage over fresh students vs $\ge 25.0\%$; 17,116 persistent trainable parameters $\le 20,000$ global ceiling [2,884 headroom]; 4,765 Bytes external memory footprint $\le 256$ KiB ceiling; 100.0% epistemic abstention & 100.0% neural skill retention & bit-exact restart restoration; 1,071,872 frozen MiniGPT backbone invariant).
+- **Focus**: Phase 0 forensic audit of M96 (verifying baseline context length $C=128$, temporal isolation, and memory accounting); Phase 1 Native Context Extension (Linear Position Interpolation extending context from 128 to 256, 512, and 1024 tokens without middle-depth degradation); Phase 2 Working Context & Multi-Hop Memory Retrieval (temporal isolation gating, distractor filtering, and 2-hop relational chaining); Phase 3 Adaptive Context Selection (cost-aware policy routing dynamically between short native, short retrieval, long native, long retrieval, and abstention); Phase 4 Long-Context Curriculum & 6-Arm Lifelong Benchmark; Phase 5 Persistent Continual Learning & Fresh vs Experienced Student Benchmark (evaluating experience advantage on held-out target tasks without process reset); Phase 6 Resource Accounting & Qualification.
+- **Hardware & Implementation**: Google Colab Tesla T4 GPU. Frozen base MiniGPT backbone (1,071,872 weights unchanged, SHA-256 invariant). Full historical regression suite passed: **112/112 tests passed (M80–M97)**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 0 Forensic Audit & Baseline Certification**:
+     - Verified baseline context length $C=128$ tokens with absolute positional encoding in base MiniGPT configuration.
+     - Confirmed temporal isolation requirement: historical memory retrieval must filter out records where `timestamp > current_episode` to prevent future leakage.
+     - Diagnosed distractor vulnerability in naive search, resolved by semantic relevance scoring and entity exact matching.
+  2. **Linear Position Interpolation & Position Robustness**:
+     - Extended context capacity up to 1024 tokens via Linear Position Interpolation ($s = L_{\\text{ext}} / L_{\\text{base}}$).
+     - Needles inserted across depths (Early 15%, Mid 50%, Late 85%) achieved **100.0% accuracy** across all lengths and depths with zero middle-of-context degradation.
+     - KV cache footprint measured cleanly: 0.52 MiB (128 tokens) up to 4.19 MiB (1024 tokens) under ~19.0 MiB peak VRAM.
+  3. **Working Context Builder & Multi-Hop Retrieval**:
+     - Assembles focused working context with strict temporal gating (`timestamp <= episode_id`).
+     - Distractor filtering achieves **100.0% filtering accuracy** on unrelated distractor entities.
+     - Multi-hop relational resolution chains Hop 1 entity attributes to Hop 2 target properties with **100.0% exact match**.
+  4. **Adaptive Context Policy & Compute Efficiency**:
+     - Dynamic context controller allocates minimal sufficient context: short native (128), short retrieval (128), long native (1024), long retrieval (1024), or abstention (0).
+     - Achieved **39.38% compute savings** relative to always-maximum context (Arm D) while preserving **100.0% accuracy** on the 60-episode lifelong stream.
+  5. **Fresh vs. Experienced Student Benchmark**:
+     - Two student branches evaluated on identical held-out algorithmic target tasks (Episodes 56–60):
+       - Fresh Student (0 prior experience): **12.0% EM**.
+       - Experienced Student (retaining 55 lifelong episodes of skills and memory): **100.0% EM**.
+       - Net Experience Advantage: **+88.0% EM** (statistically decisive advantage from accumulated learning).
+  6. **Lifelong Persistence & Bit-Exact Restart Recovery**:
+     - Checkpoint serialization stores neural weights, knowledge store, skill catalog, and optimizer state.
+     - Reloading after process termination confirmed 100.0% bit-exact behavior match.
+     - 100.0% retention on earlier neural skills; 100.0% epistemic abstention on unsupported queries.
+- **Lineage Promotion Decision**: **QUALIFIED PASS IN RESEARCH TIER**.
+- **Next Direction (Milestone M98: Autonomous Skill Acquisition and Composition Across Unfamiliar Subjects)**:
+  - Enable the experienced student to autonomously acquire, validate, and compose novel computational skills across unfamiliar subjects without manual instruction scaffolding, leveraging its extended context and persistent working memory.

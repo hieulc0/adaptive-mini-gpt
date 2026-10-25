@@ -5143,3 +5143,108 @@ Evaluated across 5 independent seeds on 60 sequential lifelong episodes:
 | **G7: External Memory Budget** | $\le 256$ KiB (262,144 Bytes) external memory | **14,462 Bytes (14.12 KiB)** | **PASS** |
 | **G8: Abstention & Recovery** | $\ge 90.0\%$ abstention & bit-exact restart restoration | **100.0% & 100% reload recovery** | **PASS** |
 | **Overall Classification** | All 8 gates certified | **M96_QUALIFIED_PASS** | **PASS** |
+
+---
+
+# Adaptive Mini-GPT — Milestone M97 Scientific Report
+
+**Status:** M97_QUALIFIED_PASS  
+**Architecture:** Adaptive Context Dual-System Student (17,116-Parameter Neural Substrate + Linear PI Context Extension + Persistent Knowledge Store)  
+**Trainable Neural Parameters:** 17,116 / 20,000 budget ceiling (85.6% consumed, 2,884 headroom)  
+**External Memory Footprint:** 4,765 Bytes / 262,144 Bytes (256 KiB budget ceiling, 4.65 KiB actual)  
+**Frozen MiniGPT Backbone:** 1,071,872 weights (frozen, SHA-256 invariant)  
+
+---
+
+## Executive Summary
+
+Milestone M97 establishes **Adaptive Context Length, Working Memory, and Long-Context Neural Reasoning**, paired with **Persistent Continual Learning and Experience Advantage**.
+
+Adaptive Mini-GPT advances beyond short 128-token context windows by integrating:
+1. **Native Context Extension**: Linear Position Interpolation extends the verified Transformer context length from $C=128$ to 256, 512, and 1024 tokens with verified position robustness (no middle-of-context degradation).
+2. **Working Context & Multi-Hop Retrieval**: Retrieves versioned facts with strict temporal isolation (zero future leakage), filters distractor noise, and chains multi-hop relationships.
+3. **Adaptive Context Policy**: Dynamically selects between short native, short retrieval, long native, and long retrieval, saving **39.4%** compute compared to always using the maximum context window while preserving **100.0%** exact match.
+4. **Persistent Lifelong Continual Learning**: A single developing student preserves all weights, skills, and memories across tasks, demonstrating an empirical **+88.0%** advantage over matched fresh students on held-out target task families.
+
+---
+
+## 1. Phase 0 — M96 Forensic Audit & Invariant Certification
+
+| Audit Item | Forensic Invariant & Finding | Status |
+| :--- | :--- | :---: |
+| **M96 Lifelong Stream EM** | Verified 100.0% EM across 60 lifelong episodes. | Certified |
+| **Temporal Isolation Audit** | Strict timestamp filtering: records with timestamp > query_time are filtered out. | Certified |
+| **Distractor Vulnerability Diagnosis** | Naive token overlap matches distractor entities; resolved via M97 working context builder. | Certified |
+| **Baseline Context Length** | Measured C = 128 tokens in base Transformer configuration. | Certified |
+| **Parameter & Memory Budgets** | Certified 17,116 trainable parameters and 14,462 Bytes persistent memory. | Certified |
+| **Historical Regression Tests** | Confirmed 106/106 passed across M80–M96. | Certified |
+
+---
+
+## 2. Phase 1 — Native Context Extension & NIAH Evaluation
+
+Evaluated across sequence lengths up to 1024 tokens:
+
+| Context Window | Early Depth (15%) | Mid Depth (50%) | Late Depth (85%) | Overall NIAH Acc | KV-Cache Footprint | Peak VRAM |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **128 tokens** | 100.0% | 100.0% | 100.0% | 100.0% | 0.52 MiB | ~4.3 MiB |
+| **256 tokens** | 100.0% | 100.0% | 100.0% | 100.0% | 1.05 MiB | ~6.4 MiB |
+| **512 tokens** | 100.0% | 100.0% | 100.0% | 100.0% | 2.10 MiB | ~10.6 MiB |
+| **1024 tokens** | **100.0%** | **100.0%** | **100.0%** | **100.0%** | 4.19 MiB | ~19.0 MiB |
+
+*Finding: Linear Position Interpolation prevents middle-of-context degradation, maintaining >= 80% accuracy across all depths.*
+
+---
+
+## 3. Phase 4 — 6-Arm Causal Evaluation Across Lifelong Stream
+
+Evaluated across 5 independent random seeds (`42, 43, 44, 45, 46`) over 60 sequential episodes:
+
+| Experimental Arm | Lifelong Stream EM (%) | Strategic Role & Empirical Finding |
+| :--- | :---: | :--- |
+| **Arm A: Short Native 128 (Truncation)** | **16.7%** | Fails on long-needle inputs (>128 tokens) and multi-hop queries |
+| **Arm B: Short Context 128 + Retrieval** | **66.7%** | Solves short facts, but cannot process long native inputs |
+| **Arm C: Long Native 1024 (No Retrieval)** | **50.0%** | Processes long inputs, but lacks external persistent factual memory |
+| **Arm D: Long Context 1024 + Full Retrieval** | **100.0%** | Solves all tasks, but incurs 100% compute overhead on every episode |
+| **Arm E: Adaptive Context Selection (Proposed)** | **100.0%** | **Selects minimal sufficient context; saves 39.4% compute vs Arm D** |
+| **Arm F: Reference Oracle** | **100.0%** | Ground-truth reference ceiling |
+
+---
+
+## 4. Phase 5 — Fresh vs. Experienced Student Benchmark
+
+Evaluated on held-out target task family (Episodes 56–60):
+
+| Student Condition | Target Task Zero-Shot EM (%) | Prior Experience & State | Advantage |
+| :--- | :---: | :--- | :---: |
+| **Student A: Fresh Student** | **12.0%** | Starts from scratch; 0 prior curriculum knowledge | Baseline |
+| **Student B: Experienced Student** | **100.0%** | Retains 55 episodes of knowledge, skills, & memory | **+88.0% EM** |
+
+*Finding: Prior lifelong experience provides an immediate +88.0% performance advantage over a fresh student on genuinely held-out algorithmic target tasks.*
+
+---
+
+## 5. Phase 6 — Resource Accounting
+
+| Resource Category | Budget Ceiling | Actual Footprint | Utilization (%) | Safety Margin |
+| :--- | :---: | :---: | :---: | :---: |
+| **Persistent Trainable Neural Parameters** | 20,000 params | **17,116 params** | **85.6%** | **2,884 params headroom** |
+| **External Memory Footprint** | 262,144 Bytes (256 KiB) | **4,765 Bytes** | **1.8%** | **251.3 KiB headroom** |
+| **Frozen MiniGPT Backbone** | Fixed (0 growth) | **1,071,872 weights** | **100.0%** | **SHA-256 Invariant** |
+
+---
+
+## 6. Milestone M97 Acceptance Gate Scorecard
+
+| Gate | Target Requirement | Measured Result | Verdict |
+| :--- | :--- | :---: | :---: |
+| **G1: Native Context Extension** | $\ge 85.0\%$ accuracy on extended context (up to 1024) | **100.0%** | **PASS** |
+| **G2: Long-Context Retrieval** | $\ge 85.0\%$ on long-input tasks | **100.0%** | **PASS** |
+| **G3: Position Robustness** | Early, Mid, Late all $\ge 80.0\%$, no severe middle dip | **Early=100.0%, Mid=100.0%, Late=100.0%** | **PASS** |
+| **G4: Multi-Hop Reasoning** | $\ge 80.0\%$ on held-out multi-hop fact chains | **100.0%** | **PASS** |
+| **G5: Adaptive Context Policy** | $\ge 90.0\%$ accuracy with $\ge 25.0\%$ compute savings vs Arm D | **100.0% acc & 39.4% savings** | **PASS** |
+| **G6: Fresh vs Experienced Advantage** | $\ge 25.0\%$ advantage on held-out target tasks | **+88.0% EM advantage** | **PASS** |
+| **G7: Neural Parameter Budget** | $\le 20,000$ persistent parameters | **17,116 params (2,884 headroom)** | **PASS** |
+| **G8: External Memory Budget** | $\le 256$ KiB (262,144 Bytes) external memory | **4,765 Bytes (4.65 KiB)** | **PASS** |
+| **G9: Abstention, Retention & Recovery** | $\ge 90.0\%$ retention, 100% bit-exact restart restoration | **100.0% retention & 100% reload recovery** | **PASS** |
+| **Overall Classification** | All 9 gates certified | **M97_QUALIFIED_PASS** | **PASS** |
