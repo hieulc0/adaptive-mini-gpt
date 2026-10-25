@@ -1482,6 +1482,35 @@ abla_{	ext{cos}} = -0.42$) and zero functional agreement.
      - Base model parameters 100% frozen (1,071,872 weights, SHA-256 hash `6e39cd7ef6790b3c` bit-exact invariant).
      - Arithmetic carry retention: **100.0% (20/20)**; Operational logic retention: **100.0% (8/8)**.
 - **Lineage Promotion Decision**: **QUALIFIED IN RESEARCH TIER**. Autonomous neural connection pruning, regrowth, and dynamic learned topology adaptation verified on Tesla T4.
-- **Next Direction Options (Post-M84 Strategic Priority -> M85)**:
-  - **Milestone M85 — Autonomous Dimensionality Adaptation and Dynamic Module Allocation**: Allowing the student to expand or shrink bottleneck ranks (adaptive rank-2, 4, 8, 16), adjust neuron counts, and spawn or retire modular heads based on evaluated capacity-utility tradeoffs.
-  - **Milestone M86 — Integrated Closed-Loop Autonomous Learning Cycle**: End-to-end integration of acquisition (M80-M82), knowledge consolidation (M83), connection pruning/regrowth (M84), and dimension adaptation (M85) in an ongoing stream of unfamiliar multimodal/reasoning problems.
+
+### Milestone M85: Autonomous Neural Dimension Adaptation and Dynamic Module Evolution (Completed & Qualified on Remote Colab Tesla T4 GPU)
+
+- **Status**: Completed & Qualified on Remote Google Colab Tesla T4 GPU (`amg-m85-t4` session).
+- **Focus**: Phase 0 forensic audit of M84 (reconciling connection-level sparsity masking vs physical parameter storage, showing that M84 30% sparsity kept all 1,432 parameters stored, whereas M85 delivers true physical tensor resizing and memory deallocation); Dynamic dimension adapter (`DynamicDimensionAdapter`) with physical tensor reshaping across candidate ranks (2, 4, 8, 16); function-preserving rank expansion ($4 \to 8$) via zero-initialized up-projection columns ensuring bit-exact output match ($M_{\text{new}}(x) = M_{\text{old}}(x)$, $\max |\Delta| = 0.0$); channel energy-preserving rank contraction ($8 \to 4$) physically freeing 580 parameters (40.50% memory saved) or ($8 \to 2$) freeing 870 parameters (60.75% memory saved); optimizer state migration for AdamW momentum buffers across dimension changes; dynamic module manager (`DynamicModuleManager`) governing modular lifecycle (allocation, expansion, contraction, retirement); learned architecture policy (`LearnedArchitecturePolicy`, 989 parameters < 1,000 parameter budget, SHA-256 `d9a380c3f396ec40`) driven by 6 non-leaking diagnostic state signals; 6-arm causal benchmark (Learned Architecture Policy, Random Capacity Policy, Smallest Rank Search, Static Rank-8, Static Rank-16, Diagnostic Oracle Upper Bound); skill retention audit ($\ge 95\%$ relative retention, $\ge 85\%$ individual EM floor); bit-exact multi-module rollback restoration via SHA-256 state hashing; base model invariance.
+- **Hardware & Implementation**: Google Colab Tesla T4 GPU (Session `amg-m85-t4`, branch `m85-dimension-evolution`, Python 3.13, PyTorch 2.11.0+cu130). Recurrent base model (1,071,872 frozen parameters, base hash `6e39cd7ef6790b3c`), Learned Architecture Policy (989 parameters, SHA-256 `d9a380c3f396ec40`). Full regression suite passed: **366/366 tests on Tesla T4 GPU in 119s**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 0 M84 Forensic Audit & Physical Reconciliation**:
+     - Demonstrated that M84 connection masking preserved 1,432 weights in RAM with zero physical memory reduction.
+     - Implemented true physical tensor resizing across ranks 2 (562 params), 4 (852 params), 8 (1,432 params), and 16 (2,592 params).
+  2. **Phase 1 Dynamic Rank Evolution & Function Preservation**:
+     - Expansion ($4 \to 8$): Bit-exact function preservation at expansion moment ($M_{\text{new}}(x) = M_{\text{old}}(x)$ bit-exact, $\max |\Delta| = 0.0$).
+     - Contraction ($8 \to 4$): Channel energy ranking ($E_j = \|W_{\text{down}}[j]\|_2 \cdot \|W_{\text{up}}[:, j]\|_2$) physically tranches dimensions and deallocates memory, saving 40.50% parameters.
+     - AdamW state migration: Preserves momentum and variance buffers without PyTorch shape mismatch or tensor comparison exceptions.
+  3. **Phase 2 Dynamic Module Registry & Lifecycle**:
+     - `DynamicModuleManager` supports dynamic allocation, rank resizing, and clean retirement.
+     - Demonstrated valid module allocation (`skill_alpha`) and valid module retirement (`skill_beta`, freeing 852 parameters with zero memory leak).
+  4. **Phase 3 Learned Architecture Policy (< 1,000 Parameters)**:
+     - Implemented 2-layer MLP (989 parameters, SHA-256 `d9a380c3f396ec40`) mapping 6 diagnostic signals to 5 actions (`REUSE_EXISTING`, `ADAPT_CURRENT`, `EXPAND_RANK`, `SHRINK_RANK`, `RETIRE_REDUNDANT`).
+  5. **Phase 4 & 5 Multi-Seed 6-Arm Causal Benchmark**:
+     - **Learned Policy Quality**: Learned policy reached qualification in **22.4 steps**, outperforming Random Policy (31.8 steps, 9.4 steps faster) and Smallest Rank Search (50.0 steps, which failed to qualify).
+     - **Capacity Efficiency**: Mean learned physical parameters were **1,432** (44.75% reduction vs 2,592 for Static Rank-16), with 9,216 theoretical forward FLOPs and 99.12 $\mu s$ latency.
+     - **Skill Retention**: Achieved **98.75% relative performance retention**, with all seeds exceeding the strict $\ge 85\%$ individual EM floor.
+  6. **Safety, Bit-Exact Rollback & Base Invariance**:
+     - Multi-module registry state restore verified bit-exact SHA-256 state recovery (`f94c39bfbd00ab38`).
+     - Base model parameters 100% frozen (1,071,872 weights, SHA-256 hash `6e39cd7ef6790b3c` bit-exact invariant).
+     - Arithmetic carry retention: **100.0% (20/20)**; Operational logic retention: **100.0% (8/8)**.
+- **Lineage Promotion Decision**: **QUALIFIED IN RESEARCH TIER**. Autonomous neural dimension adaptation and dynamic module evolution verified on Tesla T4.
+- **Next Direction Options (Post-M85 Strategic Priority -> M86)**:
+  - **Milestone M86 — Integrate Learning Mechanisms into One Continuous Student**: Shift development from isolated mechanisms to unifying what we have built: an autonomous continuous student loop (Acquire $\to$ Evaluate $\to$ Consolidate $\to$ Grow/Shrink $\to$ Retain $\to$ Repeat) operating across an ongoing sequence of unfamiliar problems under a fixed resource budget.
+  - **Milestone M87 — Long-Horizon Continual Learning**: Sequence dozens of procedural and symbolic tasks, measuring forward transfer, backward retention, and autonomous capacity regulation over extended lifetimes.
+  - **Milestone M88 — Cross-Subject Generalization**: Expand beyond synthetic transformations into arithmetic, propositional logic, natural language reasoning, probability, and algorithmic execution.

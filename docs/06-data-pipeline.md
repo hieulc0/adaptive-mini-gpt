@@ -470,3 +470,38 @@ Milestone M84 introduces connection-level neural topology adaptation, autograd g
 - **Execution Provenance**:
     * Full 359/359 regression suite passed on Google Colab Tesla T4 GPU (`amg-m84-t4` session).
     * Base model parameter invariant preserved (SHA-256: `6e39cd7ef6790b3c`, 1,071,872 weights unchanged); 100% carry (20/20) and logic (8/8) retention.
+
+### 17. Milestone M85 Autonomous Neural Dimension Adaptation and Dynamic Module Evolution
+Milestone M85 introduces physical bottleneck tensor resizing (ranks 2, 4, 8, 16), function-preserving expansion, memory deallocating contraction, dynamic module lifecycle management, and a 6-arm causal benchmark:
+- **Physical Dynamic Dimension Architecture**:
+    * **Dynamic Dimension Adapter**: `LayerNorm(128)` + `nn.Linear(128, rank)` + `GELU` + `nn.Linear(rank, 16)`.
+    * **Supported Candidate Ranks**:
+        - Rank 2: 562 physical parameters (8,192 theoretical forward FLOPs).
+        - Rank 4: 852 physical parameters (8,704 theoretical forward FLOPs).
+        - Rank 8: 1,432 physical parameters (9,728 theoretical forward FLOPs).
+        - Rank 16: 2,592 physical parameters (11,776 theoretical forward FLOPs).
+    * **Function-Preserving Rank Expansion**:
+        - Newly added up-projection columns are initialized to strict zero ($W_{\text{up}}[:, r_{\text{old}}:] = 0$).
+        - Guarantees $M_{\text{new}}(x) = M_{\text{old}}(x)$ bit-exact ($\max |\Delta| = 0.0$) at the expansion moment, preventing disruptive initialization shock.
+    * **Channel Energy-Preserving Rank Contraction**:
+        - Channel importance evaluated as $E_j = \|W_{\text{down}}[j, :]\|_2 \cdot \|W_{\text{up}}[:, j]\|_2$.
+        - Selects top $r_{\text{target}}$ dimensions and physically deallocates low-energy dimensions, releasing memory back to the system.
+    * **AdamW State Migration**:
+        - Tracks active parameters via memory address (`id(p)`), purging stale state and re-registering new tensors without PyTorch shape mismatch or ambiguous tensor comparison errors.
+- **Dynamic Module Lifecycle Management**:
+    * `DynamicModuleManager` governs allocation, expansion, contraction, and retirement across named modules.
+    * Bit-exact state checkpointing and restoration via holistic multi-module SHA-256 fingerprinting (`f94c39bfbd00ab38`).
+- **Learned Architecture Policy (< 1,000 Parameter Bound)**:
+    * Compact 2-layer MLP (989 parameters, SHA-256 `d9a380c3f396ec40`).
+    * 6 Diagnostic Input Signals: `loss_slope`, `validation_loss`, `prediction_entropy`, `gradient_norm`, `capacity_pressure`, `interference_risk`.
+    * 5 Categorical Actions: `REUSE_EXISTING`, `ADAPT_CURRENT`, `EXPAND_RANK`, `SHRINK_RANK`, `RETIRE_REDUNDANT`.
+- **Six Comparative Experimental Arms**:
+    1. `STATIC_RANK_8`: Fixed 1,432 parameters from step 1.
+    2. `STATIC_RANK_16`: Fixed 2,592 parameters from step 1.
+    3. `SMALLEST_RANK_SEARCH`: Fixed minimal Rank-2 (562 parameters; fails to qualify).
+    4. `RANDOM_CAPACITY_POLICY`: Stochastic expand/shrink mutations.
+    5. `LEARNED_ARCHITECTURE_POLICY`: Starts at Rank-4, dynamically expands upon diagnostic stall (22.4 steps vs 31.8 for Random).
+    6. `DIAGNOSTIC_ORACLE`: Validation-loss guided optimal capacity ceiling.
+- **Execution Provenance**:
+    * Full 366/366 regression suite passed on Google Colab Tesla T4 GPU (`amg-m85-t4` session).
+    * Base model parameter invariant preserved (SHA-256: `6e39cd7ef6790b3c`, 1,071,872 weights unchanged); 100% carry (20/20) and logic (8/8) retention.
