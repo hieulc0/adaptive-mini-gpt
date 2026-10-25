@@ -426,3 +426,19 @@ Milestone M82 introduces meta-policy environment and learned adaptation specific
 - **Execution Provenance**:
     * 345/345 unit and regression tests passed on Google Colab Tesla T4 GPU (`amg-m82-t4` session).
     * 100% carry (20/20) and logic (8/8) retention; base parameter SHA-256 hash invariant (`6e39cd7ef6790b3c`).
+
+### 15. Milestone M83 Knowledge Consolidation Curriculum & Multi-Regime Specification
+Milestone M83 introduces multi-teacher consolidation environments and multi-metric compatibility evaluation:
+- **Five Relation Regimes for Knowledge Reorganization**:
+    * **Regime 1: Highly Related Skills**: 3 distinct affine arithmetic transformations sharing identical multiplicative slope $a=3$ with varying offsets $b \in \{1, 5, 9\} \pmod{16}$. Probes common structure discovery and skill-specific residual separation.
+    * **Regime 2: Partially Overlapping Skills**: Affine transformation paired with a compound cascade skill sharing the first stage but applying subsequent parity logic.
+    * **Regime 3: Unrelated Skills**: Affine modular arithmetic paired with symbolic cyclic permutation shifts ($s 	o (s+3) \pmod{16}$).
+    * **Regime 4: Conflicting Skills**: Opposing polarity branching logic rules (`PARITY_NORM`: odd $	o s \oplus 6$, even $	o (s+2) mod 16$ vs `PARITY_OPPOSING`: odd $	o (s+2) mod 16$, even $	o s \oplus 6$). Generates destructive interference and verifies bit-exact rollback upon failed consolidation.
+    * **Regime 5: Future Skill Acquisition**: Unseen held-out compound cascade tasks evaluated post-consolidation to verify absence of negative transfer.
+- **Consolidation Architecture Accounting**:
+    * Baseline Capacity: $3 	imes 	ext{Rank-8}$ adapters = 4,296 parameters.
+    * Consolidated Capacity: Shared trunk (1,432 params) + 3 residual heads (116 params each) = 1,780 parameters.
+    * Parameter Compression: **58.57% reduction** (2,516 parameters pruned).
+- **Execution Provenance**:
+    * Full 350/350 regression suite passed on Google Colab Tesla T4 GPU (`amg-m83-t4` session).
+    * Base model SHA-256 parameter invariant preserved (`6e39cd7ef6790b3c`, 1,071,872 weights); 100% carry (20/20) and logic (8/8) retention.
