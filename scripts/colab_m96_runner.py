@@ -28,7 +28,7 @@ def main() -> None:
         run_cmd("git clone -b m96-persistent-memory https://github.com/hieulc0/adaptive-mini-gpt.git /content/adaptive-mini-gpt")
     else:
         print("=== Pulling latest changes on remote Colab ===")
-        run_cmd("cd /content/adaptive-mini-gpt && git fetch origin && git checkout m96-persistent-memory && git pull origin m96-persistent-memory")
+        run_cmd("cd /content/adaptive-mini-gpt && git fetch origin && git checkout -f m96-persistent-memory && git reset --hard origin/m96-persistent-memory")
 
     # 2. Install package in editable mode
     print("=== Installing adaptive-mini-gpt ===")
