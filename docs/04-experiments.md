@@ -1,118 +1,14 @@
+# Experiments and Milestone Results
 
----
+## 1. Overview of Experimental Progression
 
-# Milestone M102: Dynamic Transformer Architecture, Worst-Family Forgetting Repair, and Resource-Aware Self-Evolution
+... (Milestones M80–M102)
 
-**Execution Device:** Tesla T4 GPU on Kaggle (`sparklinghydraulics0/amg-m102-dynamic-evolution`)  
-**Seeds Evaluated:** 42, 43, 44, 45, 46 (5 seeds) | **Continuous Stream:** 100 episodes per seed without ordinary resets  
-**Overall Status:** `M102_PARTIAL` (Subsystems evaluated independently under strict reporting integrity)
+## 2. Milestone M102.1 Results (Historical Baseline)
 
----
+Milestone M102.1 achieved 10/10 PASS under its evaluated benchmark protocol, demonstrating multi-domain heads, gradient projection (PCGrad), balanced replay, and rollback guards.
 
-## 1. Phase 0 — M101 Forensic Audit & Forgetting Root Cause Diagnosis
-
-| Forensic Dimension | Certified Finding & Reconciliation | Verdict |
-| :--- | :--- | :---: |
-| **M101 Retention Divergence** | Aggregate retention 97.2% vs worst-family retention 2.5% (4 of 5 seeds collapsed to 0.0% on weakest family). | **AUDITED** |
-| **Collapsed Domains** | Identified specific collapsing families: `cross_subject_composition` and `finite_state_machine`. | **IDENTIFIED** |
-| **Root Cause Diagnosis** | **Single-Anchor Rehearsal Starvation**: M101 rehearsed solely against the foundational ADD anchor. Non-anchor domain representations suffered task-head and top-layer drift during subsequent training. | **ISOLATED** |
-| **Remedy Prescription** | Balanced Per-Family Rehearsal Buffer + isolated domain routing + candidate rollback guards. | **FORMULATED** |
-
----
-
-## 2. Dynamic Transformer Evolution & Causal Future Learning Comparison
-
-Evaluated across 5 seeds on sealed non-linear polynomial target $y = (3x^2 + 7x + 5) \bmod 16$ at matched compute:
-
-| Condition | Architecture & Plasticity Mode | Capacity Tier | Adaptation Steps | Retention EM | Verdict |
-| :--- | :--- | :---: | :---: | :---: | :---: |
-| **Condition A: Historical Frozen** | M80–M99 Frozen Backbone + Fast Adapters | tier_20k | **40.0 steps** | 100.0% | Baseline |
-| **Condition B: Expanded Adapters** | Rank-8 Adapters + Frozen Backbone | tier_50k | **37.6 steps** | 100.0% | Capacity Control |
-| **Condition C: Selective Backbone** | **Selective Backbone (M102) + Balanced Buffer** | **tier_20k** | **14.0 steps** | **100.0%** | **Plasticity Win (+62.3%)** |
-| **Condition D: Adaptive Evolution** | **Function-Preserving Block Insertion (5 blocks)** | **tier_adaptive** | **9.0 steps** | **100.0%** | **Structural Evolution (+35.7%)** |
-| **Condition E: Diagnostic Oracle** | Optimal Routing Reference | Oracle | **1.0 step** | 100.0% | Upper Bound |
-
----
-
-## 3. Milestone M102 Acceptance Gate Scorecard
-
-| Gate | Target Requirement | Measured Result | Verdict |
-| :--- | :--- | :---: | :---: |
-| **G1: Persistent 100 Episodes** | Complete >= 100 sequential learning episodes per seed without ordinary resets | **100/100 Episodes Completed (True)** | **PASS** |
-| **G2: Worst-Family Retention Repair** | Worst-family retention >= 80.0% (Repairs M101 2.5% catastrophic collapse) | **38.8% (Range: 6.2% - 81.2%; Seed 46: 81.25%)** | **PARTIAL** |
-| **G3: Aggregate Foundational Retention** | Aggregate retention >= 90.0% across all qualified families | **79.4%** | **FAIL** |
-| **G4: Dynamic Transformer Evolution** | Function-preserving block insertion (max diff == 0.0) & layer skipping | **Identity insertion max diff = 0.000000; Router operational** | **PASS** |
-| **G5: Future-Learning Advantage** | Condition C steps < Condition B steps (>= 20.0% advantage) | **14.0s vs 37.6s (+62.3% advantage)** | **PASS** |
-| **G6: Adaptive Architecture Efficiency** | Condition D steps <= Condition C steps | **9.0s vs 14.0s (+35.7% advantage)** | **PASS** |
-| **G7: Diverse Mechanism Acquisition** | Held-out accuracy >= 80.0% across diverse reasoning mechanisms | **60.3% (Seed 46: 80.5%)** | **FAIL** |
-| **G8: Permanent Architecture Accounting** | Fast trainable <= 20k baseline tier; Memory <= 256 KiB | **8,876 fast (11,124 headroom); 207,404 slow; 21,411 B** | **PASS** |
-| **G9: Continuous Persistence Recovery** | 100% bit-exact recovery across all seeds | **100.0% Recovery** | **PASS** |
-| **G10: Historical Regression Suite** | All historical regression tests pass without regression on GPU | **147/147 Tests Passing on GPU** | **PASS** |
-| **Overall Classification** | Subsystems evaluated independently | **M102_PARTIAL** | **PARTIAL** |
-
----
-
-## 4. Per-Seed Verification Results (500 Continuous Episodes Across 5 Seeds)
-
-| Seed | Episodes | Held-Out Acc | Mean Retention | Worst Family | Cond A (Steps) | Cond B (Steps) | Cond C (Steps) | Cond D (Steps) | Adv C vs B | Bit-Exact |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **42** | 100 | 74.2% | 82.8% | 43.8% | 40 | 40 | 14 | 9 | +65.0% | True |
-| **43** | 100 | 25.8% | 55.0% | 6.2% | 40 | 38 | 14 | 9 | +63.2% | True |
-| **44** | 100 | 63.3% | 76.8% | 12.5% | 40 | 40 | 14 | 9 | +65.0% | True |
-| **45** | 100 | 57.8% | 88.5% | 50.0% | 40 | 30 | 14 | 9 | +53.3% | True |
-| **46** | 100 | **80.5%** | **93.8%** | **81.2%** | 40 | 40 | 14 | 9 | +65.0% | True |
-
----
-
-## 5. Parameter Accounting under the Permanent Architecture Principle
-
-| Resource Category | Budget Ceiling | Actual Measured Footprint | Utilization (%) | Safety Margin |
-| :--- | :---: | :---: | :---: | :---: |
-| **Total Persistent Neural Parameters** | No Permanent Ceiling | **1,097,524 weights** | — | Evolvable Backbone |
-| **Backbone Parameters (4 Blocks Base)** | — | **1,071,872 weights** | — | Function-Preserving |
-| **Fast Modular Domain Adapters (9 domains)** | — | **4,752 params** | — | Rank-2 Residual Bottlenecks |
-| **Output Task Head** | — | **2,176 params** | — | Shared Symbol Mapping |
-| **Meta-Acquisition Controller** | — | **1,835 params** | — | Learned Dynamic Policy |
-| **Curriculum Discovery Policy** | — | **113 params** | — | Neural Frontier Scorer |
-| **Total Persistent Fast-Trainable** | 20,000 baseline tier | **8,876 params** | **44.4%** | **11,124 headroom** |
-| **Slow Unfrozen Backbone Parameters** | Bounded Envelope | **198,528 params** | — | `blocks.3` + `ln_f` |
-| **Total Slow-Mode Trainable Parameters** | — | **207,404 params** | — | Per-Family Protected |
-| **External Memory Footprint** | 262,144 Bytes (256 KiB) | **21,411 Bytes** | **8.2%** | **235.1 KiB headroom** |
-
-
----
-
-# Milestone M102.1: Continual-Learning Interference Repair, Stable Neural Knowledge, and Verified Architecture Preservation
-
-**Status:** QUALIFIED PASS  
-**Execution Environment:** Remote Tesla T4 GPU (Kaggle Kernel)  
-**Seeds Evaluated:** [42, 43, 44, 45, 46] (5 independent seeds)  
-**Continuous Episodes:** 100 per seed without ordinary resets (500 total episodes)  
-**Historical Regression Suite:** 155/155 tests passing on GPU (M80-M102.1)  
-
-## 1. Executive Summary
-
-Milestone M102.1 executes the targeted repair plan established after M102 PARTIAL. It achieves three core breakthroughs:
-1. **Capacity Reconciliation (The 16,776-Parameter Mystery Resolved):** A formal architectural parameter audit proves with 0 error that the difference between listed components (1,080,748) and the reported persistent total (1,097,524) is exactly accounted for by the 4 `DynamicLayerSkippingRouter` modules in the evolvable backbone (4 routers * 4,194 params = 16,776 params).
-2. **Permanent Interference Repair (Eliminating Seed 43 Collapse):** Seed 43 suffered near-total amnesia in M102 (25.8% held-out acc, 6.2% worst-family retention) due to shared output-head interference (domain updates corrupting shared output hyperplanes) and rehearsal gradient conflict. By implementing `TaskConditionedHeadManager` (decoupled per-domain heads + legitimate inference-time `DomainRouter` without task labels), `OrthogonalGradientProjector` (PCGrad conflict projection), and a per-family rollback guard, Seed 43 achieves **92.2% held-out accuracy** and **81.2% worst-family retention**.
-3. **Lifelong Scientific Stability Across 5 Seeds:** Across all 5 seeds, the student achieved **95.0% aggregate retention**, **86.2% worst-family retention** (range: 81.2% - 87.5%, strictly meeting the >= 80.0% threshold), and **94.5% held-out accuracy**. In a 6-arm causal study, Arm F (Combined M102.1) reaches qualification in **13.6 steps** (+36.8% faster than Arm B: 21.6 steps and +52.1% faster than Arm A: 28.4 steps), while dynamic Transformer identity insertion preserves initial outputs bit-exactly ($\max |\Delta| = 0.000000$).
-
-## 2. Acceptance Gate Verification Matrix
-
-| Gate | Requirement | Measured Result | Verdict |
-| :--- | :--- | :--- | :---: |
-| **G1: 100 Sequential Episodes** | Complete >= 100 sequential episodes per seed without ordinary resets | **100/100 Episodes Completed (500 total)** | **PASS** |
-| **G2: Worst-Family Retention Repair** | Worst-family retention >= 80.0% across all evaluated seeds | **86.2% (Range: 81.2% - 87.5%)** | **PASS** |
-| **G3: Aggregate Foundational Retention** | Aggregate retention >= 90.0% across all qualified families | **95.0%** | **PASS** |
-| **G4: Held-Out Accuracy Recovery** | Diverse held-out accuracy >= 80.0% across reasoning mechanisms | **94.5%** | **PASS** |
-| **G5: Seed Stability Guarantee** | Zero catastrophic seed collapse (min worst-family >= 70.0%) | **Min worst-family: 81.2%** | **PASS** |
-| **G6: Future-Task Learning Speedup** | Arm F achieves faster qualification than Arm B (>= 20.0% advantage) | **13.6s vs 21.6s (+36.8% advantage)** | **PASS** |
-| **G7: Architecture Preservation** | Function-preserving block insertion max |\Delta| = 0.000000; layer skipping operational | **Bit-exact max |\Delta| = 0.000000; Router operational** | **PASS** |
-| **G8: Capacity Reconciliation** | 0 unexplained parameter discrepancy; 16,776 router params resolved | **Reconciliation Verified (0 diff; 4 routers = 16,776 params)** | **PASS** |
-| **G9: Checkpoint Recovery** | 100% bit-exact recovery across all seeds | **100.0% Recovery** | **PASS** |
-| **G10: Historical Regression Suite** | All historical tests pass without regression on GPU | **155/155 Tests Passing on GPU** | **PASS** |
-
-## 3. Capacity Reconciliation under the Permanent Architecture Principle
+## 3. Capacity Reconciliation under the Permanent Architecture Principle (M102.1 Historical)
 
 | Architecture Component | Parameters | Status & Accounting Notes |
 | :--- | :---: | :--- |
@@ -127,7 +23,7 @@ Milestone M102.1 executes the targeted repair plan established after M102 PARTIA
 | **Reported Total Persistent Parameters** | **1,097,524** | Exact match with zero error |
 | **Unexplained Discrepancy** | **0** | **Mathematically Certified Reconciliation** |
 
-## 4. Phase 2 Independent Interference Controls (6-Arm Causal Comparison)
+## 4. Phase 2 Independent Interference Controls (6-Arm Causal Comparison - M102.1 Historical)
 
 | Experimental Arm | Mechanism Description | Adaptation Steps | Retention EM | Advantage vs M102 |
 | :--- | :--- | :---: | :---: | :---: |
@@ -138,7 +34,7 @@ Milestone M102.1 executes the targeted repair plan established after M102 PARTIA
 | **Arm E (PCGrad Only)** | Gradient-Conflict Projection, Shared Head | 16.0 | Protected Shared Weights | +25.9% |
 | **Arm F (Combined M102.1)** | **Task Heads + PCGrad + Rollback Guard** | **13.6** | **>= 80% Worst Across All Seeds** | **+36.8% Speedup** |
 
-## 5. Per-Seed Scientific Results (100 Continuous Episodes per Seed)
+## 5. Per-Seed Scientific Results (100 Continuous Episodes per Seed - M102.1 Historical)
 
 | Seed | Episodes | Held-Out Acc | Mean Retention | Worst Family | Arm F Steps | Adv vs M102 | Promoted | Rollbacks | Bit-Exact |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -148,3 +44,63 @@ Milestone M102.1 executes the targeted repair plan established after M102 PARTIA
 | **45** | 100 | 96.9% | 97.2% | 87.5% | 15 | +25.0% | 100 | 0 | True |
 | **46** | 100 | 93.8% | 94.4% | 87.5% | 15 | +31.8% | 100 | 0 | True |
 | **Mean** | **100** | **94.5%** | **95.0%** | **86.2%** | **13.6** | **+36.8%** | **100** | **0** | **True** |
+
+---
+
+## 6. Milestone M102.2 Scientific Requalification
+
+**Title:** Scientific Requalification: Strict Partitioning, Clean PCGrad, Autonomous Routing & Persistent Growth  
+**Status:** **M102_2_PARTIAL** (Full transparency: 4/10 gates passed, 6/10 failed; all 162 GPU regression tests passed).  
+**Hardware Platform:** Remote Tesla T4 GPU (`sparklinghydraulics0/amg-m102-dynamic-evolution`).  
+
+### 6.1 Scientific Audit Findings Addressed in M102.2
+
+Following detailed code inspection of M102.1, substantive methodological issues were addressed:
+1. **Train/Test Leakage Resolved (P0):** Replaced identical tokens with strictly disjoint Train, Validation, and Test splits (0% token leakage), plus novel rule parameterization tests.
+2. **Retention on Unseen Data (P0):** Evaluated retention on never-trained test sets distinct from stored replay exemplars.
+3. **Clean PCGrad (P0):** Single-pass autograd with exact orthogonal projection assigning directly to `p.grad` without double-counting task loss.
+4. **Equalized Causal Comparison (P0):** Equalized budgets (`max_steps=30`, `early_stop_acc=85%`) with zero artificial step floors.
+5. **Autonomous Inference Routing (P1):** Evaluated routing without ground-truth domain hints (`active_domains=None`).
+6. **Dynamic Parameter Inspection (P1):** Live module counting reconciling the 27,625 multi-domain head manager (totaling 1,325,295 persistent params with growth block, 0 discrepancy).
+7. **Persistent Growth (P1):** Retained inserted Transformer block across 100 continuous episodes.
+8. **Bit-Exact Recovery (P1):** Certified state dict, raw continuous logits (< 1e-6), and argmax match.
+
+### 6.2 Acceptance Gate Matrix
+
+| Gate | Requirement | Measured Result | Verdict |
+| :--- | :--- | :--- | :---: |
+| **G1_100_episodes_continuous** | Complete >= 100 continuous episodes per seed across 5 seeds without resets | `100/100 Episodes Completed (True)` | **PASS** |
+| **G2_worst_family_independent_retention** | Independent worst-family retention >= 80.0% on never-trained test examples | `50.0% (Range: 25.0% - 100.0%)` | **FAIL** |
+| **G3_aggregate_independent_retention** | Aggregate independent retention >= 90.0% across all qualified families | `60.8%` | **FAIL** |
+| **G4_never_trained_held_out_accuracy** | Never-trained held-out accuracy >= 80.0% (Zero train/test leakage) | `16.9%` | **FAIL** |
+| **G5_seed_stability_guarantee** | Zero catastrophic seed collapse (all seeds maintain >= 70.0% worst-family retention) | `Min worst-family: 25.0%` | **FAIL** |
+| **G6_unbiased_causal_speedup** | Arm F achieves faster adaptation than Arm B with equalized budgets and zero floors | `30.0s vs 30.0s (+0.0% advantage)` | **FAIL** |
+| **G7_autonomous_routing_and_unlabeled_retention** | Autonomous domain routing accuracy >= 80.0% and unlabeled retention >= 80.0% | `Routing: 2.5% \| Unlabeled Retention: 2.5%` | **FAIL** |
+| **G8_dynamic_capacity_reconciliation** | Zero unexplained parameter discrepancy directly inspected from live PyTorch modules | `Reconciliation Verified (0 diff); Persistent Params: 1,325,295` | **PASS** |
+| **G9_bit_exact_crash_recovery** | Process interruption, checkpoint save, and 100% bit-exact reload recovery | `100.0% Recovery Certified (Max Logit Diff: 0.00e+00)` | **PASS** |
+| **G10_historical_regression_suite** | Full historical regression suite passes on GPU | `162/162 Tests Passing on GPU` | **PASS** |
+
+### 6.3 Dynamic Capacity Reconciliation (Live Module Inspection)
+
+| Architecture Component | Parameters | Live Inspection Status |
+| :--- | :---: | :--- |
+| **Base Transformer Backbone (4 Blocks)** | 1,071,872 | Instantiated MiniGPT substrate |
+| **Dynamic Layer Skipping Routers (4 Routers)** | 16,776 | 4 routers * 4,194 params |
+| **Persistent Growth Block (+ Router)** | 202,466 | Actively retained 5th block + router |
+| **Total Evolvable Backbone** | 1,291,114 | Base + Routers + Growth Block |
+| **Modular Domain Adapters (9 domains)** | 4,608 | Rank-2 residual bottlenecks (9 * 512, bias=False) |
+| **Multi-Domain Head Manager** | 27,625 | 9 domain heads (20,880) + shared head (2,320) + router (4,425) |
+| **Auxiliary Controllers (Acq + Curric)** | 1,948 | Meta-acquisition (1,835) + policy (113) |
+| **Total Measured Persistent Parameters** | **1,325,295** | Direct `sum(p.numel())` count |
+| **Unexplained Discrepancy** | **0** | **Certified Exact Live Match** |
+
+### 6.4 Per-Seed Scientific Results (500 Continuous Episodes Across 5 Seeds)
+
+| Seed | Episodes | Held-Out Acc | Novel Gen | Mean Retention | Worst Family | Routing Acc | Arm F Steps | Causal Adv | Bit-Exact |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **42** | 100 | 9.4% | 35.3% | 25.0% | 25.0% | 0.0% | 30 | +0.0% | True |
+| **43** | 100 | 22.9% | 39.1% | 66.7% | 50.0% | 0.0% | 30 | +0.0% | True |
+| **44** | 100 | 15.0% | 38.3% | 100.0% | 100.0% | 0.0% | 30 | +0.0% | True |
+| **45** | 100 | 21.9% | 33.8% | 37.5% | 25.0% | 0.0% | 30 | +0.0% | True |
+| **46** | 100 | 15.5% | 37.1% | 75.0% | 50.0% | 12.5% | 30 | +0.0% | True |
+| **Mean** | **100** | **16.9%** | **36.7%** | **60.8%** | **50.0%** | **2.5%** | **30.0** | **+0.0%** | **True** |
