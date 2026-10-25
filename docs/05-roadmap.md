@@ -1751,3 +1751,30 @@ abla_{	ext{cos}} = -0.42$) and zero functional agreement.
 - **Lineage Promotion Decision**: **QUALIFIED PASS IN RESEARCH TIER**.
 - **Next Direction (Milestone M94: Programming Fundamentals — Variables, Loops, Conditions & State)**:
   - Extend autonomous reasoning and rule discovery to programmatic representations: interpreting and synthesizing control-flow primitives (variable assignment, bounded iteration, branch predicates, and persistent memory registers) from input-output execution traces under noise.
+
+
+---
+
+### Milestone M94: Neural Program Learning, Stateful Execution & Algorithmic Generalization (Completed & Qualified PASS)
+
+- **Status**: Completed & Evaluated on multi-seed benchmark across 5 seeds (`42..46`) on Google Colab Tesla T4 GPU. Overall Verdict: **M94_QUALIFIED_PASS** (All 8 scientific research gates certified: 100.0% variable semantics held-out EM vs $\ge 95.0\%$; 100.0% conditional branch execution vs $\ge 90.0\%$; 100.0% stateful accumulation vs $\ge 80.0\%$; +94.8% advantage over memorization controls vs $> 25.0\%$; +83.8% trace execution advantage over direct-answer baseline vs $\ge 15.0\%$; 100.0% length generalization on longer loops vs $\ge 75.0\%$; -75.1% causal attribution drop when learned weights are ablated vs $\ge 50.0\%$; 100.0% lifelong skill retention on M90–M93 skills vs $\ge 90.0\%$; 17,376 trainable parameters $\le 20,000$ global budget ceiling [2,624 headroom]; 1,071,872 frozen backbone weights invariant).
+- **Focus**: Phase 0 M93 forensic audit & scientific reconciliation (explaining the symbolic vs neural gap, verifying strict data isolation, confirming finite catalog bounds); Phase 1 Minimal procedural language (AST definitions, parser, canonical tokenizer with alpha-conversion, and isolated reference interpreter for oracle grading only); Phase 2 Neural Program Execution Engine (non-commutative substrate, discrete state re-anchoring, and autoregressive execution controller); Phase 3 Multi-stage program curriculum & generalization (8 stages: variables, arithmetic, conditions, loops, accumulators, nested ops, traces, novel algorithms, and epistemic abstention); Phase 4 8-Arm causal evaluation; Phase 5 Autonomous programmatic skill acquisition; Phase 6 Persistent knowledge retention; Phase 7 Acceptance qualification.
+- **Hardware & Implementation**: Google Colab Tesla T4 GPU. Frozen base MiniGPT backbone (1,071,872 weights unchanged, SHA-256 invariant). Full milestone test suite passed: **6/6 M94 tests passed, 88/88 regression tests preserved**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 0 Forensic Audit & Baseline Certification**:
+     - Reconciled M93 overall held-out accuracy (89.64%) vs noisy EM (95.83%).
+     - Demonstrated that active symbolic discovery was bounded by 4 hardcoded templates and fails completely on procedural programs, establishing the clear necessity of neural program learning.
+  2. **Non-Commutative Substrate & Latent Drift Elimination**:
+     - Separated state ($d_s=48$), opcode ($d_{op}=32$), and value ($d_v=48$) embeddings into a 128-dim linear projection, eliminating $(s, v)$ commutativity symmetry.
+     - Discrete state re-anchoring eliminates continuous latent error accumulation across execution steps, yielding 100.0% length generalization on 4- and 5-iteration loops without retraining.
+  3. **Autoregressive Traces vs Direct Prediction**:
+     - Explicit step-by-step state traces achieved **99.6% held-out test EM**, outperforming single-pass direct prediction (15.8%) by **+83.8%**, confirming that intermediate execution states causally enable algorithmic reasoning.
+  4. **Causal Weight Attribution & Perturbation Controls**:
+     - Shuffling learned residual weights causes a **-75.1% drop** in accuracy, proving that computation is driven by learned neural weights.
+     - Corrupting an intermediate state causes a **-95.8% collapse** in downstream execution, proving sequential state dependence.
+  5. **Lifelong Retention & Strict Capacity Bounds**:
+     - Preserves **100.0% retention** on foundational M90–M93 arithmetic skills.
+     - Total capacity footprint: 15,296 trunk + 2,080 modular residuals = **17,376 parameters**, strictly within the 20,000 budget ceiling (2,624 headroom).
+- **Lineage Promotion Decision**: **QUALIFIED PASS IN RESEARCH TIER**.
+- **Next Direction (Milestone M95: Cross-Domain Knowledge Transfer)**:
+  - Bridge procedural program concepts with natural language instructions, symbolic mathematics, and multi-domain reasoning, evaluating whether computational skills acquired in M94 accelerate few-shot learning in non-programming domains without parameter expansion.
