@@ -88,7 +88,7 @@ class HypothesisSpace:
 
         # 3. Piecewise / Threshold: if x < thresh: (m1*x + c1) % 16 else (m2*x + c2) % 16
         for thresh in (6, 8, 10):
-            for m1, c1 in [(2, 1), (3, 2), (1, 4), (3, 2)]:
+            for m1, c1 in [(2, 1), (3, 2), (1, 4), (5, 3)]:
                 for m2, c2 in [(15, 0), (1, 7), (2, 2), (5, 4)]:
                     def make_piece(t_v: int, m1_v: int, c1_v: int, m2_v: int, c2_v: int) -> Callable[[int], int]:
                         return lambda x: (m1_v * x + c1_v) % 16 if x < t_v else (m2_v * x + c2_v) % 16
