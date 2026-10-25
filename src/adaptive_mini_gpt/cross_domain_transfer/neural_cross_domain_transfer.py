@@ -60,7 +60,8 @@ class ModularRank2Residual(nn.Module):
         nn.init.zeros_(self.up.weight)  # Zero initialization preserves base output
 
     def forward(self, h: torch.Tensor) -> torch.Tensor:
-        z = F.gelu(self.norm(self.down(h)))\n        return self.up(z)
+        z = F.gelu(self.norm(self.down(h)))
+        return self.up(z)
 
     def count_parameters(self) -> int:
         return sum(p.numel() for p in self.parameters())
