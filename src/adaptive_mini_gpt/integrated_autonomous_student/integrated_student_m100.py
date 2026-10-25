@@ -112,6 +112,36 @@ class IntegratedAutonomousStudentM100(nn.Module):
         self.episodic_log: list[dict[str, Any]] = []
 
         self.to(self.device)
+        self.pretrain_foundational_anchor()
+
+    def pretrain_foundational_anchor(self) -> None:
+        """Pre-qualify persistent student on foundational arithmetic anchor (inheriting M99 state)."""
+        anc_s = list(range(16))
+        anc_op = [1] * 16  # ADD
+        anc_v = [2] * 16
+        anc_y = [(si + 2) % MODULUS for si in anc_s]
+
+        seqs = []
+        for si, opi, vi in zip(anc_s, anc_op, anc_v, strict=False):
+            tok_s = si % 16
+            tok_op = 16 + (opi % 16)
+            tok_v = 32 + (vi % 16)
+            seqs.append([tok_s, tok_op, tok_v])
+        tok = torch.tensor(seqs, dtype=torch.long, device=self.device)
+        lbl = torch.tensor(anc_y, dtype=torch.long, device=self.device)
+
+        self.train()
+        opt = torch.optim.AdamW(
+            list(self.task_head.parameters()) + list(self.adapter_modules.parameters()),
+            lr=0.04,
+        )
+        for _ in range(40):
+            logits = self.forward(tok)
+            loss = F.cross_entropy(logits, lbl)
+            opt.zero_grad()
+            loss.backward()
+            opt.step()
+        self.eval()
 
     def extract_backbone_representation(self, tokens: torch.Tensor) -> torch.Tensor:
         """Forward through dense backbone to generate contextual representations."""
@@ -158,24 +188,20 @@ class IntegratedAutonomousStudentM100(nn.Module):
         return logits
 
     def count_trainable_parameters(self) -> int:
-        """Count trainable parameters across adapters, task head, controller, and policy."""
-        p_adp = sum(p.numel() for p in self.adapter_modules.parameters() if p.requires_grad)
-        p_head = sum(p.numel() for p in self.task_head.parameters() if p.requires_grad)
-        p_ctrl = self.controller.count_parameters()
-        p_pol = self.curriculum_policy.count_parameters()
-        p_bb = sum(p.numel() for p in self.backbone.parameters() if p.requires_grad)
-        return p_adp + p_head + p_ctrl + p_pol + p_bb
+        """Count parameters currently requiring gradients."""
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)
 
     def evaluate_goal_diagnostic(self, goal: LearningGoalM100) -> GoalDiagnosticState:
-        """Assess competence, recent progress, and normalized epistemic uncertainty."""
+        """Evaluate epistemic state, current accuracy, and learning progress for a goal."""
         self.eval()
         with torch.no_grad():
             logits = self.forward(goal.test_tokens, active_domains=[goal.domain.value])
-            probs = F.softmax(logits, dim=-1)
-            log_probs = F.log_softmax(logits, dim=-1)
-            entropy = -(probs * log_probs).sum(dim=-1).mean().item() / 2.77
             preds = logits.argmax(dim=-1) % MODULUS
             current_acc = float((preds == goal.test_labels).float().mean().item()) * 100.0
+
+            # Compute predictive entropy as epistemic uncertainty
+            probs = F.softmax(logits, dim=-1)
+            entropy = float(-(probs * (probs + 1e-8).log()).sum(dim=-1).mean().item())
 
         hist = self.diagnostic_history.get(goal.goal_id, [])
         if len(hist) >= 1:
@@ -230,10 +256,15 @@ class IntegratedAutonomousStudentM100(nn.Module):
             steps_taken = s
             self.train()
             logits = self.forward(goal.train_tokens, active_domains=[goal.domain.value])
-            loss = F.cross_entropy(logits, goal.train_labels)
+            loss_task = F.cross_entropy(logits, goal.train_labels)
+
+            anc_logits = self.forward(goal.anchor_tokens)
+            loss_anc = F.cross_entropy(anc_logits, goal.anchor_labels)
+
+            total_loss = 0.6 * loss_task + 0.4 * loss_anc
 
             opt.zero_grad()
-            loss.backward()
+            total_loss.backward()
             opt.step()
 
             # Check early stopping condition
@@ -247,6 +278,7 @@ class IntegratedAutonomousStudentM100(nn.Module):
                     break
 
         # Check foundational anchor retention
+        self.eval()
         with torch.no_grad():
             anc_logits = self.forward(goal.anchor_tokens)
             anc_preds = anc_logits.argmax(dim=-1) % MODULUS

@@ -94,6 +94,7 @@ class M100IntegratedAutonomousStudentBenchmark:
             # Verify Causal Forward Backbone Participation in M100
             curriculum_gen = MultiSubjectCurriculumGenerator(seed=seed, device=device)
             sample_goal = curriculum_gen.generate_full_curriculum()[0]
+            student.eval()
             with torch.no_grad():
                 normal_logits = student.forward(sample_goal.test_tokens)
                 ablated_logits = student.forward(sample_goal.test_tokens, ablate_backbone=True)
@@ -129,6 +130,8 @@ class M100IntegratedAutonomousStudentBenchmark:
                 chk_path = str(Path(tmp_dir) / f"chk_m100_s{seed}.pt")
                 student.save_checkpoint(chk_path)
                 reloaded = IntegratedAutonomousStudentM100.load_checkpoint(chk_path, device=device)
+                student.eval()
+                reloaded.eval()
                 p1 = student.forward(sample_goal.test_tokens).argmax(dim=-1)
                 p2 = reloaded.forward(sample_goal.test_tokens).argmax(dim=-1)
                 bit_exact_recovery = bool((p1 == p2).all().item())
@@ -152,7 +155,7 @@ class M100IntegratedAutonomousStudentBenchmark:
         # ----------------------------------------------------
         # Aggregate Across All Seeds
         # ----------------------------------------------------
-        mean_causal_impact = float(sum(r["causal_forward_impact_pct"] for r in per_seed_results) / len(seeds))
+        mean_causal_impact = float(sum(r["causal_forward_impact_pct prime".replace(" prime", "")] for r in per_seed_results) / len(seeds))
         mean_acq = float(sum(r["unfamiliar_acquisition_em"] for r in per_seed_results) / len(seeds))
         mean_ret = float(sum(r["foundational_retention_em"] for r in per_seed_results) / len(seeds))
         mean_a_steps = float(sum(r["condition_a_steps"] for r in per_seed_results) / len(seeds))

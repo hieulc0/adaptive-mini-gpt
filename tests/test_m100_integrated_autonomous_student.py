@@ -217,6 +217,8 @@ def test_persistent_operation_and_crash_recovery(device: torch.device):
         gen = MultiSubjectCurriculumGenerator(seed=42, device=device)
         sample = gen.generate_full_curriculum()[0].test_tokens
 
+        student.eval()
+        reloaded.eval()
         p1 = student.forward(sample).argmax(dim=-1)
         p2 = reloaded.forward(sample).argmax(dim=-1)
         assert (p1 == p2).all().item() is True

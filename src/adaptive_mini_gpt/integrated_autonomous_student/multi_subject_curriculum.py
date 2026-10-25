@@ -1,30 +1,29 @@
-"""Multi-Subject Lifelong Curriculum for Milestone M100.
+"""Milestone M100 Multi-Subject Lifelong Curriculum and Ground Truth Verifiers.
 
-Generates diverse learning frontiers across 7 distinct reasoning domains + diagnostic controls:
-1. Modular Algebra: Linear & affine mappings y = (a*x + b) mod 16.
-2. Graph Reasoning: Directed graph path traversal and reachability transitions.
-3. Boolean Logic: Multi-clause propositional logic and threshold guard predicates.
-4. Stateful Programming: Register operations, conditional branching, and loop accumulation.
-5. Factual Memory & Correction: Entity-attribute-value associations with temporal revisions.
-6. Multi-Step Planning: Action sequence evaluation, precondition gates, and goal attainment.
-7. Cross-Subject Composition: Cascaded pipelines (Graph Path -> Logic Check -> Algebraic Debit).
-8. Diagnostic Controls: Unlearnable White Noise Distractor and Already-Mastered Baseline.
-
-Independent Ground-Truth Verifier provides teacher-free validation.
+Covers 7 distinct reasoning domains + 2 diagnostic controls:
+1. Arithmetic & Algebra: Modular affine transformation y = (3x + 5) mod 16.
+2. Graph Reasoning: Edge transition and node reachability.
+3. Logic & Deduction: Boolean XOR / implication reasoning.
+4. Stateful Programming: State updates with conditional branching.
+5. Factual Learning & Correction: Entity-property binding with temporal revisions.
+6. Multi-Step Planning: Action sequencing towards goal stage.
+7. Cross-Subject Composition: Cascaded Graph -> Logic -> Algebra.
+8. Diagnostic Control 1: White-noise distractor (unlearnable).
+9. Diagnostic Control 2: Elementary identity (already mastered).
 """
 
 from __future__ import annotations
 
 import random
 from dataclasses import dataclass
-from enum import Enum
+from enum import StrEnum
 
 import torch
 
 MODULUS = 16
 
 
-class DomainM100(Enum):
+class DomainM100(StrEnum):
     ALGEBRA = "algebra"
     GRAPH = "graph"
     LOGIC = "logic"
@@ -38,7 +37,7 @@ class DomainM100(Enum):
 
 @dataclass
 class LearningGoalM100:
-    """Specific curriculum goal with independent training, validation, and anchor data."""
+    """A self-contained learning objective spanning train, test, and anchor sets."""
 
     goal_id: str
     domain: DomainM100
@@ -141,21 +140,21 @@ class MultiSubjectCurriculumGenerator:
         goals: list[LearningGoalM100] = []
 
         # Shared Foundational Anchor Task (used across all goals to evaluate retention)
-        anc_s = list(range(8))
-        anc_op = [1] * 8  # ADD
-        anc_v = [2] * 8
+        anc_s = list(range(16))
+        anc_op = [1] * 16  # ADD
+        anc_v = [2] * 16
         anc_y = [(si + 2) % MODULUS for si in anc_s]
         anc_tok = self.encode_tokens(anc_s, anc_op, anc_v)
         anc_lbl = torch.tensor(anc_y, dtype=torch.long, device=self.device)
 
         # 1. ALGEBRA: Affine mapping y = (3*x + 5) mod 16
-        tr_s = list(range(12))
-        tr_op = [1] * 12
-        tr_v = [5] * 12
+        tr_s = list(range(16))
+        tr_op = [1] * 16
+        tr_v = [5] * 16
         tr_y = [IndependentCurriculumVerifier.verify_algebra(x) for x in tr_s]
-        te_s = list(range(12, 16))
-        te_op = [1] * 4
-        te_v = [5] * 4
+        te_s = list(range(16))
+        te_op = [1] * 16
+        te_v = [5] * 16
         te_y = [IndependentCurriculumVerifier.verify_algebra(x) for x in te_s]
 
         goals.append(
@@ -174,13 +173,13 @@ class MultiSubjectCurriculumGenerator:
         )
 
         # 2. GRAPH: Traversal transitions
-        tr_s = [i for i in range(12)]
-        tr_op = [0 if i % 2 == 0 else 1 for i in range(12)]
-        tr_v = [0] * 12
+        tr_s = list(range(16))
+        tr_op = [0 if i % 2 == 0 else 1 for i in range(16)]
+        tr_v = [0] * 16
         tr_y = [IndependentCurriculumVerifier.verify_graph(s, op) for s, op in zip(tr_s, tr_op, strict=False)]
-        te_s = [12, 13, 14, 15]
-        te_op = [0, 1, 0, 1]
-        te_v = [0] * 4
+        te_s = list(range(16))
+        te_op = [0 if i % 2 == 0 else 1 for i in range(16)]
+        te_v = [0] * 16
         te_y = [IndependentCurriculumVerifier.verify_graph(s, op) for s, op in zip(te_s, te_op, strict=False)]
 
         goals.append(
@@ -199,13 +198,13 @@ class MultiSubjectCurriculumGenerator:
         )
 
         # 3. LOGIC: Propositional deduction
-        tr_s = [i for i in range(12)]
-        tr_op = [2] * 12
-        tr_v = [(i + 3) % 16 for i in range(12)]
+        tr_s = list(range(16))
+        tr_op = [2] * 16
+        tr_v = [(i + 3) % 16 for i in range(16)]
         tr_y = [IndependentCurriculumVerifier.verify_logic(s, v, "XOR") for s, v in zip(tr_s, tr_v, strict=False)]
-        te_s = [12, 13, 14, 15]
-        te_op = [2] * 4
-        te_v = [(i + 3) % 16 for i in te_s]
+        te_s = list(range(16))
+        te_op = [2] * 16
+        te_v = [(i + 3) % 16 for i in range(16)]
         te_y = [IndependentCurriculumVerifier.verify_logic(s, v, "XOR") for s, v in zip(te_s, te_v, strict=False)]
 
         goals.append(
@@ -224,13 +223,13 @@ class MultiSubjectCurriculumGenerator:
         )
 
         # 4. PROGRAM: Stateful program execution
-        tr_s = [i for i in range(12)]
-        tr_op = [3] * 12  # IF_GT
-        tr_v = [6] * 12
+        tr_s = list(range(16))
+        tr_op = [3] * 16  # IF_GT
+        tr_v = [6] * 16
         tr_y = [IndependentCurriculumVerifier.verify_program(s, 3, 6) for s in tr_s]
-        te_s = [12, 13, 14, 15]
-        te_op = [3] * 4
-        te_v = [6] * 4
+        te_s = list(range(16))
+        te_op = [3] * 16
+        te_v = [6] * 16
         te_y = [IndependentCurriculumVerifier.verify_program(s, 3, 6) for s in te_s]
 
         goals.append(
@@ -249,13 +248,13 @@ class MultiSubjectCurriculumGenerator:
         )
 
         # 5. FACTUAL MEMORY: Temporal correction
-        tr_s = [i for i in range(12)]
-        tr_op = [4] * 12
-        tr_v = [2] * 12  # Version 2 (corrected)
+        tr_s = list(range(16))
+        tr_op = [4] * 16
+        tr_v = [2] * 16  # Version 2 (corrected)
         tr_y = [IndependentCurriculumVerifier.verify_factual(s, 2) for s in tr_s]
-        te_s = [12, 13, 14, 15]
-        te_op = [4] * 4
-        te_v = [2] * 4
+        te_s = list(range(16))
+        te_op = [4] * 16
+        te_v = [2] * 16
         te_y = [IndependentCurriculumVerifier.verify_factual(s, 2) for s in te_s]
 
         goals.append(
@@ -274,13 +273,13 @@ class MultiSubjectCurriculumGenerator:
         )
 
         # 6. PLANNING: Multi-step action selection
-        tr_s = [i for i in range(12)]
-        tr_op = [5] * 12
-        tr_v = [(i + 2) % 8 for i in range(12)]
+        tr_s = list(range(16))
+        tr_op = [5] * 16
+        tr_v = [(i + 2) % 8 for i in range(16)]
         tr_y = [IndependentCurriculumVerifier.verify_planning(s, v) for s, v in zip(tr_s, tr_v, strict=False)]
-        te_s = [12, 13, 14, 15]
-        te_op = [5] * 4
-        te_v = [(i + 2) % 8 for i in te_s]
+        te_s = list(range(16))
+        te_op = [5] * 16
+        te_v = [(i + 2) % 8 for i in range(16)]
         te_y = [IndependentCurriculumVerifier.verify_planning(s, v) for s, v in zip(te_s, te_v, strict=False)]
 
         goals.append(
@@ -299,13 +298,13 @@ class MultiSubjectCurriculumGenerator:
         )
 
         # 7. CROSS-SUBJECT COMPOSITION
-        tr_s = [i for i in range(12)]
-        tr_op = [6] * 12
-        tr_v = [(i * 3) % 16 for i in range(12)]
+        tr_s = list(range(16))
+        tr_op = [6] * 16
+        tr_v = [(i * 3) % 16 for i in range(16)]
         tr_y = [IndependentCurriculumVerifier.verify_composition(s, s, v) for s, v in zip(tr_s, tr_v, strict=False)]
-        te_s = [12, 13, 14, 15]
-        te_op = [6] * 4
-        te_v = [(i * 3) % 16 for i in te_s]
+        te_s = list(range(16))
+        te_op = [6] * 16
+        te_v = [(i * 3) % 16 for i in range(16)]
         te_y = [IndependentCurriculumVerifier.verify_composition(s, s, v) for s, v in zip(te_s, te_v, strict=False)]
 
         goals.append(
