@@ -24,6 +24,7 @@ from adaptive_mini_gpt.dynamic_transformer_evolution.dynamic_transformer_substra
 )
 from adaptive_mini_gpt.dynamic_transformer_evolution.per_family_rehearsal_buffer import (
     BalancedPerFamilyRehearsalBuffer,
+    DomainExemplarBatch,
 )
 from adaptive_mini_gpt.integrated_autonomous_student.structural_evolution_engine import (
     CapacityTierM100,
@@ -86,14 +87,21 @@ class PersistentStudentM102(nn.Module):
         self.d_model = base_cfg.d_model
 
         # 2. Fast Modular Domain Adapters (Rank-2 Bottlenecks)
+        adapter_domains = [
+            d.value
+            for d in DomainM101
+            if d not in (DomainM101.NOISE_DISTRACTOR, DomainM101.ALREADY_MASTERED)
+        ]
+        if "foundational_arithmetic" not in adapter_domains:
+            adapter_domains.append("foundational_arithmetic")
+
         self.adapter_modules = nn.ModuleDict({
-            f"adapter_{d.value}": nn.Sequential(
+            f"adapter_{d}": nn.Sequential(
                 nn.Linear(self.d_model, 2, bias=False),
                 nn.GELU(),
                 nn.Linear(2, self.d_model, bias=False),
             )
-            for d in DomainM101
-            if d not in (DomainM101.NOISE_DISTRACTOR, DomainM101.ALREADY_MASTERED)
+            for d in adapter_domains
         })
 
         # 3. Output Task Head
@@ -126,6 +134,18 @@ class PersistentStudentM102(nn.Module):
         self.to(self.device)
         self.pretrain_foundational_anchor()
 
+    def to(self, *args, **kwargs) -> PersistentStudentM102:
+        device = args[0] if args else kwargs.get("device", None)
+        if device is not None:
+            self.device = torch.device(device) if isinstance(device, str) else device
+            for k, v in list(self.rehearsal_buffer.domain_exemplars.items()):
+                self.rehearsal_buffer.domain_exemplars[k] = DomainExemplarBatch(
+                    domain=v.domain,
+                    tokens=v.tokens.to(self.device),
+                    labels=v.labels.to(self.device),
+                )
+        return super().to(*args, **kwargs)
+
     def pretrain_foundational_anchor(self) -> None:
         """Pre-qualify foundational arithmetic anchor."""
         anc_s = list(range(16))
@@ -143,12 +163,13 @@ class PersistentStudentM102(nn.Module):
         lbl = torch.tensor(anc_y, dtype=torch.long, device=self.device)
 
         self.train()
+        anc_adapter = self.adapter_modules["adapter_foundational_arithmetic"]
         opt = torch.optim.AdamW(
-            list(self.task_head.parameters()) + list(self.adapter_modules.parameters()),
+            list(self.task_head.parameters()) + list(anc_adapter.parameters()),
             lr=0.04,
         )
-        for _ in range(30):
-            logits = self.forward(tok)
+        for _ in range(40):
+            logits = self.forward(tok, active_domains=["foundational_arithmetic"])
             loss = F.cross_entropy(logits, lbl)
             opt.zero_grad()
             loss.backward()
@@ -227,13 +248,15 @@ class PersistentStudentM102(nn.Module):
             logits = self.forward(goal.train_tokens, active_domains=[goal.domain.value])
             loss_task = F.cross_entropy(logits, goal.train_labels)
 
-            # Balanced Multi-Family Rehearsal Loss
-            rehearsal_batch = self.rehearsal_buffer.sample_balanced_batch(batch_size_per_domain=4)
-            if rehearsal_batch is not None:
-                r_tok, r_lbl = rehearsal_batch
-                r_logits = self.forward(r_tok)
-                loss_rehearsal = F.cross_entropy(r_logits, r_lbl)
-                total_loss = 0.6 * loss_task + 0.4 * loss_rehearsal
+            # Balanced Multi-Family Rehearsal Loss (Evaluates each domain with its own adapter)
+            rehearsal_batches = self.rehearsal_buffer.sample_domain_batches(batch_size_per_domain=4)
+            if rehearsal_batches:
+                loss_rehearsal_total = torch.tensor(0.0, device=self.device)
+                for r_dom, r_tok, r_lbl in rehearsal_batches:
+                    r_logits = self.forward(r_tok, active_domains=[r_dom])
+                    loss_rehearsal_total = loss_rehearsal_total + F.cross_entropy(r_logits, r_lbl)
+                loss_rehearsal = loss_rehearsal_total / len(rehearsal_batches)
+                total_loss = 0.5 * loss_task + 0.5 * loss_rehearsal
             else:
                 total_loss = loss_task
 
@@ -301,11 +324,13 @@ class PersistentStudentM102(nn.Module):
             logits = self.forward(goal.train_tokens, active_domains=[goal.domain.value])
             loss_task = F.cross_entropy(logits, goal.train_labels)
 
-            rehearsal_batch = self.rehearsal_buffer.sample_balanced_batch(batch_size_per_domain=4)
-            if rehearsal_batch is not None:
-                r_tok, r_lbl = rehearsal_batch
-                r_logits = self.forward(r_tok)
-                loss_rehearsal = F.cross_entropy(r_logits, r_lbl)
+            rehearsal_batches = self.rehearsal_buffer.sample_domain_batches(batch_size_per_domain=4)
+            if rehearsal_batches:
+                loss_rehearsal_total = torch.tensor(0.0, device=self.device)
+                for r_dom, r_tok, r_lbl in rehearsal_batches:
+                    r_logits = self.forward(r_tok, active_domains=[r_dom])
+                    loss_rehearsal_total = loss_rehearsal_total + F.cross_entropy(r_logits, r_lbl)
+                loss_rehearsal = loss_rehearsal_total / len(rehearsal_batches)
                 loss = 0.5 * loss_task + 0.5 * loss_rehearsal
             else:
                 loss = loss_task
@@ -345,18 +370,19 @@ class PersistentStudentM102(nn.Module):
         p_curric = sum(p.numel() for p in self.curriculum_policy.parameters())
 
         fast_trainable = p_adapters + p_head + p_ctrl + p_curric
-        unfrozen_backbone = sum(
-            p.numel()
-            for pn, p in self.evolvable_backbone.base_model.named_parameters()
-            if "blocks.3" in pn or "ln_f" in pn
-        )
+
+        unfrozen_backbone = 0
+        for pn, p in self.evolvable_backbone.base_model.named_parameters():
+            if "blocks.3" in pn or "ln_f" in pn:
+                unfrozen_backbone += p.numel()
+
         slow_trainable = fast_trainable + unfrozen_backbone
-        total_persistent = p_backbone + fast_trainable
+        persistent_total = p_backbone + p_adapters + p_head + p_ctrl + p_curric
 
         return {
-            "total_persistent_parameters": total_persistent,
+            "total_persistent_neural_parameters": persistent_total,
             "backbone_parameters": p_backbone,
-            "transformer_blocks_count": len(self.evolvable_backbone.base_model.blocks),
+            "transformer_layers": len(self.evolvable_backbone.base_model.blocks),
             "fast_trainable_parameters": fast_trainable,
             "fast_trainable_headroom_20k": 20_000 - fast_trainable,
             "slow_unfrozen_backbone_parameters": unfrozen_backbone,
@@ -389,7 +415,7 @@ class PersistentStudentM102(nn.Module):
         )
 
     def save_checkpoint(self, path: str | Path) -> None:
-        """Save complete persistent state including evolvable backbone."""
+        """Save complete persistent state including evolvable backbone and rehearsal buffer."""
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         meta = {
@@ -401,11 +427,16 @@ class PersistentStudentM102(nn.Module):
             "episodic_log": self.episodic_log,
             "n_blocks": len(self.evolvable_backbone.base_model.blocks),
         }
+        exemplars_data = {
+            dom: {"tokens": batch.tokens.cpu(), "labels": batch.labels.cpu()}
+            for dom, batch in self.rehearsal_buffer.domain_exemplars.items()
+        }
         torch.save(
             {
                 "state_dict": self.state_dict(),
                 "metadata": meta,
                 "memory_store": self.memory_store.to_json(),
+                "rehearsal_exemplars": exemplars_data,
             },
             path,
         )
@@ -442,5 +473,14 @@ class PersistentStudentM102(nn.Module):
             if rec.is_active:
                 store.fact_index[(rec.entity, rec.attribute)] = rid
         student.memory_store = store
+
+        if "rehearsal_exemplars" in data:
+            for dom, ex in data["rehearsal_exemplars"].items():
+                student.rehearsal_buffer.register_domain(
+                    dom,
+                    ex["tokens"].to(device),
+                    ex["labels"].to(device),
+                )
+
         student.eval()
         return student

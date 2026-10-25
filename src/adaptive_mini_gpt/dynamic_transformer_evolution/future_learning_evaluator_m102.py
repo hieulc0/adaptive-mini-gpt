@@ -1,16 +1,17 @@
-"""Milestone M102 Causal Future-Learning Evaluator with Dynamic Architecture.
+"""Milestone M102 Causal Future Learning Evaluator.
 
-Compares 5 Causal Conditions on sealed held-out target mechanisms:
-- Condition A: Fixed M101 Architecture (Frozen Backbone + Baseline Rehearsal).
-- Condition B: Expanded Adapters (Rank-8, Frozen Backbone).
-- Condition C: Selective Backbone Plasticity + Balanced Rehearsal Buffer (M102 Baseline).
-- Condition D: Dynamic Architecture Evolution (Block Insertion + Layer Skipping + Adaptive Expansion).
-- Condition E: Diagnostic Oracle.
+Compares 5 experimental arms on sealed non-linear tasks:
+- Condition A: Historical Frozen Baseline (M80-M99 style frozen backbone)
+- Condition B: Expanded Adapters (Rank-8 adapters, frozen backbone)
+- Condition C: Selective Backbone Plasticity + Balanced Multi-Domain Rehearsal (M102)
+- Condition D: Dynamic Architecture Evolution (Block insertion + selective expansion)
+- Condition E: Diagnostic Oracle (Zero-shot optimal routing)
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Any
 
 import torch
 import torch.nn as nn
@@ -95,6 +96,7 @@ class FutureLearningEvaluatorM102:
         # Arm A: Historical Frozen Baseline (No balanced rehearsal, frozen backbone)
         stud_a = PersistentStudentM102(tier=CapacityTierM100.TIER_20K, device=self.device)
         stud_a.load_state_dict(base_student.state_dict())
+        stud_a.rehearsal_buffer = base_student.rehearsal_buffer.clone()
         res_a = stud_a.adapt_fast_skill(target_goal, max_steps=40)
         fam_ret_a = stud_a.rehearsal_buffer.evaluate_all_families_retention(stud_a)
         worst_a = min(fam_ret_a.values()) if fam_ret_a else 100.0
@@ -102,6 +104,7 @@ class FutureLearningEvaluatorM102:
         # Arm B: Expanded Adapters (Rank 8, frozen backbone)
         stud_b = PersistentStudentM102(tier=CapacityTierM100.TIER_50K, device=self.device)
         stud_b.load_state_dict(base_student.state_dict())
+        stud_b.rehearsal_buffer = base_student.rehearsal_buffer.clone()
         stud_b.adapter_modules["adapter_algebra_quadratic"] = nn.Sequential(
             nn.Linear(stud_b.d_model, 8, bias=False),
             nn.GELU(),
@@ -114,6 +117,7 @@ class FutureLearningEvaluatorM102:
         # Arm C: Selective Backbone Plasticity + Balanced Rehearsal
         stud_c = PersistentStudentM102(tier=CapacityTierM100.TIER_20K, device=self.device)
         stud_c.load_state_dict(base_student.state_dict())
+        stud_c.rehearsal_buffer = base_student.rehearsal_buffer.clone()
         res_c = stud_c.adapt_fast_skill(target_goal, max_steps=25)
         fam_ret_c = stud_c.rehearsal_buffer.evaluate_all_families_retention(stud_c)
         worst_c = min(fam_ret_c.values()) if fam_ret_c else 100.0
@@ -121,6 +125,7 @@ class FutureLearningEvaluatorM102:
         # Arm D: Dynamic Architecture Evolution (Inserted Block + Dynamic Expansion)
         stud_d = PersistentStudentM102(tier=CapacityTierM100.TIER_ADAPTIVE, device=self.device)
         stud_d.load_state_dict(base_student.state_dict())
+        stud_d.rehearsal_buffer = base_student.rehearsal_buffer.clone()
         # Function-preserving block insertion
         new_layers = stud_d.evolvable_backbone.insert_block_identity(insert_idx=len(stud_d.evolvable_backbone.base_model.blocks))
         res_d = stud_d.adapt_fast_skill(target_goal, max_steps=20)
@@ -188,7 +193,12 @@ class FutureLearningEvaluatorM102:
             condition_c=outcome_c,
             condition_d=outcome_d,
             condition_e=outcome_e,
-            backbone_plasticity_advantage_pct=round(advantage_pct, 2),
-            adaptive_architecture_advantage_pct=round(adaptive_advantage, 2),
-            all_conditions_qualified=True,
+            backbone_plasticity_advantage_pct=round(advantage_pct, 1),
+            adaptive_architecture_advantage_pct=round(adaptive_advantage, 1),
+            all_conditions_qualified=all([
+                outcome_a.qualified,
+                outcome_b.qualified,
+                outcome_c.qualified,
+                outcome_d.qualified,
+            ]),
         )
