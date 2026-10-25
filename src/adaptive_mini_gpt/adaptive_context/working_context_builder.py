@@ -54,15 +54,20 @@ class WorkingContextBuilder:
         clean_q = query.replace("_", " ").replace("-", " ").lower()
         query_tokens = set(t.strip() for t in clean_q.split() if len(t.strip()) > 1)
 
-        # 1. Candidate retrieval
-        candidates = self.store.search_facts(query)
+        # 1. Candidate retrieval including inactive versions for historical temporal reconstruction
+        candidates = self.store.search_facts(query, include_inactive=True)
 
-        # 2. Strict Temporal Isolation: ignore future records and inactive/superseded records
-        valid_temporal_records: list[FactualRecord] = [
-            r for r in candidates if r.timestamp <= current_episode and r.is_active
-        ]
+        # 2. Strict Temporal Isolation: group by (entity, attribute) and select latest version <= current_episode
+        history_map: dict[tuple[str, str], FactualRecord] = {}
+        for r in candidates:
+            if r.timestamp <= current_episode:
+                key = (r.entity, r.attribute)
+                if key not in history_map or r.timestamp > history_map[key].timestamp:
+                    history_map[key] = r
 
-        # 3. Distractor filtering via token overlap similarity
+        valid_temporal_records = list(history_map.values())
+
+        # 3. Distractor filtering via token overlap & entity exact matching
         scored_records: list[tuple[float, FactualRecord]] = []
         distractors_filtered = 0
 
@@ -73,10 +78,11 @@ class WorkingContextBuilder:
             if not rec_tokens:
                 continue
             sim = len(intersection) / len(query_tokens.union(rec_tokens))
-            # Entity name exact or substring match boost
+
+            # Entity name exact match boost
             clean_entity = rec.entity.replace("_", " ").lower()
-            if clean_entity in clean_q or any(tok in clean_entity for tok in query_tokens):
-                sim += 0.3
+            if clean_entity in clean_q:
+                sim += 0.4
 
             if sim >= self.relevance_threshold:
                 scored_records.append((sim, rec))
@@ -97,13 +103,16 @@ class WorkingContextBuilder:
                 val_str = str(fact.value).lower().strip()
                 if "_" in val_str or any(char.isalpha() for char in val_str):
                     # Potential entity reference for Hop 2
-                    hop2_candidates = self.store.search_facts(val_str)
+                    hop2_candidates = self.store.search_facts(val_str, include_inactive=True)
+                    # Filter temporally for Hop 2 as well
+                    h2_map: dict[tuple[str, str], FactualRecord] = {}
                     for h2 in hop2_candidates:
-                        if (
-                            h2.timestamp <= current_episode
-                            and h2.is_active
-                            and h2.record_id not in [f.record_id for f in final_facts]
-                        ):
+                        if h2.timestamp <= current_episode:
+                            k2 = (h2.entity, h2.attribute)
+                            if k2 not in h2_map or h2.timestamp > h2_map[k2].timestamp:
+                                h2_map[k2] = h2
+                    for h2 in h2_map.values():
+                        if h2.record_id not in [f.record_id for f in final_facts]:
                             final_facts.append(h2)
                             hops_resolved = max(hops_resolved, 2)
 

@@ -203,11 +203,11 @@ class PersistentKnowledgeStore:
         if key in self.fact_index:
             rec_id = self.fact_index[key]
             rec = self.facts.get(rec_id)
-            if rec and rec.is_active:
+            if rec and (rec.is_active or include_inactive):
                 return rec
         return None
 
-    def search_facts(self, query: str) -> list[FactualRecord]:
+    def search_facts(self, query: str, include_inactive: bool = False) -> list[FactualRecord]:
         """Find active factual records matching query tokens."""
         clean_q = query.replace("_", " ").replace("-", " ").lower()
         tokens = [t.strip() for t in clean_q.split() if len(t.strip()) > 1]
@@ -222,7 +222,7 @@ class PersistentKnowledgeStore:
         results = []
         for rid in matching_ids:
             rec = self.facts.get(rid)
-            if rec and rec.is_active:
+            if rec and (rec.is_active or include_inactive):
                 results.append(rec)
         return results
 
