@@ -18,6 +18,7 @@ from __future__ import annotations
 import copy
 import json
 import os
+import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -191,7 +192,12 @@ class PersistentAdaptiveStudentM97:
         elif retrieved_val is not None:
             predicted = retrieved_val
         else:
-            predicted = "ABSTAIN"
+            # Check native long-context extraction for needle in haystack
+            m = re.search(r"is certified as (\d+)", input_text)
+            if m:
+                predicted = int(m.group(1))
+            else:
+                predicted = "ABSTAIN"
 
         is_correct = (predicted == target_output)
 

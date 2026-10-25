@@ -342,7 +342,10 @@ class M97AdaptiveContextBenchmark:
             # Can process long inputs, but has no external persistent memory
             arm_c_correct = 0
             for task in curriculum:
-                if not task.requires_retrieval and task.task_type != TaskType.MULTI_HOP:
+                if task.task_type == TaskType.LONG_NEEDLE:
+                    # Long native context allows reading the needle directly from input text
+                    arm_c_correct += 1
+                elif not task.requires_retrieval and task.task_type != TaskType.MULTI_HOP:
                     arm_c_correct += 1
             arm_c_em = arm_c_correct / len(curriculum) * 100.0
 

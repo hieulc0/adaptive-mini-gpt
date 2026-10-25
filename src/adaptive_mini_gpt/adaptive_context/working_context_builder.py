@@ -51,11 +51,17 @@ class WorkingContextBuilder:
         allow_multi_hop: bool = True,
     ) -> WorkingContextDocument:
         """Retrieve relevant facts, filter distractors, resolve multi-hop links, and build context."""
-        clean_q = query.replace("_", " ").replace("-", " ").lower()
+        # Extract targeted search query if preceded by long background text
+        search_q = query
+        if "query:" in query.lower():
+            parts = re.split(r"query:", query, flags=re.IGNORECASE)
+            search_q = parts[-1].strip()
+
+        clean_q = search_q.replace("_", " ").replace("-", " ").lower()
         query_tokens = set(t.strip() for t in clean_q.split() if len(t.strip()) > 1)
 
         # 1. Candidate retrieval including inactive versions for historical temporal reconstruction
-        candidates = self.store.search_facts(query, include_inactive=True)
+        candidates = self.store.search_facts(search_q, include_inactive=True)
 
         # 2. Strict Temporal Isolation: group by (entity, attribute) and select latest version <= current_episode
         history_map: dict[tuple[str, str], FactualRecord] = {}
