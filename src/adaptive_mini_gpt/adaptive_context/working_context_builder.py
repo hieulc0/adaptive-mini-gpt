@@ -57,9 +57,9 @@ class WorkingContextBuilder:
         # 1. Candidate retrieval
         candidates = self.store.search_facts(query)
 
-        # 2. Strict Temporal Isolation: ignore future records
+        # 2. Strict Temporal Isolation: ignore future records and inactive/superseded records
         valid_temporal_records: list[FactualRecord] = [
-            r for r in candidates if r.timestamp <= current_episode and not r.is_superseded
+            r for r in candidates if r.timestamp <= current_episode and r.is_active
         ]
 
         # 3. Distractor filtering via token overlap similarity
@@ -101,8 +101,8 @@ class WorkingContextBuilder:
                     for h2 in hop2_candidates:
                         if (
                             h2.timestamp <= current_episode
-                            and not h2.is_superseded
-                            and h2.id not in [f.id for f in final_facts]
+                            and h2.is_active
+                            and h2.record_id not in [f.record_id for f in final_facts]
                         ):
                             final_facts.append(h2)
                             hops_resolved = max(hops_resolved, 2)
@@ -115,7 +115,7 @@ class WorkingContextBuilder:
             line = f"Fact: {fact.entity}.{fact.attribute} = {fact.value}"
             context_lines.append(line)
             retrieved_dict_list.append({
-                "id": fact.id,
+                "id": fact.record_id,
                 "entity": fact.entity,
                 "attribute": fact.attribute,
                 "value": fact.value,

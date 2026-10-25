@@ -16,6 +16,7 @@ from pathlib import Path
 
 import pytest
 import torch
+import torch.nn.functional as F
 
 from adaptive_mini_gpt.adaptive_context.adaptive_context_manager import (
     AdaptiveContextPolicy,
@@ -160,7 +161,7 @@ def test_checkpoint_serialization_and_bit_exact_recovery(device: torch.device):
         reloaded = PersistentAdaptiveStudentM97.load_checkpoint(chk_path, device=device)
 
         assert reloaded.step_counter == student.step_counter
-        assert reloaded.memory_store.get_record_count() == student.memory_store.get_record_count()
+        assert len(reloaded.memory_store.facts) == len(student.memory_store.facts)
 
         # Both process identical task
         r1 = student.process_task(
@@ -183,16 +184,31 @@ def test_checkpoint_serialization_and_bit_exact_recovery(device: torch.device):
 def test_fresh_vs_experienced_student_advantage(device: torch.device):
     """Verify experienced student outperforms fresh student on held-out target tasks."""
     substrate_trained = CrossDomainReasoningSubstrate(budget_ceiling=20_000).to(device)
+    # Train concept trunk on transition (2, OP_ADD, 3) -> 5
+    s = torch.tensor([2], device=device)
+    op = torch.tensor([OP_ADD], device=device)
+    v = torch.tensor([3], device=device)
+    y = torch.tensor([5], device=device)
+    opt = torch.optim.AdamW(substrate_trained.parameters(), lr=0.05)
+    for _ in range(40):
+        substrate_trained.train()
+        logits = substrate_trained.forward_transition(s, op, v, domain_key=DOMAIN_PROGRAM)
+        loss = F.cross_entropy(logits, y)
+        opt.zero_grad()
+        loss.backward()
+        opt.step()
+    substrate_trained.eval()
+
     store = PersistentKnowledgeStore(max_byte_budget=262_144)
 
-    # Experienced student
+    # Experienced student with trained substrate
     exp_student = PersistentAdaptiveStudentM97(
         substrate=substrate_trained,
         memory_store=store,
         device=device,
     )
 
-    # Fresh student
+    # Fresh student with untrained random substrate
     fresh_substrate = CrossDomainReasoningSubstrate(budget_ceiling=20_000).to(device)
     fresh_student = PersistentAdaptiveStudentM97(
         substrate=fresh_substrate,

@@ -459,7 +459,7 @@ class M97AdaptiveContextBenchmark:
                     epistemic_abstention_acc=round((abstain_correct / max(1, abstain_total)) * 100.0, 2),
                     checkpoint_recovery_verified=checkpoint_verified,
                     trainable_parameters=17_116,
-                    external_memory_bytes=student_e.memory_store.get_byte_size(),
+                    external_memory_bytes=student_e.memory_store.calculate_byte_size(),
                 )
             )
 

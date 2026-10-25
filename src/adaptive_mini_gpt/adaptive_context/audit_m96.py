@@ -119,7 +119,7 @@ class M96ForensicAuditor:
         mixed_results = store.search_facts("atlas founding")
         distractor_vulnerability = len(mixed_results) >= 2  # Proves distractors pollute search without working-context filtering
 
-        mem_bytes = store.get_byte_size()
+        mem_bytes = store.calculate_byte_size()
 
         notes = (
             "M96 Forensic Audit Certified: "

@@ -214,8 +214,7 @@ class PersistentAdaptiveStudentM97:
         chk_dir.mkdir(parents=True, exist_ok=True)
 
         # 1. Knowledge store state
-        mem_json = json.dumps(self.memory_store.to_dict())
-        (chk_dir / "knowledge_store.json").write_text(mem_json, encoding="utf-8")
+        self.memory_store.save_to_file(chk_dir / "knowledge_store.json")
 
         # 2. PyTorch state
         state = {
@@ -239,8 +238,7 @@ class PersistentAdaptiveStudentM97:
         mem_path = chk_dir / "knowledge_store.json"
         state_path = chk_dir / "student_state.pt"
 
-        store_dict = json.loads(mem_path.read_text(encoding="utf-8"))
-        store = PersistentKnowledgeStore.from_dict(store_dict)
+        store = PersistentKnowledgeStore.load_from_file(mem_path)
 
         state = torch.load(state_path, map_location=device, weights_only=False)
         substrate = CrossDomainReasoningSubstrate(budget_ceiling=20_000)
