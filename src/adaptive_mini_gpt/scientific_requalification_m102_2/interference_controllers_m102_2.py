@@ -111,42 +111,46 @@ class OrthogonalGradientProjectorM102_2:
         """
         active_shared = [p for p in shared_params if p.requires_grad]
         active_non_shared = [p for p in non_shared_params if p.requires_grad]
+        all_active = active_non_shared + active_shared
 
-        if not active_shared and not active_non_shared:
+        if not all_active:
             return 0.0, False
 
-        # 1. Non-shared parameters receive direct task loss gradient
-        if active_non_shared and task_loss.requires_grad:
-            grads_non_shared = torch.autograd.grad(
-                task_loss,
-                active_non_shared,
-                retain_graph=(rehearsal_loss is not None and rehearsal_loss.requires_grad),
-                allow_unused=True,
-            )
-            for p, g in zip(active_non_shared, grads_non_shared, strict=False):
-                if g is not None:
-                    p.grad = g.clone().detach()
+        # 1. Compute task loss gradients for all active parameters in a single pass
+        grads_task_all = (
+            torch.autograd.grad(task_loss, all_active, retain_graph=False, allow_unused=True)
+            if task_loss.requires_grad
+            else [None] * len(all_active)
+        )
 
-        # 2. Shared parameters undergo orthogonal projection if rehearsal loss exists
+        n_non = len(active_non_shared)
+        grads_task_non_shared = grads_task_all[:n_non]
+        grads_task_shared = grads_task_all[n_non:]
+
+        # Assign gradients to non-shared parameters
+        for p, g in zip(active_non_shared, grads_task_non_shared, strict=False):
+            if g is not None:
+                p.grad = g.clone().detach()
+
         if not active_shared:
             return 0.0, False
 
+        # If no rehearsal gradient, assign task gradient to shared parameters directly
         if rehearsal_loss is None or not rehearsal_loss.requires_grad:
-            # No rehearsal gradients: shared parameters receive direct task gradient
-            if task_loss.requires_grad:
-                grads_task = torch.autograd.grad(task_loss, active_shared, retain_graph=False, allow_unused=True)
-                for p, g in zip(active_shared, grads_task, strict=False):
-                    if g is not None:
-                        p.grad = g.clone().detach()
+            for p, g in zip(active_shared, grads_task_shared, strict=False):
+                if g is not None:
+                    p.grad = g.clone().detach()
             return 0.0, False
 
-        # Both losses require grad on shared parameters
-        grads_task = torch.autograd.grad(task_loss, active_shared, retain_graph=True, allow_unused=True)
-        grads_rehearsal = torch.autograd.grad(rehearsal_loss, active_shared, retain_graph=False, allow_unused=True)
+        # 2. Compute rehearsal loss gradients for shared parameters in a single pass
+        grads_rehearsal = torch.autograd.grad(
+            rehearsal_loss, active_shared, retain_graph=False, allow_unused=True
+        )
 
+        # 3. Flatten and project conflicting components
         g_task_flat = []
         g_reh_flat = []
-        for p, gt, gr in zip(active_shared, grads_task, grads_rehearsal, strict=False):
+        for p, gt, gr in zip(active_shared, grads_task_shared, grads_rehearsal, strict=False):
             t_vec = gt.reshape(-1) if gt is not None else torch.zeros(p.numel(), device=p.device)
             r_vec = gr.reshape(-1) if gr is not None else torch.zeros(p.numel(), device=p.device)
             g_task_flat.append(t_vec)
@@ -158,7 +162,7 @@ class OrthogonalGradientProjectorM102_2:
         dot = float(torch.dot(v_task, v_reh).item())
         conflict = dot < 0.0
 
-        for p, gt, gr in zip(active_shared, grads_task, grads_rehearsal, strict=False):
+        for p, gt, gr in zip(active_shared, grads_task_shared, grads_rehearsal, strict=False):
             t_g = gt if gt is not None else torch.zeros_like(p)
             r_g = gr if gr is not None else torch.zeros_like(p)
 
