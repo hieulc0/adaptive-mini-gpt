@@ -127,9 +127,11 @@ class SharedFoundationalSubstrate(nn.Module):
         if sanitized_id in self.residuals:
             return self.residuals[sanitized_id]
 
+        dev = next(self.parameters()).device if list(self.parameters()) else torch.device("cpu")
         new_adapter = SelectiveResidualAdapter(
             d_model=self.d_model, num_symbols=self.num_symbols, rank=rank
-        )
+        ).to(dev)
+
         # Check parameter budget
         projected = self.count_parameters() + new_adapter.count_parameters()
         if projected > self.budget_ceiling:
@@ -158,7 +160,7 @@ class SharedFoundationalSubstrate(nn.Module):
         return self.trunk.count_parameters()
 
     def count_residual_parameters(self) -> int:
-        return sum(r.count_parameters() for r in self.residuals.values())
+        return sum(r.count_residual_parameters() if hasattr(r, "count_residual_parameters") else r.count_parameters() for r in self.residuals.values())
 
     def save_state(self) -> dict[str, Any]:
         """Create exact serializable state dict copy for bit-exact checkpoint rollback."""
@@ -169,12 +171,13 @@ class SharedFoundationalSubstrate(nn.Module):
 
     def restore_state(self, state: dict[str, Any]) -> None:
         """Restore exact state dict for bit-exact rollback."""
+        dev = next(self.parameters()).device if list(self.parameters()) else torch.device("cpu")
         self.trunk.load_state_dict(state["trunk_state"])
         # Clear extra residuals and restore saved ones
         self.residuals.clear()
         for k, v in state["residuals_state"].items():
             adapter = SelectiveResidualAdapter(
                 d_model=self.d_model, num_symbols=self.num_symbols, rank=1
-            )
+            ).to(dev)
             adapter.load_state_dict(v)
             self.residuals[k] = adapter
