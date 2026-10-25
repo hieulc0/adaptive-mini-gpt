@@ -148,16 +148,16 @@ class M83KnowledgeConsolidationBenchmark:
             data_r1: dict[str, dict[str, torch.Tensor]] = {}
             teachers_r1: dict[str, BottleneckSequenceAdapter] = {}
 
-            # Train individual teacher adapters for Regime 1
+            # Train individual teacher adapters for Regime 1 to high qualification accuracy
             for skill_id, t in tasks_r1.items():
                 tr_h, tr_y = extract_features(model, t.train_examples, device)
                 ql_h, ql_y = extract_features(model, t.qualification_examples, device)
                 data_r1[skill_id] = {"train_h": tr_h, "train_y": tr_y, "qual_h": ql_h, "qual_y": ql_y}
 
                 teacher = BottleneckSequenceAdapter(d_model=d_model, bottleneck_dim=8, num_symbols=16).to(device)
-                opt = torch.optim.AdamW(teacher.parameters(), lr=6e-3)
+                opt = torch.optim.AdamW(teacher.parameters(), lr=1e-2)
                 teacher.train()
-                for _ in range(40):
+                for _ in range(50):
                     opt.zero_grad()
                     loss = F.cross_entropy(teacher(tr_h).view(-1, 16), tr_y.view(-1))
                     loss.backward()
@@ -185,7 +185,7 @@ class M83KnowledgeConsolidationBenchmark:
 
             # Phase 2: Neural Self-Distillation for Regime 1
             res_r1_distilled = NeuralSelfDistillationEngine.distill_skills(
-                teachers=teachers_r1, skill_data=data_r1, device=device, shared_rank=8, residual_rank=2, distill_steps=40,
+                teachers=teachers_r1, skill_data=data_r1, device=device, shared_rank=8, residual_rank=4, distill_steps=100, lr=0.015,
             )
             res_r1_weight_avg = NeuralSelfDistillationEngine.evaluate_weight_averaging_baseline(
                 teachers=teachers_r1, skill_data=data_r1, device=device,
@@ -214,9 +214,9 @@ class M83KnowledgeConsolidationBenchmark:
             data_r2["SKILL_CASC"] = {"train_h": c_tr_h, "train_y": c_tr_y, "qual_h": c_ql_h, "qual_y": c_ql_y}
 
             teacher_casc = BottleneckSequenceAdapter(d_model=d_model, bottleneck_dim=8, num_symbols=16).to(device)
-            opt_c = torch.optim.AdamW(teacher_casc.parameters(), lr=6e-3)
+            opt_c = torch.optim.AdamW(teacher_casc.parameters(), lr=1e-2)
             teacher_casc.train()
-            for _ in range(40):
+            for _ in range(50):
                 opt_c.zero_grad()
                 loss = F.cross_entropy(teacher_casc(c_tr_h).view(-1, 16), c_tr_y.view(-1))
                 loss.backward()
@@ -226,7 +226,7 @@ class M83KnowledgeConsolidationBenchmark:
             teachers_r2 = {"SKILL_AFF5": teachers_r1["SKILL_AFF5"], "SKILL_CASC": teacher_casc}
 
             res_r2_distilled = NeuralSelfDistillationEngine.distill_skills(
-                teachers=teachers_r2, skill_data=data_r2, device=device, shared_rank=8, residual_rank=2, distill_steps=40,
+                teachers=teachers_r2, skill_data=data_r2, device=device, shared_rank=8, residual_rank=4, distill_steps=100, lr=0.015,
             )
             res_r2_weight_avg = NeuralSelfDistillationEngine.evaluate_weight_averaging_baseline(
                 teachers=teachers_r2, skill_data=data_r2, device=device,
@@ -260,9 +260,9 @@ class M83KnowledgeConsolidationBenchmark:
             teacher_pos = BottleneckSequenceAdapter(d_model=d_model, bottleneck_dim=8, num_symbols=16).to(device)
             teacher_neg = BottleneckSequenceAdapter(d_model=d_model, bottleneck_dim=8, num_symbols=16).to(device)
             for t_ad, d_k in [(teacher_pos, "SKILL_POS"), (teacher_neg, "SKILL_NEG")]:
-                o = torch.optim.AdamW(t_ad.parameters(), lr=6e-3)
+                o = torch.optim.AdamW(t_ad.parameters(), lr=1e-2)
                 t_ad.train()
-                for _ in range(35):
+                for _ in range(50):
                     o.zero_grad()
                     l = F.cross_entropy(t_ad(data_r4[d_k]["train_h"]).view(-1, 16), data_r4[d_k]["train_y"].view(-1))
                     l.backward()
@@ -303,7 +303,16 @@ class M83KnowledgeConsolidationBenchmark:
             fut_ts_h, fut_ts_y = extract_features(model, target_future_task.sealed_test_examples, device)
 
             # Evaluate learning using consolidated representation warm-start
-            prior_weights = {8: res_r1_distilled.consolidated_model.shared_down.state_dict()} if res_r1_distilled.consolidated_model else None
+            prior_weights = None
+            if res_r1_distilled.consolidated_model is not None:
+                shared = res_r1_distilled.consolidated_model
+                prior_weights = {
+                    8: {
+                        "down_proj.weight": shared.shared_down.weight.data.clone(),
+                        "down_proj.bias": shared.shared_down.bias.data.clone(),
+                    }
+                }
+
             future_outcome = AdaptationEpisodeEngine.run_episode(
                 task=target_future_task,
                 train_h=fut_tr_h,
@@ -317,8 +326,9 @@ class M83KnowledgeConsolidationBenchmark:
                 d_model=d_model,
                 device=device,
                 fixed_init=InitChoice.EXPERIENCE_PRIOR,
-                fixed_lr=0.006,
+                fixed_lr=0.012,
                 fixed_rank=8,
+                experience_priors=prior_weights,
                 max_steps=60,
             )
 
@@ -399,19 +409,22 @@ class M83KnowledgeConsolidationBenchmark:
             "title": "Milestone M83: Autonomous Neural Knowledge Consolidation and Self-Distillation",
             "status": "PASS" if overall_pass else "PARTIAL",
             "runtime_seconds": round(benchmark_elapsed, 2),
+            "seeds": seeds,
             "gates": {
                 "gate_parameter_compression_ge_20pct": {
                     "passed": bool(gate_compression_pass),
                     "target": ">= 20.0%",
                     "observed_mean_compression": f"{avg_compression:.2f}%",
-                    "baseline_parameters_3skills": 4296,
-                    "consolidated_parameters_3skills": 1630,
-                    "parameters_eliminated": 2666,
+                    "baseline_parameters_3skills": seed_results[seeds[0]]["regime1_distilled"].baseline_parameters,
+                    "consolidated_parameters_3skills": seed_results[seeds[0]]["regime1_distilled"].consolidated_parameters,
+                    "parameters_eliminated": seed_results[seeds[0]]["regime1_distilled"].baseline_parameters - seed_results[seeds[0]]["regime1_distilled"].consolidated_parameters,
                 },
                 "gate_skill_retention_ge_95pct": {
                     "passed": bool(gate_retention_pass),
                     "mean_distilled_em": round(avg_retention_r1, 4),
-                    "all_individual_skills_ge_85": True,
+                    "all_individual_skills_ge_85": all(
+                        seed_results[s]["regime1_distilled"].passed_retention_gate for s in seeds
+                    ),
                 },
                 "gate_consolidation_policy_superiority": {
                     "passed": bool(gate_policy_pass),
@@ -522,7 +535,7 @@ Milestone M83 establishes that Adaptive Mini-GPT can autonomously discover redun
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 """
         s_data = data["regimes_summary"]
-        seeds_list = [42, 43, 44, 45, 46]
+        seeds_list = data.get("seeds", [42, 43, 44, 45, 46])
         for idx, s in enumerate(seeds_list):
             d1 = s_data["regime1_highly_related"]["distilled_em_per_seed"][idx]
             w1 = s_data["regime1_highly_related"]["weight_avg_em_per_seed"][idx]

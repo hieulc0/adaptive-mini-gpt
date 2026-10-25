@@ -78,8 +78,8 @@ class NeuralSelfDistillationEngine:
         d_model: int = 128,
         shared_rank: int = 8,
         residual_rank: int = 2,
-        distill_steps: int = 40,
-        lr: float = 6e-3,
+        distill_steps: int = 80,
+        lr: float = 1.2e-2,
         temperature: float = 2.0,
         alpha: float = 0.5,
     ) -> DistillationResult:
@@ -110,16 +110,25 @@ class NeuralSelfDistillationEngine:
         for skill_id in teachers.keys():
             student.register_skill_residual(skill_id)
 
-        # Initialize student shared trunk with average teacher weights
+        # Initialize student shared trunk with mapped average teacher weights
+        param_map = {"shared_down": "down_proj", "shared_up": "up_proj"}
         with torch.no_grad():
             for name, p in student.named_parameters():
                 if "residuals" not in name:
-                    matching = [t.state_dict()[name] for t in teachers.values() if name in t.state_dict()]
+                    t_name = name
+                    for s_k, t_k in param_map.items():
+                        t_name = t_name.replace(s_k, t_k)
+                    matching = [t.state_dict()[t_name] for t in teachers.values() if t_name in t.state_dict()]
                     if matching:
                         avg_w = torch.stack(matching).mean(dim=0)
                         p.copy_(avg_w)
 
-        optimizer = torch.optim.AdamW(student.parameters(), lr=lr, weight_decay=1e-4)
+        trunk_params = [p for n, p in student.named_parameters() if "residuals" not in n]
+        res_params = [p for n, p in student.named_parameters() if "residuals" in n]
+        optimizer = torch.optim.AdamW([
+            {"params": trunk_params, "lr": lr},
+            {"params": res_params, "lr": lr * 1.5},
+        ], weight_decay=1e-4)
 
         # Step 3: Self-Distillation Training Loop
         student.train()
@@ -245,21 +254,22 @@ class NeuralSelfDistillationEngine:
         device: torch.device,
         seed: int = 42,
     ) -> DistillationResult:
-        """Random convex combination parameter merging control."""
+        """Random convex parameter combination control."""
         start_time = time.perf_counter()
-        rng = torch.Generator(device=device).manual_seed(seed)
-        weights = F.softmax(torch.randn(len(teachers), generator=rng, device=device), dim=0)
-
+        torch.manual_seed(seed)
         sample_teacher = next(iter(teachers.values()))
         merged = BottleneckSequenceAdapter(
             sample_teacher.d_model, sample_teacher.bottleneck_dim, sample_teacher.num_symbols
         ).to(device)
 
+        num_teachers = len(teachers)
+        rand_weights = F.softmax(torch.randn(num_teachers), dim=0)
+
         with torch.no_grad():
             for name, p in merged.named_parameters():
                 stack_w = torch.stack([t.state_dict()[name] for t in teachers.values()])
-                # Weighted sum across teachers
-                w_comb = sum(w * stack_w[idx] for idx, w in enumerate(weights))
+                # Convex combination
+                w_comb = sum(w * stack_w[i] for i, w in enumerate(rand_weights))
                 p.copy_(w_comb)
 
         merged.eval()
