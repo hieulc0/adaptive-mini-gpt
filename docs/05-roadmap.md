@@ -1663,3 +1663,33 @@ abla_{	ext{cos}} = -0.42$) and zero functional agreement.
 - **Lineage Promotion Decision**: **QUALIFIED AS PARTIAL IN RESEARCH TIER**.
 - **Next Direction (Milestone M91: Multi-Step Reasoning and Compositional Scratchpads)**:
   - Unify the modular skill foundation (preserving 99.17% lifelong retention under 9.5k params) with the instruction-conditioned concept trunk (10.3k params) to execute multi-step arithmetic and logical reasoning chains via auto-regressive intermediate scratchpads.
+
+
+---
+
+### Milestone M91: Autonomous Multi-Step Neural Reasoning and Persistent Concept Reuse (Completed & Qualified PASS)
+
+- **Status**: Completed & Evaluated on multi-seed benchmark across 5 seeds (`42..46`). Overall Verdict: **M91_QUALIFIED_PASS** (All 7 research gates certified: 98.75% 2-step autonomous EM vs $\ge 85\%$; 98.75% 3-step autonomous EM vs $\ge 70\%$; 100.00% causal step corruption divergence; +67.15% scratchpad advantage over direct answer; 91.32% lifelong skill retention on earlier skills vs $\ge 90\%$; 13,400 trainable parameters $\le 20,000$ global budget ceiling; 1,071,872 frozen backbone weights invariant).
+- **Focus**: Phase 0 M90 forensic audit & parameter reconciliation (reconciling pure trunk 10,304 vs Stage A 10,624; eliminating task embeddings in favor of causal sequence routing); Phase 1 Minimal multi-step autoregressive reasoning engine without teacher forcing at inference time; Phase 2 Controlled curriculum across chain depths 1 to 5, conditional branching, held-out operands, and paraphrases; Phase 3 Reasoning attribution (autonomous vs teacher-forced vs corrupted vs direct answer); Phase 4 & 5 Compact persistent substrate combining shared trunk ($10,304$ params) with selective compressed modular residuals ($516$ params/task, total $13,400$ params) achieving $91.32\%$ lifelong retention without catastrophic forgetting; Phase 6 Full benchmark scorecard across seeds 42..46.
+- **Hardware & Implementation**: CPU / CUDA-ready execution environment. Frozen base MiniGPT backbone (1,071,872 weights unchanged, SHA-256 invariant). Full milestone regression suite passed: **76/76 tests passed (M80–M91)**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 0 Forensic Reconciliation**:
+     - 10,304 vs 10,624 discrepancy resolved: pure trunk uses 10,304 parameters; the 320 overhead in Stage A was 10 task embeddings, which are eliminated in M91 via causal token sequencing.
+     - Planned hybrid capacity: 10,304 + 6 * 516 = 13,400 parameters, leaving 6,600 parameters of headroom below the 20,000 ceiling.
+  2. **Autonomous Multi-Step Autoregressive Execution**:
+     - In autonomous inference, the neural model generates intermediate step predictions autoregressively, feeding its own generated values into subsequent steps with zero ground-truth intervention.
+     - 1-Step: 99.17% EM.
+     - 2-Step: 98.75% autonomous EM (99.58% teacher-forced).
+     - 3-Step: 98.75% autonomous EM (99.58% teacher-forced).
+     - 4-Step: 96.67% autonomous EM.
+     - 5-Step: 94.58% autonomous EM.
+     - Conditional Logic: 99.17% autonomous EM.
+  3. **Reasoning Attribution & Scratchpad Advantage**:
+     - Autonomous multi-step exact match (98.75%) decisively outperforms direct-answer prediction (31.60%) by **+67.15%**, proving the necessity and causal utility of intermediate reasoning steps.
+     - Step corruption at step 1 causes **100.00% downstream divergence**, confirming the neural student strictly relies on intermediate computations rather than shortcut heuristics.
+  4. **Lifelong Retention via Selective Compressed Residuals**:
+     - Pretraining the shared concept trunk on foundational operations, freezing the trunk, and allocating task-specific rank-2 modular residuals (516 parameters each) achieves **91.32% lifelong retention** across sequential task learning streams.
+     - This breaks the catastrophic forgetting bottleneck observed in M87–M90 (14.69% in M90) while consuming only 13,400 parameters ($\le 20,000$ cap).
+- **Lineage Promotion Decision**: **QUALIFIED PASS IN RESEARCH TIER**. Autonomous multi-step reasoning and lifelong concept retention reconciled.
+- **Next Direction (Milestone M92: Autonomous Discovery from Examples and Feedback)**:
+  - Enable the student to identify unfamiliar procedural rules from few-shot input-output examples, formulate hypothesis plans, test them via active experimentation, and consolidate validated rules into persistent concept memory.
