@@ -39,6 +39,8 @@ from adaptive_mini_gpt.integrated_autonomous_student.integrated_student_m100 imp
     IntegratedAutonomousStudentM100,
 )
 from adaptive_mini_gpt.integrated_autonomous_student.multi_subject_curriculum import (
+    MODULUS,
+    DomainM100,
     MultiSubjectCurriculumGenerator,
 )
 from adaptive_mini_gpt.integrated_autonomous_student.structural_evolution_engine import (
@@ -106,13 +108,25 @@ class M100IntegratedAutonomousStudentBenchmark:
             cycle_coordinator = AutonomousLearningCycleM100(student, consolidation_interval=3)
 
             cycle_telemetry = []
-            for _c_idx in range(len(goals)):
+            num_cycles = 14
+            for _c_idx in range(num_cycles):
                 res = cycle_coordinator.run_cycle(goals)
                 cycle_telemetry.append(res)
 
-            # Compute curriculum performance
-            learned_goals = [c for c in cycle_telemetry if c.skill_acquired]
-            unfamiliar_acquisition_em = 100.0 if len(learned_goals) >= 6 else float(len(learned_goals) / 7.0) * 100.0
+            # Compute curriculum performance: held-out exact match across all 7 reasoning domains
+            student.eval()
+            domain_em_scores: list[float] = []
+            with torch.no_grad():
+                for g in goals:
+                    if g.domain not in (DomainM100.NOISE_DISTRACTOR, DomainM100.ALREADY_MASTERED):
+                        te_logits = student.forward(g.test_tokens, active_domains=[g.domain.value])
+                        te_preds = te_logits.argmax(dim=-1) % MODULUS
+                        em_score = float((te_preds == g.test_labels).float().mean().item()) * 100.0
+                        domain_em_scores.append(em_score)
+
+            unfamiliar_acquisition_em = (
+                float(sum(domain_em_scores) / len(domain_em_scores)) if domain_em_scores else 0.0
+            )
             foundational_retention_em = float(
                 sum(c.retained_anchor_accuracy for c in cycle_telemetry) / max(1, len(cycle_telemetry))
             )
@@ -155,7 +169,7 @@ class M100IntegratedAutonomousStudentBenchmark:
         # ----------------------------------------------------
         # Aggregate Across All Seeds
         # ----------------------------------------------------
-        mean_causal_impact = float(sum(r["causal_forward_impact_pct prime".replace(" prime", "")] for r in per_seed_results) / len(seeds))
+        mean_causal_impact = float(sum(r["causal_forward_impact_pct"] for r in per_seed_results) / len(seeds))
         mean_acq = float(sum(r["unfamiliar_acquisition_em"] for r in per_seed_results) / len(seeds))
         mean_ret = float(sum(r["foundational_retention_em"] for r in per_seed_results) / len(seeds))
         mean_a_steps = float(sum(r["condition_a_steps"] for r in per_seed_results) / len(seeds))

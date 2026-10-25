@@ -21,6 +21,7 @@ from adaptive_mini_gpt.integrated_autonomous_student.integrated_student_m100 imp
     IntegratedAutonomousStudentM100,
 )
 from adaptive_mini_gpt.integrated_autonomous_student.multi_subject_curriculum import (
+    DomainM100,
     LearningGoalM100,
 )
 from adaptive_mini_gpt.self_directed_curriculum.curriculum_policy import (
@@ -85,6 +86,8 @@ class AutonomousLearningCycleM100:
             # Deprioritize already mastered/acquired skills or unlearnable noise to progress curriculum
             if g.goal_id in self.student.acquired_skills:
                 score -= 100.0
+            if g.domain == DomainM100.ALREADY_MASTERED or st.current_accuracy >= 95.0:
+                score -= 150.0
             if not g.is_learnable and len(self.student.diagnostic_history.get(g.goal_id, [])) > 0:
                 score -= 200.0
 
@@ -99,7 +102,7 @@ class AutonomousLearningCycleM100:
         boundary_queries = min(4, len(best_goal.train_tokens))
 
         # Step 5: Acquire Missing Skills via Fast Plasticity
-        res_adapt = self.student.adapt_fast_skill(best_goal, max_steps=25)
+        res_adapt = self.student.adapt_fast_skill(best_goal, max_steps=35, early_stop_acc=85.0)
         held_out_acc = res_adapt["final_test_acc"]
         anchor_acc = res_adapt["retained_anchor_acc"]
 

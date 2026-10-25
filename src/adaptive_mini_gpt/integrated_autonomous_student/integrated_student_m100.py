@@ -35,7 +35,6 @@ from adaptive_mini_gpt.integrated_autonomous_student.structural_evolution_engine
 )
 from adaptive_mini_gpt.integrated_autonomous_student.two_speed_plasticity_manager import (
     ConsolidationReport,
-    PlasticityMode,
     TwoSpeedPlasticityManager,
 )
 from adaptive_mini_gpt.meta_acquisition.controller import (
@@ -223,8 +222,8 @@ class IntegratedAutonomousStudentM100(nn.Module):
     def adapt_fast_skill(
         self,
         goal: LearningGoalM100,
-        max_steps: int = 25,
-        early_stop_acc: float = 100.0,
+        max_steps: int = 35,
+        early_stop_acc: float = 85.0,
     ) -> dict[str, Any]:
         """Fast Plasticity: Rapid skill acquisition updating only adapters and task head."""
         self.step_counter += 1
@@ -240,8 +239,19 @@ class IntegratedAutonomousStudentM100(nn.Module):
                 "abstained": True,
             }
 
-        # Configure fast plasticity
-        self.plasticity_manager.configure_plasticity(self, PlasticityMode.FAST_ADAPTER_ONLY)
+        # Configure fast plasticity: freeze backbone, enable active domain adapter and task head
+        for p in self.backbone.parameters():
+            p.requires_grad = False
+
+        active_adapter_key = f"adapter_{goal.domain.value}"
+        for name, p in self.adapter_modules.named_parameters():
+            if active_adapter_key in name:
+                p.requires_grad = True
+            else:
+                p.requires_grad = False
+
+        for p in self.task_head.parameters():
+            p.requires_grad = True
 
         opt = torch.optim.AdamW(
             [p for p in self.parameters() if p.requires_grad],
@@ -261,7 +271,7 @@ class IntegratedAutonomousStudentM100(nn.Module):
             anc_logits = self.forward(goal.anchor_tokens)
             loss_anc = F.cross_entropy(anc_logits, goal.anchor_labels)
 
-            total_loss = 0.5 * loss_task + 0.5 * loss_anc
+            total_loss = 0.6 * loss_task + 0.4 * loss_anc
 
             opt.zero_grad()
             total_loss.backward()

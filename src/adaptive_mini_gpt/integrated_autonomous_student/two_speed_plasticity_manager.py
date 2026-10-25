@@ -52,7 +52,7 @@ class TwoSpeedPlasticityManager:
         self,
         retention_threshold_pct: float = 90.0,
         slow_lr: float = 0.001,
-        fast_lr: float = 0.025,
+        fast_lr: float = 0.035,
     ) -> None:
         self.retention_threshold_pct = retention_threshold_pct
         self.slow_lr = slow_lr
