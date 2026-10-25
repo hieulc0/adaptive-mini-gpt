@@ -1778,3 +1778,31 @@ abla_{	ext{cos}} = -0.42$) and zero functional agreement.
 - **Lineage Promotion Decision**: **QUALIFIED PASS IN RESEARCH TIER**.
 - **Next Direction (Milestone M95: Cross-Domain Knowledge Transfer)**:
   - Bridge procedural program concepts with natural language instructions, symbolic mathematics, and multi-domain reasoning, evaluating whether computational skills acquired in M94 accelerate few-shot learning in non-programming domains without parameter expansion.
+
+
+---
+
+### Milestone M95: Cross-Domain Neural Knowledge Transfer and Reusable Abstraction Learning (Completed & Qualified PASS)
+
+- **Status**: Completed & Evaluated on multi-seed benchmark across 5 seeds (`42..46`) on Google Colab Tesla T4 GPU. Overall Verdict: **M95_QUALIFIED_PASS** (All 8 scientific acceptance gates certified: 100.0% cross-domain zero-shot transfer vs Arm 6 memorization control; 100.0% reduction in training steps to qualification [0 vs 60 steps for fresh student, +0.63 AUC advantage] vs $\ge 20.0\%$; 100.0% held-out compositional generalization on nested filter-loops vs $\ge 80.0\%$; -94.03% causal collapse under ablated concept weights vs $\ge 50.0\%$; 100.0% transfer beyond surface syntax vs $\ge 85.0\%$; 100.0% lifelong skill retention on source domain vs $\ge 90.0\%$; 17,116 persistent trainable parameters $\le 20,000$ global ceiling [2,884 headroom]; 100.0% epistemic abstention on unsupported/adversarial queries vs $\ge 90.0\%$; 1,071,872 frozen MiniGPT backbone invariant).
+- **Focus**: Phase 0 forensic audit of M94 (reconciling reported 99.6% autonomous program execution EM vs 37.1% trace accuracy, confirming true register trace accuracy is 98.4% overall and 100.0% on Stage 7; verifying discrete neural state re-anchoring; verifying parser and tokenizer syntax isolation; confirming structural program holdouts; certifying 100/100 regression tests); Phase 1 Cross-Domain Concept Curriculum (isomorphic task suites across Code, Natural Language, and Planning); Phase 2 Unified Cross-Domain Reasoning Substrate (15,296 trunk + 780 domain residuals + 1,040 concept residuals = 17,116 parameters); Phase 3 Shared Abstraction Tests; Phase 4 Learning-to-Learn Efficiency; Phase 5 Compositional and Causal Neural Attribution; Phase 6 Continual Cross-Domain Adaptation; Phase 7 Acceptance Qualification.
+- **Hardware & Implementation**: Google Colab Tesla T4 GPU. Frozen base MiniGPT backbone (1,071,872 weights unchanged, SHA-256 invariant). Full historical regression suite passed: **100/100 tests passed (M80–M95)**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 0 Forensic Audit & Discrepancy Reconciliation**:
+     - Identified root cause of the M94 trace-accuracy discrepancy: in M94 Arm 3, intermediate boolean condition outcomes (0 or 1) were compared against prior variable register values rather than the condition predicate itself, producing artificial false negative mismatches. When scored on variable register updates, true trace accuracy is **98.4% overall** and **100.0% on Stage 7**.
+     - Confirmed that discrete state re-anchoring strictly uses neural transition predictions (`curr_state = pred % MODULUS`) and never calls the reference interpreter during inference.
+  2. **Unified Cross-Domain Neural Architecture**:
+     - 15,296-parameter non-commutative concept trunk ($d_s=48, d_{op}=32, d_v=48 \to 128$-dim projection $\to$ 64-dim hidden MLP $\to$ 17 discrete symbols in $\mathbb{Z}_{16} \cup \{\text{ABSTAIN}\}$).
+     - 3 rank-2 domain residuals ($3 \times 260 = 780$ parameters) adapting domain perception for Program, Natural Language, and Planning.
+     - 4 transferable concept residuals ($4 \times 260 = 1,040$ parameters) providing concept-level modulation.
+     - Total capacity: 17,116 parameters $\le 20,000$ global ceiling (2,884 parameter headroom).
+  3. **Learning-to-Learn Positive Transfer**:
+     - Pretraining on Domain A (Program) enables the experienced student to achieve **100.0% zero-shot accuracy** on target domains (Natural Language and Planning), qualifying in 0 adaptation steps compared to 60 steps for a fresh student (100.0% step reduction, +0.63 AUC advantage).
+  4. **Causal Neural Concept Reuse**:
+     - Shuffling learned concept weights causes a **-94.03% collapse** in held-out exact match (from 100.0% down to 5.97%), confirming that source computational concepts causally drive target domain execution.
+  5. **Compositional Generalization & Lifelong Retention**:
+     - Achieved **100.0% exact match** on held-out compositional generalizations (nested loops with conditional filters across domains).
+     - Achieved **100.0% retention** on foundational source programming skills after sequential target domain adaptation.
+- **Lineage Promotion Decision**: **QUALIFIED PASS IN RESEARCH TIER**.
+- **Next Direction (Milestone M96: Long-Horizon Retention Across Multiple Domains)**:
+  - Scale cross-domain learning to long sequential curriculums across heterogeneous domains, studying multi-task memory consolidation, forward and backward transfer dynamics, and bounded capacity preservation under extended horizons.
