@@ -7,7 +7,7 @@ from pathlib import Path
 
 import torch
 
-from adaptive_mini_gpt.model import MiniGPT, MiniGPTConfig
+from adaptive_mini_gpt.model import MiniGPT, ModelConfig
 from adaptive_mini_gpt.persistent_memory.benchmark_m96 import (
     M96PersistentMemoryBenchmark,
 )
@@ -25,12 +25,13 @@ def main() -> None:
     device = torch.device(args.device)
     print(f"=== Milestone M96 Benchmark Runner (Device: {device}) ===")
 
-    config = MiniGPTConfig(
-        vocab_size=128,
-        n_layer=2,
-        n_head=2,
-        n_embd=64,
-        block_size=128,
+    config = ModelConfig(
+        vocab_size=1024,
+        context_length=128,
+        d_model=128,
+        n_heads=4,
+        n_layers=4,
+        d_ff=512,
     )
     model = MiniGPT(config).to(device)
     model.eval()
