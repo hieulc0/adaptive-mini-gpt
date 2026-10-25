@@ -90,7 +90,7 @@ class PersistentStudentM102_2(nn.Module):
             mod_enabled=False,
         )
         base_model = MiniGPT(base_cfg)
-        self.evolvable_backbone = DynamicEvolvableBackbone(base_model=base_model, d_model=128)
+        self.evolvable_backbone = DynamicEvolvableBackbone(base_model=base_model)
 
         # 2. Domain-Isolated Residual Adapters (Rank-2 bottlenecks)
         self.domains = [d.value for d in DomainM102_2]
