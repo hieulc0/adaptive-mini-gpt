@@ -12,8 +12,14 @@ fi
 
 # 2. Setup repo
 rm -rf /content/adaptive-mini-gpt
-echo "Cloning branch m83-knowledge-consolidation..."
-git clone --branch m83-knowledge-consolidation https://github.com/hieulc0/adaptive-mini-gpt.git /content/adaptive-mini-gpt
+if [ -f /content/repo.tar.gz ]; then
+  echo "Extracting uploaded repo archive..."
+  mkdir -p /content/adaptive-mini-gpt
+  tar -xzf /content/repo.tar.gz -C /content/adaptive-mini-gpt
+else
+  echo "Cloning branch m83-knowledge-consolidation..."
+  git clone --branch m83-knowledge-consolidation https://github.com/hieulc0/adaptive-mini-gpt.git /content/adaptive-mini-gpt
+fi
 
 cd /content/adaptive-mini-gpt
 git log -n 1 --oneline || true
