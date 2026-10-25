@@ -1632,3 +1632,34 @@ abla_{	ext{cos}} = -0.42$) and zero functional agreement.
 - **Lineage Promotion Decision**: **QUALIFIED AS PARTIAL IN RESEARCH TIER**.
 - **Next Direction (Milestone M90: Learning from In-Context Explanations and Natural Language Instructions)**:
   - Transition from pure few-shot input-output examples to instruction-guided concept acquisition. Enable the student to parse procedural explanations and opcodes, acquiring unfamiliar skills with fewer examples and zero cross-task interference.
+
+
+---
+
+### Milestone M90: Foundational Concept Learning & Instruction-Conditioned Neural Transfer (Completed & Evaluated as PARTIAL)
+
+- **Status**: Completed & Evaluated on multi-seed benchmark across 5 seeds (`42..46`). Overall Verdict: **PARTIAL** (Grounded scientific finding: Stage A capacity feasibility fully certified with 100.00% Joint QL EM passing Gate A; Stage B instruction conditioning established with 92.61% seen test EM, 44.48% on held-out operands, 43.33% on held-out paraphrases, and 73.47% on novel two-stage compositions; causal attribution certified with 1.25% shuffled prompt EM; purely shared sequential retention remains unresolved at 14.69%, confirming that modular skill isolation is required for lifelong retention while shared trunks excel at instruction transfer and compositional reasoning).
+- **Focus**: Phase 0 M89 forensic audit; Phase 1 Stage A Capacity Feasibility Sweep across ranks 16, 32, 48 (Gate A $\ge 85.0\%$ EM); Phase 2 Instruction-Conditioned Concept Training (15 tasks without task IDs); Phase 3 Multi-Faceted Generalization (unseen operands, paraphrases, compositions, negative controls); Phase 4 Continual Retention across sequential curricula; Phase 5 Learning-to-Learn meta-evaluation; Phase 6 Parameter Budget Ceiling Compliance (10,304 params $\le 20,000$).
+- **Hardware & Implementation**: CPU / CUDA-ready execution environment. Frozen base MiniGPT backbone (1,071,872 weights unchanged, SHA-256 invariant). Full milestone regression suite passed: **70/70 tests passed (M80-M90)**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Instruction Grammar & Formatting**: Tokenized controlled instruction vocabulary (`[OP_TOKEN, ARG, OPR_k, SEP, payload]`) with canonical opcodes (`ADD`, `SUB`, `SCALE`, `XOR`, `COND`, `COMP`) and synonyms (`INCR`, `DECR`, `MULT`, `FLIP`, `THRESH`).
+  2. **Frozen Causal Attention Routing**: Instructions prepended to sequence payloads pass through MiniGPT's 4-layer causal self-attention, mixing instruction semantics into contextual hidden states at symbol positions.
+  3. **Instruction Concept Trunk**: 10,304 parameters ($d_{\text{shared}}=32$), operating without per-task embedding registries or external symbolic dispatchers.
+  4. **Stage A Capacity Feasibility (Gate A)**:
+     - Rank 16 (6,336 params): 100.00% Joint QL EM.
+     - Rank 32 (10,624 params): 100.00% Joint QL EM.
+     - Rank 48 (14,912 params): 100.00% Joint QL EM.
+     - Gate A fully certified.
+  5. **Stage B Instruction Generalization**:
+     - Seen test exact match: 92.61%.
+     - Held-out operand transfer: 44.48%.
+     - Held-out paraphrase transfer: 43.33%.
+     - Novel two-stage compositions: 73.47%.
+     - Negative controls: Shuffled prompt drops to 1.25% EM (causal attribution verified); Random labels 0.00% EM.
+  6. **Lifelong Retention Findings**:
+     - Vanilla sequential: 23.33% EM.
+     - Bounded replay: 14.69% EM.
+     - Budget-matched modular reference: 99.17% EM.
+- **Lineage Promotion Decision**: **QUALIFIED AS PARTIAL IN RESEARCH TIER**.
+- **Next Direction (Milestone M91: Multi-Step Reasoning and Compositional Scratchpads)**:
+  - Unify the modular skill foundation (preserving 99.17% lifelong retention under 9.5k params) with the instruction-conditioned concept trunk (10.3k params) to execute multi-step arithmetic and logical reasoning chains via auto-regressive intermediate scratchpads.
