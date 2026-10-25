@@ -86,8 +86,8 @@ def test_task_conditioned_head_manager_isolation(device: torch.device):
     mgr = TaskConditionedHeadManager(d_model=128, domains=domains, num_classes=16).to(device)
 
     # Verify head keys
-    dom_math = DomainM101.MODULAR_ARITHMETIC.value
-    dom_graph = DomainM101.GRAPH_NAVIGATION.value
+    dom_math = DomainM101.ALGEBRA_QUADRATIC.value
+    dom_graph = DomainM101.GRAPH_REACHABILITY.value
     assert f"head_{dom_math}" in mgr.domain_heads
     assert f"head_{dom_graph}" in mgr.domain_heads
 
@@ -136,8 +136,8 @@ def test_balanced_rehearsal_buffer_m102_1(device: torch.device):
     """Verify BalancedRehearsalBufferM102_1 stores exemplars across domains and computes per-family SE."""
     buffer = BalancedRehearsalBufferM102_1(max_exemplars_per_domain=32)
 
-    dom1 = DomainM101.MODULAR_ARITHMETIC.value
-    dom2 = DomainM101.GRAPH_NAVIGATION.value
+    dom1 = DomainM101.ALGEBRA_QUADRATIC.value
+    dom2 = DomainM101.GRAPH_REACHABILITY.value
 
     t1 = torch.randint(0, 1024, (16, 4), device=device)
     l1 = torch.randint(0, 16, (16,), device=device)

@@ -103,7 +103,7 @@ class OrthogonalGradientProjector:
     ) -> tuple[float, bool]:
         """Compute task and rehearsal gradients and project task grad away if conflicting."""
         active_params = [p for p in shared_params if p.requires_grad]
-        if not active_params:
+        if not active_params or not task_loss.requires_grad or not rehearsal_loss.requires_grad:
             return 0.0, False
 
         # Compute separate gradients

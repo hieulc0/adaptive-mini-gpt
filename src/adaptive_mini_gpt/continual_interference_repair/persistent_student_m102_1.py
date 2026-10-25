@@ -295,24 +295,29 @@ class PersistentStudentM102_1(nn.Module):
             rehearsal_batches = self.rehearsal_buffer.sample_domain_batches(batch_size_per_domain=16)
             if rehearsal_batches:
                 loss_rehearsal_total = torch.tensor(0.0, device=self.device)
+                has_rehearsal_grad = False
                 for r_dom, r_tok, r_lbl in rehearsal_batches:
                     r_logits = self.forward(r_tok, active_domains=[r_dom])
-                    loss_rehearsal_total = loss_rehearsal_total + F.cross_entropy(r_logits, r_lbl)
+                    loss_r = F.cross_entropy(r_logits, r_lbl)
+                    if loss_r.requires_grad:
+                        has_rehearsal_grad = True
+                    loss_rehearsal_total = loss_rehearsal_total + loss_r
                 loss_rehearsal = loss_rehearsal_total / len(rehearsal_batches)
 
                 opt.zero_grad()
-                if self.enable_gradient_projection:
+                if self.enable_gradient_projection and has_rehearsal_grad:
                     shared_p = [p for p in head_params if p.requires_grad]
                     _, had_conflict = OrthogonalGradientProjector.project_conflicting_gradients(
                         shared_p, total_task_loss, loss_rehearsal
                     )
                     if had_conflict:
                         conflicts_count += 1
-                    # Backprop remaining non-shared adapter parameters
                     total_task_loss.backward()
-                else:
+                elif has_rehearsal_grad:
                     total_loss = 0.5 * total_task_loss + 0.5 * loss_rehearsal
                     total_loss.backward()
+                else:
+                    total_task_loss.backward()
 
                 opt.step()
             else:
@@ -394,19 +399,24 @@ class PersistentStudentM102_1(nn.Module):
             rehearsal_batches = self.rehearsal_buffer.sample_domain_batches(batch_size_per_domain=16)
             if rehearsal_batches:
                 loss_rehearsal_total = torch.tensor(0.0, device=self.device)
+                has_rehearsal_grad = False
                 for r_dom, r_tok, r_lbl in rehearsal_batches:
                     r_logits = self.forward(r_tok, active_domains=[r_dom])
-                    loss_rehearsal_total = loss_rehearsal_total + F.cross_entropy(r_logits, r_lbl)
+                    loss_r = F.cross_entropy(r_logits, r_lbl)
+                    if loss_r.requires_grad:
+                        has_rehearsal_grad = True
+                    loss_rehearsal_total = loss_rehearsal_total + loss_r
                 loss_rehearsal = loss_rehearsal_total / len(rehearsal_batches)
 
                 opt.zero_grad()
-                if self.enable_gradient_projection:
-                    shared_p = [p for pn, p in self.evolvable_backbone.base_model.named_parameters() if ("blocks.3" in pn or "ln_f" in pn)]
+                if self.enable_gradient_projection and has_rehearsal_grad:
+                    shared_p = [p for pn, p in self.evolvable_backbone.base_model.named_parameters() if ("blocks.3" in pn or "ln_f" in pn) and p.requires_grad]
                     OrthogonalGradientProjector.project_conflicting_gradients(shared_p, loss_task, loss_rehearsal)
-                    (loss_task + loss_rehearsal).backward()
-                else:
+                elif has_rehearsal_grad:
                     loss = 0.5 * loss_task + 0.5 * loss_rehearsal
                     loss.backward()
+                else:
+                    loss_task.backward()
 
                 opt.step()
             else:
