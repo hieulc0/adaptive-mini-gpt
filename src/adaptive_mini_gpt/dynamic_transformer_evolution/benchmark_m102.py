@@ -44,6 +44,7 @@ class M102DynamicTransformerBenchmark:
         cls,
         device: torch.device,
         seeds: list[int] | None = None,
+        output_dir: str | Path | None = None,
         capacity_tier: CapacityTierM100 = CapacityTierM100.TIER_20K,
         episodes_per_seed: int = 100,
     ) -> dict[str, Any]:
@@ -274,6 +275,17 @@ class M102DynamicTransformerBenchmark:
                 "remedy_prescription": audit.remedy_prescription,
             },
         }
+
+        if output_dir:
+            out_p = Path(output_dir)
+            out_p.mkdir(parents=True, exist_ok=True)
+            with open(out_p / "m102_report.json", "w", encoding="utf-8") as f:
+                json.dump(report, f, indent=2)
+            md_content = cls.generate_markdown_report(report)
+            with open(out_p / "m102_report.md", "w", encoding="utf-8") as f:
+                f.write(md_content)
+            print(f"[+] Deliverables saved to {out_p}")
+
         return report
 
     @classmethod
