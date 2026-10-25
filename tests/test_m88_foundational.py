@@ -124,9 +124,9 @@ def test_shared_foundational_substrate() -> None:
     saved = substrate.save_state()
     # Mutate trunk weight
     with torch.no_grad():
-        substrate.trunk.down_proj.weight.add_(1.0)
+        substrate.trunk.head.weight.add_(1.0)
     out_mutated = substrate(x, task_id=None)
-    assert not torch.allclose(out_trunk, out_mutated)
+    assert not torch.allclose(out_trunk, out_mutated, atol=1e-2)
 
     # Restore
     substrate.restore_state(saved)
