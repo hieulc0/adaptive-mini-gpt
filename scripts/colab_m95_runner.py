@@ -36,9 +36,9 @@ def main() -> None:
     os.chdir("/content/adaptive-mini-gpt")
     run_cmd("python3 -m pytest -q tests/test_m95_cross_domain_transfer.py")
 
-    print("=== Running Historical Regression Suite (M80-M94) on Tesla T4 ===")
-    reg_out = run_cmd("python3 -m pytest -q tests/test_m9*.py tests/test_m8*.py")
-    print("Regression suite output snippet:\n", reg_out[-500:] if len(reg_out) > 500 else reg_out)
+    print("=== Running Historical Regression Suite (M80-M95) on Tesla T4 ===")
+    reg_out = run_cmd("python3 -m pytest -q tests/test_m8[0-9]*.py tests/test_m9[0-5]*.py")
+    print("Regression suite summary snippet:\n", reg_out[-500:] if len(reg_out) > 500 else reg_out)
 
     # 4. Run Milestone M95 Benchmark
     print("=== Executing Milestone M95 Master Benchmark on Tesla T4 ===")
