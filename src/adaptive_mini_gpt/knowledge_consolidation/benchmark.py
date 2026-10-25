@@ -326,7 +326,7 @@ class M83KnowledgeConsolidationBenchmark:
                 d_model=d_model,
                 device=device,
                 fixed_init=InitChoice.EXPERIENCE_PRIOR,
-                fixed_lr=0.012,
+                fixed_lr=0.016,
                 fixed_rank=8,
                 experience_priors=prior_weights,
                 max_steps=60,
