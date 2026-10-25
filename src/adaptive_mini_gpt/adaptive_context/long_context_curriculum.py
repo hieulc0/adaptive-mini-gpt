@@ -142,7 +142,7 @@ class LongContextCurriculumGenerator:
                     domain_id=DOMAIN_NL,
                     has_supported_entity=True,
                     is_contradictory=False,
-                    requires_retrieval=True,
+                    requires_retrieval=False,
                     depth_position=depth_pos,
                     token_length=len(full_input.split()),
                     intermediate_steps=None,

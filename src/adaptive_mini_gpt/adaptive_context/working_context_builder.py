@@ -87,13 +87,8 @@ class WorkingContextBuilder:
 
             # Entity name exact match boost
             clean_entity = rec.entity.replace("_", " ").lower()
-            if clean_entity in clean_q:
+            if clean_entity in clean_q or rec.entity.lower() in clean_q:
                 sim += 0.4
-
-            # Attribute match boost
-            clean_attr = rec.attribute.replace("_", " ").lower()
-            if clean_attr in clean_q or any(tok in clean_attr for tok in query_tokens):
-                sim += 0.5
 
             if sim >= self.relevance_threshold:
                 scored_records.append((sim, rec))
