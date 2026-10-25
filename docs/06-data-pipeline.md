@@ -442,3 +442,31 @@ Milestone M83 introduces multi-teacher consolidation environments and multi-metr
 - **Execution Provenance**:
     * Full 350/350 regression suite passed on Google Colab Tesla T4 GPU (`amg-m83-t4` session).
     * Base model SHA-256 parameter invariant preserved (`6e39cd7ef6790b3c`, 1,071,872 weights); 100% carry (20/20) and logic (8/8) retention.
+
+
+### 16. Milestone M84 Autonomous Connection Pruning, Regrowth, and Dynamic Topology Specification
+Milestone M84 introduces connection-level neural topology adaptation, autograd gradient-salient link reactivation, and a 7-arm causal benchmarking harness:
+- **Connection-Level Dynamic Sparsity Architecture**:
+    * **Dynamic Sparse Sequence Adapter**: LayerNorm(128) + `SparseMaskedLinear`(128 $	o$ 8) + GELU + `SparseMaskedLinear`(8 $	o$ 16).
+    * Total Connection Synapses: $128 \times 8 + 8 \times 16 = 1,024 + 128 = 1,152$ connections.
+    * Physical Storage Footprint: 1,432 parameters (1,152 weights + 24 biases + 256 LayerNorm params).
+    * Target Active Connection Sparsity: $\ge 20.0\%$ reduction (tested at 30.0% sparsity $\to$ 806 active connections).
+- **Unmasked Autograd Gradient Flow (RigL Mechanism)**:
+    * Standard PyTorch masked forward passes ($W_{\text{eff}} = W \odot M$) yield zero gradients ($\nabla W = \nabla W_{\text{eff}} \odot M = 0$) for pruned links ($M=0$).
+    * Custom `MaskedLinearFunction(torch.autograd.Function)` computes unmasked analytical gradient outer products $\nabla W = \nabla_{\text{out}}^T \cdot X$, providing valid saliency signals for dormant connections and enabling gradient-based regrowth.
+    * Strict zero-weight enforcement via `adapter.enforce_masks()` guarantees that inactive synapses remain exactly zero after optimizer steps.
+- **Seven Comparative Experimental Arms**:
+    1. `ORIGINAL_DENSE`: 100% active connections (1,152 links).
+    2. `RANDOM_PRUNING_REGROWTH`: Stochastic prune-and-regrow control without gradient/magnitude guidance.
+    3. `STATIC_MAGNITUDE_PRUNING`: 30% magnitude pruning, static mask.
+    4. `RIGL_GRADIENT_REGROWTH`: Dynamic sparse training via magnitude death + top gradient reactivation.
+    5. `FIXED_SPARSE`: Static random sparse topology fixed from initialization.
+    6. `LEARNED_TOPOLOGY_CONTROLLER`: Autonomous 964-parameter policy proposing dynamic actions.
+    7. `DIAGNOSTIC_ORACLE`: Validation-loss guided greedy topology selection.
+- **Learned Topology Controller (< 1,000 Parameter Bound)**:
+    * Compact 2-layer MLP (964 parameters, SHA-256 `3bebb837e1c38e90`).
+    * 6 Diagnostic Input Signals: `current_sparsity`, `mean_weight_magnitude`, `gradient_norm`, `loss_slope`, `prediction_entropy`, `budget_pressure`.
+    * 4 Categorical Actions: `MAINTAIN_TOPOLOGY`, `PRUNE_LEAST_IMPORTANT`, `REGROW_GRADIENT_SALIENT`, `BALANCED_REWIRE`.
+- **Execution Provenance**:
+    * Full 359/359 regression suite passed on Google Colab Tesla T4 GPU (`amg-m84-t4` session).
+    * Base model parameter invariant preserved (SHA-256: `6e39cd7ef6790b3c`, 1,071,872 weights unchanged); 100% carry (20/20) and logic (8/8) retention.

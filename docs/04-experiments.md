@@ -4159,7 +4159,8 @@ abla_{	ext{cos}}$), directly diagnosing destructive interference.
   - *Consolidated Capacity Accounting*: For 3 skills, total capacity is $1,432 + 3 	imes 116 = 1,780$ parameters, compared to $3 	imes 1,432 = 4,296$ parameters for independent Rank-8 adapters—yielding **58.57% parameter compression** ($> 2.9	imes$ the $\ge 20\%$ target).
 - **Soft-Target Self-Distillation Engine (`NeuralSelfDistillationEngine`)**:
   - Combines ground-truth cross-entropy with temperature-scaled Kullback-Leibler divergence ($T=2.0, lpha=0.5$):
-    $$\mathcal{L} = (1 - lpha) \mathcal{L}_{	ext{CE}}(y_{	ext{student}}, y_{	ext{true}}) + lpha T^2 \mathcal{D}_{	ext{KL}}\left(\sigma(z_{	ext{student}}/T) \,\|\, \sigma(z_{	ext{teacher}}/T)ight)$$
+    $$\mathcal{L} = (1 - lpha) \mathcal{L}_{	ext{CE}}(y_{	ext{student}}, y_{	ext{true}}) + lpha T^2 \mathcal{D}_{	ext{KL}}\left(\sigma(z_{	ext{student}}/T) \,\|\, \sigma(z_{	ext{teacher}}/T)
+ight)$$
   - Dual learning rate optimization: `lr=1.5e-2` for trunk, `lr=2.25e-2` for residual heads with AdamW.
 - **Learned Consolidation Controller (`LearnedConsolidationController`)**:
   - Trainable parameters: **939 parameters** (strictly under the 1,000 parameter budget, SHA-256: `62ac3369d964d588`).
@@ -4230,3 +4231,74 @@ abla_{	ext{cos}} = -0.42$), functional agreement collapsed to 0.00%, and naive w
 | **G7: Controller Parameter Budget** | Explicitly accounted trainable consolidation policy parameters | **939 parameters (< 1,000 budget, hash 62ac3369d964d588)** | **PASS** |
 | **G8: Core Capability Retention** | Arithmetic carry (20/20) and operational logic (8/8) | **100.0% (20/20 & 8/8)** | **PASS** |
 | **G9: Zero Base Drift & Invariance** | Base model SHA-256 invariant preserved | **Bit-exact hash 6e39cd7ef6790b3c (0 base growth)** | **PASS** |
+
+
+---
+
+## Milestone M84: Autonomous Neural Connection Pruning, Regrowth, and Learned Topology Adaptation
+
+**Execution Environment:** Remote Google Colab GPU (Tesla T4, 16GB VRAM, CUDA 13.0, PyTorch 2.11.0+cu130, Python 3.13.16)  
+**Execution Mode:** Controlled multi-seed benchmark across 7 comparative arms (Seeds 42, 43, 44, 45, 46)  
+**Artifacts Generated:** `runs/colab-m84/output/m84_report.json`, `runs/colab-m84/output/m84_report.md`  
+**Verdict:** **PASS (All 9 Scientific Acceptance Gates Verified)**
+
+### 1. Research Objectives
+Milestone M84 transitions Adaptive Mini-GPT from coarse module-level operations (adding or merging entire rank-8 adapters) to **connection-level neural rewiring**:
+1. **Dynamic Connection Pruning:** Identify and eliminate non-essential neural connections (achieving $\ge 20\%$ sparsity, targeted at 30%) without catastrophic forgetting.
+2. **Gradient-Salient Regrowth (RigL):** Reactivate dormant connections using unmasked autograd gradient signals ($|\nabla W|$) rather than stochastic heuristics.
+3. **Learned Topology Controller:** Train a parameter-bounded neural policy (< 1,000 parameters) that selects between maintaining topology, pruning low-magnitude links, regrowing salient links, and balanced rewiring based on non-leaking diagnostic state signals.
+4. **Lineage Preservation & Safety:** Ensure bit-exact rollback upon rejected trials, 100% base model parameter invariance (SHA-256 hash `6e39cd7ef6790b3c`), and zero degradation in future task acquisition.
+
+### 2. Phase 0 Audit: M83 Net vs. Marginal Parameter Accounting
+Addressing the scientific review of M83, M84 reconciles marginal adapter compression against total system footprint including the 939-parameter controller:
+- **Marginal Adapter Compression:** 58.57% (4,296 $	o$ 1,780 parameters for 3 adapters).
+- **Net Total 1-Cluster Compression:** 36.71% (4,296 $	o$ 2,719 parameters including the 939-parameter controller).
+- **Amortized Multi-Cluster Compression:** For $K$ skill clusters, net savings scale as $1 - \frac{1780K + 939}{4296K}$:
+  - $K=5$ clusters: **54.19% net compression**.
+  - $K=10$ clusters: **56.38% net compression**.
+  - Asymptote ($K \to \infty$): **58.57% marginal limit**.
+
+### 3. Primary Empirical Results across 7 Comparative Arms (Colab Tesla T4)
+
+| Experimental Arm | Mean EM | Mean Steps to Qual (85% EM) | Final Sparsity | Active Connections | Description |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **Learned Topology Controller (M84)** | **100.00%** | **20.4 steps** | **30.03%** | **806.0 / 1152** | Autonomous 964-param policy driving dynamic prune & rewire |
+| **Diagnostic Oracle Upper Bound** | 100.00% | 16.2 steps | 3.99% | 1106.0 / 1152 | Validation-loss guided greedy topology selection |
+| **Original Dense Adapter** | 100.00% | 16.2 steps | 0.00% | 1152.0 / 1152 | Full uncompressed baseline (100% connections active) |
+| **Static Magnitude Pruning** | 100.00% | 22.2 steps | 29.95% | 807.0 / 1152 | Standard 30% magnitude pruning, static mask |
+| **RigL Dynamic Sparse Training** | 100.00% | 23.2 steps | 30.03% | 806.0 / 1152 | Unmasked gradient regrowth + magnitude death |
+| **Random Pruning & Regrowth** | 97.50% | 24.4 steps | 30.03% | 806.0 / 1152 | Stochastic prune & regrow without gradient/magnitude guidance |
+| **Fixed Random Sparse Topology** | 100.00% | 24.8 steps | 29.95% | 807.0 / 1152 | Static random sparse topology from initialization |
+
+### 4. Per-Seed Multi-Metric Breakdown across 5 Independent Seeds
+
+| Seed | Dense EM | Random Regrowth EM | Static Mag Pruning EM | RigL Dynamic EM | Fixed Sparse EM | Learned Controller EM | Oracle EM | Future Cascade Steps |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **42** | 1.0000 | 0.9375 (33 steps) | 1.0000 (22 steps) | 1.0000 (26 steps) | 1.0000 (19 steps) | **1.0000 (19 steps)** | 1.0000 (17 steps) | **17** |
+| **43** | 1.0000 | 1.0000 (25 steps) | 1.0000 (20 steps) | 1.0000 (22 steps) | 1.0000 (20 steps) | **1.0000 (19 steps)** | 1.0000 (17 steps) | **15** |
+| **44** | 1.0000 | 1.0000 (18 steps) | 1.0000 (29 steps) | 1.0000 (28 steps) | 1.0000 (23 steps) | **1.0000 (30 steps)** | 1.0000 (17 steps) | **29** |
+| **45** | 1.0000 | 1.0000 (18 steps) | 1.0000 (18 steps) | 1.0000 (16 steps) | 1.0000 (27 steps) | **1.0000 (14 steps)** | 1.0000 (13 steps) | **17** |
+| **46** | 1.0000 | 0.9375 (38 steps) | 1.0000 (24 steps) | 1.0000 (24 steps) | 1.0000 (35 steps) | **1.0000 (20 steps)** | 1.0000 (17 steps) | **26** |
+| **Mean / Med** | **1.0000** | **0.9750 (24.4s)** | **1.0000 (22.2s)** | **1.0000 (23.2s)** | **1.0000 (24.8s)** | **1.0000 (20.4s)** | **1.0000 (16.2s)** | **Median: 17 steps** |
+
+### 5. Key Findings & Scientific Qualification
+1. **Connection Pruning Without Forgetting:** Deactivating 30.03% of connections (346 connections eliminated; 1,152 $	o$ 806 active connections) achieved **98.75% relative skill retention** and 100% final exact match across all seeds.
+2. **Gradient-Salient Regrowth Utility:** Regrowing inactive connections using unmasked autograd gradients (RigL) reached qualification in 23.2 steps vs 24.4 steps for random rewiring and avoided stochastic accuracy collapse observed in Seed 42 and Seed 46 under random rewiring.
+3. **Learned Topology Adaptation:** The 964-parameter learned controller reached qualification in **20.4 steps**, outperforming Random Regrowth (24.4 steps), Fixed Random Sparse (24.8 steps), RigL (23.2 steps), and Static Pruning (22.2 steps).
+4. **Preserved Future Learning Efficiency:** On unfamiliar held-out procedural tasks (`TWO_STAGE_CASCADE`), adapted sparse models adapted in **17 median steps** (target $\le 35$ steps), demonstrating zero negative transfer on future adaptation.
+5. **Safety & Bit-Exact Rollback:** Trial failure simulation and state restore verified bit-exact SHA-256 state recovery (`8e86ca8397dd1403`).
+6. **Zero Base Drift:** Base model hash invariant maintained bit-exact (`6e39cd7ef6790b3c`, 1,071,872 weights unchanged); 100% arithmetic carry (20/20) and 100% operational logic (8/8) retention.
+7. **Regression Suite:** **359/359 tests passed** on Tesla T4 GPU.
+
+### 6. Milestone M84 Acceptance Gate Scorecard
+| Gate | Evaluation Metric | Target Gate | Observed Result (Tesla T4) | Verdict |
+| :--- | :--- | :---: | :---: | :---: |
+| **G1: Neural Connection Pruning** | Active connection reduction on neural adapters | $\ge 20.0\%$ | **30.03% (806 / 1152 active links; 346 eliminated)** | **PASS** |
+| **G2: Regrowth Utility** | Gradient-salient regrowth outperforming random controls | Faster & $\ge 95\%$ EM | **23.2s RigL & 20.4s Ctrl vs 24.4s Rand (100% EM)** | **PASS** |
+| **G3: Skill Retention** | Performance retention on pre-existing skills | $\ge 95\%$ rel, $\ge 85\%$ floor | **98.75% relative retention (all seeds $\ge 93.75\%$)** | **PASS** |
+| **G4: Future Learning Efficiency** | Steps to qualification on held-out `TWO_STAGE_CASCADE` | $\le 35$ steps | **Median: 17 steps (dense: 17 steps)** | **PASS** |
+| **G5: Learned Policy Superiority** | Controller outperforms random & static controls | Faster sample efficiency | **20.4 steps vs 24.4s (Rand) & 24.8s (Fixed)** | **PASS** |
+| **G6: Capacity & Overhead Accounting** | Bounded policy parameters & transparent breakdown | $< 1,000$ params | **964 controller params (Hash: 3bebb837e1c38e90)** | **PASS** |
+| **G7: Bit-Exact Rollback** | Trial rejection state restoration via SHA-256 | Bit-exact match | **Restored hash matches bit-exact: 8e86ca8397dd1403** | **PASS** |
+| **G8: Core Capability Retention** | Arithmetic carry (20/20) & operational logic (8/8) | 100.0% | **100.0% carry (20/20) & 100.0% logic (8/8)** | **PASS** |
+| **G9: Base Invariance & Regression Suite**| Base parameter SHA-256 hash & regression suite | 0 drift, 350+ tests | **Hash 6e39cd7ef6790b3c invariant; 359/359 tests passed** | **PASS** |

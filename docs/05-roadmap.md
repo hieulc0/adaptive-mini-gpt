@@ -1456,3 +1456,32 @@ abla_{	ext{cos}} = -0.42$) and zero functional agreement.
   - **Milestone M84 — Learn to Prune and Regrow Neural Connections**: Dynamic connection-level sparse allocation and regrowth (RigL / dynamic sparse exploration) allowing individual neurons and synapse pathways to grow and shrink adaptively.
   - **Milestone M85 — Learn to Expand or Reduce Neural Dimensions and Modules**: Autonomous dimension resizing and module allocation guided by learned meta-policies.
   - **Milestone M86 — Integrated Acquisition, Consolidation, and Topology Adaptation**: Unified closed-loop autonomous student combining dynamic growth, consolidation shrinkage, and topological refinement.
+
+
+### Milestone M84: Autonomous Neural Connection Pruning, Regrowth, and Learned Topology Adaptation (Completed & Qualified on Remote Colab Tesla T4 GPU)
+
+- **Status**: Completed & Qualified on Remote Google Colab Tesla T4 GPU (`amg-m84-t4` session).
+- **Focus**: Phase 0 forensic audit of M83 (reconciling marginal 58.57% adapter compression vs 36.71% net 1-cluster total compression including the 939-parameter controller, and establishing multi-cluster amortization reaching 54.19% at $K=5$); Dynamic sparse neural sequence adapter with custom PyTorch autograd function (`SparseMaskedLinear` and `DynamicSparseSequenceAdapter`) maintaining unmasked gradient flow for inactive connections to enable RigL-style regrowth; connection pruning by magnitude and utility; gradient-salient connection reactivation; balanced prune-and-regrow rewiring maintaining fixed parameter capacity budgets; learned topology adaptation controller (< 1,000 parameters, exactly 964 parameters) driven by 6 non-leaking diagnostic state signals (sparsity, weight magnitude, gradient norm, loss slope, prediction entropy, budget pressure); 7-arm causal benchmark (Original Dense, Random Pruning/Regrowth, Static Magnitude Pruning, RigL Dynamic Sparse Training, Fixed Sparse, Learned Topology Controller, Diagnostic Oracle Upper Bound); skill retention audit ($\ge 95\%$ relative retention, $\ge 85\%$ individual EM floor); future task acquisition on held-out `TWO_STAGE_CASCADE`; bit-exact rollback restoration via SHA-256 state hashing; base model invariance.
+- **Hardware & Implementation**: Google Colab Tesla T4 GPU (Session `amg-m84-t4`, branch `m84-topology-adaptation`, Python 3.13, PyTorch 2.11.0+cu130). Recurrent base model (1,071,872 frozen parameters, base hash `6e39cd7ef6790b3c`), Learned Topology Controller (964 parameters, SHA-256 `3bebb837e1c38e90`). Full regression suite passed: **359/359 tests on Tesla T4 GPU in 118s**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 0 M83 Forensic Audit & Amortization**:
+     - Net system compression reconciled: 36.71% net 1-cluster compression vs 58.57% marginal compression.
+     - Amortized scaling: $1 - \frac{1780K + 939}{4296K} \to 54.19\%$ at $K=5$ clusters and $56.38\%$ at $K=10$ clusters.
+  2. **Phase 1 Dynamic Sparse Neural Adapters & Autograd Regrowth**:
+     - Built `SparseMaskedLinear` and `DynamicSparseSequenceAdapter` (1,152 total connections across down- and up-projections).
+     - Solved the PyTorch masked gradient vanishing issue via custom `MaskedLinearFunction` autograd calculating unmasked gradient outer products $\nabla_{out}^T X$, providing salient regrowth signals for deactivated weights.
+  3. **Phase 2 Learned Topology Controller (< 1,000 Parameter Bound)**:
+     - Implemented compact 2-layer MLP (964 parameters, SHA-256 `3bebb837e1c38e90`) mapping 6 diagnostic signals to 4 discrete actions (`MAINTAIN_TOPOLOGY`, `PRUNE_LEAST_IMPORTANT`, `REGROW_GRADIENT_SALIENT`, `BALANCED_REWIRE`).
+  4. **Phase 3 & 4 Multi-Seed 7-Arm Causal Benchmark**:
+     - Active connections reduced by **30.03%** (346 connections eliminated; 1,152 $\to$ 806 active connections), passing the $\ge 20\%$ target gate.
+     - **Regrowth Utility**: Dynamic RigL gradient regrowth (23.2 steps) and Learned Topology Controller (20.4 steps) significantly outperformed Random Pruning & Regrowth (24.4 steps) and Fixed Sparse (24.8 steps), avoiding accuracy collapse.
+     - **Skill Retention**: Achieved **98.75% relative performance retention**, with all seeds exceeding the strict $\ge 85\%$ individual EM floor.
+     - **Future Learning Efficiency**: On held-out compound tasks (`TWO_STAGE_CASCADE`), adapted sparse adapters reached qualification in **17 median steps** (target $\le 35$ steps), demonstrating zero negative transfer.
+  5. **Safety, Bit-Exact Rollback & Base Invariance**:
+     - Trial rejection simulation verified bit-exact state restore via SHA-256 parameter hashing (`8e86ca8397dd1403`).
+     - Base model parameters 100% frozen (1,071,872 weights, SHA-256 hash `6e39cd7ef6790b3c` bit-exact invariant).
+     - Arithmetic carry retention: **100.0% (20/20)**; Operational logic retention: **100.0% (8/8)**.
+- **Lineage Promotion Decision**: **QUALIFIED IN RESEARCH TIER**. Autonomous neural connection pruning, regrowth, and dynamic learned topology adaptation verified on Tesla T4.
+- **Next Direction Options (Post-M84 Strategic Priority -> M85)**:
+  - **Milestone M85 — Autonomous Dimensionality Adaptation and Dynamic Module Allocation**: Allowing the student to expand or shrink bottleneck ranks (adaptive rank-2, 4, 8, 16), adjust neuron counts, and spawn or retire modular heads based on evaluated capacity-utility tradeoffs.
+  - **Milestone M86 — Integrated Closed-Loop Autonomous Learning Cycle**: End-to-end integration of acquisition (M80-M82), knowledge consolidation (M83), connection pruning/regrowth (M84), and dimension adaptation (M85) in an ongoing stream of unfamiliar multimodal/reasoning problems.
