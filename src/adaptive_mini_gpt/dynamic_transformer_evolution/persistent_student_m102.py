@@ -32,7 +32,7 @@ from adaptive_mini_gpt.integrated_autonomous_student.structural_evolution_engine
 from adaptive_mini_gpt.integrated_autonomous_student.two_speed_plasticity_manager import (
     TwoSpeedPlasticityManager,
 )
-from adaptive_mini_gpt.learning_driven_experiment.curriculum_discovery_policy import (
+from adaptive_mini_gpt.self_directed_curriculum.curriculum_policy import (
     CurriculumDiscoveryPolicy,
 )
 from adaptive_mini_gpt.meta_acquisition.learned_acquisition_controller import (
