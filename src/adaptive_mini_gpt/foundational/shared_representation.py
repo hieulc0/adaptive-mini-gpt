@@ -112,19 +112,28 @@ class SharedFoundationalSubstrate(nn.Module):
             d_model=d_model, d_shared=d_shared, num_symbols=num_symbols
         )
         self.residuals = nn.ModuleDict()
+        self.lru_order: list[str] = []
 
     def forward(self, h: torch.Tensor, task_id: str | None = None) -> torch.Tensor:
         """Forward pass combining shared foundational trunk with optional task residual."""
         base_logits = self.trunk(h)
-        if task_id is not None and task_id in self.residuals:
-            res_logits = self.residuals[task_id](h)
-            return base_logits + res_logits
+        if task_id is not None:
+            sanitized_id = task_id.replace(".", "_").replace("-", "_")
+            if sanitized_id in self.residuals:
+                if sanitized_id in self.lru_order:
+                    self.lru_order.remove(sanitized_id)
+                    self.lru_order.append(sanitized_id)
+                res_logits = self.residuals[sanitized_id](h)
+                return base_logits + res_logits
         return base_logits
 
     def allocate_residual(self, task_id: str, rank: int = 1) -> SelectiveResidualAdapter:
-        """Allocate ultra-compact task residual if budget permits."""
+        """Allocate ultra-compact task residual if budget permits, or retire least recently accessed."""
         sanitized_id = task_id.replace(".", "_").replace("-", "_")
         if sanitized_id in self.residuals:
+            if sanitized_id in self.lru_order:
+                self.lru_order.remove(sanitized_id)
+            self.lru_order.append(sanitized_id)
             return self.residuals[sanitized_id]
 
         dev = next(self.parameters()).device if list(self.parameters()) else torch.device("cpu")
@@ -132,14 +141,22 @@ class SharedFoundationalSubstrate(nn.Module):
             d_model=self.d_model, num_symbols=self.num_symbols, rank=rank
         ).to(dev)
 
+        # Enforce parameter budget via LRU retirement if needed
+        adapter_params = new_adapter.count_parameters()
+        while (self.count_parameters() + adapter_params) > self.budget_ceiling and self.lru_order:
+            oldest = self.lru_order.pop(0)
+            if oldest in self.residuals:
+                del self.residuals[oldest]
+
         # Check parameter budget
-        projected = self.count_parameters() + new_adapter.count_parameters()
+        projected = self.count_parameters() + adapter_params
         if projected > self.budget_ceiling:
             raise RuntimeError(
                 f"Parameter budget exceeded: {projected} > {self.budget_ceiling}"
             )
 
         self.residuals[sanitized_id] = new_adapter
+        self.lru_order.append(sanitized_id)
         return new_adapter
 
     def has_residual(self, task_id: str) -> bool:
@@ -167,6 +184,7 @@ class SharedFoundationalSubstrate(nn.Module):
         return {
             "trunk_state": copy.deepcopy(self.trunk.state_dict()),
             "residuals_state": {k: copy.deepcopy(v.state_dict()) for k, v in self.residuals.items()},
+            "lru_order": list(self.lru_order),
         }
 
     def restore_state(self, state: dict[str, Any]) -> None:
@@ -175,6 +193,7 @@ class SharedFoundationalSubstrate(nn.Module):
         self.trunk.load_state_dict(state["trunk_state"])
         # Clear extra residuals and restore saved ones
         self.residuals.clear()
+        self.lru_order = list(state.get("lru_order", []))
         for k, v in state["residuals_state"].items():
             adapter = SelectiveResidualAdapter(
                 d_model=self.d_model, num_symbols=self.num_symbols, rank=1

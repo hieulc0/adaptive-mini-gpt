@@ -7,7 +7,8 @@ Verifies:
 4. Exemplar replay buffer (bounded capacity, sampling, byte-level storage accounting).
 5. Foundational continual student (zero-shot probe, residual allocation, R[i, j] updates).
 6. Bit-exact rollback restoration upon conflict rejection.
-7. Master M88 Benchmark smoke execution across arms.
+7. LRU residual retirement and parameter budget bounds.
+8. Master M88 Benchmark smoke execution across arms.
 """
 
 from __future__ import annotations
@@ -227,6 +228,36 @@ def test_bit_exact_rollback_on_conflict() -> None:
         assert log_conf.retained_or_rolled_back == "ROLLED_BACK"
         # Verify trunk weight matches saved exactly
         assert torch.allclose(student.substrate.trunk.down_proj.weight, trunk_weight_saved)
+
+
+def test_lru_residual_retirement_budget_bound() -> None:
+    """Verify LRU retirement keeps substrate strictly within budget ceiling."""
+    # Capacity for trunk (6,176) + 3 residuals (3 * 144 = 432) = 6,608
+    budget = 6_176 + 3 * 144
+    substrate = SharedFoundationalSubstrate(
+        d_model=128, d_shared=16, num_symbols=16, budget_ceiling=budget
+    )
+    assert substrate.count_parameters() == 6_176
+
+    # Allocate 5 residuals
+    for i in range(5):
+        substrate.allocate_residual(f"task_{i}", rank=1)
+
+    # Total parameters must strictly remain <= budget
+    assert substrate.count_parameters() <= budget
+    assert len(substrate.residuals) == 3
+    # Most recently allocated residuals (task_2, task_3, task_4) should be present
+    assert substrate.has_residual("task_4")
+    assert substrate.has_residual("task_3")
+    assert substrate.has_residual("task_2")
+    # Older residuals (task_0, task_1) were LRU-retired
+    assert not substrate.has_residual("task_0")
+    assert not substrate.has_residual("task_1")
+
+    # Forward on retired task falls back gracefully to trunk without error
+    x = torch.randn(2, 4, 128)
+    out_retired = substrate(x, task_id="task_0")
+    assert out_retired.shape == (2, 4, 16)
 
 
 def test_m88_benchmark_smoke() -> None:
