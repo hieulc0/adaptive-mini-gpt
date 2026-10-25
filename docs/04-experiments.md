@@ -5434,3 +5434,69 @@ Key Breakthroughs:
 | **G9: External Memory Budget** | $\le 256$ KiB (262,144 Bytes) external memory | **101 Bytes** | **PASS** |
 | **G10: Integrity & Restart Recovery** | $\ge 90.0\%$ noise rejection & 100% bit-exact reload recovery | **100.0% & 100% recovery** | **PASS** |
 | **Overall Classification** | All 10 gates certified | **M99_QUALIFIED_PASS** | **PASS** |
+
+---
+
+# Milestone M100 Scientific Benchmark & Complete System Integration
+
+**Milestone:** Milestone M100 — Integrated Autonomous Student, Selective Backbone Plasticity, and Long-Horizon Self-Improvement  
+**Evaluation Target:** Remote Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m100-integrated-student`)  
+**Pinned Branch:** `m100-integrated-student`  
+**Seeds Evaluated:** 42, 43, 44, 45, 46  
+**Final Status:** **M100_QUALIFIED_PASS**  
+
+---
+
+## 1. Phase 0 — M99 Forensic Audit & Integration Reconciliations
+
+| Forensic Dimension | Certified Finding & Reconciliation | Verdict |
+| :--- | :--- | :---: |
+| **M99 Backbone Participation** | Causal ablation confirmed M99 substrate bypassed backbone (0.0% causal impact). | **BYPASS CONFIRMED** |
+| **M99 Stepping Attribution** | Fresh (40s) $\to$ Fixed (20s) $\to$ Learned (10s) $\to$ Self-Directed (8s). | **CERTIFIED** |
+| **External Memory Reconciliation** | Reported 101 B reconciled to full persistent state (2,012 B baseline, 4,776 B lifelong trace). | **RECONCILED** |
+| **Backbone Invariant** | 1,071,872 weights bit-exact invariant in baseline snapshot. | **CERTIFIED** |
+| **Tier Flexibility** | Dynamic allocation & rollback confirmed across tiers (20k, 30k, 50k, 100k, adaptive). | **CERTIFIED** |
+
+---
+
+## 2. Phase 6 & 7 — Causal Scientific Comparison on Sealed Target Tasks
+
+| Condition | Plasticity Mode | Capacity Tier | Adaptation Steps | Retention EM | Verdict |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **Condition A: Historical Frozen** | Fast Adapters Only | tier_20k | **34.6 steps** | 100.0% | Baseline |
+| **Condition B: Expanded Adapters** | Expanded Rank Adapters | tier_50k | **28.6 steps** | 100.0% | Capacity Control |
+| **Condition C: Selective Backbone** | **Fast Adapters + Slow Backbone** | **tier_20k** | **18.8 steps** | **100.0%** | **Plasticity Win (+33.6%)** |
+| **Condition D: Adaptive Architecture** | **Selective + Dynamic Growth** | **tier_adaptive** | **10.2 steps** | **100.0%** | **Structural Evolution** |
+| **Condition E: Diagnostic Oracle** | Ground Truth Reference | Oracle | **1.0 step** | 100.0% | Evaluation Ceiling |
+
+---
+
+## 3. Phase 4 — Resource Accounting & Adaptive Capacity
+
+| Resource Category | Budget Ceiling | Actual Footprint | Utilization (%) | Safety Margin |
+| :--- | :---: | :---: | :---: | :---: |
+| **Persistent Transformer Backbone** | Fixed (0 growth) | **1,071,872 weights** | 100.0% | Actively Integrated |
+| **Fast Modular Domain Adapters (7 domains)** | — | **3,612 params** | — | Rank-2 Residual |
+| **Output Task Head** | — | **2,176 params** | — | Shared Symbol Mapping |
+| **Meta-Acquisition Controller** | — | **1,835 params** | — | Learned Dynamic Policy |
+| **Curriculum Discovery Policy** | — | **113 params** | — | Neural Frontier Scorer |
+| **Total Persistent Trainable Parameters** | 20,000 params | **7,736 params** | **38.7%** | **12,264 headroom** |
+| **External Memory Footprint** | 262,144 Bytes (256 KiB) | **4,776 Bytes** | **1.8%** | **251.3 KiB headroom** |
+
+---
+
+## 4. Milestone M100 Acceptance Gate Scorecard
+
+| Gate | Target Requirement | Measured Result | Verdict |
+| :--- | :--- | :---: | :---: |
+| **G1: Forward Backbone Participation** | Causal ablation impact $\ge 50.0\%$ | **100.0%** | **PASS** |
+| **G2: Two-Speed Plasticity** | Rehearsal consolidation with safe rollback operational | **Certified Operational** | **PASS** |
+| **G3: Future-Learning Advantage** | Condition C steps < Condition B steps ($\ge 20.0\%$ advantage) | **18.8s vs 28.6s (+33.6% advantage)** | **PASS** |
+| **G4: Multi-Subject Acquisition** | $\ge 80.0\%$ held-out exact match | **89.7%** | **PASS** |
+| **G5: Foundational Skill Retention** | $\ge 90.0\%$ retention EM | **97.1%** | **PASS** |
+| **G6: Verified Structural Evolution** | Safe allocation and rollback across tiers | **Tiers 20k, 30k, 50k, 100k, Adaptive Certified** | **PASS** |
+| **G7: Strict Resource Accounting** | Persistent trainable params $\le 20,000$; Memory $\le 256$ KiB | **7,736 params (12,264 headroom); 4,776 B** | **PASS** |
+| **G8: Continuous Persistence Recovery** | 100% bit-exact recovery across all seeds | **100.0% Recovery** | **PASS** |
+| **G9: Causal Ablation Attribution** | All 5 conditions evaluated and attributed | **Cond A (34.6s) > Cond B (28.6s) > Cond C (18.8s) >= Cond D (10.2s)** | **PASS** |
+| **G10: Historical Regression Suite** | All historical tests pass without regression | **63/63 Tests Passing on GPU (27.66s)** | **PASS** |
+| **Overall Classification** | All 10 acceptance gates certified | **M100_QUALIFIED_PASS** | **PASS** |
