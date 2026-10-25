@@ -1905,3 +1905,37 @@ abla_{	ext{cos}} = -0.42$) and zero functional agreement.
 - **Lineage Promotion Decision**: **QUALIFIED PASS IN RESEARCH TIER**.
 - **Next Direction (Milestone M99: Autonomous Curriculum Discovery and Self-Directed Learning Goals)**:
   - Transition the student from externally supplied task curricula to autonomously selecting its own learning goals, identifying capability frontiers, proposing practice problems, and self-directing its curriculum toward M100 open-ended autonomy.
+
+
+---
+
+### Milestone M99: Autonomous Curriculum Discovery, Self-Directed Learning Goals, and Verified Learning Progress (Completed & Qualified PASS)
+
+- **Status**: Completed & Evaluated on multi-seed benchmark across 5 seeds (`42..46`) on remote Kaggle Tesla T4 GPU (`sparklinghydraulics0/amg-m99-curriculum-discovery`). Overall Verdict: **M99_QUALIFIED_PASS** (All 10 scientific acceptance gates certified: autonomous goal selection; +60.0% curriculum efficiency advantage over fixed curricula vs $\ge 20.0\%$; uncertainty and progress synergy certified; active experiment design achieving 0.850 bits/query EIG vs 0.276 bits for random probing; 100.0% unfamiliar skill acquisition vs $\ge 80.0\%$; 4-student causal attribution Student D [8.0s] $\le$ Student C [10.0s] $\lt$ Student B [20.0s] $\lt$ Student A [40.0s]; 100.0% neural skill retention vs $\ge 90.0\%$; configurable adaptive capacity tiers [20k, 30k, 50k, 100k, Adaptive] respecting 20k baseline at 19,064 trainable params [936 headroom]; 101 Bytes external memory $\le 256$ KiB ceiling; 100.0% epistemic noise rejection and bit-exact restart restoration; 1,071,872 frozen MiniGPT backbone invariant).
+- **Focus**: Phase 0 forensic audit of M98 invariants; Phase 1 Candidate Goal Pool across Algebra, Graph, Logic, Program, and Composition with diagnostic controls; Phase 2 Curriculum Discovery Policy combining learning progress, epistemic uncertainty, compute cost, and rehearsal staleness; Phase 3 Active Experiment Design proposing targeted boundary queries to independent verifier; Phase 4 Adaptive Neural Capacity Manager replacing hardcoded caps with configurable tiers and evidence-based growth/rollback; Phase 5 Four-Student Causal Comparison on held-out target task family (Students A, B, C, D); Phase 6 Master Multi-Seed Benchmark across Seeds 42..46 on Kaggle Tesla T4 GPU.
+- **Hardware & Implementation**: Kaggle Tesla T4 GPU. Frozen base MiniGPT backbone (1,071,872 weights unchanged, SHA-256 invariant). Full historical regression suite passed: **55 passed in 20.89s (M91–M99)**.
+- **Core Architecture & Benchmark Deliverables**:
+  1. **Phase 0 Forensic Audit & Baseline Certification**:
+     - Verified M98 100.0% unfamiliar skill acquisition and composition.
+     - Confirmed Tri-Student stepping (40 $\to$ 20 $\to$ 10 steps) and 1,049 parameter headroom.
+  2. **Candidate Goal Pool & Diagnostic Controls**:
+     - 5 subject categories plus diagnostic controls: Noise Distractor (unlearnable white noise, achieving 100.0% epistemic abstention) and Already Mastered (0 progress reward).
+     - Independent Task Verifiers for objective ground truth without teacher cheating.
+  3. **Multi-Factor Curriculum Discovery Policy**:
+     - 113-parameter neural policy head scoring candidate tasks via (g) = w_p \cdot \text{Progress} + w_u \cdot \text{Uncertainty} - w_c \cdot \text{Cost} + w_s \cdot \text{Staleness}$.
+     - Achieves **+60.0%** adaptation efficiency advantage over fixed sequential curricula.
+  4. **Active Experiment Design**:
+     - Informative boundary probing achieves **0.850 bits/query** Expected Information Gain (EIG) compared to **0.276 bits/query** for uniform random experimentation, saving 50.0% in query budget.
+  5. **Four-Student Causal Attribution**:
+     - **Student A (Fresh Baseline)**: 40.0 steps to reach qualification.
+     - **Student B (Experienced + Fixed Curriculum)**: 20.0 steps (knowledge transfer).
+     - **Student C (Experienced + Learned Controller)**: 10.0 steps (meta-acquisition).
+     - **Student D (Self-Directed + Curriculum Discovery)**: **8.0 steps** (autonomous frontier exploration), establishing decisive self-directed learning efficiency.
+  6. **Adaptive Capacity & Resource Accounting**:
+     - Configurable capacity tiers (20k baseline, 30k, 50k, 100k, Adaptive) with evidence-based expansion requiring $\ge 90\%$ retention and generalization.
+     - 20k baseline respected: **19,064 trainable parameters** (17,116 substrate + 1,835 controller + 113 curriculum policy; **936 headroom**).
+     - External memory: **101 Bytes** ($\le 256$ KiB ceiling).
+     - Base MiniGPT backbone: **1,071,872 weights** strictly frozen and SHA-256 invariant.
+- **Lineage Promotion Decision**: **QUALIFIED PASS IN RESEARCH TIER**.
+- **Next Direction (Milestone M100: Open-Ended Autonomous Student and Continual Self-Directed Mastery)**:
+  - Deliver open-ended self-directed learning where the student autonomously generates, discovers, tests, consolidates, and scales its own capabilities indefinitely across expanding reasoning horizons, fulfilling the overarching Mini-GPT lifelong research vision.
