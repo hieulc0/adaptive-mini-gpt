@@ -70,10 +70,7 @@ class TextStudentM103(nn.Module):
         # 2. Evolvable backbone substrate with dynamic layer skipping
         self.evolvable_backbone = DynamicEvolvableBackbone(base_model=self.base_model).to(self.device)
 
-        # 3. Reference to dynamic layer skipping routers
-        self.layer_routers = self.evolvable_backbone.layer_routers
-
-        # 4. Modular residual adapters for text rule domains (512 params each, rank-2)
+        # 3. Modular residual adapters for text rule domains (512 params each, rank-2)
         self.domains = [d.value for d in TextRuleDomainM103]
         self.adapter_modules = nn.ModuleDict({
             f"adapter_{d}": nn.Sequential(
@@ -86,14 +83,14 @@ class TextStudentM103(nn.Module):
         for adapter in self.adapter_modules.values():
             nn.init.zeros_(adapter[2].weight)
 
-        # 5. Autoregressive Language Model Head (Linear 128 -> 1024)
+        # 4. Autoregressive Language Model Head (Linear 128 -> 1024)
         self.lm_head = nn.Linear(128, 1024, bias=False).to(self.device)
         self.lm_head.weight = self.base_model.wte.weight  # Tied word embeddings
 
-        # 6. Text Tokenizer
+        # 5. Text Tokenizer
         self.tokenizer = ByteTextTokenizerM103(vocab_size=1024)
 
-        # 7. Function-preserving persistent growth block (M102/M102.1/M102.2)
+        # 6. Function-preserving persistent growth block (M102/M102.1/M102.2)
         self.growth_block_active = False
         if self.enable_persistent_growth:
             self.evolvable_backbone.insert_block_identity(insert_idx=len(self.base_model.blocks))
@@ -101,6 +98,11 @@ class TextStudentM103(nn.Module):
 
         # Rehearsal buffer for continuous learning
         self.replay_buffer: dict[str, list[QAItemM103]] = {}
+
+    @property
+    def layer_routers(self) -> nn.ModuleList:
+        """Dynamic layer skipping routers hosted directly on the evolvable backbone."""
+        return self.evolvable_backbone.layer_routers
 
     def forward_lm(
         self,
