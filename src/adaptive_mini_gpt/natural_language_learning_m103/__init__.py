@@ -1,5 +1,40 @@
 """Milestone M103, M104 & M105: Natural-Language Learning, Grounded Concepts, and Autonomous Self-Modification."""
 
+from adaptive_mini_gpt.natural_language_learning_m103.grounded_extractor_m104_e import (
+    AttributeClassMetricM104_E,
+    EntityConditionedAttentionExtractorM104_E,
+    ExtractionEvaluationReportM104_E,
+    ExtractionStrategyComparisonReportM104_E,
+    ExtractionStrategyTypeM104_E,
+    GroundedBottleneckAuditorM104_E,
+    LexicalKeywordBaselineM104_E,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.semantic_bottleneck_m104_e import (
+    IntegratedStudentM104_E,
+    SemanticBottleneckM104_E,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.multi_world_transfer_m104_e import (
+    MultiWorldTransferReportM104_E,
+    ProceduralTransferWorldM104_E,
+    SingleWorldTransferResultM104_E,
+    SurvivalRunRecordM104_E,
+    WORLD_FAMILIES_M104_E,
+    WorldFamilySpecM104_E,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.concept_learner_m104_e import (
+    ConceptLearnerM104_E,
+    PhaseE0AuditReport,
+    PhaseE1Report,
+    PhaseE2Report,
+    PhaseM105AReport,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.benchmark_m104_e import (
+    AcceptanceGateResultM104_E,
+    BenchmarkRunnerM104_E,
+    MilestoneReportM104_E,
+)
+
+
 from adaptive_mini_gpt.natural_language_learning_m103.grounded_extractor_m104_d import (
     AttributeClassMetricM104_D,
     CalibratedConceptExtractorM104_D,
