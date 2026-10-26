@@ -24,10 +24,10 @@ def main() -> None:
     parser.add_argument("--device", type=str, default=None, help="Device to use (cuda/cpu)")
     args = parser.parse_args()
 
-    if args.device:
-        device = torch.device(args.device)
-    else:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    from adaptive_mini_gpt.training.remote_runtime import require_remote_cuda
+
+    require_remote_cuda(args.device or "cuda")
+    device = torch.device(args.device or "cuda")
 
     print(f"Executing M104-E & M105-A Benchmark on {device} across seeds {args.seeds}...", flush=True)
 

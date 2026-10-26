@@ -123,3 +123,8 @@
 | **M107** | Multimodal Grounding | Integrate vision, audio, and physical token streams into the persistent student |
 | **M108+** | Autonomous Tool-Using, Self-Sustaining Intelligence | Self-directed experimentation in external environments with measured resource efficiency |
 
+
+
+## Independent architecture review (2026-10-26)
+
+The M104-E/M105-A source audit found truncated entity inputs, silently collapsed transfer labels, and unqualified rollback/controller claims. Historical reports above remain unchanged and require the [audit addendum](ARCHITECTURE_AUDIT.md) when interpreted. See [long-term vision](LONG_TERM_VISION.md), [research integrity](RESEARCH_INTEGRITY.md), [minimal repair plan](REFACTOR_PLAN.md), and [execution report](SCIENTIFIC_REVIEW_REPORT.md). No new milestone or scientific PASS is assigned. Local work is lint/type/syntax/mock-only; real learning and full tests require Kaggle/Colab CUDA.

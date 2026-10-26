@@ -660,3 +660,8 @@
 | **GATE_8** | Continual Competence & Retention: Initial competence >= 50% certified before retention | `Initial Competence: 42.5% (Certified: False), Replay Retained: 47.5%` | **FAIL** |
 | **GATE_9** | Multi-World Forward Transfer Requalification: 5 worlds evaluated at [0, 1, 2, 5, 10, 20, 40, 80] | `Worlds: 5, Exp Step-0: 0.0% vs Fresh: 0.0%, Steps tied: 1.0 (Advantage: False)` | **FAIL** |
 | **GATE_10** | M105-A Complete Rollback & Controller Qualification: Bit-exact full state restore | `Bit-exact restore: True, Learned Acceptance: 100.0%` | **PASS** |
+
+
+## Independent architecture review (2026-10-26)
+
+The M104-E/M105-A source audit found truncated entity inputs, silently collapsed transfer labels, and unqualified rollback/controller claims. Historical reports above remain unchanged and require the [audit addendum](ARCHITECTURE_AUDIT.md) when interpreted. See [long-term vision](LONG_TERM_VISION.md), [research integrity](RESEARCH_INTEGRITY.md), [minimal repair plan](REFACTOR_PLAN.md), and [execution report](SCIENTIFIC_REVIEW_REPORT.md). No new milestone or scientific PASS is assigned. Local work is lint/type/syntax/mock-only; real learning and full tests require Kaggle/Colab CUDA.

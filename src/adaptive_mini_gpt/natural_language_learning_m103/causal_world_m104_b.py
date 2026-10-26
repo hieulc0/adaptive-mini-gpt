@@ -164,7 +164,7 @@ class ProceduralCausalWorldM104_B(ProceduralCausalWorldM103_G1):
                 initial_state=it.initial_state,
                 expected_state=it.expected_state,
                 rule_explanation=it.rule_explanation,
-                question_text=it.question_text,
+                question_text=it.paraphrased_question,
                 canonical_answer=it.canonical_answer,
                 family=it.family,
                 is_counterfactual=it.is_counterfactual,

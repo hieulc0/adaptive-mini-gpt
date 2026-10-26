@@ -1,3 +1,5 @@
+> Current execution policy: LOCAL = edit/static/mock-only; all neural training/evaluation and full tests require Kaggle/Colab CUDA. Historical CPU training and full-local-pytest commands below are superseded by AGENTS.md and must not be used locally. There is no CPU fallback when remote GPU allocation fails.
+
 # Training, Checkpointing, Colab, and Kaggle Operations
 
 ## Execution environments and quick starts

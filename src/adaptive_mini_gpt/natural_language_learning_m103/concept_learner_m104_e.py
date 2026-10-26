@@ -14,7 +14,7 @@ Phases:
 from __future__ import annotations
 
 import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 import torch
@@ -26,9 +26,7 @@ from adaptive_mini_gpt.natural_language_learning_m103.causal_world_m104_b import
     ProceduralCausalWorldM104_B,
 )
 from adaptive_mini_gpt.natural_language_learning_m103.grounded_extractor_m104_e import (
-    ExtractionEvaluationReportM104_E,
     ExtractionStrategyComparisonReportM104_E,
-    ExtractionStrategyTypeM104_E,
     GroundedBottleneckAuditorM104_E,
 )
 from adaptive_mini_gpt.natural_language_learning_m103.language_pretrainer_m103_b import (
@@ -131,7 +129,7 @@ class ConceptLearnerM104_E:
         items: list[CausalItemM104_B],
         objects: dict[str, Any],
         tokenizer: ByteTextTokenizerM103,
-        max_len: int = 220,
+        max_len: int = 256,
     ) -> dict[str, torch.Tensor]:
         """Encodes text prompts and targets into PyTorch tensors."""
         prompt_ids_list: list[list[int]] = []
@@ -140,16 +138,22 @@ class ConceptLearnerM104_E:
         multi_hot_list: list[list[float]] = []
 
         for it in items:
-            p_text = f"<bos><rule>{it.rule_explanation}<sep><question>{it.question_text}<sep><answer>"
-            toks = tokenizer.encode(p_text)[:max_len]
+            if it.action_name not in self.action_vocab or it.expected_state not in self.state_vocab:
+                raise ValueError(
+                    f"Unknown action/state: {it.action_name!r}/{it.expected_state!r}; "
+                    "configure an explicit vocabulary and matching output head"
+                )
+            toks = tokenizer.encode_prompt(
+                question=it.question_text, explanation=it.rule_explanation, max_length=max_len
+            )
             if len(toks) < max_len:
                 toks = toks + [ByteTextTokenizerM103.PAD_ID] * (max_len - len(toks))
             prompt_ids_list.append(toks)
 
-            act_id = self.action_vocab.get(it.action_name, 0)
+            act_id = self.action_vocab[it.action_name]
             action_ids_list.append(act_id)
 
-            tgt_id = self.state_vocab.get(it.expected_state, 0)
+            tgt_id = self.state_vocab[it.expected_state]
             target_ids_list.append(tgt_id)
 
             obj = objects.get(it.object_name)
@@ -198,7 +202,7 @@ class ConceptLearnerM104_E:
         full_rep = auditor.evaluate_neural_extractor(student, ds["val_held_out_pair"], world.objects, tokenizer, strategy_name="full_context")
         eca_rep = auditor.evaluate_neural_extractor(student, ds["val_held_out_pair"], world.objects, tokenizer, strategy_name="entity_conditioned_attention")
 
-        best_strat = "entity_conditioned_attention"
+        best_strat = max((q_rep, full_rep, eca_rep), key=lambda rep: rep.micro_f1).strategy_name
         best_f1 = max(q_rep.micro_f1, full_rep.micro_f1, eca_rep.micro_f1)
         lex_gap = lex_q.micro_f1 - best_f1
 
@@ -753,7 +757,8 @@ class ConceptLearnerM104_E:
         )
 
         # 2. Compare Three Policies on Independent Candidate Evaluations
-        eval_fn = lambda: float((student(val_enc["prompts"], val_enc["action_ids"])[0].argmax(dim=-1) == val_enc["target_ids"]).float().mean().item() * 100.0)
+        def eval_fn() -> float:
+            return float((student(val_enc["prompts"], val_enc["action_ids"])[0].argmax(dim=-1) == val_enc["target_ids"]).float().mean().item() * 100.0)
 
         # A. Learned Policy
         learned_ctrl = LearnedModificationControllerM105_A()

@@ -577,3 +577,8 @@ eg A \lor B$), and conditional parity branching.
 - **Execution Provenance**:
     * Full regression suite passed on Google Colab Tesla T4 GPU (`amg-m88-t4` session).
     * Base model parameter invariant preserved (SHA-256: `6e39cd7ef6790b3c`, 1,071,872 weights unchanged); 100% carry (20/20) and logic (8/8) retention.
+
+
+## Independent architecture review (2026-10-26)
+
+The M104-E/M105-A source audit found truncated entity inputs, silently collapsed transfer labels, and unqualified rollback/controller claims. Historical reports above remain unchanged and require the [audit addendum](ARCHITECTURE_AUDIT.md) when interpreted. See [long-term vision](LONG_TERM_VISION.md), [research integrity](RESEARCH_INTEGRITY.md), [minimal repair plan](REFACTOR_PLAN.md), and [execution report](SCIENTIFIC_REVIEW_REPORT.md). No new milestone or scientific PASS is assigned. Local work is lint/type/syntax/mock-only; real learning and full tests require Kaggle/Colab CUDA.

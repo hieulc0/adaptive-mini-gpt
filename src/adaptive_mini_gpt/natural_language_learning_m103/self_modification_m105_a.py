@@ -21,10 +21,11 @@ Features:
 from __future__ import annotations
 
 import copy
+import math
 import random
 import time
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any
 
@@ -92,7 +93,12 @@ class FullLearningStateSnapshotM105_A:
 
 
 class StructuralRollbackControllerM105_A:
-    """Manages transactional self-modifications with complete learning-state restoration."""
+    """Legacy fixed-topology transaction helper; not a complete learning snapshot.
+
+    Does not restore module registrations, arbitrary model attributes, NumPy RNG,
+    controller state, or optimizer parameter identities. Structural operators must
+    remain unsupported until a separately qualified transaction layer exists.
+    """
 
     def __init__(
         self,
@@ -192,6 +198,7 @@ class StructuralRollbackControllerM105_A:
 
         # 1. Capture complete learning-process snapshot
         self.create_snapshot()
+        retention_passed = False
 
         try:
             # 2. Execute candidate modification operator
@@ -214,15 +221,20 @@ class StructuralRollbackControllerM105_A:
                 if hasattr(self.target_model, "replay_ratio"):
                     self.target_model.replay_ratio = ratio
 
+            else:
+                raise NotImplementedError(f"Unsupported modification operator: {proposal.operator_type}")
+
             # 3. Evaluate on validation set
             post_metric = active_val_fn()
+            if not math.isfinite(pre_metric) or not math.isfinite(post_metric):
+                raise ValueError("Validation metrics must be finite")
             delta_gain = post_metric - pre_metric
 
             # 4. Check backward retention safeguard
             retention_passed = True
             if retention_eval_fn is not None:
                 retention_acc = retention_eval_fn()
-                if retention_acc < min_retention_threshold:
+                if not math.isfinite(retention_acc) or retention_acc < min_retention_threshold:
                     retention_passed = False
 
             post_params = sum(p.numel() for p in self.target_model.parameters())

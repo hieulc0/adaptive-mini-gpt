@@ -11,17 +11,15 @@ Integrates:
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
 from adaptive_mini_gpt.dynamic_transformer_evolution.dynamic_transformer_substrate import (
     DynamicEvolvableBackbone,
-    DynamicLayerSkippingRouter,
 )
 from adaptive_mini_gpt.integrated_autonomous_student.structural_evolution_engine import (
     CapacityTierM100,
@@ -253,7 +251,7 @@ class TextStudentM103(nn.Module):
             gen_text = self.tokenizer.decode(gen_ids).strip().lower()
             target_text = it.answer.strip().lower()
 
-            if gen_text == target_text or target_text in gen_text:
+            if gen_text == target_text:
                 matches += 1
 
         return round((matches / len(items)) * 100.0, 2)

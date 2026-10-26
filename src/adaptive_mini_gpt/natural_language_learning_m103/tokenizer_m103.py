@@ -57,6 +57,26 @@ class ByteTextTokenizerM103:
             tokens.append(self.EOS_ID)
         return tokens
 
+    def encode_prompt(
+        self,
+        question: str,
+        explanation: str | None = None,
+        max_length: int = 256,
+    ) -> list[int]:
+        """Encode structured boundaries without silently discarding observable evidence.
+
+        Raw ``encode`` deliberately remains byte-only. Callers must choose an
+        explicit context policy if the complete prompt does not fit.
+        """
+        full, prompt_len = self.format_qa_sequence(question, "", explanation)
+        prompt = full[:prompt_len]
+        if len(prompt) > max_length:
+            raise ValueError(
+                f"Complete prompt length {len(prompt)} exceeds context budget {max_length}; "
+                "refusing to truncate entity or causal evidence"
+            )
+        return prompt
+
     def decode(
         self,
         token_ids: list[int] | torch.Tensor,

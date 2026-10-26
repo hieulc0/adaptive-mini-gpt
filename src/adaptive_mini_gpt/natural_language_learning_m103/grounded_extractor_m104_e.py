@@ -26,7 +26,6 @@ from typing import Any
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 from adaptive_mini_gpt.natural_language_learning_m103.causal_world_m104_b import (
     CausalItemM104_B,
@@ -345,8 +344,10 @@ class GroundedBottleneckAuditorM104_E:
                 true_tags = obj.tags if obj else set()
                 true_tag_indices = {self.TAG_VOCAB[t] for t in true_tags if t in self.TAG_VOCAB}
 
-                p_text = f"<bos><rule>{it.rule_explanation}<sep><question>{it.question_text}<sep><answer>"
-                p_ids = torch.tensor([tokenizer.encode(p_text)[:220]], dtype=torch.long, device=self.device)
+                prompt_ids = tokenizer.encode_prompt(
+                    question=it.question_text, explanation=it.rule_explanation
+                )
+                p_ids = torch.tensor([prompt_ids], dtype=torch.long, device=self.device)
                 act_id = torch.tensor([self.action_vocab.get(it.action_name, 0)], dtype=torch.long, device=self.device)
 
                 if hasattr(student_model, "forward_with_strategy"):
@@ -358,8 +359,6 @@ class GroundedBottleneckAuditorM104_E:
                 if tag_logits is not None:
                     probs = torch.sigmoid(tag_logits[0])
                     pred_indices = set(torch.where(probs >= decision_threshold)[0].tolist())
-                    if not pred_indices:
-                        pred_indices = set(torch.topk(probs, k=1).indices.tolist())
                 else:
                     pred_indices = set()
 
@@ -446,8 +445,10 @@ class GroundedBottleneckAuditorM104_E:
                         tgt[self.TAG_VOCAB[t]] = 1.0
                 all_targets.append(tgt)
 
-                p_text = f"<bos><rule>{it.rule_explanation}<sep><question>{it.question_text}<sep><answer>"
-                p_ids = torch.tensor([tokenizer.encode(p_text)[:220]], dtype=torch.long, device=self.device)
+                prompt_ids = tokenizer.encode_prompt(
+                    question=it.question_text, explanation=it.rule_explanation
+                )
+                p_ids = torch.tensor([prompt_ids], dtype=torch.long, device=self.device)
                 act_id = torch.tensor([self.action_vocab.get(it.action_name, 0)], dtype=torch.long, device=self.device)
 
                 if hasattr(student_model, "forward_with_strategy"):

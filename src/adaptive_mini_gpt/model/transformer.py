@@ -234,20 +234,11 @@ class MiniGPT(nn.Module):
         learning_rate: float,
         weight_decay: float,
     ) -> AdamW:
-        """Create AdamW with decoupled weight decay applied only to >=2D weight tensors."""
+        """Exclude embeddings (including tied aliases), norms and biases from decay."""
+        embedding_ids = {id(m.weight) for m in self.modules() if isinstance(m, nn.Embedding)}
         param_dict = {pn: p for pn, p in self.named_parameters() if p.requires_grad}
-        decay_params = [
-            p
-            for n, p in param_dict.items()
-            if p.dim() >= 2
-            and not (self._embedding_grad_mask is not None and ("wte" in n or "lm_head" in n))
-        ]
-        nodecay_params = [
-            p
-            for n, p in param_dict.items()
-            if p.dim() < 2
-            or (self._embedding_grad_mask is not None and ("wte" in n or "lm_head" in n))
-        ]
+        decay_params = [p for p in param_dict.values() if p.dim() >= 2 and id(p) not in embedding_ids]
+        nodecay_params = [p for p in param_dict.values() if p.dim() < 2 or id(p) in embedding_ids]
         optim_groups = [
             {"params": decay_params, "weight_decay": weight_decay},
             {"params": nodecay_params, "weight_decay": 0.0},
@@ -315,7 +306,7 @@ class MiniGPT(nn.Module):
             )
             if has_skips:
                 saved_block_outputs[idx_layer] = x
-                for skip_name, skip_mod in self.skip_connections.items():
+                for _skip_name, skip_mod in self.skip_connections.items():
                     if (
                         getattr(skip_mod, "target_layer", None) == idx_layer
                         and getattr(skip_mod, "source_layer", None) in saved_block_outputs

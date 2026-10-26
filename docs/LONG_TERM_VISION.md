@@ -1,0 +1,13 @@
+# Self-Evolving Adaptive Mini-GPT
+
+One persistent neural student should acquire reusable representations, retain useful knowledge, transfer experience to unfamiliar future tasks, improve how it learns, and eventually propose and select changes to its own learning machinery. The approximately 1.2M-parameter configuration is an experimental baseline, not a permanent limit.
+
+The progression is language and conceptual acquisition; mathematics, logic, science and programming; predictive world representations and hypothetical simulation; corrective experience and retention; independent future-task transfer; learned practice selection; and learned architectural modification. Text, documents, Wikipedia and structured data precede progressively qualified image, audio, video, simulation and tool interfaces. None of these capabilities follows automatically from the existence of an interface.
+
+No component is permanently frozen or capped. Backbone weights, depth, width, hidden dimensions, layers, attention, routing, topology, connections, activation pathways, adapters, auxiliary modules, vocabulary, tokenization, context length, context management, input/output representations, generation, memory, retrieval, consolidation, objectives, optimization and practice selection remain eligible for evidence-driven evolution. Freezing is an experimental control or temporary protection mechanism. Finite configurable budgets govern every experiment; they are not architectural laws.
+
+A single persistent learner means an auditable continuing lineage of learned state and experience. Multiple controls and disposable candidate copies are legitimate experimental tools. A collection of independently initialized milestone specialists, keyed by developer-supplied domain labels, does not establish that continuing learner. Auxiliary neural modules must contribute through learned integration and persist with the student. External factual stores, simulators and validators are useful infrastructure whose contributions must be measured separately. Deterministic answer generation cannot be attributed to neural understanding.
+
+Changes require independent development validation, preserved sealed evaluation, bounded cost, explicit retention checks, reversible state and rejection on regression. Growth is considered only after complete input, valid labels, sufficient supervision, optimization competence and useful generalization have been checked. Positive future learning efficiency is measured in examples, optimizer steps and actual compute to reach the same held-out competence, not lower training loss.
+
+Learn before growing. Reuse before learning. Verify before retaining. Improve the ability to learn, not just the ability to remember.
