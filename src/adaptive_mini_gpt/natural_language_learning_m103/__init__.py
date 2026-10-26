@@ -1,4 +1,45 @@
-"""Milestone M103 & M104: Natural-Language Learning, Grounded Concepts, and Autonomous Practice."""
+"""Milestone M103, M104 & M105: Natural-Language Learning, Grounded Concepts, and Autonomous Self-Modification."""
+
+from adaptive_mini_gpt.natural_language_learning_m103.grounded_extractor_m104_d import (
+    AttributeClassMetricM104_D,
+    CalibratedConceptExtractorM104_D,
+    GroundedBottleneckAuditReportM104_D,
+    GroundedBottleneckAuditorM104_D,
+    Stage1ExtractionReportM104_D,
+    Stage2OutcomeReportM104_D,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.semantic_bottleneck_m104_d import (
+    IntegratedStudentM104_D,
+    SemanticBottleneckM104_D,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.multi_world_transfer_m104_d import (
+    MultiWorldTransferReportM104_D,
+    ProceduralTransferWorldM104_D,
+    SingleWorldTransferResultM104_D,
+    SurvivalRunRecordM104_D,
+    WORLD_FAMILIES_M104_D,
+    WorldFamilySpecM104_D,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.self_modification_m105_a import (
+    LearnedModificationControllerM105_A,
+    ModificationEvaluationResultM105_A,
+    ModificationOperatorTypeM105_A,
+    NeuralModificationProposalM105_A,
+    PolicyEvaluationSummaryM105_A,
+    StructuralRollbackControllerM105_A,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.concept_learner_m104_d import (
+    ConceptLearnerM104_D,
+    PhaseD0AuditReport,
+    PhaseD1Report,
+    PhaseD3Report,
+    PhaseM105APreviewReport,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.benchmark_m104_d import (
+    BenchmarkRunnerM104_D,
+    GateResultM104_D,
+    MilestoneM104_DReport,
+)
 
 from adaptive_mini_gpt.natural_language_learning_m103.bottleneck_diagnostic_m104_c import (
     BottleneckDiagnosticAuditorM104_C,
@@ -249,6 +290,34 @@ from adaptive_mini_gpt.natural_language_learning_m103.world_simulator_m103_c imp
 )
 
 __all__ = [
+    "AttributeClassMetricM104_D",
+    "CalibratedConceptExtractorM104_D",
+    "GroundedBottleneckAuditReportM104_D",
+    "GroundedBottleneckAuditorM104_D",
+    "Stage1ExtractionReportM104_D",
+    "Stage2OutcomeReportM104_D",
+    "IntegratedStudentM104_D",
+    "SemanticBottleneckM104_D",
+    "MultiWorldTransferReportM104_D",
+    "ProceduralTransferWorldM104_D",
+    "SingleWorldTransferResultM104_D",
+    "SurvivalRunRecordM104_D",
+    "WORLD_FAMILIES_M104_D",
+    "WorldFamilySpecM104_D",
+    "LearnedModificationControllerM105_A",
+    "ModificationEvaluationResultM105_A",
+    "ModificationOperatorTypeM105_A",
+    "NeuralModificationProposalM105_A",
+    "PolicyEvaluationSummaryM105_A",
+    "StructuralRollbackControllerM105_A",
+    "ConceptLearnerM104_D",
+    "PhaseD0AuditReport",
+    "PhaseD1Report",
+    "PhaseD3Report",
+    "PhaseM105APreviewReport",
+    "BenchmarkRunnerM104_D",
+    "GateResultM104_D",
+    "MilestoneM104_DReport",
     "ActivePracticeEnvironmentM104_C",
     "BenchmarkM104_C",
     "BottleneckDiagnosticAuditorM104_C",
