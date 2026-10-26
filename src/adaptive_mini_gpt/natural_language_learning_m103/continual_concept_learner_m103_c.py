@@ -131,6 +131,10 @@ class ContinualConceptLearnerM103_C:
             return torch.tensor(0.0, device=self.device, requires_grad=True)
 
         batch_tokens, mask = student.tokenizer.pad_batch(token_lists, device=self.device)
+        ctx_len = student.base_model.config.context_length
+        if batch_tokens.size(1) > ctx_len:
+            batch_tokens = batch_tokens[:, :ctx_len]
+            mask = mask[:, :ctx_len]
         logits = student.forward_lm(batch_tokens, active_domain=active_domain)
         shift_logits = logits[:, :-1, :].contiguous()
         shift_labels = batch_tokens[:, 1:].contiguous().clone()

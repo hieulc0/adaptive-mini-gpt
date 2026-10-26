@@ -247,8 +247,8 @@ class WorldSimulatorM103_C:
 
         # Counterfactual Items: modified rule parameters (e.g. blue adds 4, red loses 2)
         expl_cf = (
-            "Suppose in a hypothetical variation of System-Alpha, blue adds 4 energy units instead of 2, "
-            "and red loses 2 energy units. Blue still acts first."
+            "In modified System-Alpha, blue adds 4 energy. "
+            "Red loses 2 energy. Blue acts first."
         )
         counterfactual_items: list[SimulatorItemM103_C] = []
         for s in [4, 8, 12, 16, 20]:
@@ -256,9 +256,9 @@ class WorldSimulatorM103_C:
                 ent = self.ENTITIES[s % len(self.ENTITIES)]
                 ans_num = self.simulate_energy_step(s, is_blue=is_b, is_red=is_r, blue_gain=4, red_loss=2)
                 status_str = "blue and red" if (is_b and is_r) else "blue"
-                q_text = f"Under the modified rule, an {ent} starts with {s} energy and is {status_str}. What is its final energy?"
+                q_text = f"An {ent} starts with {s} energy and is {status_str}. Under modified rules, what is final energy?"
                 c_ans = f"{ans_num} energy"
-                u_ans = f"Under the modified rule the final energy is {ans_num} energy."
+                u_ans = f"Under modified rules the final energy is {ans_num} energy."
 
                 counterfactual_items.append(
                     self.format_simulator_item(

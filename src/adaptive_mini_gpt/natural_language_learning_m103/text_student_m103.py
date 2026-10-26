@@ -146,9 +146,15 @@ class TextStudentM103(nn.Module):
         else:
             cur_tokens = prompt_tokens.unsqueeze(0) if prompt_tokens.dim() == 1 else prompt_tokens
 
+        ctx_len = self.base_model.config.context_length
+        if cur_tokens.size(1) > ctx_len:
+            cur_tokens = cur_tokens[:, -ctx_len:]
+
         generated: list[int] = []
         with torch.no_grad():
             for _ in range(max_new_tokens):
+                if cur_tokens.size(1) >= ctx_len:
+                    break
                 logits = self.forward_lm(cur_tokens, active_domain=active_domain)
                 next_token_logits = logits[0, -1, :]
                 next_token = int(next_token_logits.argmax().item())

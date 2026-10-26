@@ -170,6 +170,10 @@ class GeneralizationEvaluatorM103_C:
             token_lists = [it.full_tokens for it in items if it.full_tokens]
             if token_lists:
                 batch_tokens, mask = self.tokenizer.pad_batch(token_lists, device=student.device)
+                ctx_len = student.base_model.config.context_length
+                if batch_tokens.size(1) > ctx_len:
+                    batch_tokens = batch_tokens[:, :ctx_len]
+                    mask = mask[:, :ctx_len]
                 logits = student.forward_lm(batch_tokens, active_domain=active_domain)
                 shift_logits = logits[:, :-1, :].contiguous()
                 shift_labels = batch_tokens[:, 1:].contiguous().clone()
