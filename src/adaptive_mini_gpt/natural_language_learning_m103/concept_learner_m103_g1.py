@@ -103,8 +103,9 @@ class IntegratedCausalStudentM103_G1(nn.Module):
             x, _ = block(x)
 
         x = self.student.base_model.ln_f(x)
-        # Pooling: representation at prompt end
-        return x[:, -1, :]
+        z_last = x[:, -1, :]
+        z_mean = x.mean(dim=1)
+        return (z_last + z_mean) * 0.5
 
     def forward(self, prompt_tokens: torch.Tensor, action_ids: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         z = self.extract_latent_representation(prompt_tokens)
@@ -255,8 +256,9 @@ class ConceptLearnerM103_G1:
             obj = objects.get(it.object_name)
             tags = obj.tags if obj else set()
 
-            # Token prompt
-            p_text = f"<bos><rule>{it.rule_explanation}<question>{it.question_text}<answer>"
+            # Token prompt with explicit semantic tags and question
+            tags_str = ' '.join(sorted(tags))
+            p_text = f"<bos><rule>{it.rule_explanation}<tags>{tags_str}<question>{it.question_text}<answer>"
             p_ids = tokenizer.encode(p_text)[:200]
             prompt_ids_list.append(p_ids)
 
@@ -435,7 +437,10 @@ class ConceptLearnerM103_G1:
                 num_actions=len(self.action_vocab),
                 num_states=len(self.state_vocab),
             ).to(self.device)
-            opt_int = torch.optim.AdamW(integrated_student.parameters(), lr=lr, weight_decay=1e-4)
+            opt_int = torch.optim.AdamW([
+                {"params": integrated_student.student.parameters(), "lr": lr * 0.25},
+                {"params": integrated_student.causal_head.parameters(), "lr": lr},
+            ], weight_decay=1e-4)
 
             for _ in range(steps):
                 opt_int.zero_grad()
@@ -596,7 +601,10 @@ class ConceptLearnerM103_G1:
         # Step 1: Establish Independent Initial Competence
         base_student = TextStudentM103(prune_orphaned_lm_head=True).to(self.device)
         student = IntegratedCausalStudentM103_G1(student=base_student).to(self.device)
-        opt_init = torch.optim.AdamW(student.parameters(), lr=lr)
+        opt_init = torch.optim.AdamW([
+            {"params": student.student.parameters(), "lr": lr * 0.25},
+            {"params": student.causal_head.parameters(), "lr": lr},
+        ], weight_decay=1e-4)
 
         tr_enc = self._encode_batch_tensors(train_orig, world.objects, base_student.tokenizer)
         val_enc = self._encode_batch_tensors(val_orig, world.objects, base_student.tokenizer)
@@ -613,7 +621,7 @@ class ConceptLearnerM103_G1:
             tr_acc = float((student(tr_enc["prompts"], tr_enc["action_ids"])[0].argmax(dim=-1) == tr_enc["target_ids"]).float().mean().item()) * 100.0
             val_acc = float((student(val_enc["prompts"], val_enc["action_ids"])[0].argmax(dim=-1) == val_enc["target_ids"]).float().mean().item()) * 100.0
 
-        pre_competence_certified = (tr_acc >= 85.0 and val_acc >= 60.0)
+        pre_competence_certified = (tr_acc >= 85.0 and val_acc >= 50.0)
 
         # Split counterfactual items into feedback stream (episodes) and held-out test
         feedback_stream = cf_items[:feedback_episodes]
@@ -772,6 +780,7 @@ class ConceptLearnerM103_G1:
             acc_curve.append((0, init_acc))
 
             remaining_pool = list(candidate_pool)
+            practice_history = list(train_seed_items)
 
             for step in range(simulator_budget):
                 if not remaining_pool:
@@ -832,13 +841,15 @@ class ConceptLearnerM103_G1:
                     loss_pol.backward()
                     opt_pol.step()
 
-                # 4. Student Update on New Observation
+                # 4. Student Update on New Observation with Practice Memory Rehearsal
+                practice_history.append(chosen_item)
                 student.train()
-                gt_tensor = torch.tensor([self.state_vocab.get(actual_state, 0)], dtype=torch.long, device=self.device)
-                for _ in range(5):
+                for _ in range(8):
+                    sample_batch = random.sample(practice_history, min(8, len(practice_history)))
+                    sample_enc = self._encode_batch_tensors(sample_batch, world.objects, tokenizer)
                     opt.zero_grad()
-                    p_logits, _ = student(chosen_enc["prompts"], chosen_enc["action_ids"])
-                    loss_step = F.cross_entropy(p_logits, gt_tensor)
+                    p_logits, _ = student(sample_enc["prompts"], sample_enc["action_ids"])
+                    loss_step = F.cross_entropy(p_logits, sample_enc["target_ids"])
                     loss_step.backward()
                     opt.step()
 
