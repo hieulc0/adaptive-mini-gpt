@@ -11,14 +11,12 @@ Provides:
 
 from __future__ import annotations
 
-import copy
 from typing import Any
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.transformer import MiniGPT, TransformerBlock
 
 
@@ -35,12 +33,16 @@ class DynamicLayerSkippingRouter(nn.Module):
 
     def forward(self, x: torch.Tensor, threshold: float = 0.5) -> tuple[torch.Tensor, torch.Tensor]:
         """Returns binary execution mask and router decision probability."""
-        pooled = x.mean(dim=1)  # [batch, d_model]
+        pooled = x[:, -1]  # Last-token decisions are causal for this prefix.
         logits = self.router(pooled)
         probs = F.softmax(logits, dim=-1)
         # execute if execute_prob >= threshold
         execute_mask = probs[:, 1] >= threshold
         return execute_mask, probs
+
+    def token_gates(self, x: torch.Tensor) -> torch.Tensor:
+        """Token-local probabilities; no sequence or batch reduction."""
+        return F.softmax(self.router(x), dim=-1)[..., 1:2]
 
 
 class DynamicEvolvableBackbone(nn.Module):
@@ -53,16 +55,17 @@ class DynamicEvolvableBackbone(nn.Module):
         self.d_model = self.config.d_model
 
         # Layer skipping routers per block
-        self.layer_routers = nn.ModuleList([
-            DynamicLayerSkippingRouter(self.d_model) for _ in range(len(self.base_model.blocks))
-        ])
+        self.layer_routers = nn.ModuleList(
+            [DynamicLayerSkippingRouter(self.d_model) for _ in range(len(self.base_model.blocks))]
+        )
         self.skipping_enabled = False
         self.execution_stats: dict[str, Any] = {"blocks_executed": 0, "blocks_skipped": 0}
 
     def insert_block_identity(self, insert_idx: int) -> int:
         """Function-preserving block insertion at insert_idx with zero-initialized output projections."""
-        new_block = TransformerBlock(self.config, zero_init_moe=False)
-        new_block.to(next(self.base_model.parameters()).device)
+        new_block = TransformerBlock(self.config, zero_init_moe=True)
+        parameter = next(self.base_model.parameters())
+        new_block.to(device=parameter.device, dtype=parameter.dtype)
 
         # Zero-initialize the attention projection and MLP output projection so block(x) = x initially
         nn.init.zeros_(new_block.attn.c_proj.weight)
@@ -79,11 +82,14 @@ class DynamicEvolvableBackbone(nn.Module):
         self.base_model.blocks = nn.ModuleList(blocks_list)
 
         # Add corresponding router
-        new_router = DynamicLayerSkippingRouter(self.d_model).to(new_block.ln_1.weight.device)
+        new_router = DynamicLayerSkippingRouter(self.d_model).to(
+            device=parameter.device, dtype=parameter.dtype
+        )
         routers_list = list(self.layer_routers)
         routers_list.insert(insert_idx, new_router)
         self.layer_routers = nn.ModuleList(routers_list)
 
+        self.config.n_layers = len(self.base_model.blocks)
         return len(self.base_model.blocks)
 
     def remove_block(self, remove_idx: int) -> int:
@@ -98,15 +104,18 @@ class DynamicEvolvableBackbone(nn.Module):
         routers_list.pop(remove_idx)
         self.layer_routers = nn.ModuleList(routers_list)
 
+        self.config.n_layers = len(self.base_model.blocks)
         return len(self.base_model.blocks)
 
-    def forward(
+    def hidden_states(
         self,
         tokens: torch.Tensor,
         allow_skipping: bool = False,
     ) -> torch.Tensor:
         """Forward pass with conditional dynamic layer execution."""
         b, t = tokens.size()
+        if not 0 < t <= self.config.context_length:
+            raise ValueError("Complete sequence exceeds configured context or is empty")
         tok_emb = self.base_model.wte(tokens)
         if self.base_model.wpe is not None:
             pos = torch.arange(0, t, dtype=torch.long, device=tokens.device)
@@ -118,19 +127,23 @@ class DynamicEvolvableBackbone(nn.Module):
         blocks_skip = 0
 
         for i, block in enumerate(self.base_model.blocks):
-            if allow_skipping and self.skipping_enabled and i < len(self.layer_routers):
-                exec_mask, _ = self.layer_routers[i](x)
-                if not exec_mask.any():
-                    # Entire batch can bypass this block safely
-                    blocks_skip += 1
-                    continue
-
-            # Execute block
-            x, _ = block(x)
+            if allow_skipping and i < len(self.layer_routers):
+                gate = self.layer_routers[i].token_gates(x)
+                update, _ = block(x)
+                # Correctness-first whole-block gating: no compute-saving claim.
+                scale = (gate >= 0.5).to(x.dtype) * gate
+                x = x + scale * (update - x)
+            else:
+                x, _ = block(x)
             blocks_exec += 1
 
         self.execution_stats["blocks_executed"] += blocks_exec
         self.execution_stats["blocks_skipped"] += blocks_skip
 
         x = self.base_model.ln_f(x)
-        return x[:, -1, :]  # Pooled representation at last token
+        return x
+
+    def forward(self, tokens: torch.Tensor, allow_skipping: bool = False) -> torch.Tensor:
+        return self.hidden_states(tokens, allow_skipping=allow_skipping and self.skipping_enabled)[
+            :, -1
+        ]

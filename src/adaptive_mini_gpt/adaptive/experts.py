@@ -56,6 +56,7 @@ class AdaptiveMoELayer(nn.Module):
         dropout: float = 0.1,
         bias: bool = True,
         zero_init_experts: bool = False,
+        cohort_sizes: list[int] | None = None,
     ) -> None:
         super().__init__()
         self.d_model = d_model
@@ -71,6 +72,7 @@ class AdaptiveMoELayer(nn.Module):
             n_experts=n_experts,
             top_k=self.top_k,
             routing_mode=routing_mode,
+            cohort_sizes=cohort_sizes,
         )
         self.experts = nn.ModuleList(
             [
@@ -116,11 +118,15 @@ class AdaptiveMoELayer(nn.Module):
 
     @torch.no_grad()
     def add_experts(self, num_new: int, freeze_existing: bool = False) -> int:
-        """Append zero-output experts; learned top-k routing is NOT function-preserving.
+        """Append an independently normalized zero-output residual cohort.
 
-        New zero logits can displace or renormalize active old experts. This
-        legacy operation requires independent t0 validation before retention.
+        Existing cohort probabilities remain unchanged, even for negative logits.
+        Eval t0 preservation does not imply future retention after training.
         """
+        if self.routing_mode == "task":
+            raise NotImplementedError(
+                "Task expert expansion requires explicit stable task-ID migration"
+            )
         if num_new <= 0:
             raise ValueError(f"num_new must be positive, got {num_new}")
 
@@ -154,5 +160,9 @@ class AdaptiveMoELayer(nn.Module):
         # Old relative logits stay fixed, but selected sets/normalization can change.
         nn.init.zeros_(new_gate.weight.data[old_n:])
         self.router.gate = new_gate
+        self.router.cohort_sizes.append(num_new)
+        self.router.cohort_sizes_tensor = self.router.cohort_sizes_tensor.new_tensor(
+            self.router.cohort_sizes
+        )
 
         return new_n

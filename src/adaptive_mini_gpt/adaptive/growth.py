@@ -60,6 +60,9 @@ def grow_model_experts(
             assert isinstance(block, TransformerBlock)
             if block.moe is not None:
                 block.moe.add_experts(add_experts, freeze_existing=freeze_old_experts)
+        model.config.expert_cohort_sizes = list(
+            next(block.moe.router.cohort_sizes for block in model.blocks if block.moe is not None)
+        )
         model.config.n_experts += add_experts
 
     if getattr(model, "moe_head", None) is None:

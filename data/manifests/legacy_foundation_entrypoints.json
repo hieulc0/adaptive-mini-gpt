@@ -1,0 +1,20 @@
+{
+  "baseline": "d7fbedd",
+  "quarantined": [
+    "scripts/run_m103_a_benchmark.py",
+    "scripts/run_m103_b_benchmark.py",
+    "scripts/run_m103_c_benchmark.py",
+    "scripts/run_m103_d_benchmark.py",
+    "scripts/run_m103_e_benchmark.py",
+    "scripts/run_m103_f_benchmark.py",
+    "scripts/run_m103_g1_benchmark.py",
+    "scripts/run_m103_g_benchmark.py",
+    "scripts/run_m104_b_benchmark.py",
+    "scripts/run_m104_c_benchmark.py",
+    "scripts/run_m104_d_benchmark.py",
+    "scripts/run_m104_e_benchmark.py"
+  ],
+  "reason": "Known M103/M104 input observability/truncation/label/evaluation defects; historical reproduction only",
+  "historical_override": "AMG_ALLOW_UNSUPPORTED_HISTORICAL=1, remote CUDA required",
+  "other_legacy_paths": "Uncertified; inventory is not semantic certification"
+}

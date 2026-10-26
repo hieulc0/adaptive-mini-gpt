@@ -12,6 +12,9 @@ from adaptive_mini_gpt.natural_language_learning_m103.benchmark_m103_g import (
 
 
 def main() -> None:
+    from adaptive_mini_gpt.training.legacy_entrypoints import require_historical_reproduction
+
+    require_historical_reproduction("run_m103_g_benchmark.py")
     parser = argparse.ArgumentParser(description="Run Milestone M103-G Master Benchmark")
     parser.add_argument("--steps", type=int, default=150, help="Optimization steps per phase")
     parser.add_argument("--output-dir", type=str, default="runs/m103_g_output", help="Directory for reports")

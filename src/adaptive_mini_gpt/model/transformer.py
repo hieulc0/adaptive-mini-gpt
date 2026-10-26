@@ -71,6 +71,7 @@ class TransformerBlock(nn.Module):
                 dropout=config.dropout,
                 bias=config.bias,
                 zero_init_experts=zero_init_moe,
+                cohort_sizes=config.expert_cohort_sizes,
             )
 
         self.mod_router: MixtureOfDepthsRouter | None = None
@@ -97,6 +98,7 @@ class TransformerBlock(nn.Module):
             dropout=config.dropout,
             bias=config.bias,
             zero_init_experts=True,
+            cohort_sizes=config.expert_cohort_sizes,
         ).to(device=device, dtype=dtype)
 
     def forward(

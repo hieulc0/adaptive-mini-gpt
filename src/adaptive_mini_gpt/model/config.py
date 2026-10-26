@@ -24,6 +24,7 @@ class ModelConfig:
     # Adaptive / Modular MoE fields (M3/M4)
     adaptive_enabled: bool = False
     n_experts: int = 4
+    expert_cohort_sizes: list[int] | None = None
     top_k: int = 2
     d_expert: int = 128
     routing_mode: str = "learned_topk"  # "learned_topk" or "task"

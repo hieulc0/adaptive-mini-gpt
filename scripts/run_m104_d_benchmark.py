@@ -16,6 +16,9 @@ from adaptive_mini_gpt.natural_language_learning_m103.benchmark_m104_d import (
 
 
 def main() -> None:
+    from adaptive_mini_gpt.training.legacy_entrypoints import require_historical_reproduction
+
+    require_historical_reproduction("run_m104_d_benchmark.py")
     parser = argparse.ArgumentParser(description="Run Milestone M104-D Master Benchmark")
     parser.add_argument("--steps", type=int, default=150, help="Adaptation budget steps")
     parser.add_argument("--grounding-steps", type=int, default=60, help="Language grounding optimization steps")

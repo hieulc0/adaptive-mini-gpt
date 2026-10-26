@@ -35,6 +35,9 @@ def parse_args() -> argparse.Namespace:
 
 
 def main() -> None:
+    from adaptive_mini_gpt.training.legacy_entrypoints import require_historical_reproduction
+
+    require_historical_reproduction("run_m103_d_benchmark.py")
     args = parse_args()
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Executing M103-D Benchmark on device: {device}")

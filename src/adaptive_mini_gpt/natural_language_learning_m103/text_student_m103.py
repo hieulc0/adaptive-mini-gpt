@@ -125,19 +125,7 @@ class TextStudentM103(nn.Module):
         allow_skipping: bool = False,
     ) -> torch.Tensor:
         """Autoregressive forward pass returning next-token logits (B, T, V)."""
-        b, t = tokens.size()
-        tok_emb = self.base_model.wte(tokens)
-        pos = torch.arange(0, t, dtype=torch.long, device=tokens.device)
-        x = self.base_model.drop(tok_emb + self.base_model.wpe(pos))
-
-        for i, block in enumerate(self.base_model.blocks):
-            if allow_skipping and i < len(self.layer_routers):
-                exec_mask, _ = self.layer_routers[i](x)
-                if not exec_mask.any():
-                    continue
-            x, _ = block(x)
-
-        x = self.base_model.ln_f(x)
+        x = self.evolvable_backbone.hidden_states(tokens, allow_skipping=allow_skipping)
 
         # Apply domain adapter if specified
         if active_domain and f"adapter_{active_domain}" in self.adapter_modules:

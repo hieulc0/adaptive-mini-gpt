@@ -222,17 +222,7 @@ class IntegratedStudentM104_E(nn.Module):
 
     def extract_sequence_hidden_states(self, tokens: torch.Tensor) -> torch.Tensor:
         """Runs Transformer and returns hidden sequence H: (B, L, d_model)."""
-        b, t = tokens.size()
-        if t > self.student.base_model.config.context_length:
-            raise ValueError("Complete prompt exceeds configured model context")
-        tok_emb = self.student.base_model.wte(tokens)
-        pos = torch.arange(0, t, dtype=torch.long, device=tokens.device)
-        x = self.student.base_model.drop(tok_emb + self.student.base_model.wpe(pos))
-
-        for block in self.student.base_model.blocks:
-            x, _ = block(x)
-
-        return self.student.base_model.ln_f(x)
+        return self.student.evolvable_backbone.hidden_states(tokens)
 
     def pool_representations(
         self,
