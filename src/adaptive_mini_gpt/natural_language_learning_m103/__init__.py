@@ -1,4 +1,33 @@
-"""Milestone M103: Natural-Language Learning and Generalization."""
+"""Milestone M103 & M104: Natural-Language Learning, Grounded Concepts, and Autonomous Practice."""
+
+from adaptive_mini_gpt.natural_language_learning_m103.causal_world_m104_b import (
+    CausalItemM104_B,
+    CausalObjectM104_B,
+    ProceduralCausalWorldM104_B,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.semantic_adapter_m104_b import (
+    IntegratedSemanticStudentM104_B,
+    SemanticConceptAdapterM104_B,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.active_practice_m104_b import (
+    ActivePracticeEnvironmentM104_B,
+    PolicyLearningTrajectoryM104_B,
+    PracticeStepRecordM104_B,
+    TrainablePracticePolicyM104_B,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.concept_learner_m104_b import (
+    ConceptLearnerM104_B,
+    PhaseB1GroundedReportM104_B,
+    PhaseB2RetentionReportM104_B,
+    PhaseB3MultiPoolReportM104_B,
+    PhaseB4MetaTransferReportM104_B,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.benchmark_m104_b import (
+    BenchmarkM104_B,
+    MilestoneGateM104_B,
+    MilestoneReportM104_B,
+)
+
 from adaptive_mini_gpt.natural_language_learning_m103.causal_world_m103_g1 import (
     CausalItemM103_G1,
     CausalObjectM103_G1,
@@ -189,6 +218,23 @@ from adaptive_mini_gpt.natural_language_learning_m103.world_simulator_m103_c imp
 )
 
 __all__ = [
+    "ActivePracticeEnvironmentM104_B",
+    "BenchmarkM104_B",
+    "CausalItemM104_B",
+    "CausalObjectM104_B",
+    "ConceptLearnerM104_B",
+    "IntegratedSemanticStudentM104_B",
+    "MilestoneGateM104_B",
+    "MilestoneReportM104_B",
+    "PhaseB1GroundedReportM104_B",
+    "PhaseB2RetentionReportM104_B",
+    "PhaseB3MultiPoolReportM104_B",
+    "PhaseB4MetaTransferReportM104_B",
+    "PolicyLearningTrajectoryM104_B",
+    "PracticeStepRecordM104_B",
+    "ProceduralCausalWorldM104_B",
+    "SemanticConceptAdapterM104_B",
+    "TrainablePracticePolicyM104_B",
     "BenchmarkReportM103_F",
     "BenchmarkRunnerM103_F",
     "CapacityAuditReportM103_E1",
