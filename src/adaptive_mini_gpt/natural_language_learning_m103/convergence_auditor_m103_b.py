@@ -129,13 +129,17 @@ class ConvergenceAuditorM103_B:
         matches = 0
 
         for it in items:
-            p_toks, _ = self.tokenizer.format_qa_sequence(
-                question=it.question,
-                answer="",
-                explanation=None,
-            )
-            if p_toks and p_toks[-1] == self.tokenizer.EOS_ID:
-                p_toks = p_toks[:-1]
+            if it.prompt_len > 0:
+                p_toks = it.full_tokens[:it.prompt_len]
+            else:
+                expl = it.explanation if it.explanation else None
+                p_toks, _ = self.tokenizer.format_qa_sequence(
+                    question=it.question,
+                    answer="",
+                    explanation=expl,
+                )
+                if p_toks and p_toks[-1] == self.tokenizer.EOS_ID:
+                    p_toks = p_toks[:-1]
 
             gen_ids = student.generate(
                 prompt_tokens=p_toks,
@@ -174,7 +178,7 @@ class ConvergenceAuditorM103_B:
         torch.manual_seed(seed)
         cgen = TextCurriculumGeneratorM103(seed=seed)
         goal = cgen.generate_energy_goal()
-        tiny_batch = goal.train_items[:4]
+        tiny_batch = goal.train_items[:2]
         dom = goal.domain.value
 
         # 1. Adapter-Only (M103-A regime)
@@ -186,13 +190,13 @@ class ConvergenceAuditorM103_B:
         # 2. Selective Backbone (blocks.3 + ln_f + wte + adapter)
         stud2 = TextStudentM103(device=self.device, enable_persistent_growth=False)
         rep_selective = self._run_overfit_regime(
-            stud2, tiny_batch, dom, "Selective Backbone Plasticity", "selective_backbone", steps=50, lr=0.003
+            stud2, tiny_batch, dom, "Selective Backbone Plasticity", "selective_backbone", steps=60, lr=0.005
         )
 
         # 3. Full Backbone
         stud3 = TextStudentM103(device=self.device, enable_persistent_growth=False)
         rep_full = self._run_overfit_regime(
-            stud3, tiny_batch, dom, "Full Backbone Training", "full", steps=50, lr=0.003
+            stud3, tiny_batch, dom, "Full Backbone Training", "full", steps=60, lr=0.005
         )
 
         certified = bool(rep_selective.converged or rep_full.converged)

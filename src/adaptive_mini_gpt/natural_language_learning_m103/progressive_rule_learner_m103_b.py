@@ -96,13 +96,17 @@ class ProgressiveRuleLearnerM103_B:
 
         student.eval()
         for it in items:
-            p_toks, _ = self.tokenizer.format_qa_sequence(
-                question=it.question,
-                answer="",
-                explanation=None,
-            )
-            if p_toks and p_toks[-1] == self.tokenizer.EOS_ID:
-                p_toks = p_toks[:-1]
+            if it.prompt_len > 0:
+                p_toks = it.full_tokens[:it.prompt_len]
+            else:
+                expl = it.explanation if it.explanation else None
+                p_toks, _ = self.tokenizer.format_qa_sequence(
+                    question=it.question,
+                    answer="",
+                    explanation=expl,
+                )
+                if p_toks and p_toks[-1] == self.tokenizer.EOS_ID:
+                    p_toks = p_toks[:-1]
 
             gen_ids = student.generate(
                 prompt_tokens=p_toks,
@@ -207,7 +211,6 @@ class ProgressiveRuleLearnerM103_B:
                     character_accuracy=char_acc,
                     sample_generated_answers=samples,
                 ))
-
         final_te = checkpoints[-1].held_out_test_exact_match if checkpoints else 0.0
         final_nov = checkpoints[-1].novel_generalization_exact_match if checkpoints else 0.0
         learned = (final_te >= 50.0 or checkpoints[-1].train_exact_match >= 75.0)

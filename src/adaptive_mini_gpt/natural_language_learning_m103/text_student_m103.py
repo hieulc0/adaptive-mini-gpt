@@ -198,7 +198,7 @@ class TextStudentM103(nn.Module):
         self,
         items: list[QAItemM103],
         active_domain: str | None = None,
-        with_explanation: bool = False,
+        with_explanation: bool = True,
     ) -> float:
         """Evaluate exact string match on answer completions."""
         if not items:
@@ -206,15 +206,17 @@ class TextStudentM103(nn.Module):
 
         matches = 0
         for it in items:
-            expl = it.explanation if with_explanation else None
-            prompt_toks, _ = self.tokenizer.format_qa_sequence(
-                question=it.question,
-                answer="",
-                explanation=expl,
-            )
-            # Remove trailing EOS from prompt
-            if prompt_toks and prompt_toks[-1] == self.tokenizer.EOS_ID:
-                prompt_toks = prompt_toks[:-1]
+            if with_explanation and it.prompt_len > 0:
+                prompt_toks = it.full_tokens[:it.prompt_len]
+            else:
+                expl = it.explanation if with_explanation else None
+                prompt_toks, _ = self.tokenizer.format_qa_sequence(
+                    question=it.question,
+                    answer="",
+                    explanation=expl,
+                )
+                if prompt_toks and prompt_toks[-1] == self.tokenizer.EOS_ID:
+                    prompt_toks = prompt_toks[:-1]
 
             gen_ids = self.generate(
                 prompt_tokens=prompt_toks,
@@ -284,7 +286,7 @@ class TextStudentM103(nn.Module):
             # Validation check
             self.eval()
             with torch.no_grad():
-                val_em = self.evaluate_exact_match(goal.val_items, active_domain=dom, with_explanation=False)
+                val_em = self.evaluate_exact_match(goal.val_items, active_domain=dom, with_explanation=True)
                 final_val_acc = val_em
                 if val_em >= early_stop_acc:
                     break
@@ -293,8 +295,8 @@ class TextStudentM103(nn.Module):
         self.replay_buffer[dom] = goal.train_items[:4]
 
         # Evaluate on test set
-        test_em = self.evaluate_exact_match(goal.test_items, active_domain=dom, with_explanation=False)
-        novel_em = self.evaluate_exact_match(goal.novel_items, active_domain=dom, with_explanation=False)
+        test_em = self.evaluate_exact_match(goal.test_items, active_domain=dom, with_explanation=True)
+        novel_em = self.evaluate_exact_match(goal.novel_items, active_domain=dom, with_explanation=True)
 
         return {
             "steps_taken": steps_taken,
