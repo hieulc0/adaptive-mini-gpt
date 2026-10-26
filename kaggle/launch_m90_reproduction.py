@@ -40,6 +40,8 @@ def main():
         raise RuntimeError("Kaggle CUDA required; local/CPU execution refused")
     if len(PINNED_SHA) != 40:
         raise ValueError("Render pushed source SHA")
+    os.environ["OMP_NUM_THREADS"] = "2"
+    os.environ["MKL_NUM_THREADS"] = "2"
     OUT.mkdir(parents=True, exist_ok=True)
     subprocess.run(
         [
