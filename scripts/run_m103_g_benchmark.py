@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-\"\"\"CLI runner for Milestone M103-G Master Benchmark.\"\"\"
+"""CLI runner for Milestone M103-G Master Benchmark."""
 
 import argparse
 from pathlib import Path
