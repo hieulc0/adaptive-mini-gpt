@@ -11,6 +11,7 @@ from pathlib import Path
 import torch
 
 PINNED_SHA = "__PINNED_SHA__"
+CONTRACTS_ONLY = False
 REPO = Path("/tmp/amg-foundation-stabilization")
 OUT = Path("/kaggle/working/foundation-stabilization")
 
@@ -57,6 +58,7 @@ def main():
     subprocess.run(["git", "checkout", "--detach", PINNED_SHA], cwd=REPO, check=True)
     status = {
         "sha": PINNED_SHA,
+        "scope": "CONTRACTS_ONLY" if CONTRACTS_ONLY else "FULL",
         "torch": torch.__version__,
         "cuda": torch.version.cuda,
         "gpu": torch.cuda.get_device_name(0),
@@ -122,7 +124,7 @@ def main():
             240,
         ),
     )
-    if status["phases"]["contracts"]["exit_code"] == 0:
+    if status["phases"]["contracts"]["exit_code"] == 0 and not CONTRACTS_ONLY:
         record(
             "full_suite",
             run(

@@ -88,6 +88,7 @@ def make_owner():
         torch.zeros(2, 26, device="cuda"),
         torch.tensor([0, 1], device="cuda"),
     )
+    owner.external["sampler"] = random.Random(42)
     owner.external.update(next_batch=batch, memory={"fact": [1]}, controller={"count": 2})
     return owner, batch
 
@@ -111,6 +112,7 @@ def test_topology_optimizer_rollback_and_process_restart(tmp_path):
         migrate_adamw(s.model, s.optimizer)
         s.external["memory"]["fact"].append(9)
         s.external["controller"]["count"] += 1
+        s.external["sampler"].random()
         s.metadata["candidate"] = True
         s.step(*batch)
 
@@ -131,7 +133,8 @@ def test_topology_optimizer_rollback_and_process_restart(tmp_path):
 
     with pytest.raises(FileExistsError):
         owner.save(source)
-    expected_loss = owner.step(*batch)
+    indices = [owner.external["sampler"].randrange(len(batch[0]))]
+    expected_loss = owner.step(*[v[indices] for v in batch])
     expected_rng = [
         random.random(),
         float(np.random.random()),
@@ -151,6 +154,8 @@ def test_topology_optimizer_rollback_and_process_restart(tmp_path):
     assert restored.external["root_refs"][0] is restored.model
     assert restored.external["root_refs"][1] is restored.optimizer
     assert restored.metadata["last_loss"] == expected_loss
+    assert restored.metadata["next_indices"] == indices
+    assert restored.external["sampler"].getstate() == owner.external["sampler"].getstate()
     assert restored.metadata["rng_after_update"] == expected_rng
     for k, v in expected.items():
         assert torch.equal(restored.model.state_dict()[k], v)

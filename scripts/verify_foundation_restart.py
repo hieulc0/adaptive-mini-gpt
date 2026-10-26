@@ -12,7 +12,10 @@ from adaptive_mini_gpt.training.remote_runtime import require_remote_cuda
 if __name__ == "__main__":
     require_remote_cuda()
     state = LearningState.load(sys.argv[1])
-    state.metadata["last_loss"] = state.step(*state.external["next_batch"])
+    batch = state.external["next_batch"]
+    indices = [state.external["sampler"].randrange(len(batch[0]))]
+    state.metadata["next_indices"] = indices
+    state.metadata["last_loss"] = state.step(*[v[indices] for v in batch])
     state.metadata["rng_after_update"] = [
         random.random(),
         float(np.random.random()),

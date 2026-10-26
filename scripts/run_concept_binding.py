@@ -150,7 +150,12 @@ def run(out):
             language_model(mode), metadata={"git_sha": sha, "data_hash": spec["data_sha256"]}
         )
         initial = digest(owner.model.state_dict())
-        rng = random.Random(seed)
+        owner.external["sampler"] = random.Random(seed)
+        owner.metadata["label_schema"] = {
+            "state": {0: "light_off", 1: "light_on"},
+            "tags": TAG_IDS,
+            "actions": {0: "fire", 2: "spark"},
+        }
         arm = {
             "initial_hash": initial,
             "stored_parameters": sum(p.numel() for p in owner.model.parameters()),
@@ -167,12 +172,17 @@ def run(out):
         for phase in ("tiny", "train"):
             batch = batches[phase]
             for step in range(steps[phase]):
-                ix = rng.sample(range(len(splits[phase])), min(16, len(splits[phase])))
+                ix = owner.external["sampler"].sample(
+                    range(len(splits[phase])), min(16, len(splits[phase]))
+                )
                 sampled = [x[ix] for x in batch]
                 loss = owner.step(*sampled)
                 arm["updates"] += 1
                 arm["examples"] += len(ix)
                 arm["tokens"] += int((sampled[0] != tokenizer.PAD_ID).sum())
+                owner.metadata.update(
+                    phase=phase, phase_step=step + 1, examples=arm["examples"], tokens=arm["tokens"]
+                )
                 if phase == "train" and (step + 1) % 100 == 0:
                     val = evaluate(owner.model, batches["validation"], splits["validation"])
                     arm["curves"].append(
