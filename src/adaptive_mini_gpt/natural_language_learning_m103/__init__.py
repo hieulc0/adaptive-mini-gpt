@@ -1,3 +1,37 @@
+"""Milestone M103: Natural-Language Learning and Generalization."""
+from adaptive_mini_gpt.natural_language_learning_m103.causal_world_m103_g1 import (
+    CausalItemM103_G1,
+    CausalObjectM103_G1,
+    ProceduralCausalWorldM103_G1,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.baselines_m103_g1 import (
+    AttributeOnlyHeuristicBaselineM103_G1,
+    BaselineEvaluationReportM103_G1,
+    MajorityClassBaselineM103_G1,
+    MatchedLinearProbeBaselineM103_G1,
+    NearestNeighborBaselineM103_G1,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.active_practice_m104_a import (
+    ActivePracticeEnvironmentM104_A,
+    PolicyLearningTrajectoryM104_A,
+    PracticeStepRecordM104_A,
+    TrainablePolicyNetworkM104_A,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.concept_learner_m103_g1 import (
+    ConceptLearnerM103_G1,
+    IntegratedCausalHeadM103_G1,
+    IntegratedCausalStudentM103_G1,
+    Phase1RequalificationReportM103_G1,
+    Phase2CorrectiveReportM103_G1,
+    Phase3ActivePracticeReportM103_G1,
+    SeedRequalificationReportM103_G1,
+    StandaloneLatentPredictorM103_G1,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.benchmark_m103_g1 import (
+    BenchmarkM103_G1,
+    MilestoneGateM103_G1,
+    MilestoneReportM103_G1,
+)
 
 from adaptive_mini_gpt.natural_language_learning_m103.causal_world_m103_g import (
     CausalItemM103_G,
@@ -41,7 +75,6 @@ from adaptive_mini_gpt.natural_language_learning_m103.concept_learner_m103_f imp
     Phase3LearningToLearnReportM103_F,
     StateTransitionStudyReportM103_F,
 )
-"""Milestone M103: Natural-Language Learning and Generalization."""
 
 from adaptive_mini_gpt.natural_language_learning_m103.audit_m103 import (
     CapacityAuditReportM103,
