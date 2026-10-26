@@ -97,6 +97,7 @@ def test_topology_optimizer_rollback_and_process_restart(tmp_path):
     from adaptive_mini_gpt.training.learning_state import LearningState, migrate_adamw
 
     owner, batch = make_owner()
+    owner.external["root_refs"] = (owner.model, owner.optimizer)
     owner.step(*batch)
     owner.model.eval()
     snapshot = owner.snapshot()
@@ -118,6 +119,8 @@ def test_topology_optimizer_rollback_and_process_restart(tmp_path):
     assert not hasattr(owner.model, "extra")
     assert owner.external["memory"] == {"fact": [1]}
     assert owner.external["controller"] == {"count": 2}
+    assert owner.external["root_refs"][0] is owner.model
+    assert owner.external["root_refs"][1] is owner.optimizer
     assert owner.metadata == snapshot["roots"][4]
     for k, v in snapshot["roots"][0].state_dict().items():
         assert torch.equal(owner.model.state_dict()[k], v)
@@ -145,6 +148,8 @@ def test_topology_optimizer_rollback_and_process_restart(tmp_path):
         timeout=90,
     )
     restored = LearningState.load(resumed)
+    assert restored.external["root_refs"][0] is restored.model
+    assert restored.external["root_refs"][1] is restored.optimizer
     assert restored.metadata["last_loss"] == expected_loss
     assert restored.metadata["rng_after_update"] == expected_rng
     for k, v in expected.items():
@@ -300,3 +305,19 @@ def test_rejection_restores_rng_flags_and_blocks_checkpoint_publication(tmp_path
     assert flags == {n: m.training for n, m in owner.model.named_modules()}
     assert masks == {n: p.requires_grad for n, p in owner.model.named_parameters()}
     assert owner.external["replay"] == []
+
+
+def test_root_replacement_is_rejected_without_corrupting_live_owner():
+    require_remote_cuda()
+    import pytest
+
+    owner, _ = make_owner()
+    original = owner.model
+
+    def replace(state):
+        state.model = torch.nn.Linear(1, 1).cuda()
+
+    with pytest.raises(RuntimeError, match="root handles"):
+        owner.candidate(replace, lambda s: True)
+    assert owner.model is original
+    assert hasattr(owner.model, "student")

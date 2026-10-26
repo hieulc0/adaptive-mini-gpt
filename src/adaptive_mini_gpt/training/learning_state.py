@@ -110,17 +110,23 @@ class LearningState:
     def restore(self, snapshot):
         if snapshot["version"] != self.VERSION:
             raise ValueError("Unsupported learning-state version")
-        model, optimizer, scheduler, external, metadata = copy.deepcopy(snapshot["roots"])
-        # Preserve root handles; all child ownership comes from this joint graph.
+        model, optimizer, scheduler, external, metadata = snapshot["roots"]
+        if type(model) is not type(self.model) or type(optimizer) is not type(self.optimizer):
+            raise ValueError("Restore requires matching root types")
+        # Root handles stay live; a shared memo also rebinds controller/self aliases.
+        memo = {id(model): self.model, id(optimizer): self.optimizer, id(external): self.external}
+        model_dict = copy.deepcopy(model.__dict__, memo)
+        optimizer_dict = copy.deepcopy(optimizer.__dict__, memo)
+        scheduler = copy.deepcopy(scheduler, memo)
+        external_dict = copy.deepcopy(dict(external), memo)
+        metadata = copy.deepcopy(metadata, memo)
         self.model.__dict__.clear()
-        self.model.__dict__.update(model.__dict__)
+        self.model.__dict__.update(model_dict)
         self.optimizer.__dict__.clear()
-        self.optimizer.__dict__.update(optimizer.__dict__)
-        if scheduler is not None:
-            scheduler.optimizer = self.optimizer
+        self.optimizer.__dict__.update(optimizer_dict)
         self.scheduler = scheduler
         self.external.clear()
-        self.external.update(external)
+        self.external.update(external_dict)
         self.metadata = metadata
         for name, p in self.model.named_parameters():
             p.grad = snapshot["gradients"].get(name)
@@ -172,17 +178,30 @@ class LearningState:
         if self._in_candidate:
             raise RuntimeError("Nested candidates are unsupported")
         before = self.snapshot()
+        roots = (self.model, self.optimizer, self.external)
+
+        def rollback():
+            self.model, self.optimizer, self.external = roots
+            self.restore(before)
+
         self._in_candidate = True
         try:
             modify(self)
+            if any(
+                current is not original
+                for current, original in zip(
+                    (self.model, self.optimizer, self.external), roots, strict=True
+                )
+            ):
+                raise RuntimeError("Candidate cannot replace owned root handles")
             if any(optimizer_membership(self.model, self.optimizer).values()):
                 raise RuntimeError("Candidate optimizer ownership violation")
             accepted = bool(validate(self))
             if not accepted:
-                self.restore(before)
+                rollback()
             return accepted
         except BaseException:
-            self.restore(before)
+            rollback()
             raise
         finally:
             self._in_candidate = False

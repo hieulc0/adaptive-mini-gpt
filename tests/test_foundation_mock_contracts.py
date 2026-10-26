@@ -45,3 +45,40 @@ def test_binding_counterfactual_changes_answer_with_identical_words():
         assert tok.decode(ids[ids.index(tok.QUESTION_ID) + 1 : -1]) == row.question
     negated = pair_cases("tiny", ((False, False), (True, True)), 0, 0, ("fire", "spark"), 0, 0)
     assert negated[0].state == negated[1].state == 0
+
+
+def test_joint_restore_rebinds_external_root_aliases():
+    # Pure Python fake roots; RNG setters mocked. No neural construction/tensors.
+    import copy
+    import random
+    from types import SimpleNamespace
+
+    import numpy as np
+
+    from adaptive_mini_gpt.training.learning_state import LearningState
+
+    class Model:
+        def named_parameters(self):
+            return iter([])
+
+        def parameters(self):
+            return iter([])
+
+    class CPUState:
+        def cpu(self):
+            return self
+
+    owner = object.__new__(LearningState)
+    owner.model = Model()
+    owner.optimizer = SimpleNamespace(param_groups=[])
+    owner.external = {"controller": {"model": owner.model, "optimizer": owner.optimizer}}
+    snapshot = {
+        "version": 1,
+        "roots": copy.deepcopy((owner.model, owner.optimizer, None, owner.external, {"steps": 0})),
+        "gradients": {},
+        "rng": (random.getstate(), np.random.get_state(), CPUState(), None),
+    }
+    with patch("torch.set_rng_state"):
+        owner.restore(snapshot)
+    assert owner.external["controller"]["model"] is owner.model
+    assert owner.external["controller"]["optimizer"] is owner.optimizer

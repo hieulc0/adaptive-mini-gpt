@@ -87,6 +87,22 @@ def main():
                 90,
             ),
         )
+    alias_test = OUT / "test_historical_root_alias.py"
+    subprocess.run(["git", "checkout", "--detach", PINNED_SHA], cwd=REPO, check=True)
+    alias_test.write_text((REPO / "tests/test_foundation_mock_contracts.py").read_text())
+    subprocess.run(
+        ["git", "checkout", "--detach", "5a7b409fc0e8312708328fbddaca54cf0dd6e332"],
+        cwd=REPO,
+        check=True,
+    )
+    record(
+        "historical_root_alias",
+        run(
+            [sys.executable, "-m", "pytest", "-q", str(alias_test), "-k", "rebinds"],
+            "historical-root-alias",
+            90,
+        ),
+    )
     subprocess.run(["git", "checkout", "--detach", PINNED_SHA], cwd=REPO, check=True)
     record(
         "contracts",
