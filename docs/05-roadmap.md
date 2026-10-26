@@ -64,7 +64,8 @@
 
 ### Milestone M103-E: Compositional Neural Learning & Retention
 - **Execution Date:** October 26, 2026
-- **Status:** **QUALIFIED_PASS (9/10 ACCEPTANCE GATES PASSED; 189/189 GPU REGRESSION TESTS PASS)**
+- **Status:** **PROVISIONAL (9/10 ACCEPTANCE GATES REPORTED; 189/189 GPU REGRESSION TESTS PASS)**
+- **Audit Note:** Requalified in M103-E.1 / M103-F to address train/test numerical leakage (s=7), pre-competence retention gating, and orphaned parameter accounting.
 - **Hardware Platform:** Remote Tesla T4 GPU (`sparklinghydraulics0/amg-m102-dynamic-evolution`; Kernel Version 34)
 - **Key Scientific Outcomes & Verifications**:
   1. **Forensic Parameter Accounting (Phase E0)**: Reconciled **1,178,474 unique storage parameters** (tied embeddings) against **1,309,546 registered PyTorch parameters** with **0 unexplained discrepancy**. Proved shared storage pointer (`p.data_ptr()`) between `student.lm_head` and `base_model.wte`, identifying the 131,072 difference as an orphaned `base_model.lm_head`.
@@ -73,9 +74,27 @@
   4. **Catastrophic Forgetting Repaired (Phase E3)**: Unprotected fine-tuning on Sector-Z feedback caused backward retention to drop to 50.0%. Protected balanced rehearsal maintained **100.0% backward retention** (surpassing the >=85% threshold) with disjoint held-out validation.
   5. **First Learning-to-Learn Benchmark (Phase E4)**: Evaluated forward meta-transfer on an unfamiliar rule family (Grid-Beta Navigation). The experienced student achieved a **20.5x speedup ratio** over the fresh student (final loss 0.0030 vs 0.0615), providing the first quantitative proof of positive forward meta-transfer.
 
-### Long-Term Evolutionary Roadmap Beyond M103-E
-| **M103-E** | Compositional Learning & Retention | Reconciled parameters (1,178,474 unique), repaired forgetting (100% retention), positive meta-transfer (20.5x speedup) |
-| **M104** | Autonomous Practice, Multi-Session Learning & Memory | Autonomous curriculum selection, active experiment design, episodic consolidation |
+
+### Milestone M103-F / M103-E.1: Verified Reusable Concepts & Meta-Transfer
+- **Execution Date:** October 26, 2026
+- **Status:** **PARTIAL (7/10 ACCEPTANCE GATES PASSED; 194/194 GPU REGRESSION TESTS PASS)**
+- **Hardware Platform:** Remote Tesla T4 GPU (`sparklinghydraulics0/amg-m102-dynamic-evolution`; Kernel Version 35)
+- **Key Scientific Deliverables & Findings**:
+  1. **Safe Orphan Pruning & Complete Parameter Certification (Gate 1 PASS)**: Tied `base_model.lm_head.weight` to `base_model.wte.weight`, eliminating the orphaned 131,072-parameter language head and cleanly establishing **1,178,474 active forward-path parameters** (and 1,178,474 unique allocated parameters) with exactly **0 unexplained discrepancy**.
+  2. **Zero Numerical Leakage (Gate 2 PASS)**: Enforced strict orthogonality across train, validation, novel hypothesis, extrapolation, and corrective splits (`s=7` removed from training; all splits strictly disjoint).
+  3. **Multidimensional Answer Scoring (Gate 3 PASS)**: Implemented separate reporting for Strict Exact Match (100.0% train), Prefix Correctness, Standalone Numeric Match, and Format Validity.
+  4. **Single-Rule Optimization Solved (Gate 4 PASS)**: On balanced parity training items, final loss dropped to `0.0010` with **100.0% Strict EM** and **100.0% Numeric Accuracy**.
+  5. **Held-Out In-Range Generalization Frontier (Gate 5 FAIL)**: Under strict zero-leakage evaluation on disjoint unseen values (`s in [4, 9, 12]`), numeric accuracy was **0.0%**, confirming that character-level autoregression acts as an associative lookup rather than learning general arithmetic operations.
+  6. **Pre-Competence Gating on Retention (Gate 7 & 8 FAIL)**: Retention evaluation was conditioned on achieving >=70% held-out baseline competence. Because pre-update held-out accuracy was 0.0%, retention certification was rejected and reported as **0.0%**, fixing the false-positive 100% retention loophole in M103-E.
+  7. **4-Way Learning-to-Learn Study (Gate 9 PASS)**: Evaluated Fresh Baseline (final loss 0.0342), Pretrained No-Rule (final loss 0.0031), Experienced Persistent (final loss 0.0016), and Experienced No-Memory (final loss 0.0036). The experienced persistent student converged **21.38x lower in loss** than the fresh student on unfamiliar Grid Navigation, establishing positive representation meta-transfer.
+  8. **True Disk-Roundtrip Checkpoint Recovery (Gate 10 PASS)**: Certified bit-exact state recovery (`0.00e+00` logit diff) following complete in-memory model destruction and reload from disk.
+
+### Long-Term Evolutionary Roadmap Beyond M103-F
+| Milestone | Focus | Key Deliverables & Criteria |
+| :--- | :--- | :--- |
+| **M103-E** | Compositional Learning & Retention | PROVISIONAL (Engineering Pass; 189/189 GPU tests; Requalified in M103-E.1 / M103-F) |
+| **M103-F** | Verified Reusable Concepts & Meta-Transfer | PARTIAL (194/194 GPU tests; 1,178,474 active params; zero leakage; 21.38x meta-transfer loss ratio) |
+| **M104** | Autonomous Practice, Multi-Session Learning & Memory | Autonomous curriculum selection, active experiment design, episodic consolidation (advancement pending operational rule generalization) |
 | **M105** | Learned Architectural Adaptation | Trainable controller learning when to grow, prune, rewire, and adapt dimensions under budget |
 | **M106** | Adaptive Context, Long-Term Memory & Evolving Topology | Dynamically expand context capacity, compress past experience, and reconfigure paths |
 | **M107** | Multimodal Grounding | Integrate vision, audio, and physical token streams into the persistent student |

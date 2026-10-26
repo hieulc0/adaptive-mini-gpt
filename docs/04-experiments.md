@@ -214,10 +214,10 @@
 
 ---
 
-## 11. Milestone M103-E: Compositional Neural Learning & Retention
+## 11. Milestone M103-E: Compositional Neural Learning & Retention (PROVISIONAL)
 
 **Title:** Compositional Neural Learning: Forensic Capacity Audit, Parity Balancing, Protected Retention & Learning-to-Learn  
-**Status:** **QUALIFIED_PASS** (9/10 gates passed; 189/189 GPU regression tests pass).  
+**Status:** **PROVISIONAL** (Engineering Progress · Requalification Required; 9/10 gates reported; 189/189 GPU regression tests pass; Leaked split s=7 and pre-competence retention loopholes requalified in M103-E.1 / M103-F).  
 **Hardware Platform:** Remote Tesla T4 GPU (`sparklinghydraulics0/amg-m102-dynamic-evolution`; Kernel Version 34).  
 **Execution Timestamp:** 2026-10-26 04:29:36 UTC (Execution Duration: 26.7s).  
 
@@ -265,3 +265,79 @@
 | **GATE_8** | Disjoint Corrective Adaptation: Measure adaptation on disjoint held-out items | `Evaluated on disjoint held-out Sector-Z items s=[8, 10, 12]` | **PASS** |
 | **GATE_9** | Protected Retention Certification: Maintain backward retention >= 85% | `Protected Retention: 100.0% (Threshold >= 85%). Unprotected: 50.0%` | **PASS** |
 | **GATE_10** | First Learning-to-Learn Benchmark: Measure forward transfer on unfamiliar family | `Speedup ratio: 20.5x (Exp loss: 0.0030 vs Fresh loss: 0.0615)` | **PASS** |
+
+
+---
+
+## 12. Milestone M103-F / M103-E.1: Verified Reusable Concepts & Meta-Transfer Report
+
+**Title:** Verified Reusable Concepts: Scientific Requalification, Zero-Leakage Arithmetic, Pre-Competence Gating & 4-Way Meta-Transfer  
+**Status:** **PARTIAL** (7/10 acceptance gates passed; 194/194 GPU regression tests pass).  
+**Hardware Platform:** Remote Tesla T4 GPU (`sparklinghydraulics0/amg-m102-dynamic-evolution`; Kernel Version 35).  
+**Execution Timestamp:** 2026-10-26 04:48:07 UTC (Execution Duration: 31.32s).  
+
+### 12.1 Scientific Findings & Forensic Requalification
+
+1. **Phase 0 — Forensic Capacity Audit & Safe Orphan Pruning**:
+   - Reconciled active forward-path parameters to **1,178,474 parameters** with **0 unexplained discrepancy**.
+   - Pruned the untied, orphaned 131,072-parameter `base_model.lm_head` tensor cleanly via `prune_orphaned_lm_head=True`, tying `base_model.lm_head.weight` to `base_model.wte.weight`.
+   - Distinctly audited:
+     * Active forward-path parameters: **1,178,474**
+     * Unique allocated physical storage: **1,178,474**
+     * Orphaned / unused parameters: **0**
+     * Discrepancy: **0**
+
+2. **Phase 0 — Zero Numerical Leakage Certification**:
+   - Audited all dataset splits to guarantee strict mathematical disjointness:
+     * `train_s`: `[2, 3, 6, 8, 11, 14]`
+     * `val_in_range_s`: `[4, 9, 12]`
+     * `novel_hypo_s`: `[5, 7, 13, 17, 19]`
+     * `extrap_s`: `[20, 21, 24, 25, 28]`
+     * `corr_train_s`: `[1, 10]` vs `corr_held_out_s`: `[15, 18]`
+   - Leaked value $s=7$ completely removed from training curriculum (present only in unseen evaluation).
+
+3. **Phase 0 — Multidimensional Answer Scoring**:
+   - Replaced prefix-only substring acceptance with multidimensional scoring:
+     * Strict Exact Match (full string bit-exact equality)
+     * Prefix Correctness (target starts string)
+     * Standalone Numeric Match (extracts final integer value)
+     * Format Validity (presence of expected units like 'energy')
+   - On the training set, the student achieved **100.0% Strict EM**, **100.0% Numeric Accuracy**, and **100.0% Format Validity**.
+
+4. **Phase 1 — In-Distribution Generalization Reality (Gate 5 FAIL)**:
+   - Evaluated single-rule optimization across 300 steps at learning rate 0.002: final loss reached `0.0010` with `100.0%` train exact match.
+   - However, on strictly disjoint held-out in-range numbers ($s \in [4, 9, 12]$), numeric accuracy was **0.0%**.
+   - Decisive scientific conclusion: The persistent student memorizes specific numeric transitions as associative memory rather than discovering generalizable arithmetic addition in direct character-level generation.
+
+5. **Phase 2 — Pre-Competence Gating on Backward Retention (Gate 7 FAIL & Gate 8 FAIL)**:
+   - In M103-E, retention reported 100% by default because baseline post-training accuracy was computed against a zero baseline.
+   - M103-F / M103-E.1 enforces a strict precondition: retention is ONLY certified if the student achieves $\ge 70\%$ held-out competence prior to feedback.
+   - Because baseline held-out accuracy was $0.0\%$, pre-competence was rejected (`False`), and retention was accurately reported as **0.0%**, eliminating the false-positive retention loophole.
+   - Disjoint corrective adaptation on held-out Sector-Z items ($s \in [15, 18]$) similarly scored 0.0% on held-out generalization, correctly failing Gate 8.
+
+6. **Phase 3 — 4-Way Learning-to-Learn Study**:
+   - Compared four matched experimental conditions on unfamiliar Grid Navigation ($X \to X + 2$):
+     * `Fresh_Baseline`: Initial loss 0.5112 -> Final loss 0.0342.
+     * `Pretrained_NoRule`: Initial loss 0.2967 -> Final loss 0.0031.
+     * `Experienced_Persistent`: Initial loss 0.1678 -> Final loss **0.0016**.
+     * `Experienced_NoMemory`: Initial loss 0.1678 -> Final loss 0.0036.
+   - The experienced persistent student converged **21.38x lower in training loss** than the fresh student ($0.0016$ vs $0.0342$), confirming that prior rule experience primes neural representation plasticity.
+   - However, held-out operational generalization on the grid task remained 0.0% across all conditions under strict zero-leakage evaluation, showing that loss reduction does not automatically equal held-out operational generalization.
+
+7. **True Disk-Roundtrip Checkpoint Recovery**:
+   - Validated complete state-dict disk serialization, memory object deallocation, re-instantiation, and reload with **0.00e+00 max logit difference**.
+
+### 12.2 Acceptance Gate Matrix
+
+| Gate | Requirement | Measured Result | Verdict |
+| :--- | :--- | :--- | :---: |
+| **GATE_1** | Parameter Accounting & Orphan Pruning: Active: 1,178,474, Orphaned: 0, Discrepancy: 0 | `Active: 1,178,474, Unique: 1,178,474, Orphaned: 0, Discrepancy: 0` | **PASS** |
+| **GATE_2** | Zero Numerical Leakage: Completely disjoint sets; s=7 strictly absent from training | `Train s=[2, 3, 6, 8, 11, 14]; Val s=[4, 9, 12]; Novel s=[5, 7, 13, 17, 19]; 7 in train=False` | **PASS** |
+| **GATE_3** | Multidimensional Scoring: Strict EM, prefix correctness, numeric, format reported | `Train Strict EM: 100.0%, Numeric Acc: 100.0%, Format: 100.0%` | **PASS** |
+| **GATE_4** | Single-Rule Optimization: Full convergence on balanced parity training split | `Final Loss: 0.0010, Strict EM: 100.0%, Numeric Acc: 100.0%` | **PASS** |
+| **GATE_5** | In-Distribution Generalization: Held-out in-range numeric accuracy >= 50% | `In-Range Held-Out Numeric Accuracy: 0.0% (Target >= 50.0%)` | **FAIL** |
+| **GATE_6** | State-Transition Representation Study: Compare direct, trace, structured tokens | `Evaluated direct_answer (100% train EM), state_transition_trace, structured_tokens` | **PASS** |
+| **GATE_7** | Pre-Competence Gated Retention: Require pre-update competence >= 70% | `Pre-Competence: 0.0% (Certified: False), Protected Retention: 0.0%` | **FAIL** |
+| **GATE_8** | Disjoint Corrective Adaptation: Tested on disjoint held-out corrective items | `Pre-Feedback Acc: 0.0% -> Post-Feedback Acc: 0.0% (Gain: +0.0%)` | **FAIL** |
+| **GATE_9** | 4-Way Learning-to-Learn Study: Compare Fresh, Pretrained, Experienced, NoMemory | `Speedup Loss Ratio: 21.38x (Exp: 0.0016 vs Fresh: 0.0342)` | **PASS** |
+| **GATE_10** | True Disk-Roundtrip Recovery: Save, destroy object, reconstruct, reload | `True Disk Roundtrip Bit-Exact: True, Max Logit Diff: 0.00e+00` | **PASS** |
