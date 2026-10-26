@@ -174,7 +174,8 @@ class BenchmarkRunnerM103_C:
         # Condition 2: Pretrained Backbone under identical budget
         print("Pretraining language student on matched corpus...")
         pretrainer = LanguagePretrainerM103_B(device=self.device)
-        pretrained_student = pretrainer.create_pretrained_student(steps=60, lr=0.003)
+        pretrained_student = TextStudentM103(enable_persistent_growth=True, device=self.device)
+        pretrainer.pretrain_student(pretrained_student, steps=60, lr=0.003)
         print("Training Condition 2: Pretrained selective backbone...")
         res_pretrained = self.learner.train_concept(
             student=pretrained_student,
