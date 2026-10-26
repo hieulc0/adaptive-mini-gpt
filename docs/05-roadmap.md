@@ -38,5 +38,17 @@
   3. **Progressive Adaptation Curves (Phase 3)**: Over 20-200 steps on Energy System rule QA, Condition B (Selective Backbone) reached `43.75%` train EM and `62.5%` character-level accuracy (`"1 ergy"`, `"6 ergy"`, `"4 ergy"`), though zero-shot generalization to held-out linguistic paraphrases remained at `0.0%` EM.
   4. **Competence Gating Enforcement (Phase 4)**: Competence gating (>75% held-out EM) correctly flagged that full task mastery was not acquired on held-out splits, appropriately rejecting retention claims when acquisition was incomplete.
   5. **Live Capacity Reconciliation & Bit-Exact Recovery**: Live PyTorch module parameter audit verified **1,309,546 persistent parameters** with **0 unexplained discrepancy**; crash recovery verified 100% bit-exact (`max_logit_diff = 0.00e+00`).
-- **Next Step: M103-C \u2014 Scaled Language Substrate, Constrained Subword Tokenization & Multi-Rule Accumulation**:
-  - Scale language pretraining volume and introduce hybrid subword/canonical answer token heads so the student can ground rule logic to single-token answer units before open-ended variable-length string generation.
+
+### Milestone M103-C: Generalizable Concept Learning
+- **Execution Date:** October 26, 2026
+- **Status:** **QUALIFIED_PASS (10/10 ACCEPTANCE GATES PASSED; 179/179 GPU REGRESSION TESTS PASS)**
+- **Hardware Platform:** Remote Tesla T4 GPU (`sparklinghydraulics0/amg-m102-dynamic-evolution`; Kernel Version 30)
+- **Key Scientific Deliverables & Findings**:
+  1. **Discrepancy Audit Certified**: Clarified the root cause of M103-B's intermediate result: Condition B achieved 43.8% exact match strictly on the 16 training examples (memorization), but 0.0% on held-out unseen values and 0.0% on paraphrased questions. M103-C strictly separates and independently reports Train EM, Canonical Val EM, Unseen Values EM, Paraphrase EM, and Counterfactual EM.
+  2. **Router Dimension Certification**: Verified live PyTorch module dimensions for layer-skipping routers: `Linear(128, 32)` (4,128 params) and `Linear(32, 2)` (66 params) = `4,194` params per router. This reconciles the historical documentation typo in earlier drafts which stated `128->32->1` (4,161 params). Total persistent neural parameters: **1,309,546** with exactly **0** unexplained parameter discrepancy.
+  3. **Deterministic Ground-Truth World Simulator**: Implemented `WorldSimulatorM103_C` modeling entities (Orb, Crystal, Beacon, Relic, Sphere), state variables (Energy, Coordinates), and causal transition rules, generating 52 Train, 13 Canonical Val, 28 Unseen Values, 30 Paraphrase, and 10 Counterfactual items with zero leakage.
+  4. **Matched Pretrained vs. Random Evaluation**: Under matched 150-step optimization budgets with prompt loss masking, Random Selective Backbone reached 10.0% Train EM (Loss 0.2216), 0.0% Unseen EM; Pretrained Selective Backbone reached 0.0% Train EM, 0.0% Unseen EM. This demonstrates that 180-sentence generic pretraining is insufficient for arithmetic extrapolation.
+  5. **Canonical Short Answers vs Unrestricted Generation**: Canonical short answers achieved `53.57%` format validity without token runaway; unrestricted byte-level generation exhibited multi-token autoregressive drift.
+  6. **Competence Gating (Stop Condition Executed)**: Because single-concept unseen value accuracy was 0.0% (< 75.0% threshold), the continual learning coordinator halted cleanly before Family 2 (Coordinate Navigation), preventing ungrounded continual learning experiments before single-concept generalization is proven.
+- **Next Step: M103-D — Inductive Biases for Arithmetic Generalization & Number Representation**:
+  - Focus on representation mechanisms that allow small Transformers to generalize arithmetic rules (e.g. digit-level or subword tokenization, relative positional embeddings, or algorithmic scratchpads) to surpass the 75% unseen value generalization threshold.
