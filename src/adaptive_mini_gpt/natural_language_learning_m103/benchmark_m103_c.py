@@ -468,7 +468,7 @@ class BenchmarkRunnerM103_C:
             f"- **Router Architecture**: `{report.router_dimension_certification['certified_architecture']}`",
             f"- **Parameters per Router**: `{report.router_dimension_certification['total_params_per_router']}`",
             f"- **Layer Routers Total (4 blocks)**: `16,776` parameters",
-            f"- **Base Transformer (4 blocks + tied lm_head)**: `1,079,040` parameters",
+            f"- **Base Transformer (4 blocks + tied lm_head)**: `1,088,256` parameters",
             f"- **Domain Adapters (4 domains)**: `2,048` parameters",
             f"- **Persistent Growth Block**: `211,682` parameters",
             f"- **Total Persistent Neural Parameters**: `{report.capacity_accounting['total_measured_persistent_params']}`",

@@ -17,10 +17,24 @@ from adaptive_mini_gpt.natural_language_learning_m103.benchmark_m103_c import (
     BenchmarkRunnerM103_C,
     MilestoneGateM103_C,
 )
+from adaptive_mini_gpt.natural_language_learning_m103.benchmark_m103_d import (
+    BenchmarkReportM103_D,
+    BenchmarkRunnerM103_D,
+    MilestoneGateM103_D,
+)
 from adaptive_mini_gpt.natural_language_learning_m103.comparator_m103 import (
     ModeEvaluationResultM103,
     MultiModeComparisonReportM103,
     NaturalLanguageComparatorM103,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.concept_learner_m103_d import (
+    ConceptLearnerM103_D,
+    DatasetItemM103_D,
+    EvaluationResultM103_D,
+    PhaseD1OptimizationReport,
+    PhaseD3SimulationReport,
+    PhaseD4CorrectiveReport,
+    RepresentationComparisonM103_D,
 )
 from adaptive_mini_gpt.natural_language_learning_m103.continual_concept_learner_m103_c import (
     ContinualConceptLearnerM103_C,
@@ -52,6 +66,9 @@ from adaptive_mini_gpt.natural_language_learning_m103.language_pretrainer_m103_b
     LanguagePretrainerM103_B,
     PretrainingReportM103_B,
 )
+from adaptive_mini_gpt.natural_language_learning_m103.number_tokenizer_m103_d import (
+    NumberAwareTokenizerM103_D,
+)
 from adaptive_mini_gpt.natural_language_learning_m103.progressive_rule_learner_m103_b import (
     ProgressiveConditionResultM103_B,
     ProgressiveLearningReportM103_B,
@@ -78,11 +95,14 @@ from adaptive_mini_gpt.natural_language_learning_m103.world_simulator_m103_c imp
 
 __all__ = [
     "BenchmarkReportM103_C",
+    "BenchmarkReportM103_D",
     "BenchmarkRunnerM103_C",
+    "BenchmarkRunnerM103_D",
     "ByteTextTokenizerM103",
     "CapacityAuditReportM103",
     "ConceptDatasetM103_C",
     "ConceptFamilyM103_C",
+    "ConceptLearnerM103_D",
     "ContinualConceptLearnerM103_C",
     "ContinualLanguageStudentM103_B",
     "ContinualLifelongReportM103_B",
@@ -91,8 +111,10 @@ __all__ = [
     "ConvergenceAuditorM103_B",
     "ConvergenceRegimeResultM103_B",
     "ConvergenceSampleOutputM103_B",
+    "DatasetItemM103_D",
     "DynamicCapacityAuditorM103",
     "EvaluationMetricsM103_C",
+    "EvaluationResultM103_D",
     "GeneralizationDiagnosticReportM103_C",
     "GeneralizationEvaluatorM103_C",
     "LanguagePretrainerM103_B",
@@ -101,14 +123,20 @@ __all__ = [
     "M103BenchmarkReport",
     "M103NaturalLanguageBenchmark",
     "MilestoneGateM103_C",
+    "MilestoneGateM103_D",
     "ModeEvaluationResultM103",
     "MultiModeComparisonReportM103",
     "NaturalLanguageComparatorM103",
+    "NumberAwareTokenizerM103_D",
+    "PhaseD1OptimizationReport",
+    "PhaseD3SimulationReport",
+    "PhaseD4CorrectiveReport",
     "PretrainingReportM103_B",
     "ProgressiveConditionResultM103_B",
     "ProgressiveLearningReportM103_B",
     "ProgressiveRuleLearnerM103_B",
     "QAItemM103",
+    "RepresentationComparisonM103_D",
     "RoutingDiagnosticM103",
     "RoutingDiagnosticReportM103",
     "RuleGoalM103",
