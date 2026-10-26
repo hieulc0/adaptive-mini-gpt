@@ -547,3 +547,51 @@
 | **GATE_8** | Phase C2 Continual Learning & Protected Retention: Retention >= 60% | `Backward Retention: Selective=47.5%, Replay=35.0%, Modular=25.0% (Forward: 70.8%)` | **FAIL** |
 | **GATE_9** | Phase C3 Multi-Pool Practice Selection: 6 policies across pools [28, 100, 200] | `Diversity Coverage best across all pools (Pool 28: +27.5%; Pool 100: +2.3%; Pool 200: +12.3%)` | **PASS** |
 | **GATE_10** | Phase C4 Learning-to-Learn Meta-Transfer: Speedup on unseen World B | `World B Transfer: Experienced=57.5% (40 steps) vs Fresh=47.5% (150 steps). Speedup: 3.75x` | **PASS** |
+
+
+## 17. Milestone M104-D: Language Grounding, Multi-World Transfer, and M105-A Self-Modification Preparation
+
+**Title:** Language Grounding, Right-Censored Survival Transfer, and M105-A Self-Modification Preparation  
+**Status:** **PARTIAL** (5/10 acceptance gates passed; 222/222 GPU regression tests pass).  
+**Hardware Platform:** Remote Tesla T4 GPU (`sparklinghydraulics0/amg-m102-dynamic-evolution`; Kernel Version 42).  
+**Execution Timestamp:** 2026-10-26 08:22:05 UTC (Execution Duration: 117.25s benchmark + 224.76s regression suite).  
+
+### 17.1 Key Empirical Findings & Requalification Deliverables
+
+1. **Phase D0 & D1: Calibrated Language Grounding Audit**:
+   - **Audit of False Positives**: Diagnosed why M104-C suffered from 26.2% precision: global sequence pooling over the whole prompt averaged rule text with entity text, causing attribute leakage. Top false positive classes identified: `glass`, `cloth`, `obsidian`, `silver`, `magical`.
+   - **Entity-Targeted Sequence Pooling**: Deployed `<question>`-to-`<answer>` token pooling in `IntegratedStudentM104_D`, isolating entity description tokens from causal rule definitions.
+   - **Loss Balancing & Threshold Search**: Balanced positive weighting (`pos_weight = 2.0`) and validation threshold calibration (optimal $\tau = 0.37$).
+   - **Empirical Outcome**: Extraction precision slightly improved to **28.1%** (+1.9 pp vs M104-C), recall adjusted to **51.4%**, yielding an F1 of **35.2%**. Although prompt leakage was eliminated, text extraction remains the primary bottleneck due to byte-level Transformer capacity on small synthetic vocabularies (Gate 1 FAILED).
+   - **Integrated Concept Accuracy**: Achieved **48.3% held-out pair acc** (+1.8 pp over M104-C's 46.5%), **61.1% novel entity transfer**, and **61.1% paraphrase robustness**.
+   - **Frozen vs Selective Plasticity**: Frozen backbone achieved **51.7%** vs Selective Plasticity **48.3%** and No-Adapter **51.7%**. Freezing linguistic representations completely prevents representation drift during concept tuning.
+
+2. **Phase D2: Genuine Multi-World Forward Transfer (5 World Families)**:
+   - Evaluated transfer across **5 distinct procedural world families** (`world_t1_elemental`, `world_t2_celestial`, `world_t3_biomechanical`, `world_t4_chronocrystal`, `world_t5_subterranean`) with zero entity/action overlap.
+   - **Survival Analysis & Censoring**: Formalized time-to-target survival analysis, ensuring non-converged runs are flagged as `RIGHT_CENSORED` rather than reporting unobserved speedup ratios.
+   - **Transfer Results**: Both Experienced Persistent Student and Fresh Student achieved **92.9% mean final accuracy** across the 5 transfer worlds and reached the 55% target threshold by step 10 (**1.00x speedup ratio**; Gate 8 FAILED). Because the deterministic transfer realms were learned rapidly by both arms, no forward transfer speedup was verified.
+
+3. **Phase D3: Certified Competence & Continual Retention**:
+   - Initial old-world competence reached **42.5%** (below the 50.0% qualification threshold), triggering the pre-competence safeguard.
+   - Pre-feedback surprise on changed rules (Shadow Realm) was **60.0%**.
+   - Replay-protected adaptation achieved **75.0% new-world acc** and **47.5% old-world retention**, while non-replay adaptation degraded to **42.5%**, demonstrating rehearsal protection.
+
+4. **Phase M105-A Preparation: Neural Self-Modification Architecture**:
+   - Implemented `StructuralRollbackControllerM105_A` supporting candidate operators: `SELECTIVE_BACKBONE_UPDATE`, `ADAPTER_ALLOCATION`, and `REHEARSAL_CONSOLIDATION`.
+   - Certified bit-exact state restoration on rollback (`rollback_restores_bit_exact = True`).
+   - Compared modification policies on exploratory tasks: Learned Policy (**58.5%**) vs Fixed Heuristic (**55.0%**) vs Random (**50.0%**). Documented as an experimental preview requiring independent qualification in M105.
+
+### 17.2 Acceptance Gate Matrix
+
+| Gate | Requirement | Measured Result | Verdict |
+| :--- | :--- | :--- | :---: |
+| **GATE_1** | Extraction Precision Calibration: Precision >= 50% and F1 >= 50% | `Precision=28.1%, F1=35.2% (Threshold: >= 50.0%)` | **FAIL** |
+| **GATE_2** | Decoupled Stage Error Audit: Comprehensive 26-class false-positive audit | `Audit completed across all classes. Top FP: ["glass", "cloth", "obsidian"]` | **PASS** |
+| **GATE_3** | Integrated Grounded Concept Accuracy: Held-out pairs >= 50.0% | `Held-out pair accuracy: 48.3% (+1.8% over M104-C)` | **FAIL** |
+| **GATE_4** | Selective Plasticity Advantage / Parity: Selective >= Frozen | `Selective: 48.3% vs Frozen: 51.7% (Frozen advantage maintained)` | **FAIL** |
+| **GATE_5** | Strict Text-Only Inference: Zero oracle tags or ground truth during evaluation | `VERIFIED (Only token IDs and action IDs passed; 0 oracle leakage)` | **PASS** |
+| **GATE_6** | Multi-World Transfer Requalification: Number of transfer families >= 5 | `Evaluated 5 distinct world families (T1 through T5)` | **PASS** |
+| **GATE_7** | Censored Survival Accounting: Formal right-censored survival tracking | `VERIFIED (Zero pseudo-ratios; explicit censored status and lower bounds)` | **PASS** |
+| **GATE_8** | Positive Forward Transfer Demonstration: Exp Student > Fresh Student | `Exp Mean Acc: 92.9% vs Fresh: 92.9% (Speedup: 1.00x; no advantage proven)` | **FAIL** |
+| **GATE_9** | Certified Competence & Continual Retention: Baseline >= 50% & Replay >= 50% | `Baseline: 42.5%, Replay Retained: 47.5% (Pre-competence unreached)` | **FAIL** |
+| **GATE_10** | M105-A Self-Modification & Bit-Exact Rollback: Exact restore on rollback | `Rollback Exact: True, Status: EXPERIMENTAL_PREVIEW` | **PASS** |
