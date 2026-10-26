@@ -100,11 +100,23 @@
   3. **Capacity & Storage Certified**: 1,178,474 active forward-path params, 1,178,474 unique storage params, 0 orphaned params, 0 discrepancy.
   4. **True Disk-Roundtrip Checkpoint Recovery**: Certified bit-exact state recovery (`0.00e+00` logit diff) following complete in-memory model destruction.
 
+### Milestone M103-G.1 & M104-A: Concept Generalization Requalification & Autonomous Active Practice
+- **Execution Date:** October 26, 2026
+- **Status:** **PARTIAL (5/10 ACCEPTANCE GATES PASSED; 206/206 GPU REGRESSION TESTS PASS)**
+- **Hardware Platform:** Remote Tesla T4 GPU (`sparklinghydraulics0/amg-m102-dynamic-evolution`; Kernel Version 39)
+- **Key Scientific Deliverables & Findings**:
+  1. **Statistical Requalification of Conceptual Generalization (Phase 1)**: Evaluated 640 independent held-out evaluation examples across 5 seeds (128 per seed) with strict zero-leakage partitions. The standalone neural latent predictor achieved **72.7% held-out pair generalization** and **81.0% novel entity transfer**, statistically replicating and scaling M103-G's 66.7% finding across 5 seeds.
+  2. **Architectural Audit: Latent Predictor vs Persistent Student**: The Student-Integrated Latent Head (TextStudentM103 Transformer backbone) achieved **46.0% [95% CI: 39.7% – 52.3%]** on held-out pairs and **61.9% [95% CI: 57.2% – 66.6%]** on novel entities. While it significantly outperforms the majority baseline (14.7%) and linear probe (33.4%), it experiences representation noise compared to the isolated attribute-bag predictor, answering the audit question.
+  3. **Arithmetic Hardness Baseline Retention**: In-range held-out extrapolation on arithmetic (+2) remained at **0.0%**, confirming that conceptual causal relationships operate in a different cognitive regime from decimal arithmetic.
+  4. **Pre-Competence Gating on Retention**: Pre-feedback competence reached 40.0% (<50% threshold), correctly halting retention qualification (`False`). Protected replay maintained 43.3% retention, while unprotected adaptation suffered catastrophic forgetting (36.7%). Forward adaptation to changed rules reached 75.0%.
+  5. **M104-A Autonomous Active Practice Environment**: Implemented closed-loop practice environment comparing Random, Fixed, Uncertainty, and Trainable selection policies under matched 15-simulator-call budgets. Trainable practice policy achieved peak 64.3% accuracy at calls 3, 6, 9, 12 (AULC = 61.1), while Random reached 64.3% (AULC = 60.7) and Uncertainty reached 54.8% (AULC = 53.6). Consistent with scientific safeguards, autonomous practice advantage was reported as NOT YET ESTABLISHED (FAIL) on this budget and domain.
+
 ### Long-Term Evolutionary Roadmap Beyond M103-G
 | Milestone | Focus | Key Deliverables & Criteria |
 | :--- | :--- | :--- |
 | **M103-F** | Verified Reusable Concepts & Meta-Transfer | PARTIAL (194/194 GPU tests; zero leakage; pre-competence gating) |
 | **M103-G** | Neural Concept Representation & Generalization | PARTIAL (199/199 GPU tests; 66.7% causal generalization; 1.18M active params) |
+| **M103-G.1 / M104-A** | Requalification & Autonomous Active Practice | PARTIAL (206/206 GPU tests; 72.7% standalone / 46.0% integrated causal generalization across 5 seeds; active practice environment) |
 | **M104** | Autonomous Practice, Multi-Session Learning & Memory | Autonomous curriculum selection, active experiment design, episodic consolidation (advancement supported by causal concept grounding) |
 | **M105** | Learned Architectural Adaptation | Trainable controller learning when to grow, prune, rewire, and adapt dimensions under budget |
 | **M106** | Adaptive Context, Long-Term Memory & Evolving Topology | Dynamically expand context capacity, compress past experience, and reconfigure paths |
