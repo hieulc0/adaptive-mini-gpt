@@ -65,6 +65,24 @@ def main():
         "kernel_id": "sparklinghydraulics0/amg-foundational-audit",
         "phases": {},
     }
+    install = run(
+        [sys.executable, "-m", "pip", "install", "--no-deps", "-e", str(REPO)], "install", 180
+    )
+    if install["exit_code"] != 0:
+        raise RuntimeError("Package installation failed; inspect install.log")
+    # Demonstrate new neural regressions against the first audit revision.
+    baseline_test = OUT / "test_baseline_neural_regressions.py"
+    baseline_test.write_text((REPO / "tests/test_audit_neural_regressions.py").read_text())
+    subprocess.run(
+        ["git", "checkout", "--detach", "cdd433a8d43c6b1cdc469205b3fe8e5c8a732e00"],
+        cwd=REPO,
+        check=True,
+    )
+    baseline = run(
+        [sys.executable, "-m", "pytest", "-q", str(baseline_test)], "baseline-neural-tests", 90
+    )
+    status["baseline_expected_failure"] = baseline
+    subprocess.run(["git", "checkout", "--detach", PINNED_SHA], cwd=REPO, check=True)
     status["phases"]["audit_tests"] = run(
         [
             sys.executable,
@@ -72,6 +90,7 @@ def main():
             "pytest",
             "-q",
             "tests/test_architecture_audit_contracts.py",
+            "tests/test_audit_neural_regressions.py",
             f"--junitxml={OUT / 'audit-tests.xml'}",
         ],
         "audit-tests",

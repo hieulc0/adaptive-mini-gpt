@@ -39,7 +39,7 @@ After that contract passes remotely, implement actual bounded plasticity/replay/
 
 ## Remote execution
 
-Use `kaggle/launch_foundational_audit.py` in a private script kernel, with `AMG_AUDIT_SHA` replaced by the full committed and pushed SHA before submission. The launcher verifies Kaggle plus CUDA, clones the branch, checks out the exact SHA, records provenance, runs inspected audit regressions and the diagnostic, and keeps stdout/stderr in working storage. Run the full suite remotely as a separately bounded phase after feasibility; failures remain failures, including legacy smoke assumptions invalidated by correct overflow errors. Do not call that historical suite locally.
+Use `kaggle/launch_foundational_audit.py` in a private script kernel, with `__PINNED_SHA__` replaced by the full committed and pushed SHA before submission. The launcher verifies Kaggle plus CUDA, clones the branch, checks out the exact SHA, records provenance, runs inspected audit regressions and the diagnostic, and keeps stdout/stderr in working storage. Run the full suite remotely as a separately bounded phase after feasibility; failures remain failures, including legacy smoke assumptions invalidated by correct overflow errors. Do not call that historical suite locally.
 
 Expected commands, on Kaggle only:
 
@@ -50,3 +50,25 @@ python -m pytest -q --junitxml=/kaggle/working/full-tests.xml
 ```
 
 The third command is a remote regression run, not a quality gate for neural intelligence. Artifacts must include failures, counts and actual source provenance. Read SCIENTIFIC_REVIEW_REPORT.md for actual execution status rather than inferring completion from this plan.
+
+Local-safe job preparation after committing/pushing (does not train locally):
+
+```bash
+python - <<'PYCODE'
+import json, subprocess
+from pathlib import Path
+sha = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+job = Path("runs/kaggle-foundational-audit/job")
+job.mkdir(parents=True, exist_ok=True)
+job.joinpath("launch.py").write_text(Path("kaggle/launch_foundational_audit.py").read_text().replace("__PINNED_SHA__", sha))
+job.joinpath("kernel-metadata.json").write_text(json.dumps(dict(
+    id="sparklinghydraulics0/amg-foundational-audit", title="amg-foundational-audit",
+    code_file="launch.py", language="python", kernel_type="script",
+    is_private="true", enable_gpu="true", enable_tpu="false", enable_internet="true",
+    dataset_sources=[], competition_sources=[], kernel_sources=[], model_sources=[]), indent=2))
+PYCODE
+kaggle kernels push -p runs/kaggle-foundational-audit/job
+kaggle kernels status sparklinghydraulics0/amg-foundational-audit
+# After COMPLETE or ERROR, preserve outputs and logs; ERROR is not a pass:
+kaggle kernels output sparklinghydraulics0/amg-foundational-audit -p runs/kaggle-foundational-audit/output
+```

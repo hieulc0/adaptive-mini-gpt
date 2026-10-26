@@ -41,9 +41,11 @@ def test_m104_b_causal_world_disjointness_and_pools():
     assert len(novel_names.intersection(tr_names)) == 0
 
     assert len(ds_100["paraphrase_test"]) >= 10
+    originals = {it.scenario_id: it for it in ds_100["novel_entity"]}
     for p_item in ds_100["paraphrase_test"]:
-        assert p_item.paraphrased_question is not None
-        assert p_item.paraphrased_question != p_item.question_text
+        assert p_item.question_text == p_item.paraphrased_question
+        original = originals[p_item.scenario_id.removeprefix("para_")]
+        assert p_item.question_text != original.question_text
 
 
 def test_m104_b_semantic_concept_adapter_shapes_and_accounting():

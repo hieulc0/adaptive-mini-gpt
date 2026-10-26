@@ -83,8 +83,8 @@ class CausalSelfAttention(nn.Module):
         if self.pos_encoding == "rope":
             t_pos = torch.arange(t, device=x.device, dtype=torch.float32)
             freqs = torch.outer(t_pos, self.inv_freq.to(device=x.device))
-            cos = torch.cos(freqs).repeat_interleave(2, dim=-1).view(1, 1, t, self.head_dim).to(dtype=q.dtype)
-            sin = torch.sin(freqs).repeat_interleave(2, dim=-1).view(1, 1, t, self.head_dim).to(dtype=q.dtype)
+            cos = torch.cat([torch.cos(freqs), torch.cos(freqs)], dim=-1).view(1, 1, t, self.head_dim).to(dtype=q.dtype)
+            sin = torch.cat([torch.sin(freqs), torch.sin(freqs)], dim=-1).view(1, 1, t, self.head_dim).to(dtype=q.dtype)
             q = apply_rotary_emb(q, cos, sin)
             k = apply_rotary_emb(k, cos, sin)
 

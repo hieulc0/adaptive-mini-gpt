@@ -42,3 +42,54 @@ New files pass targeted Ruff formatting/lint after import cleanup. Changed legac
 ## Remote execution
 
 REMOTE: Kaggle or Colab GPU training/full tests. Existing historical kernel status queried: `sparklinghydraulics0/amg-m104-e-grounding-transfer` COMPLETE. This is not a new qualification run. New diagnostic submission and measured results will be appended after the exact reviewed revision is committed/pushed and remotely executed. Until then: foundational learning NOT RUN; full regression NOT RUN; retention, transfer and controller advantage NOT QUALIFIED.
+
+## Verification and source publication update
+
+Reviewed source was committed and pushed as `cdd433a8d43c6b1cdc469205b3fe8e5c8a732e00` on the existing branch before remote submission. Local commit required filesystem escalation because `.git` is read-only in the ordinary sandbox; no approval rejection occurred. The private Kaggle diagnostic was submitted as `sparklinghydraulics0/amg-foundational-audit`, version 1. Job files: `runs/kaggle-foundational-audit/job/`; remote outputs: `/kaggle/working/foundational-audit/`. Submission alone is not verification.
+
+Exact local checks: `.venv/bin/python -m pytest -q tests/test_architecture_audit_contracts.py` (10 passed); `.venv/bin/python -m compileall -q` on changed source/test/runners; `.venv/bin/ruff check` on all changed Python files (pass after bounded import/unused-name cleanup); `.venv/bin/ruff format` on new Python files; `git diff --check` (pass). A targeted Pyright check of `training/remote_runtime.py` passed with 0 errors/warnings after a temporary configuration supplied the correct relative source and installed-package paths. Initial direct Pyright invocations could not resolve Torch; an initial temporary config used an unsupported absolute include and was discarded. No repository-wide type-check pass is claimed.
+
+## Changed files in the implementation commit
+
+- `README.md`
+- `docs/03-training-and-colab.md`
+- `docs/04-experiments.md`
+- `docs/05-roadmap.md`
+- `docs/06-data-pipeline.md`
+- `docs/ARCHITECTURE_AUDIT.md`
+- `docs/LONG_TERM_VISION.md`
+- `docs/REFACTOR_PLAN.md`
+- `docs/RESEARCH_INTEGRITY.md`
+- `docs/SCIENTIFIC_REVIEW_REPORT.md`
+- `kaggle/launch_foundational_audit.py`
+- `scripts/run_foundational_audit.py`
+- `scripts/run_m104_e_benchmark.py`
+- `src/adaptive_mini_gpt/model/transformer.py`
+- `src/adaptive_mini_gpt/natural_language_learning_m103/causal_world_m104_b.py`
+- `src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py`
+- `src/adaptive_mini_gpt/natural_language_learning_m103/grounded_extractor_m104_e.py`
+- `src/adaptive_mini_gpt/natural_language_learning_m103/self_modification_m105_a.py`
+- `src/adaptive_mini_gpt/natural_language_learning_m103/text_student_m103.py`
+- `src/adaptive_mini_gpt/natural_language_learning_m103/tokenizer_m103.py`
+- `src/adaptive_mini_gpt/training/remote_runtime.py`
+- `tests/test_architecture_audit_contracts.py`
+
+## Kaggle version 1 — completed phases, overall ERROR
+
+Kernel: `sparklinghydraulics0/amg-foundational-audit/1`; pinned source `cdd433a8d43c6b1cdc469205b3fe8e5c8a732e00`. Hardware: Tesla T4; Python 3.13.15; PyTorch 2.11.0+cu128; CUDA 12.8. Downloaded artifacts: `runs/kaggle-foundational-audit/output/foundational-audit/` (report, execution status, fixtures, three checkpoints, logs and test XML); kernel log is one directory above. This ERROR kernel is **not** a qualified completed run. Its individual audit tests and feasibility subprocesses exited zero; full regression exited one.
+
+Audit contracts: 10 passed remotely. Full suite: **718 passed, 25 failed, 1 skipped**, 464.38 seconds. Preserve `full-tests.log` and `full-tests.xml`; no timeout was counted as a pass.
+
+Controlled single-seed result (seed 42; each arm 200 tiny + 200 main updates, 400 actual optimizer steps; LR 0.002, zero decay; 4 tiny / 32 train / 32 dev / 32 held-out examples):
+
+| Arm | Tiny F1 / exact set | Train F1 / state accuracy | Dev F1 | Held-out F1 / exact set | Held-out state accuracy | Mismatched-text F1 | Measured GPU wall time |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Selective | 100% / 100% | 100% / 100% | 50% | 50% / 50% | 50% | 50% | 7.089 s |
+| Fully trainable | 100% / 100% | 100% / 100% | 50% | 75% / 75% | 50% | 25% | 6.199 s |
+| Frozen | 100% / 100% | 100% / 100% | 50% | 50% / 50% | 50% | 50% | 4.147 s |
+
+All arms have the same initial tensor hash `b4b586814e27dc7dffbaf3471e098c54730e38651942fed62a6e8a00ed32242c`; final checkpoint hashes and actual gradient-bearing parameter names are in report.json. Optimizer coverage of trainable registration is true in every arm, which does not imply every registered module participates in question-only inference. Dataset hash: `e3421087f1c7fa0a8a73210bab2990b735d829808f86224148f6325e2065596e`. Infrastructure simulator-query count is zero; labels are static synthetic supervision. Full-batch training observes 800 tiny-case presentations plus 6,400 main-case presentations per arm. GPU wall time is synchronized elapsed training/evaluation time, not device event-only kernel time.
+
+Interpretation: **tiny neural acquisition PASS; reliable unfamiliar-description generalization FAIL/INCONCLUSIVE; causal generalization FAIL** (50% equals the majority state baseline). The fully trainable arm's text ablation drop suggests text dependence, but 32 highly correlated cases from one seed do not qualify broad language understanding or an architecture superiority claim. The material words remain familiar; only names/phrasing change. There is no corrected-versus-historical causal improvement estimate. Corrective feedback, retention, future-task learning efficiency and learned self-modification remain NOT QUALIFIED and are not advanced on these results. No multi-seed sweep was launched.
+
+The full suite uncovered additional production failures: removed generation/inspection/counting methods; `TokenDataset` already shifts next-token labels, while `MiniGPT.forward` shifted again; answer masks use -1 while the model only ignored -100; MoE telemetry names no longer matched router outputs. One failure was a missing installed `amg` console script in the launcher. Two were stale test expectations exposed by the deliberate prompt/paraphrase repair. These are separated from the negative learning result. A follow-up focused repair restores historical interfaces from Git revision `9d1dad4`, restores aligned targets and both mask sentinels, reconnects router telemetry/auxiliary loss, fixes the independently identified rotary frequency pairing, updates the two obsolete payload expectations, and installs the package in the remote runner. New neural tests will be demonstrated against the pre-repair audit SHA and rerun on the corrected SHA remotely.

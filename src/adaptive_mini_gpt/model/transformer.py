@@ -318,14 +318,14 @@ class MiniGPT(nn.Module):
                     total_balance_loss = total_balance_loss + aux["balance_loss"]
                 if "z_loss" in aux:
                     total_z_loss = total_z_loss + aux["z_loss"]
-                if "router_entropy" in aux:
-                    entropies.append(aux["router_entropy"])
-                if "expert_utilization" in aux:
-                    utilizations.append(aux["expert_utilization"])
-                if "mod_loss" in aux:
-                    total_mod_loss = total_mod_loss + aux["mod_loss"]
-                if "mod_routed_fraction" in aux:
-                    mod_fractions.append(aux["mod_routed_fraction"])
+                if "entropy" in aux:
+                    entropies.append(aux["entropy"])
+                if "utilization" in aux:
+                    utilizations.append(aux["utilization"])
+                if "mod_aux_loss" in aux:
+                    total_mod_loss = total_mod_loss + aux["mod_aux_loss"]
+                if "mod_active_token_fraction" in aux:
+                    mod_fractions.append(aux["mod_active_token_fraction"])
 
         x = self.ln_f(x)
         logits = self.lm_head(x)
@@ -342,18 +342,23 @@ class MiniGPT(nn.Module):
             "balance_loss": total_balance_loss.item(),
             "z_loss": total_z_loss.item(),
             "mean_entropy": sum(entropies) / len(entropies) if entropies else 0.0,
+            "router_entropy": sum(entropies) / len(entropies) if entropies else 0.0,
             "expert_utilization": utilizations[-1].tolist() if utilizations else [],
             "mod_loss": total_mod_loss.item(),
+            "mod_aux_loss": total_mod_loss.item(),
+            "mod_active_fraction": sum(mod_fractions) / len(mod_fractions) if mod_fractions else 1.0,
+            "mod_active_token_fraction": sum(mod_fractions) / len(mod_fractions) if mod_fractions else 1.0,
             "mean_mod_fraction": sum(mod_fractions) / len(mod_fractions) if mod_fractions else 1.0,
         }
 
         loss = None
         if targets is not None:
-            shift_logits = logits[..., :-1, :].contiguous()
-            shift_targets = targets[..., 1:].contiguous()
+            # TokenDataset supplies already shifted next-token targets. Accept
+            # its historical -1 mask as well as the explicit -100 sentinel.
+            labels = targets.masked_fill(targets == -1, -100)
             loss = F.cross_entropy(
-                shift_logits.view(-1, self.config.vocab_size),
-                shift_targets.view(-1),
+                logits.reshape(-1, self.config.vocab_size),
+                labels.reshape(-1),
                 ignore_index=-100,
             )
             if self.config.adaptive_enabled:
@@ -366,3 +371,133 @@ class MiniGPT(nn.Module):
                 loss = loss + total_mod_loss
 
         return logits, loss
+
+    @torch.no_grad()
+    def generate(
+        self,
+        idx: Tensor,
+        max_new_tokens: int,
+        temperature: float = 1.0,
+        top_k: int | None = None,
+        top_p: float | None = None,
+        repetition_penalty: float = 1.0,
+        eos_id: int | None = None,
+        task_id: int | None = None,
+        bypass_moe: bool = False,
+        **kwargs: Any,
+    ) -> Tensor:
+        """Autoregressively generate new tokens with top-k, top-p, and repetition penalty."""
+        for _ in range(max_new_tokens):
+            idx_cond = (
+                idx
+                if idx.size(1) <= self.config.context_length
+                else idx[:, -self.config.context_length :]
+            )
+            logits, _ = self(idx_cond, task_id=task_id, bypass_moe=bypass_moe, **kwargs)
+            logits = logits[:, -1, :]
+
+            if repetition_penalty != 1.0 and repetition_penalty > 0.0:
+                for b_idx in range(idx.size(0)):
+                    seen_tokens = torch.unique(idx_cond[b_idx])
+                    seen_logits = logits[b_idx, seen_tokens]
+                    logits[b_idx, seen_tokens] = torch.where(
+                        seen_logits < 0,
+                        seen_logits * repetition_penalty,
+                        seen_logits / repetition_penalty,
+                    )
+
+            if temperature <= 0.0:
+                idx_next = torch.argmax(logits, dim=-1, keepdim=True)
+            else:
+                logits = logits / max(temperature, 1e-5)
+
+                if top_k is not None and top_k > 0:
+                    v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
+                    logits[logits < v[:, [-1]]] = float("-inf")
+
+                if top_p is not None and 0.0 < top_p < 1.0:
+                    sorted_logits, sorted_indices = torch.sort(logits, descending=True, dim=-1)
+                    cumulative_probs = torch.cumsum(F.softmax(sorted_logits, dim=-1), dim=-1)
+                    sorted_indices_to_remove = cumulative_probs > top_p
+                    sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
+                    sorted_indices_to_remove[..., 0] = 0
+                    indices_to_remove = sorted_indices_to_remove.scatter(
+                        1, sorted_indices, sorted_indices_to_remove
+                    )
+                    logits = logits.masked_fill(indices_to_remove, float("-inf"))
+
+                probs = F.softmax(logits, dim=-1)
+                idx_next = torch.multinomial(probs, num_samples=1)
+
+            idx = torch.cat((idx, idx_next), dim=1)
+            if eos_id is not None and (idx_next == eos_id).all():
+                break
+
+        return idx
+
+    def get_num_params(self, non_embedding: bool = False) -> int:
+        """Return total parameters in the model."""
+        n_params = sum(p.numel() for p in self.parameters())
+        if non_embedding:
+            if self.wpe is not None:
+                n_params -= self.wpe.weight.numel()
+            if not self.config.tie_word_embeddings:
+                n_params -= self.wte.weight.numel()
+        return n_params
+
+    def get_active_params_per_token(self) -> int:
+        """Return a configured active-parameter estimate, not measured FLOPs/latency."""
+        total = self.get_num_params(non_embedding=False)
+        inactive = 0
+        for block in self.blocks:
+            if not isinstance(block, TransformerBlock):
+                continue
+            active_moe_params = 0
+            if block.moe is not None:
+                exp_params = (
+                    sum(p.numel() for p in block.moe.experts[0].parameters())
+                    if len(block.moe.experts) > 0
+                    else 0
+                )
+                n_inactive = max(0, block.moe.n_experts - block.moe.top_k)
+                inactive += n_inactive * exp_params
+                active_moe_params = block.moe.top_k * exp_params + sum(
+                    p.numel() for p in block.moe.router.parameters()
+                )
+            if self.config.mod_enabled:
+                ffn_params = sum(p.numel() for p in block.mlp.parameters())
+                skippable = ffn_params + active_moe_params
+                inactive += int(round(skippable * (1.0 - self.config.mod_capacity_factor)))
+        return total - inactive
+
+    def inspect_architecture(self) -> dict[str, Any]:
+        """Return architectural details, total/trainable/active parameter counts."""
+        layer_details: list[dict[str, Any]] = []
+        for i, block in enumerate(self.blocks):
+            layer_params = sum(p.numel() for p in block.parameters())
+            layer_details.append({"layer": i, "params": layer_params})
+
+        return {
+            "architecture": self.config.architecture,
+            "d_model": self.config.d_model,
+            "n_layers": self.config.n_layers,
+            "n_heads": self.config.n_heads,
+            "head_dim": self.config.head_dim,
+            "d_ff": self.config.d_ff,
+            "context_length": self.config.context_length,
+            "vocab_size": self.config.vocab_size,
+            "tie_word_embeddings": self.config.tie_word_embeddings,
+            "adaptive_enabled": self.config.adaptive_enabled,
+            "n_experts": self.config.n_experts if self.config.adaptive_enabled else 0,
+            "top_k": self.config.top_k if self.config.adaptive_enabled else 0,
+            "mod_enabled": self.config.mod_enabled,
+            "mod_capacity_factor": (
+                self.config.mod_capacity_factor if self.config.mod_enabled else 1.0
+            ),
+            "moe_head_enabled": self.moe_head is not None,
+            "total_params": self.get_num_params(non_embedding=False),
+            "active_params_per_token": self.get_active_params_per_token(),
+            "trainable_params": sum(p.numel() for p in self.parameters() if p.requires_grad),
+            "non_embedding_params": self.get_num_params(non_embedding=True),
+            "layers": layer_details,
+        }

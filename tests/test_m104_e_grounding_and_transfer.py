@@ -1,17 +1,13 @@
 """Fast unit and regression tests for Milestone M104-E and M105-A."""
 
-import random
+import pytest
 import torch
 
-from adaptive_mini_gpt.natural_language_learning_m103.causal_world_m104_b import (
-    ProceduralCausalWorldM104_B,
-)
 from adaptive_mini_gpt.natural_language_learning_m103.concept_learner_m104_e import (
     ConceptLearnerM104_E,
 )
 from adaptive_mini_gpt.natural_language_learning_m103.grounded_extractor_m104_e import (
     EntityConditionedAttentionExtractorM104_E,
-    GroundedBottleneckAuditorM104_E,
     LexicalKeywordBaselineM104_E,
 )
 from adaptive_mini_gpt.natural_language_learning_m103.multi_world_transfer_m104_e import (
@@ -19,16 +15,12 @@ from adaptive_mini_gpt.natural_language_learning_m103.multi_world_transfer_m104_
     ProceduralTransferWorldM104_E,
 )
 from adaptive_mini_gpt.natural_language_learning_m103.self_modification_m105_a import (
-    FixedHeuristicControllerM105_A,
-    LearnedModificationControllerM105_A,
     ModificationOperatorTypeM105_A,
     NeuralModificationProposalM105_A,
-    RandomModificationControllerM105_A,
     StructuralRollbackControllerM105_A,
 )
 from adaptive_mini_gpt.natural_language_learning_m103.semantic_bottleneck_m104_e import (
     IntegratedStudentM104_E,
-    SemanticBottleneckM104_E,
 )
 from adaptive_mini_gpt.natural_language_learning_m103.text_student_m103 import (
     TextStudentM103,
@@ -157,22 +149,12 @@ def test_m104_e_procedural_transfer_worlds_and_multistep():
         assert len(ds["multistep"]) > 0
 
 
-def test_m104_e_smoke_cpu():
-    """Fast 1-seed 2-step smoke test of all phases on CPU."""
-    device = torch.device("cpu")
-    learner = ConceptLearnerM104_E(device=device)
+def test_m104_e_complete_input_required():
+    """Legacy standard rules exceed context; never silently train on rule-only bytes.
 
-    # Phase E0 smoke test
-    e0 = learner.run_phase_e0_audit(seed=42)
-    assert e0.independent_benchmark_arms_verified
-    assert e0.step_zero_evaluation_enabled
-    assert e0.strategy_comparison.lexical_baseline.micro_f1 > 50.0
-
-    # Phase E1 smoke test (1 seed, 2 steps)
-    e1 = learner.run_phase_e1_grounded_study(seeds=[42], steps=2)
-    assert e1.num_seeds == 1
-    assert 0.0 <= e1.selective_plasticity_held_out_acc <= 100.0
-
-    # Phase M105-A smoke test
-    m105 = learner.run_phase_m105a_qualification(seed=42, num_trials=2)
-    assert m105.rollback_restores_bit_exact
+    Remote-only integration file: the learner constructs neural models before
+    reaching the checked input boundary. Mock-only local coverage is separate.
+    """
+    learner = ConceptLearnerM104_E(device=torch.device("cuda" if torch.cuda.is_available() else "cpu"))
+    with pytest.raises(ValueError, match="exceeds context budget"):
+        learner.run_phase_e0_audit(seed=42)
