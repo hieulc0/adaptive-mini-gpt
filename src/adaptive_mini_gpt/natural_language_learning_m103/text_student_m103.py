@@ -137,6 +137,9 @@ class TextStudentM103(nn.Module):
         # Output logits
         return self.lm_head(x)
 
+    # Alias forward to forward_lm for standard nn.Module call syntax
+    forward = forward_lm
+
     def generate(
         self,
         prompt_tokens: list[int] | torch.Tensor,
