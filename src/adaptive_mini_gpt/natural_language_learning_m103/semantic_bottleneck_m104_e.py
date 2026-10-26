@@ -3,7 +3,7 @@
 Key Architectural Features:
 1. Entity-Conditioned Cross-Attention (ECA):
    - Uses entity/question representation as query to cross-attend over full sequence hidden states.
-   - Eliminates rule-text leakage while retaining full access to descriptive property modifiers.
+   - Attends over the supplied prompt; rule/entity separation is not guaranteed.
 2. Low-Rank Semantic Bottleneck (~56k parameters):
    - Exactly 56,074 parameters (certified 56.0% reduction vs M104-B's 127,418 params).
 3. Selective Plasticity with Grounded Embeddings:
@@ -64,7 +64,7 @@ class SemanticBottleneckM104_E(nn.Module):
         # 3. Action embedding
         self.action_emb = nn.Embedding(num_actions, action_dim)
 
-        # 4. Context-conditioned Transition Dynamics Network:
+        # 4. Entity/action Transition Dynamics Network (global_repr is currently unused):
         # Exactly 56,074 params (Linear 192 -> 128)
         self.transition_net = nn.Sequential(
             nn.Linear(d_model + action_dim, d_model),

@@ -1,21 +1,9 @@
-"""Milestone M105-A Neural Self-Modification Architecture and Transactional Rollback Engine.
+"""M105-A fixed-topology modification probes and partial rollback.
 
-Features:
-1. Complete Learning State Restoration:
-   - Captures and restores model parameters, optimizer state, LR scheduler state,
-     PyTorch/CUDA/Python RNG states, replay memory buffer, controller state, and module registrations.
-   - Restores the entire learning process bit-exact upon transaction abort.
-2. Candidate Selection Safeguards:
-   - Repeated modification candidates are evaluated exclusively on separate validation/regression sets.
-   - Sealed final holdout sets remain untainted and are reserved exclusively for independent qualification.
-   - Enforces backward retention safeguards before committing candidate modifications.
-3. Supported Modification Operators:
-   - SELECTIVE_BACKBONE_UPDATE: Dynamically modulates layer-specific plasticity masks and learning rates.
-   - ADAPTER_ALLOCATION: Dynamically allocates, scales, or routes modular adapter branches.
-   - REHEARSAL_CONSOLIDATION: Dynamically modulates replay buffer mixing and consolidation ratios.
-4. Multi-Policy Comparison:
-   - Compares Learned Modification Policy (reinforcement/context-driven) against Fixed Heuristic
-     and Uniform Random baseline policies.
+Mode changes, bottleneck scaling and optional rehearsal settings are experimental
+operators. The snapshot does not implement complete learning-process recovery,
+structural allocation or independently qualified controller improvement. See
+ARCHITECTURE_AUDIT.md and RESEARCH_INTEGRITY.md before using these interfaces.
 """
 
 from __future__ import annotations
@@ -81,7 +69,7 @@ class PolicyEvaluationSummaryM105_A:
 
 @dataclass
 class FullLearningStateSnapshotM105_A:
-    """Complete snapshot of the entire learning process."""
+    """Legacy partial snapshot; excludes topology and several mutable state owners."""
     model_state_dict: dict[str, torch.Tensor]
     optimizer_state_dict: dict[str, Any] | None
     scheduler_state_dict: dict[str, Any] | None
@@ -115,7 +103,7 @@ class StructuralRollbackControllerM105_A:
         self._snapshot: FullLearningStateSnapshotM105_A | None = None
 
     def create_snapshot(self) -> FullLearningStateSnapshotM105_A:
-        """Captures a complete snapshot of model, optimizer, scheduler, RNG, and replay state."""
+        """Capture supported fixed-topology tensor, optimizer, scheduler and replay state."""
         model_sd = {k: v.detach().clone() for k, v in self.target_model.state_dict().items()}
         opt_sd = copy.deepcopy(self.optimizer.state_dict()) if self.optimizer is not None else None
         sched_sd = copy.deepcopy(self.scheduler.state_dict()) if self.scheduler is not None else None
@@ -143,7 +131,7 @@ class StructuralRollbackControllerM105_A:
         return snapshot
 
     def restore_snapshot(self, snapshot: FullLearningStateSnapshotM105_A | None = None) -> None:
-        """Restores complete learning state with bit-exact precision."""
+        """Restore supported snapshot fields; not a resumed-learning certificate."""
         target_snap = snapshot or self._snapshot
         if target_snap is None:
             return

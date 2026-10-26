@@ -2,6 +2,14 @@
 
 Review baseline: `m104-e-and-m105-a`, `c353b1ff4ee5c9d3772635718912be53eb714424`; clean initial tree. No milestone advancement or historical artifact edits.
 
+## Current status after all runs
+
+- IMPLEMENTED: forensic review and focused compatibility/math/input repairs; no new milestone.
+- LOCALLY CHECKED (MOCK ONLY): 10 inspected tests, changed-file lint/syntax/diff checks; targeted runtime-guard type check only.
+- REMOTE VERIFIED (focused contracts): Kaggle version 3 COMPLETE, 12 passed; independent old-revision mask and rotary failures reproduced in separate CUDA processes.
+- FULL REGRESSION: version 2 completed with 744 passed / 1 failed / 1 skipped; overall kernel ERROR. M90 scientific capacity acceptance remains unresolved.
+- SCIENTIFICALLY QUALIFIED: no foundational or long-term capability qualification. Tiny supervised fitting was demonstrated; reliable language/concept generalization, retention, positive future learning efficiency and learned self-modification are NOT QUALIFIED. No multi-seed expansion or open-ended modification was attempted.
+
 ## Scientific answer
 
 The current system is a credible **research substrate to repair and test**, but it is not yet a scientifically qualified persistent neural learner. Its fundamental immediate failure is an invalid experimental interface: the rule alone is 335 bytes while neural inputs were truncated to 220 bytes, removing the entity description; transfer vocabularies silently collapse new actions/outcomes to class zero. These errors prevent interpreting low extraction or high transfer accuracy as architectural evidence. The smallest testable redesign preserves the Transformer and replaces those interfaces with complete structured input, explicit labels, a continuing learning-state lineage and independent generalization controls.
@@ -41,7 +49,7 @@ New files pass targeted Ruff formatting/lint after import cleanup. Changed legac
 
 ## Remote execution
 
-REMOTE: Kaggle or Colab GPU training/full tests. Existing historical kernel status queried: `sparklinghydraulics0/amg-m104-e-grounding-transfer` COMPLETE. This is not a new qualification run. New diagnostic submission and measured results will be appended after the exact reviewed revision is committed/pushed and remotely executed. Until then: foundational learning NOT RUN; full regression NOT RUN; retention, transfer and controller advantage NOT QUALIFIED.
+REMOTE: Kaggle or Colab GPU training/full tests. Existing historical kernel status queried: `sparklinghydraulics0/amg-m104-e-grounding-transfer` COMPLETE. This is not a new qualification run. Three new remote runs were submitted after their source revisions were committed/pushed. Versions 1/2 completed their subprocesses but ended in ERROR due to failing full suites; version 3 completed the isolated contracts-only check. Detailed results below supersede the initial submission status. Retention, transfer and controller advantage remain NOT QUALIFIED.
 
 ## Verification and source publication update
 
@@ -49,9 +57,10 @@ Reviewed source was committed and pushed as `cdd433a8d43c6b1cdc469205b3fe8e5c8a7
 
 Exact local checks: `.venv/bin/python -m pytest -q tests/test_architecture_audit_contracts.py` (10 passed); `.venv/bin/python -m compileall -q` on changed source/test/runners; `.venv/bin/ruff check` on all changed Python files (pass after bounded import/unused-name cleanup); `.venv/bin/ruff format` on new Python files; `git diff --check` (pass). A targeted Pyright check of `training/remote_runtime.py` passed with 0 errors/warnings after a temporary configuration supplied the correct relative source and installed-package paths. Initial direct Pyright invocations could not resolve Torch; an initial temporary config used an unsupported absolute include and was discarded. No repository-wide type-check pass is claimed.
 
-## Changed files in the implementation commit
+## Changed files across the audit
 
 - `README.md`
+- `docs/02-architecture.md`
 - `docs/03-training-and-colab.md`
 - `docs/04-experiments.md`
 - `docs/05-roadmap.md`
@@ -64,15 +73,20 @@ Exact local checks: `.venv/bin/python -m pytest -q tests/test_architecture_audit
 - `kaggle/launch_foundational_audit.py`
 - `scripts/run_foundational_audit.py`
 - `scripts/run_m104_e_benchmark.py`
+- `src/adaptive_mini_gpt/model/attention.py`
 - `src/adaptive_mini_gpt/model/transformer.py`
 - `src/adaptive_mini_gpt/natural_language_learning_m103/causal_world_m104_b.py`
 - `src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py`
 - `src/adaptive_mini_gpt/natural_language_learning_m103/grounded_extractor_m104_e.py`
 - `src/adaptive_mini_gpt/natural_language_learning_m103/self_modification_m105_a.py`
+- `src/adaptive_mini_gpt/natural_language_learning_m103/semantic_bottleneck_m104_e.py`
 - `src/adaptive_mini_gpt/natural_language_learning_m103/text_student_m103.py`
 - `src/adaptive_mini_gpt/natural_language_learning_m103/tokenizer_m103.py`
 - `src/adaptive_mini_gpt/training/remote_runtime.py`
 - `tests/test_architecture_audit_contracts.py`
+- `tests/test_audit_neural_regressions.py`
+- `tests/test_m104_b_grounded_concepts_and_active_learning.py`
+- `tests/test_m104_e_grounding_and_transfer.py`
 
 ## Kaggle version 1 — completed phases, overall ERROR
 
@@ -105,3 +119,28 @@ The remaining failure is `tests/test_m90_concept_instruction.py::test_stage_a_ca
 The foundational diagnostic repeated **identical** final parameter hashes and scores for all arms. Version 2 synchronized GPU wall times were 6.563 / 6.033 / 4.031 seconds (selective / fully trainable / frozen), 400 diagnostic optimizer updates per arm. This is engineering reproducibility of the same narrow negative result, not a new independent-world replication or a generalization improvement.
 
 The initial before/after CUDA baseline check correctly triggered the old mask failure, but its device-side assert poisoned the same subprocess before the rotary test. That second baseline error is not independent rotary defect evidence. The launcher is corrected to use a separate subprocess for each baseline regression, and a short contracts-only remote run will verify those failures independently; it does not rerun or replace the failed M90 acceptance experiment.
+
+
+## Kaggle version 3 — COMPLETE, isolated contracts only
+
+Pinned source `068de03d013143fcdb25ce152cca4b47dea19544`; same Tesla T4, PyTorch 2.11.0+cu128 and CUDA 12.8. `CONTRACTS_ONLY=True` is explicit in the submitted launcher copy. Kernel status COMPLETE. Output: `runs/kaggle-foundational-audit/output-v3/foundational-audit/`. The old audit revision `cdd433a...` fails the target/mask test and rotary norm test independently (one failure per subprocess, each with one deselected test). Corrected source passes **12/12** focused tests in 2.79 seconds. Logs show the rotary baseline's actual norm assertion failure, not contamination by the separate CUDA device-side mask assertion. This establishes the focused software corrections. Full regression and neural learning were deliberately not rerun in this contracts-only job; their version 2 failures/negative results remain binding.
+
+After this source revision, only documentation and inaccurate source comments/docstrings were clarified; neural math is unchanged from the full-suite-tested `e8ab576...` implementation. Historical reports/checkpoints were not overwritten. Versions 1/2 data hashes and downloaded artifact file hashes were locally verified without loading any model weights; retrieval manifests are beside those artifacts.
+
+The version 2 description-mismatch control leaves **all 32/32 causal predictions unchanged in every arm**. This is evidence of failure to use the tested material change in held-out state prediction; it is consistent with an action shortcut, not a general proof of context independence on every input. The fully trainable arm's attribute F1 drop under that same ablation does not rescue causal competence.
+
+| Foundational capability | Current verdict |
+| --- | --- |
+| Tiny supervised neural acquisition | PASS in a narrow four-case diagnostic; not general language understanding |
+| Unfamiliar-description concept extraction | FAIL / INCONCLUSIVE for reliable competence; 50–75% F1 in one correlated world |
+| Unseen causal outcome prediction | FAIL in this diagnostic; 50%, no description-ablation response |
+| Corrective learning | NOT QUALIFIED in the new protocol; not advanced after weak generalization |
+| Established-knowledge retention | NOT QUALIFIED; independent starting competence not established |
+| Positive unfamiliar-future learning efficiency | NOT QUALIFIED; old transfer labels invalid and no new qualifying study |
+| Learned self-modification and complete resumed-learning rollback | NOT QUALIFIED |
+
+## Remaining blockers and smallest next experiment
+
+Preserve the existing dense student. Repair the full-rule context/vocabulary migration before rerunning the M104 master benchmark. Factor name changes from syntax changes and compare mixed-template supervision with equal-input lexical/shallow controls on independent development examples; then seal fresh worlds. Do not increase capacity or launch a multi-seed sweep until generalization is informative. Requalify M90 with an explicit initialization protocol and per-rank outputs; its ambient-RNG dependency is confirmed, but the exact causal origin of its observed failed EM was not isolated. Do not seed-shop or relax its >=85% gate. Build one versioned complete learning-state owner and verify resumed updates before training modification policies. These are unresolved scientific/architectural tasks, not silently completed Stage C/D deliverables.
+
+Final execution boundary: LOCAL: lint/type/syntax/mock-only; REMOTE: Kaggle or Colab GPU training/full tests. No local neural training/evaluation or CPU fallback occurred. No Colab session was created, and Kaggle batch jobs have terminated.
