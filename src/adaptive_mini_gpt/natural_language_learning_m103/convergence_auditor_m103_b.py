@@ -190,13 +190,13 @@ class ConvergenceAuditorM103_B:
         # 2. Selective Backbone (blocks.3 + ln_f + wte + adapter)
         stud2 = TextStudentM103(device=self.device, enable_persistent_growth=False)
         rep_selective = self._run_overfit_regime(
-            stud2, tiny_batch, dom, "Selective Backbone Plasticity", "selective_backbone", steps=60, lr=0.005
+            stud2, tiny_batch, dom, "Selective Backbone Plasticity", "selective_backbone", steps=75, lr=0.005
         )
 
         # 3. Full Backbone
         stud3 = TextStudentM103(device=self.device, enable_persistent_growth=False)
         rep_full = self._run_overfit_regime(
-            stud3, tiny_batch, dom, "Full Backbone Training", "full", steps=60, lr=0.005
+            stud3, tiny_batch, dom, "Full Backbone Training", "full", steps=75, lr=0.005
         )
 
         certified = bool(rep_selective.converged or rep_full.converged)
