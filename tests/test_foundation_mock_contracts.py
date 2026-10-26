@@ -82,3 +82,26 @@ def test_joint_restore_rebinds_external_root_aliases():
         owner.restore(snapshot)
     assert owner.external["controller"]["model"] is owner.model
     assert owner.external["controller"]["optimizer"] is owner.optimizer
+
+
+def test_capacity_ledger_counts_all_routing_cohorts_and_single_task_route():
+    from types import SimpleNamespace
+
+    from adaptive_mini_gpt.model.transformer import MiniGPT, TransformerBlock
+
+    # Fake module/parameter ledger only; no model allocation or size benchmark.
+    parameter = SimpleNamespace(numel=lambda: 10)
+    expert = SimpleNamespace(parameters=lambda: iter([parameter]))
+    router = SimpleNamespace(
+        cohort_sizes=[2, 2], top_k=2, routing_mode="learned_topk", parameters=lambda: iter([])
+    )
+    block = object.__new__(TransformerBlock)
+    object.__setattr__(
+        block, "moe", SimpleNamespace(experts=[expert] * 4, n_experts=4, top_k=2, router=router)
+    )
+    model = SimpleNamespace(
+        get_num_params=lambda **kw: 100, blocks=[block], config=SimpleNamespace(mod_enabled=False)
+    )
+    assert MiniGPT.get_active_params_per_token(model) == 100  # all four experts execute
+    router.routing_mode = "task"
+    assert MiniGPT.get_active_params_per_token(model) == 70  # exactly one expert executes

@@ -463,9 +463,13 @@ class MiniGPT(nn.Module):
                     if len(block.moe.experts) > 0
                     else 0
                 )
-                n_inactive = max(0, block.moe.n_experts - block.moe.top_k)
+                router = block.moe.router
+                active_experts = 1 if router.routing_mode == "task" else sum(
+                    min(router.top_k, n) for n in router.cohort_sizes
+                )
+                n_inactive = max(0, block.moe.n_experts - active_experts)
                 inactive += n_inactive * exp_params
-                active_moe_params = block.moe.top_k * exp_params + sum(
+                active_moe_params = active_experts * exp_params + sum(
                     p.numel() for p in block.moe.router.parameters()
                 )
             if self.config.mod_enabled:
