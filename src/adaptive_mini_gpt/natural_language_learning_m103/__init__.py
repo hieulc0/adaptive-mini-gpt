@@ -1,5 +1,36 @@
 """Milestone M103 & M104: Natural-Language Learning, Grounded Concepts, and Autonomous Practice."""
 
+from adaptive_mini_gpt.natural_language_learning_m103.bottleneck_diagnostic_m104_c import (
+    BottleneckDiagnosticAuditorM104_C,
+    BottleneckDiagnosticReportM104_C,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.semantic_bottleneck_m104_c import (
+    IntegratedStudentM104_C,
+    SemanticBottleneckM104_C,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.active_practice_m104_c import (
+    ActivePracticeEnvironmentM104_C,
+    MetaTrainablePracticePolicyM104_C,
+    PolicyLearningTrajectoryM104_C,
+    PracticeStepRecordM104_C,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.concept_learner_m104_c import (
+    ConceptLearnerM104_C,
+    PhaseC1GroundedReportM104_C,
+    PhaseC2RetentionReportM104_C,
+    PhaseC3MultiPoolReportM104_C,
+    PhaseC4MetaTransferReportM104_C,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.benchmark_m104_c import (
+    BenchmarkM104_C,
+    MilestoneGateM104_C,
+    MilestoneReportM104_C,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.self_modification_interface_m104_c import (
+    ModificationOperatorTypeM104_C,
+    NeuralModificationProposalM104_C,
+    StructuralRollbackControllerM104_C,
+)
 from adaptive_mini_gpt.natural_language_learning_m103.causal_world_m104_b import (
     CausalItemM104_B,
     CausalObjectM104_B,
@@ -218,6 +249,25 @@ from adaptive_mini_gpt.natural_language_learning_m103.world_simulator_m103_c imp
 )
 
 __all__ = [
+    "ActivePracticeEnvironmentM104_C",
+    "BenchmarkM104_C",
+    "BottleneckDiagnosticAuditorM104_C",
+    "BottleneckDiagnosticReportM104_C",
+    "ConceptLearnerM104_C",
+    "IntegratedStudentM104_C",
+    "MetaTrainablePracticePolicyM104_C",
+    "MilestoneGateM104_C",
+    "MilestoneReportM104_C",
+    "ModificationOperatorTypeM104_C",
+    "NeuralModificationProposalM104_C",
+    "PhaseC1GroundedReportM104_C",
+    "PhaseC2RetentionReportM104_C",
+    "PhaseC3MultiPoolReportM104_C",
+    "PhaseC4MetaTransferReportM104_C",
+    "PolicyLearningTrajectoryM104_C",
+    "PracticeStepRecordM104_C",
+    "SemanticBottleneckM104_C",
+    "StructuralRollbackControllerM104_C",
     "ActivePracticeEnvironmentM104_B",
     "BenchmarkM104_B",
     "CausalItemM104_B",
