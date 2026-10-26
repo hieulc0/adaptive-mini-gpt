@@ -46,6 +46,7 @@ class TextStudentM103(nn.Module):
         tier: CapacityTierM100 = CapacityTierM100.TIER_20K,
         device: torch.device | None = None,
         enable_persistent_growth: bool = True,
+        prune_orphaned_lm_head: bool = False,
     ) -> None:
         super().__init__()
         self.tier = tier
@@ -84,8 +85,12 @@ class TextStudentM103(nn.Module):
             nn.init.zeros_(adapter[2].weight)
 
         # 4. Autoregressive Language Model Head (Linear 128 -> 1024)
-        self.lm_head = nn.Linear(128, 1024, bias=False).to(self.device)
-        self.lm_head.weight = self.base_model.wte.weight  # Tied word embeddings
+        if prune_orphaned_lm_head and hasattr(self.base_model, "lm_head") and self.base_model.lm_head is not None:
+            self.base_model.lm_head.weight = self.base_model.wte.weight
+            self.lm_head = self.base_model.lm_head
+        else:
+            self.lm_head = nn.Linear(128, 1024, bias=False).to(self.device)
+            self.lm_head.weight = self.base_model.wte.weight  # Tied word embeddings
 
         # 5. Text Tokenizer
         self.tokenizer = ByteTextTokenizerM103(vocab_size=1024)

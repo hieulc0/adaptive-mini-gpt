@@ -1,3 +1,22 @@
+from adaptive_mini_gpt.natural_language_learning_m103.benchmark_m103_f import (
+    BenchmarkReportM103_F,
+    BenchmarkRunnerM103_F,
+    MilestoneGateM103_F,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.capacity_auditor_m103_e1 import (
+    CapacityAuditReportM103_E1,
+    DynamicCapacityAuditorM103_E1,
+)
+from adaptive_mini_gpt.natural_language_learning_m103.concept_learner_m103_f import (
+    ConceptLearnerM103_F,
+    DatasetItemM103_F,
+    EvaluationResultM103_F,
+    LearningToLearnConditionResultM103_F,
+    Phase1OptimizationReportM103_F,
+    Phase2CorrectiveReportM103_F,
+    Phase3LearningToLearnReportM103_F,
+    StateTransitionStudyReportM103_F,
+)
 """Milestone M103: Natural-Language Learning and Generalization."""
 
 from adaptive_mini_gpt.natural_language_learning_m103.audit_m103 import (
@@ -113,6 +132,19 @@ from adaptive_mini_gpt.natural_language_learning_m103.world_simulator_m103_c imp
 )
 
 __all__ = [
+    "BenchmarkReportM103_F",
+    "BenchmarkRunnerM103_F",
+    "CapacityAuditReportM103_E1",
+    "ConceptLearnerM103_F",
+    "DatasetItemM103_F",
+    "DynamicCapacityAuditorM103_E1",
+    "EvaluationResultM103_F",
+    "LearningToLearnConditionResultM103_F",
+    "MilestoneGateM103_F",
+    "Phase1OptimizationReportM103_F",
+    "Phase2CorrectiveReportM103_F",
+    "Phase3LearningToLearnReportM103_F",
+    "StateTransitionStudyReportM103_F",
     "BenchmarkReportM103_C",
     "BenchmarkReportM103_D",
     "BenchmarkReportM103_E",
