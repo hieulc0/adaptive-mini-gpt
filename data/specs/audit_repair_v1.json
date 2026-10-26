@@ -1,0 +1,16 @@
+{
+  "id": "approved-audit-repair-v1",
+  "scope": "single-seed feasibility, not milestone qualification",
+  "seed": 42,
+  "model": "existing TextStudentM103 plus existing IntegratedStudentM104_E; no capacity increase",
+  "input": "complete UTF-8 byte prompt, real special markers, model-derived context budget, overflow rejected",
+  "splits": {"tiny": 8, "train": 128, "name_only": 32, "description_only": 64, "combined": 64},
+  "supervision": "explicit positive material/property statements; fixed two-action causal rule",
+  "neural_arms": ["frozen_backbone", "selective_plasticity", "trainable_backbone"],
+  "baselines": ["majority", "train-vocabulary bag-of-words linear"],
+  "optimizer": {"lr": 0.002, "weight_decay": 0, "steps_per_phase": 200, "batch_max": 16},
+  "tiny_stop_f1": 0.95,
+  "decision_threshold": 0.5,
+  "m90": {"seed": 42, "epochs": 50, "ranks": [16, 32], "gate_rank32_qualification_em_percent": 85, "ambient_seeds": [111, 222]},
+  "limitations": ["No negation or reference resolution", "Two material/property bundles are correlated", "No rule transfer", "Template cases are correlated; no independent confidence claim", "No retention or learning-to-learn claim"]
+}

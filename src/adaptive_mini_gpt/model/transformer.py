@@ -356,6 +356,8 @@ class MiniGPT(nn.Module):
             # TokenDataset supplies already shifted next-token targets. Accept
             # its historical -1 mask as well as the explicit -100 sentinel.
             labels = targets.masked_fill(targets == -1, -100)
+            if not (labels != -100).any():
+                raise ValueError("Batch has no supervised target tokens; refusing undefined mean loss")
             loss = F.cross_entropy(
                 logits.reshape(-1, self.config.vocab_size),
                 labels.reshape(-1),

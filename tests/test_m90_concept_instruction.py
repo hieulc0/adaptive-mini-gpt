@@ -110,8 +110,10 @@ def test_instruction_concept_trunk_parameter_budget() -> None:
 
 def test_stage_a_capacity_sweep_and_gate_a() -> None:
     """Verify Stage A Capacity Feasibility on foundational tasks."""
-    cfg = ModelConfig(vocab_size=1024, context_length=128, d_model=128, n_heads=4, n_layers=4, d_ff=512)
-    model = MiniGPT(cfg)
+    from adaptive_mini_gpt.training.reproducibility import isolated_rng
+    with isolated_rng(42, "backbone"):
+        cfg = ModelConfig(vocab_size=1024, context_length=128, d_model=128, n_heads=4, n_layers=4, d_ff=512)
+        model = MiniGPT(cfg)
 
     report = StageACapacityBenchmark.evaluate_capacity_sweep(
         model=model,

@@ -68,8 +68,12 @@ class ByteTextTokenizerM103:
         Raw ``encode`` deliberately remains byte-only. Callers must choose an
         explicit context policy if the complete prompt does not fit.
         """
-        full, prompt_len = self.format_qa_sequence(question, "", explanation)
-        prompt = full[:prompt_len]
+        if not question.strip():
+            raise ValueError("A complete observation requires a nonempty question")
+        prompt = [self.BOS_ID]
+        if explanation is not None and explanation.strip():
+            prompt += [self.RULE_ID] + self.encode(explanation) + [self.SEP_ID]
+        prompt += [self.QUESTION_ID] + self.encode(question) + [self.ANSWER_ID]
         if len(prompt) > max_length:
             raise ValueError(
                 f"Complete prompt length {len(prompt)} exceeds context budget {max_length}; "
@@ -144,14 +148,16 @@ class ByteTextTokenizerM103:
             t = torch.empty((0, 0), dtype=torch.long, device=device)
             return t, t
 
-        max_len = max_length or max(len(seq) for seq in token_lists)
+        max_len = max_length if max_length is not None else max(len(seq) for seq in token_lists)
+        if max_len <= 0 or any(len(seq) > max_len for seq in token_lists):
+            raise ValueError("Complete sequence exceeds padding budget; refusing silent truncation")
         batch_size = len(token_lists)
 
         padded = torch.full((batch_size, max_len), self.PAD_ID, dtype=torch.long, device=device)
         mask = torch.zeros((batch_size, max_len), dtype=torch.bool, device=device)
 
         for i, seq in enumerate(token_lists):
-            trunc = seq[:max_len]
+            trunc = seq
             padded[i, :len(trunc)] = torch.tensor(trunc, dtype=torch.long, device=device)
             mask[i, :len(trunc)] = True
 

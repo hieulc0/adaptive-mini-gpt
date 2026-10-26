@@ -22,6 +22,10 @@ def main() -> None:
     parser.add_argument("--lr-joint", type=float, default=0.02)
     args = parser.parse_args()
 
+    from adaptive_mini_gpt.training.remote_runtime import require_remote_cuda
+    from adaptive_mini_gpt.training.reproducibility import seed_all
+    require_remote_cuda(args.device)
+    seed_all(args.seeds[0])
     device = torch.device(args.device)
     print(f"=== Milestone M90 Benchmark Runner (Device: {device}) ===")
 

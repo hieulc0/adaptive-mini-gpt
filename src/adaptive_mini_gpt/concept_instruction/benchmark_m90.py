@@ -160,6 +160,8 @@ class M90InstructionBenchmark:
         seed_results: list[SeedEvaluationResult] = []
 
         for seed in seeds:
+            from adaptive_mini_gpt.training.reproducibility import seed_all
+            seed_all(seed)
             suite = curriculum_gen.generate_stage_b_suite(seed=seed)
 
             # 1. Multi-task concept training on 15 train tasks

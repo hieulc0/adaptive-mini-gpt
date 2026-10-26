@@ -223,6 +223,8 @@ class IntegratedStudentM104_E(nn.Module):
     def extract_sequence_hidden_states(self, tokens: torch.Tensor) -> torch.Tensor:
         """Runs Transformer and returns hidden sequence H: (B, L, d_model)."""
         b, t = tokens.size()
+        if t > self.student.base_model.config.context_length:
+            raise ValueError("Complete prompt exceeds configured model context")
         tok_emb = self.student.base_model.wte(tokens)
         pos = torch.arange(0, t, dtype=torch.long, device=tokens.device)
         x = self.student.base_model.drop(tok_emb + self.student.base_model.wpe(pos))
@@ -239,7 +241,7 @@ class IntegratedStudentM104_E(nn.Module):
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """Extracts entity-targeted representation and whole-sequence global causal representation."""
         B, L, D = h_seq.size()
-        global_mask = (tokens != ByteTextTokenizerM103.PAD_ID) & (tokens != 0)
+        global_mask = tokens != ByteTextTokenizerM103.PAD_ID
         global_mask_f = global_mask.float().unsqueeze(-1)
         global_repr = (h_seq * global_mask_f).sum(dim=1) / global_mask_f.sum(dim=1).clamp(min=1.0)
 
@@ -287,7 +289,7 @@ class IntegratedStudentM104_E(nn.Module):
         elif strategy == "question_only":
             entity_input = q_entity_repr
         else:  # entity_conditioned_attention (ECA)
-            pad_mask = (prompt_tokens == ByteTextTokenizerM103.PAD_ID) | (prompt_tokens == 0)
+            pad_mask = prompt_tokens == ByteTextTokenizerM103.PAD_ID
             q_query = q_entity_repr.unsqueeze(1)  # (B, 1, d_model)
             attended_repr = self.eca_extractor(
                 query_repr=q_query,

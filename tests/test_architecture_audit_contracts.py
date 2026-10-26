@@ -196,3 +196,66 @@ def test_unsupported_structural_operator_cannot_commit_noop():
     )
     result = ctrl.apply_and_evaluate(proposal, val_eval_fn=lambda: 1.0)
     assert not result.accepted
+
+
+def test_padding_must_not_discard_observed_tokens():
+    with pytest.raises(ValueError, match="exceeds"):
+        ByteTextTokenizerM103().pad_batch([[257, 261, 65, 262]], max_length=3)
+
+
+def test_prompt_exact_boundary_and_extensible_budget():
+    tok = ByteTextTokenizerM103()
+    full, n = tok.format_qa_sequence("é" * 140, "", "rule")
+    assert tok.encode_prompt("é" * 140, "rule", max_length=n) == full[:n]
+    with pytest.raises(ValueError, match="exceeds"):
+        tok.encode_prompt("é" * 140, "rule", max_length=n - 1)
+
+
+def test_independent_rng_stream_restores_ambient_state():
+    import random
+
+    from adaptive_mini_gpt.training.reproducibility import isolated_rng
+
+    with patch("torch.cuda.is_available", return_value=False):
+        before = random.getstate()
+        with isolated_rng(42, "fixture"):
+            first = random.random()
+        assert random.getstate() == before
+        random.random()
+        with isolated_rng(42, "fixture"):
+            assert random.random() == first
+
+
+def test_optimizer_membership_reports_dynamic_missing_parameter():
+    from adaptive_mini_gpt.training.optimizer_contract import optimizer_membership
+
+    # Parameters are fake objects; no neural initialization or optimizer steps.
+    class Param:
+        requires_grad = True
+
+    old, new = Param(), Param()
+    model = SimpleNamespace(
+        parameters=lambda: iter([old, new]),
+        named_parameters=lambda: iter([("old", old), ("new", new)]),
+    )
+    optimizer = SimpleNamespace(param_groups=[{"params": [old]}])
+    assert optimizer_membership(model, optimizer)["missing_trainable"] == ["new"]
+
+
+def test_complete_protocol_retains_whitespace_and_rejects_missing_evidence():
+    from adaptive_mini_gpt.natural_language_learning_m103.input_protocol import (
+        ObservedCase,
+        encode_observation,
+        validate_cases,
+    )
+
+    case = ObservedCase("x", "  wood\n", " rules ", "fire", ("wood",), "hot", {"wood": "wood"})
+    ids = encode_observation(case, ByteTextTokenizerM103(), 512)
+    assert 261 in ids and 260 in ids
+    validate_cases([case], {"wood": 0}, {"fire": 0}, {"hot": 0})
+    from dataclasses import replace
+
+    with pytest.raises(ValueError, match="evidence"):
+        validate_cases([replace(case, question="metal")], {"wood": 0}, {"fire": 0}, {"hot": 0})
+    with pytest.raises(ValueError, match="Contradictory"):
+        validate_cases([replace(case, question="not wood")], {"wood": 0}, {"fire": 0}, {"hot": 0})

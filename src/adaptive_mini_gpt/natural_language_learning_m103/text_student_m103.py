@@ -167,7 +167,7 @@ class TextStudentM103(nn.Module):
 
         ctx_len = self.base_model.config.context_length
         if cur_tokens.size(1) > ctx_len:
-            cur_tokens = cur_tokens[:, -ctx_len:]
+            raise ValueError("Complete task prompt exceeds model context; refusing silent truncation")
 
         generated: list[int] = []
         with torch.no_grad():

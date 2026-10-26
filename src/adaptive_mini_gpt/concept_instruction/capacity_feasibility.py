@@ -19,17 +19,13 @@ Evaluates:
 
 from __future__ import annotations
 
-import copy
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, field
 
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 
 from adaptive_mini_gpt.continual_retention.curriculum_m89 import (
     M89CurriculumGenerator,
-    RetentionDataset,
     extract_retention_features,
 )
 from adaptive_mini_gpt.continual_retention.task_conditioning import (
@@ -39,6 +35,8 @@ from adaptive_mini_gpt.model import MiniGPT
 from adaptive_mini_gpt.neural_weight_learning.sequence_adapter import (
     Rank16SequenceAdapter,
 )
+from adaptive_mini_gpt.training.optimizer_contract import adamw_groups
+from adaptive_mini_gpt.training.reproducibility import isolated_rng, stream_seed
 
 
 @dataclass(frozen=True)
@@ -65,6 +63,7 @@ class StageACapacityReport:
     gate_a_overall_passed: bool
     selected_rank: int
     modular_reference_em: float
+    initialization_seeds: dict[str, int] = field(default_factory=dict)
 
 
 class StageACapacityBenchmark:
@@ -97,11 +96,18 @@ class StageACapacityBenchmark:
             te_h, te_y = extract_retention_features(model, t.sealed_test_examples, device)
             task_data.append((t.task_id, tr_h, tr_y, ql_h, ql_y, te_h, te_y))
 
+        initialization_seeds = {}
+
         # 1. Modular Reference (Independent rank-16 adapters)
         indep_ems = []
-        for _, tr_h, tr_y, ql_h, ql_y, te_h, te_y in task_data:
-            adapter = Rank16SequenceAdapter(d_model=128, bottleneck_dim=16, num_symbols=16).to(device)
-            opt = torch.optim.AdamW(adapter.parameters(), lr=lr)
+        for task_id, tr_h, tr_y, _ql_h, _ql_y, te_h, te_y in task_data:
+            name = f"reference:{task_id}"
+            initialization_seeds[name] = stream_seed(seed, name)
+            with isolated_rng(seed, name):
+                adapter = Rank16SequenceAdapter(d_model=128, bottleneck_dim=16, num_symbols=16).to(
+                    device
+                )
+            opt = torch.optim.AdamW(adamw_groups(adapter, 0.01), lr=lr)
             for _ in range(epochs):
                 logits = adapter(tr_h)
                 loss = F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))
@@ -118,14 +124,17 @@ class StageACapacityBenchmark:
         results_by_rank: dict[int, RankFeasibilityResult] = {}
         for rank in ranks:
             # Joint Multi-Task Training
-            joint_trunk = TaskConditionedKnowledgeTrunk(
-                max_tasks=max(10, num_tasks),
-                d_model=128,
-                d_shared=rank,
-                num_symbols=16,
-            ).to(device)
+            name = f"joint:{rank}"
+            initialization_seeds[name] = stream_seed(seed, name)
+            with isolated_rng(seed, name):
+                joint_trunk = TaskConditionedKnowledgeTrunk(
+                    max_tasks=max(10, num_tasks),
+                    d_model=128,
+                    d_shared=rank,
+                    num_symbols=16,
+                ).to(device)
 
-            opt_joint = torch.optim.AdamW(joint_trunk.parameters(), lr=lr)
+            opt_joint = torch.optim.AdamW(adamw_groups(joint_trunk, 0.01), lr=lr)
             for _ in range(epochs):
                 for t_id, tr_h, tr_y, _, _, _, _ in task_data:
                     logits = joint_trunk(tr_h, task_id=t_id)
@@ -151,15 +160,18 @@ class StageACapacityBenchmark:
             mean_joint_te = sum(joint_te_ems) / len(joint_te_ems)
 
             # Sequential Unregularized Training (shows forgetting baseline)
-            seq_trunk = TaskConditionedKnowledgeTrunk(
-                max_tasks=max(10, num_tasks),
-                d_model=128,
-                d_shared=rank,
-                num_symbols=16,
-            ).to(device)
+            name = f"sequential:{rank}"
+            initialization_seeds[name] = stream_seed(seed, name)
+            with isolated_rng(seed, name):
+                seq_trunk = TaskConditionedKnowledgeTrunk(
+                    max_tasks=max(10, num_tasks),
+                    d_model=128,
+                    d_shared=rank,
+                    num_symbols=16,
+                ).to(device)
 
             for t_id, tr_h, tr_y, _, _, _, _ in task_data:
-                opt_seq = torch.optim.AdamW(seq_trunk.parameters(), lr=lr)
+                opt_seq = torch.optim.AdamW(adamw_groups(seq_trunk, 0.01), lr=lr)
                 for _ in range(epochs):
                     logits = seq_trunk(tr_h, task_id=t_id)
                     loss = F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))
@@ -191,7 +203,9 @@ class StageACapacityBenchmark:
                 gate_a_passed=gate_a_passed,
             )
 
-        target_rank = selected_rank if selected_rank in results_by_rank else list(results_by_rank.keys())[0]
+        target_rank = (
+            selected_rank if selected_rank in results_by_rank else list(results_by_rank.keys())[0]
+        )
         gate_a_overall = results_by_rank[target_rank].gate_a_passed
 
         return StageACapacityReport(
@@ -200,4 +214,5 @@ class StageACapacityBenchmark:
             gate_a_overall_passed=gate_a_overall,
             selected_rank=selected_rank,
             modular_reference_em=round(modular_ref_em, 2),
+            initialization_seeds=initialization_seeds,
         )

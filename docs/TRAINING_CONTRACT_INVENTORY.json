@@ -1,0 +1,4278 @@
+{
+  "counts": {
+    "CrossEntropyLoss": 62,
+    "AdamW": 308,
+    "cross_entropy": 304,
+    "binary_cross_entropy_with_logits": 34,
+    "scaled_dot_product_attention": 3
+  },
+  "sites": [
+    {
+      "path": "src/adaptive_mini_gpt/active_learning/continual_active.py",
+      "line": 119,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/active_learning/continual_active.py",
+      "line": 136,
+      "operation": "AdamW",
+      "arguments": "AdamW(trainable_params, lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/active_learning/learning_evaluator.py",
+      "line": 224,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/active_learning/learning_evaluator.py",
+      "line": 225,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptation/trainer.py",
+      "line": 214,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptation/trainer.py",
+      "line": 226,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptation/trainer.py",
+      "line": 107,
+      "operation": "cross_entropy",
+      "arguments": "nn.functional.cross_entropy(logits[:, :-1, :].contiguous().view(-1, logits.size(-1)), y[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptation/trainer.py",
+      "line": 312,
+      "operation": "cross_entropy",
+      "arguments": "nn.functional.cross_entropy(logits_p[:, :-1, :].contiguous().view(-1, logits_p.size(-1)), y_p[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptation/trainer.py",
+      "line": 333,
+      "operation": "cross_entropy",
+      "arguments": "nn.functional.cross_entropy(logits_a[:, :-1, :].contiguous().view(-1, logits_a.size(-1)), y_a[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptation/trainer.py",
+      "line": 354,
+      "operation": "cross_entropy",
+      "arguments": "nn.functional.cross_entropy(logits_l[:, :-1, :].contiguous().view(-1, logits_l.size(-1)), y_l[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptation/trainer.py",
+      "line": 370,
+      "operation": "cross_entropy",
+      "arguments": "nn.functional.cross_entropy(logits[:, :-1, :].contiguous().view(-1, logits.size(-1)), y_b[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptive/mod.py",
+      "line": 54,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(logits, target_mask.detach())"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptive_context/benchmark_m97.py",
+      "line": 220,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(substrate.parameters(), lr=lr_trunk, weight_decay=1e-05)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptive_context/benchmark_m97.py",
+      "line": 225,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, all_y)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptive_context/persistent_student_m97.py",
+      "line": 123,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.substrate.parameters(), lr=0.001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptive_optimization/audit.py",
+      "line": 102,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([w], lr=0.01, eps=1e-08)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptive_optimization/optimization_engine.py",
+      "line": 223,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptive_optimization/optimization_engine.py",
+      "line": 252,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW([p for p in adapter_candidate.parameters() if p.requires_grad], lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptive_optimization/optimization_engine.py",
+      "line": 298,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(adapter_candidate.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptive_optimization/optimization_engine.py",
+      "line": 323,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(adapter_candidate.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/adaptive_optimization/optimization_engine.py",
+      "line": 337,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW([p for p in adapter_candidate.parameters() if p.requires_grad], lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/analogy/analogy_experiments.py",
+      "line": 446,
+      "operation": "AdamW",
+      "arguments": "AdamW([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/analogy/analogy_experiments.py",
+      "line": 451,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/analogy/audit.py",
+      "line": 196,
+      "operation": "AdamW",
+      "arguments": "AdamW([p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/analogy/audit.py",
+      "line": 197,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/analogy/audit.py",
+      "line": 154,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/analogy/language_diagnostic.py",
+      "line": 97,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(reduction='sum')"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/analogy/language_diagnostic.py",
+      "line": 164,
+      "operation": "AdamW",
+      "arguments": "AdamW([p for p in m_8.parameters() if p.requires_grad], lr=0.0005)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/analogy/language_diagnostic.py",
+      "line": 165,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/analogy/language_diagnostic.py",
+      "line": 194,
+      "operation": "AdamW",
+      "arguments": "AdamW([p for p in m_16.parameters() if p.requires_grad], lr=0.0005)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/analogy/sequential_retention.py",
+      "line": 147,
+      "operation": "AdamW",
+      "arguments": "AdamW([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/analogy/sequential_retention.py",
+      "line": 148,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/autonomous_discovery/benchmark_m92.py",
+      "line": 177,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(substrate.parameters(), lr=lr_trunk, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/autonomous_discovery/benchmark_m92.py",
+      "line": 181,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.reshape(-1, 16), y_tr.reshape(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/autonomous_discovery/neural_rule_learner.py",
+      "line": 143,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(res_module.parameters(), lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/autonomous_discovery/neural_rule_learner.py",
+      "line": 159,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.reshape(-1, 16), y_tr.reshape(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/autonomous_research_loop/research_loop.py",
+      "line": 198,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(fresh_adapter.parameters(), lr=0.0005, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/autonomous_research_loop/research_loop.py",
+      "line": 215,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt], device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/budgeted_autonomous_learning/sequential_stream.py",
+      "line": 233,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(fresh_ad.parameters(), lr=0.0005, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/budgeted_autonomous_learning/sequential_stream.py",
+      "line": 249,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out, torch.tensor([tgt], device=dev))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/budgeted_autonomous_learning/sequential_stream.py",
+      "line": 288,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(cand_ad.parameters(), lr=0.0005, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/budgeted_autonomous_learning/sequential_stream.py",
+      "line": 304,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out, torch.tensor([tgt], device=dev))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/capacity_evolution/evolution_engine.py",
+      "line": 172,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(trainable_params, lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/capacity_evolution/evolution_engine.py",
+      "line": 173,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/causal_learning_audit/factorial.py",
+      "line": 165,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(adapter.parameters(), lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/causal_learning_audit/factorial.py",
+      "line": 166,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/causal_learning_audit/transfer.py",
+      "line": 137,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(adapter.parameters(), lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/causal_learning_audit/transfer.py",
+      "line": 138,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/causal_meta_learning/causal_ablation.py",
+      "line": 299,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(target_adapter.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/causal_meta_learning/causal_ablation.py",
+      "line": 353,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, tgt)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/causal_meta_learning/causal_ablation.py",
+      "line": 261,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, tgt)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/causal_neural_memory/causal_stream_engine.py",
+      "line": 143,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=0.001, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/causal_neural_memory/causal_stream_engine.py",
+      "line": 172,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt], device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/composition/composition_trainer.py",
+      "line": 97,
+      "operation": "AdamW",
+      "arguments": "AdamW(trainable_params, lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/composition/composition_trainer.py",
+      "line": 98,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/composition/hybrid_router.py",
+      "line": 143,
+      "operation": "AdamW",
+      "arguments": "AdamW(self.neural_router.parameters(), lr=lr, weight_decay=0.001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/composition/hybrid_router.py",
+      "line": 144,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 180,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(trunk.parameters(), lr=lr_joint, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 309,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(exp_student.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 325,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(fresh_student.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 185,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.reshape(-1, 16), y_tr.reshape(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 210,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(student.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 228,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(student.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 246,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(student.parameters(), lr=0.015)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 264,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(seq_trunk.parameters(), lr=0.015)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 285,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(rep_trunk.parameters(), lr=0.015)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 314,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(exp_student(h_nov_tr).reshape(-1, 16), y_nov_tr.reshape(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 330,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(fresh_student(h_nov_tr).reshape(-1, 16), y_nov_tr.reshape(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 212,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(student(h_ho_tr).reshape(-1, 16), y_ho_tr.reshape(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 230,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(student(h_hp_tr).reshape(-1, 16), y_hp_tr.reshape(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 248,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(student(h_cp_tr).reshape(-1, 16), y_cp_tr.reshape(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 266,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(seq_trunk(h_st_tr).reshape(-1, 16), y_st_tr.reshape(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/benchmark_m90.py",
+      "line": 287,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(rep_trunk(h_rep_tr).reshape(-1, 16), y_rep_tr.reshape(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/capacity_feasibility.py",
+      "line": 110,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(adapter, 0.01), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/capacity_feasibility.py",
+      "line": 137,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(joint_trunk, 0.01), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/capacity_feasibility.py",
+      "line": 113,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/capacity_feasibility.py",
+      "line": 174,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(seq_trunk, 0.01), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/capacity_feasibility.py",
+      "line": 141,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/concept_instruction/capacity_feasibility.py",
+      "line": 177,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_interference_repair/persistent_student_m102_1.py",
+      "line": 177,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(list(self.head_manager.parameters()) + list(anc_adapter.parameters()), lr=0.04)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_interference_repair/persistent_student_m102_1.py",
+      "line": 265,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([{'params': adapter_params, 'lr': self.plasticity_manager.fast_lr}, {'params': head_params, 'lr': 0.015}], weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_interference_repair/persistent_student_m102_1.py",
+      "line": 392,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in self.parameters() if p.requires_grad], lr=0.001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_interference_repair/persistent_student_m102_1.py",
+      "line": 183,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, lbl)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_interference_repair/persistent_student_m102_1.py",
+      "line": 287,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, goal.train_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_interference_repair/persistent_student_m102_1.py",
+      "line": 291,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(self.head_manager.domain_router(h_emb), target_dom_tensor)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_interference_repair/persistent_student_m102_1.py",
+      "line": 397,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, goal.train_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_interference_repair/persistent_student_m102_1.py",
+      "line": 301,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(r_logits, r_lbl)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_interference_repair/persistent_student_m102_1.py",
+      "line": 405,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(r_logits, r_lbl)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/benchmark_m89.py",
+      "line": 120,
+      "operation": "cross_entropy",
+      "arguments": "torch.nn.functional.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/capacity_feasibility.py",
+      "line": 92,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(joint_trunk.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/capacity_feasibility.py",
+      "line": 74,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/capacity_feasibility.py",
+      "line": 117,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(seq_trunk.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/capacity_feasibility.py",
+      "line": 77,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/capacity_feasibility.py",
+      "line": 97,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/capacity_feasibility.py",
+      "line": 120,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/retention_learners.py",
+      "line": 163,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.trunk.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/retention_learners.py",
+      "line": 191,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.trunk.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/retention_learners.py",
+      "line": 243,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.trunk.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/retention_learners.py",
+      "line": 293,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.trunk.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/retention_learners.py",
+      "line": 359,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/retention_learners.py",
+      "line": 166,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/retention_learners.py",
+      "line": 194,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/retention_learners.py",
+      "line": 246,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/retention_learners.py",
+      "line": 297,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/retention_learners.py",
+      "line": 362,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/retention_learners.py",
+      "line": 202,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(plog.view(-1, 16), p_y[idx:idx + 1].view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_retention/retention_learners.py",
+      "line": 255,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(plog.view(-1, 16), p_y[idx:idx + 1].view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_self_improvement/continual_learning_stream.py",
+      "line": 204,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=0.001, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_self_improvement/continual_learning_stream.py",
+      "line": 232,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt], device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_student/continual_learner.py",
+      "line": 183,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_student/continual_learner.py",
+      "line": 196,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_student/continual_learner.py",
+      "line": 64,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), val_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_student/learning_policy.py",
+      "line": 110,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.parameters(), lr=0.015, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/continual_student/learning_policy.py",
+      "line": 117,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out, y_tr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/corrective/corrective_trainer.py",
+      "line": 98,
+      "operation": "AdamW",
+      "arguments": "AdamW(trainable_params, lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/corrective/corrective_trainer.py",
+      "line": 99,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/corrective/uncertainty_router.py",
+      "line": 128,
+      "operation": "AdamW",
+      "arguments": "AdamW(self.neural_router.parameters(), lr=lr, weight_decay=0.001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/corrective/uncertainty_router.py",
+      "line": 129,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_domain_transfer/benchmark_m95.py",
+      "line": 202,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(substrate.parameters(), lr=lr_trunk, weight_decay=1e-05)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_domain_transfer/benchmark_m95.py",
+      "line": 222,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(substrate.domain_residuals[Domain.PROGRAM.value].parameters(), lr=0.02)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_domain_transfer/benchmark_m95.py",
+      "line": 207,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, all_y_tr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_domain_transfer/benchmark_m95.py",
+      "line": 280,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(substrate.domain_residuals[dom.value].parameters(), lr=0.02)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_domain_transfer/benchmark_m95.py",
+      "line": 236,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_p, py)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_domain_transfer/benchmark_m95.py",
+      "line": 294,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_t, ty)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_domain_transfer/cross_domain_learner.py",
+      "line": 79,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(res_mod.parameters(), lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_domain_transfer/cross_domain_learner.py",
+      "line": 82,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(sub.parameters(), lr=0.01, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_domain_transfer/cross_domain_learner.py",
+      "line": 126,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, y_t)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_subject_skills/autonomous_skill_learner.py",
+      "line": 98,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(substrate.substrate.parameters(), lr=lr, weight_decay=1e-05)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_subject_skills/autonomous_skill_learner.py",
+      "line": 109,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits_tr, y_tr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_subject_skills/autonomous_skill_learner.py",
+      "line": 113,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits_anc, y_anc)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_subject_skills/benchmark_m98.py",
+      "line": 180,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(substrate.substrate.parameters(), lr=lr_trunk, weight_decay=1e-05)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_subject_skills/benchmark_m98.py",
+      "line": 184,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, all_y)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/cross_subject_skills/persistent_student_m98.py",
+      "line": 109,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.substrate.substrate.parameters(), lr=0.001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/curriculum_discovery/uncertainty.py",
+      "line": 228,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(policy.parameters(), lr=lr, weight_decay=weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/curriculum_discovery/uncertainty.py",
+      "line": 229,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/data/pretrain_dataset.py",
+      "line": 127,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, model.config.vocab_size), y.view(-1), ignore_index=pad_id, reduction='sum')"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/data/retention_data.py",
+      "line": 106,
+      "operation": "cross_entropy",
+      "arguments": "nn.functional.cross_entropy(shift_logits.view(-1, model.config.vocab_size), shift_labels.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/architecture_policy.py",
+      "line": 122,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.parameters(), lr=0.015, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/architecture_policy.py",
+      "line": 127,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, y_train)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 197,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(ad_s8.parameters(), lr=0.015)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 229,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(ad_s16.parameters(), lr=0.015)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 261,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(ad_sm.parameters(), lr=0.015)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 292,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(ad_rnd.parameters(), lr=0.015)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 341,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(ad_lrn.parameters(), lr=0.015)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 416,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(ad_orc.parameters(), lr=0.015)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 482,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(ad_sim.parameters(), lr=0.015)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 495,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(ad_sim.parameters(), lr=0.015)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 203,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 235,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 267,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 299,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 350,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 422,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 486,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(ad_sim(sim_tr_h).view(-1, 16), sim_tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 502,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out_sim.view(-1, 16), sim_tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dimension_evolution/benchmark.py",
+      "line": 94,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, adapter.num_symbols), y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dynamic_transformer_evolution/persistent_student_m102.py",
+      "line": 167,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(list(self.task_head.parameters()) + list(anc_adapter.parameters()), lr=0.04)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dynamic_transformer_evolution/persistent_student_m102.py",
+      "line": 242,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([{'params': adapter_params, 'lr': self.plasticity_manager.fast_lr}, {'params': head_params, 'lr': 0.008}], weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dynamic_transformer_evolution/persistent_student_m102.py",
+      "line": 351,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in self.parameters() if p.requires_grad], lr=0.001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dynamic_transformer_evolution/persistent_student_m102.py",
+      "line": 173,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, lbl)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dynamic_transformer_evolution/persistent_student_m102.py",
+      "line": 257,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, goal.train_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dynamic_transformer_evolution/persistent_student_m102.py",
+      "line": 296,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(list(self.task_head.parameters()), lr=0.005)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dynamic_transformer_evolution/persistent_student_m102.py",
+      "line": 356,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, goal.train_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dynamic_transformer_evolution/persistent_student_m102.py",
+      "line": 265,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(r_logits, r_lbl)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dynamic_transformer_evolution/persistent_student_m102.py",
+      "line": 363,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(r_logits, r_lbl)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/dynamic_transformer_evolution/persistent_student_m102.py",
+      "line": 300,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(self.forward(r_tok, active_domains=[r_dom]), r_lbl)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/experience_guided_learning/causal_experience_benchmark.py",
+      "line": 196,
+      "operation": "cross_entropy",
+      "arguments": "torch.nn.functional.cross_entropy(d_logits.view(-1, d_logits.size(-1)), dev_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/experience_guided_learning/causal_experience_benchmark.py",
+      "line": 293,
+      "operation": "cross_entropy",
+      "arguments": "torch.nn.functional.cross_entropy(t_logits.view(-1, t_logits.size(-1)), test_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/experiment_design/continual_study.py",
+      "line": 176,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(adapter.parameters(), lr=0.005, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/experiment_design/continual_study.py",
+      "line": 177,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/experiment_design/learning_evaluator.py",
+      "line": 192,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(adapter.parameters(), lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/experiment_design/learning_evaluator.py",
+      "line": 193,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/continual_mechanisms.py",
+      "line": 164,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.trunk.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/continual_mechanisms.py",
+      "line": 274,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(params, lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/continual_mechanisms.py",
+      "line": 358,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.trunk.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/continual_mechanisms.py",
+      "line": 450,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/continual_mechanisms.py",
+      "line": 528,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/continual_mechanisms.py",
+      "line": 174,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/continual_mechanisms.py",
+      "line": 285,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/continual_mechanisms.py",
+      "line": 367,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/continual_mechanisms.py",
+      "line": 459,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/continual_mechanisms.py",
+      "line": 537,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/continual_mechanisms.py",
+      "line": 182,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(rep_logits.view(-1, 16), rep_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/continual_mechanisms.py",
+      "line": 293,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(rep_logits.view(-1, 16), rep_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/student.py",
+      "line": 175,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(params, lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/student.py",
+      "line": 187,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/foundational/student.py",
+      "line": 195,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(rep_logits.view(-1, 16), rep_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/generalizable_learning/optimization_engine.py",
+      "line": 228,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/generalizable_learning/optimization_engine.py",
+      "line": 256,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW([p for p in adapter_candidate.parameters() if p.requires_grad], lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/generalizable_learning/optimization_engine.py",
+      "line": 319,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW([p for p in adapter_candidate.parameters() if p.requires_grad], lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/generalizable_learning/optimization_engine.py",
+      "line": 329,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW([p for p in adapter_candidate.parameters() if p.requires_grad], lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/generalizable_learning/skill_router.py",
+      "line": 145,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.trainable_gate.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/generalizable_learning/skill_router.py",
+      "line": 146,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/guided_experiment/continual_study.py",
+      "line": 175,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(adapter.parameters(), lr=0.005, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/guided_experiment/continual_study.py",
+      "line": 176,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/guided_experiment/learning_evaluator.py",
+      "line": 191,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(adapter.parameters(), lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/guided_experiment/learning_evaluator.py",
+      "line": 192,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integrated_autonomous_student/future_learning_evaluator_m100.py",
+      "line": 142,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(param_groups)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integrated_autonomous_student/future_learning_evaluator_m100.py",
+      "line": 142,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(student.parameters(), lr=adapter_lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integrated_autonomous_student/future_learning_evaluator_m100.py",
+      "line": 150,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, target_goal.train_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integrated_autonomous_student/future_learning_evaluator_m100.py",
+      "line": 153,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(anc_logits, target_goal.anchor_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integrated_autonomous_student/integrated_student_m100.py",
+      "line": 133,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(list(self.task_head.parameters()) + list(self.adapter_modules.parameters()), lr=0.04)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integrated_autonomous_student/integrated_student_m100.py",
+      "line": 256,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in self.parameters() if p.requires_grad], lr=self.plasticity_manager.fast_lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integrated_autonomous_student/integrated_student_m100.py",
+      "line": 139,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, lbl)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integrated_autonomous_student/integrated_student_m100.py",
+      "line": 269,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, goal.train_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integrated_autonomous_student/integrated_student_m100.py",
+      "line": 272,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(anc_logits, goal.anchor_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integrated_autonomous_student/integrated_student_m100.py",
+      "line": 302,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in self.parameters() if p.requires_grad], lr=0.015)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integrated_autonomous_student/integrated_student_m100.py",
+      "line": 305,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(anc_logits, goal.anchor_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integrated_autonomous_student/two_speed_plasticity_manager.py",
+      "line": 169,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=self.slow_lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integrated_autonomous_student/two_speed_plasticity_manager.py",
+      "line": 180,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(tgt_logits, target_train_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integrated_autonomous_student/two_speed_plasticity_manager.py",
+      "line": 184,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(anc_logits, anchor_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integration/knowledge_integrator.py",
+      "line": 153,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(trainable_params, lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integration/knowledge_integrator.py",
+      "line": 154,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integration/learned_router.py",
+      "line": 129,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.neural_router.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/integration/learned_router.py",
+      "line": 130,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/interaction/closed_loop_reasoner.py",
+      "line": 131,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(candidate.parameters(), lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/interaction/closed_loop_reasoner.py",
+      "line": 183,
+      "operation": "cross_entropy",
+      "arguments": "nn.functional.cross_entropy(logits_p[:, :-1, :].contiguous().view(-1, logits_p.size(-1)), yp[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/interaction/closed_loop_reasoner.py",
+      "line": 203,
+      "operation": "cross_entropy",
+      "arguments": "nn.functional.cross_entropy(logits_r[:, :-1, :].contiguous().view(-1, logits_r.size(-1)), yr[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/interaction/closed_loop_recurrent.py",
+      "line": 152,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(candidate_model.parameters(), lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/interaction/closed_loop_recurrent.py",
+      "line": 202,
+      "operation": "cross_entropy",
+      "arguments": "torch.nn.functional.cross_entropy(logits_p[:, :-1, :].contiguous().view(-1, logits_p.size(-1)), b_labels[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/interaction/closed_loop_recurrent.py",
+      "line": 210,
+      "operation": "cross_entropy",
+      "arguments": "torch.nn.functional.cross_entropy(logits_r[:, :-1, :].contiguous().view(-1, logits_r.size(-1)), r_labels[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/knowledge_consolidation/benchmark.py",
+      "line": 217,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(teacher_casc.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/knowledge_consolidation/benchmark.py",
+      "line": 158,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(teacher.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/knowledge_consolidation/benchmark.py",
+      "line": 221,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(teacher_casc(c_tr_h).view(-1, 16), c_tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/knowledge_consolidation/benchmark.py",
+      "line": 263,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(t_ad.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/knowledge_consolidation/benchmark.py",
+      "line": 162,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(teacher(tr_h).view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/knowledge_consolidation/benchmark.py",
+      "line": 267,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(t_ad(data_r4[d_k]['train_h']).view(-1, 16), data_r4[d_k]['train_y'].view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/knowledge_consolidation/candidate_analyzer.py",
+      "line": 124,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out_a.view(-1, 16), probe_y_a.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/knowledge_consolidation/candidate_analyzer.py",
+      "line": 130,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out_b.view(-1, 16), probe_y_b.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/knowledge_consolidation/distillation_engine.py",
+      "line": 128,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([{'params': trunk_params, 'lr': lr}, {'params': res_params, 'lr': lr * 1.5}], weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/knowledge_consolidation/distillation_engine.py",
+      "line": 154,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(student_logits.view(-1, 16), ty.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning/cumulative_learner.py",
+      "line": 386,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning/cumulative_learner.py",
+      "line": 457,
+      "operation": "cross_entropy",
+      "arguments": "nn.functional.cross_entropy(logits_p[:, :-1, :].contiguous().view(-1, logits_p.size(-1)), b_labels[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning/cumulative_learner.py",
+      "line": 475,
+      "operation": "cross_entropy",
+      "arguments": "nn.functional.cross_entropy(logits_r[:, :-1, :].contiguous().view(-1, logits_r.size(-1)), r_labels[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning/foundation.py",
+      "line": 77,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning/foundation.py",
+      "line": 131,
+      "operation": "cross_entropy",
+      "arguments": "nn.functional.cross_entropy(logits_p[:, :-1, :].contiguous().view(-1, logits_p.size(-1)), b_labels[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning/foundation.py",
+      "line": 139,
+      "operation": "cross_entropy",
+      "arguments": "nn.functional.cross_entropy(logits_r[:, :-1, :].contiguous().view(-1, logits_r.size(-1)), r_labels[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning/modular_cumulative_learner.py",
+      "line": 235,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(trainable_params, lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning/modular_cumulative_learner.py",
+      "line": 301,
+      "operation": "cross_entropy",
+      "arguments": "nn.functional.cross_entropy(logits_p[:, :-1, :].contiguous().view(-1, logits_p.size(-1)), b_labels[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning/modular_cumulative_learner.py",
+      "line": 319,
+      "operation": "cross_entropy",
+      "arguments": "nn.functional.cross_entropy(logits_r[:, :-1, :].contiguous().view(-1, logits_r.size(-1)), r_labels[:, 1:].contiguous().view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning_driven_experiment/evaluator.py",
+      "line": 75,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(adapter.parameters(), lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning_driven_experiment/evaluator.py",
+      "line": 76,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning_to_learn/benchmark.py",
+      "line": 122,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapt.parameters(), lr=0.004)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning_to_learn/benchmark.py",
+      "line": 205,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(c_adapter.parameters(), lr=0.004)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning_to_learn/benchmark.py",
+      "line": 128,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(lg.view(-1, 16), ty.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning_to_learn/benchmark.py",
+      "line": 212,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(c_lg.view(-1, 16), c_ty.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning_to_learn/learning_to_learn_engine.py",
+      "line": 171,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning_to_learn/learning_to_learn_engine.py",
+      "line": 181,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), train_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning_to_learn/learning_to_learn_engine.py",
+      "line": 259,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(clone.parameters(), lr=0.004)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning_to_learn/learning_to_learn_engine.py",
+      "line": 264,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(lg.view(-1, 16), train_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning_to_learn/learning_to_learn_engine.py",
+      "line": 219,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(t_logits.view(-1, 16), test_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/learning_to_learn/learning_to_learn_engine.py",
+      "line": 192,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(q_logits.view(-1, 16), qual_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/long_horizon/long_horizon_student.py",
+      "line": 159,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/long_horizon/long_horizon_student.py",
+      "line": 172,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/memory/learning_experiments.py",
+      "line": 364,
+      "operation": "AdamW",
+      "arguments": "AdamW([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/memory/learning_experiments.py",
+      "line": 369,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/memory/tri_state_policy.py",
+      "line": 155,
+      "operation": "AdamW",
+      "arguments": "AdamW(self.tri_state_head.parameters(), lr=0.001, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/memory/tri_state_policy.py",
+      "line": 156,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/meta/meta_learner.py",
+      "line": 165,
+      "operation": "AdamW",
+      "arguments": "AdamW(params, lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/meta/meta_learner.py",
+      "line": 166,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/meta/tri_state_diagnostic.py",
+      "line": 274,
+      "operation": "AdamW",
+      "arguments": "AdamW(head.parameters(), lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/meta/tri_state_diagnostic.py",
+      "line": 275,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/meta_acquisition/benchmark.py",
+      "line": 172,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(clone.parameters(), lr=0.004)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/meta_acquisition/benchmark.py",
+      "line": 177,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/meta_acquisition/meta_trainer.py",
+      "line": 228,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=lr_val, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/meta_acquisition/meta_trainer.py",
+      "line": 377,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(controller.parameters(), lr=meta_lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/meta_acquisition/meta_trainer.py",
+      "line": 241,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), train_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/meta_acquisition/meta_trainer.py",
+      "line": 120,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), dev_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/meta_acquisition/meta_trainer.py",
+      "line": 131,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(a_logits.view(-1, 16), anchor_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/meta_acquisition/meta_trainer.py",
+      "line": 321,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(t_logits.view(-1, 16), test_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/meta_acquisition/meta_trainer.py",
+      "line": 251,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(q_logits.view(-1, 16), qual_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/metacognition/policy_head.py",
+      "line": 106,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(policy.parameters(), lr=lr, weight_decay=weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/metacognition/policy_head.py",
+      "line": 107,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/metacognition/policy_head.py",
+      "line": 138,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(policy.parameters(), lr=lr, weight_decay=weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/metacognition/policy_head.py",
+      "line": 139,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/model/attention.py",
+      "line": 105,
+      "operation": "scaled_dot_product_attention",
+      "arguments": "F.scaled_dot_product_attention(q, k, v, attn_mask=alibi_mask, dropout_p=self.dropout_p if self.training else 0.0, is_causal=False)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/model/attention.py",
+      "line": 120,
+      "operation": "scaled_dot_product_attention",
+      "arguments": "F.scaled_dot_product_attention(q, k, v, attn_mask=attn_mask, dropout_p=self.dropout_p if self.training else 0.0, is_causal=False)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/model/attention.py",
+      "line": 129,
+      "operation": "scaled_dot_product_attention",
+      "arguments": "F.scaled_dot_product_attention(q, k, v, attn_mask=None, dropout_p=self.dropout_p if self.training else 0.0, is_causal=True)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/model/transformer.py",
+      "line": 246,
+      "operation": "AdamW",
+      "arguments": "AdamW(optim_groups, lr=learning_rate)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/model/transformer.py",
+      "line": 361,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.reshape(-1, self.config.vocab_size), labels.reshape(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/modular_skill_learning/candidate_acquisition.py",
+      "line": 89,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(candidate.parameters(), lr=self.lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/modular_skill_learning/candidate_acquisition.py",
+      "line": 125,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt], dtype=torch.long, device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/modular_skill_learning/sequential_transfer.py",
+      "line": 85,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=self.lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/modular_skill_learning/sequential_transfer.py",
+      "line": 108,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt], dtype=torch.long, device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_d.py",
+      "line": 321,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_d.py",
+      "line": 471,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=best_lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_d.py",
+      "line": 635,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_d.py",
+      "line": 442,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in trial_student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_d.py",
+      "line": 528,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=best_lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_e.py",
+      "line": 384,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_e.py",
+      "line": 528,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=best_lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_e.py",
+      "line": 692,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_e.py",
+      "line": 722,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr * 0.75, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_e.py",
+      "line": 780,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in experienced_student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_e.py",
+      "line": 785,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in fresh_student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_e.py",
+      "line": 500,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in trial_student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_e.py",
+      "line": 590,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=best_lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_f.py",
+      "line": 356,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_f.py",
+      "line": 542,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=best_lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_f.py",
+      "line": 655,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_f.py",
+      "line": 680,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr * 0.75, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_f.py",
+      "line": 748,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in pretrained_student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_f.py",
+      "line": 518,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in trial_student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_f.py",
+      "line": 600,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_f.py",
+      "line": 776,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 176,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(net_continuous.parameters(), lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 250,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(net_discrete.parameters(), lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 290,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(student_bytes.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 404,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(latent_predictor.parameters(), lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 466,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(student_text.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 554,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(student.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 730,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(s_pre.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 745,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(s_exp.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 194,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, train_tgt_tensor)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 257,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, train_tgt_tensor)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 432,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, tr_tgt)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 691,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(student_model.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 736,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(s_pre(inp).view(-1, 1024), tgt.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 751,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(s_exp(inp).view(-1, 1024), tgt.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 311,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, logits.size(-1)), tgt.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 484,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, logits.size(-1)), tgt.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 572,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, logits.size(-1)), tgt.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 611,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, logits.size(-1)), tgt.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g.py",
+      "line": 702,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, logits.size(-1)), tgt.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 538,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(arith_cont.parameters(), lr=0.005)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 604,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([{'params': student.student.parameters(), 'lr': lr * 0.25}, {'params': student.causal_head.parameters(), 'lr': lr}], weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 378,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(lin_probe.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 416,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(standalone.parameters(), lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 440,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([{'params': integrated_student.student.parameters(), 'lr': lr * 0.25}, {'params': integrated_student.causal_head.parameters(), 'lr': lr}], weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 615,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_tr, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 758,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(student.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 771,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(policy_net.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 381,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(lin_probe(tr_enc['multi_hot_tags'], tr_enc['one_hot_acts']), tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 421,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out_std, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 448,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits_int, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 640,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(regime_student.causal_head.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 669,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(pred_step, gt_tensor)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 765,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_seed, seed_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 542,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_a, arith_t)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 643,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([{'params': regime_student.student.parameters(), 'lr': lr * 0.1}, {'params': regime_student.causal_head.parameters(), 'lr': lr}])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 648,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(regime_student.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 852,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(p_logits, sample_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m103_g1.py",
+      "line": 676,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_rep, enc_rep['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 462,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(arith_module.parameters(), lr=0.005)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 535,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([{'params': student.student.parameters(), 'lr': lr * 0.25}, {'params': student.adapter.parameters(), 'lr': lr}], weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 882,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(experienced_student.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 298,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(lin_probe.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 328,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(standalone.parameters(), lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 353,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([{'params': integrated_student.student.parameters(), 'lr': lr * 0.25}, {'params': integrated_student.adapter.parameters(), 'lr': lr}], weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 400,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(frozen_student.adapter.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 421,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(no_adapt_student.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 894,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([{'params': arm_student.student.parameters(), 'lr': lr * 0.25}, {'params': arm_student.adapter.parameters(), 'lr': lr}], weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 301,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(lin_probe(tr_enc['multi_hot_tags'], tr_enc['one_hot_acts']), tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 332,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(out_std, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 361,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_logits, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 362,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_logits, tr_enc['multi_hot_tags'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 425,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_no, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 543,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 565,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(regime_s.adapter.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 589,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(pred_s, gt_t)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 677,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([{'params': student.student.parameters(), 'lr': lr * 0.25}, {'params': student.adapter.parameters(), 'lr': lr}], weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 692,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(policy_net.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 888,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_a, tr_a_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 404,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 466,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_ar, arith_s + 2)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 543,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_enc['multi_hot_tags'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 567,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([{'params': regime_s.student.parameters(), 'lr': lr * 0.05}, {'params': regime_s.adapter.parameters(), 'lr': lr}])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 572,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(regime_s.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 888,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_a, tr_a_enc['multi_hot_tags'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 908,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_b, b_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 404,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_enc['multi_hot_tags'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 687,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, seed_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 908,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_b, b_enc['multi_hot_tags'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 687,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, seed_enc['multi_hot_tags'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 780,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_p, sample_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 595,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_rep, enc_rep['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 780,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_p, sample_enc['multi_hot_tags'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_b.py",
+      "line": 595,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_rep, enc_rep['multi_hot_tags'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 253,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(student.parameters(), lr=0.003)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 494,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(arith_module.parameters(), lr=0.005)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 570,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 924,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in experienced_student.parameters() if p.requires_grad], lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 258,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 332,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(trainable_params, lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 356,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(m_froz.bottleneck.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 372,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(m_train.parameters(), lr=lr * 0.5)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 388,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(m_m104b.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 404,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(m_no.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 419,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(std.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 443,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(lin_b.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 575,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 930,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_a, tr_a_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 953,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in arm_student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 337,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 408,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 423,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_std, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 599,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(regime_s.bottleneck.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 619,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(pred_s, gt_t)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 706,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 720,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(policy_net.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 964,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_b, b_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 360,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 376,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 392,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 498,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_ar, arith_s + 2)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 603,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in regime_s.parameters() if p.requires_grad], lr=lr * 0.5)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 607,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(regime_s.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 713,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, seed_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 260,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 360,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 376,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 392,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_enc['multi_hot_tags'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 446,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(lin_b(tr_enc['multi_hot_tags'], tr_enc['one_hot_acts']), tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 577,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 816,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_p, sample_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 932,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_a, tr_a_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 339,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 966,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_b, b_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 625,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_rep, enc_rep['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 715,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, seed_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 625,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_rep, enc_rep['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_c.py",
+      "line": 818,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_p, sample_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 359,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in exp_student_template.parameters() if p.requires_grad], lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 531,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 552,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr * 0.5)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 577,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr * 0.5)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 230,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in m_sel.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 270,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(m_froz.bottleneck.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 284,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(m_train.parameters(), lr=lr * 0.5)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 298,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(m_none.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 364,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_a, tr_a_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 536,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_orig_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 556,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_s, tr_shadow_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 562,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_rep, rep_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 581,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_s, tr_shadow_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 235,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 302,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 274,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 288,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 391,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in s_arm.parameters() if p.requires_grad], lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 420,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_b, batch_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 274,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 288,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 366,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_a, tr_a_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 395,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in s_arm.parameters() if p.requires_grad], lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 538,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_orig_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 237,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 399,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in s_arm.parameters() if p.requires_grad], lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 404,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(s_arm.bottleneck.parameters(), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_d.py",
+      "line": 422,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_b, batch_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 422,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(student, 0.01), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 451,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(student, 0.01), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 477,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(student, 0.01), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 539,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(exp_student_template, 0.01), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 724,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(student, 0.01), lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 283,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(m_sel, 0.0001), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 327,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(m_froz, 0.01), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 343,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(m_train, 0.01), lr=lr * 0.5)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 359,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(m_none, 0.01), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 427,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st1, tr1_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 464,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_b, b_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 483,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_s, cf_enc_train['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 544,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_a, tr_a_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 288,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 331,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 347,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 363,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_l, tr_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 576,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(s_arm, 0.01), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 618,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(st_b, batch_enc['target_ids'])"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 429,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag1, tr1_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 466,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_b, b_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 485,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_s, cf_enc_train['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 546,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_a, tr_a_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 580,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(s_arm, 0.01), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 290,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 333,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 349,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_l, tr_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 585,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(s_arm, 0.01), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 590,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adamw_groups(s_arm, 0.01), lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/concept_learner_m104_e.py",
+      "line": 620,
+      "operation": "binary_cross_entropy_with_logits",
+      "arguments": "F.binary_cross_entropy_with_logits(tag_b, batch_enc['multi_hot_tags'], pos_weight=pos_weight)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/continual_concept_learner_m103_c.py",
+      "line": 148,
+      "operation": "cross_entropy",
+      "arguments": "torch.nn.functional.cross_entropy(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/continual_concept_learner_m103_c.py",
+      "line": 168,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/continual_language_student_m103_b.py",
+      "line": 79,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/convergence_auditor_m103_b.py",
+      "line": 105,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/generalization_evaluator_m103_c.py",
+      "line": 185,
+      "operation": "cross_entropy",
+      "arguments": "torch.nn.functional.cross_entropy(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/language_pretrainer_m103_b.py",
+      "line": 89,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/language_pretrainer_m103_b.py",
+      "line": 107,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/progressive_rule_learner_m103_b.py",
+      "line": 176,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/routing_diagnostic_m103.py",
+      "line": 82,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(router_m102.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/routing_diagnostic_m103.py",
+      "line": 120,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(router_reh.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/routing_diagnostic_m103.py",
+      "line": 94,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, y_cur)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/routing_diagnostic_m103.py",
+      "line": 146,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, batch_y)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/text_student_m103.py",
+      "line": 215,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(shift_logits.view(-1, shift_logits.size(-1)), shift_labels.view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/natural_language_learning_m103/text_student_m103.py",
+      "line": 279,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in self.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_meta_learning/evaluator.py",
+      "line": 197,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_meta_learning/evaluator.py",
+      "line": 257,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_meta_learning/evaluator.py",
+      "line": 129,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, tgt)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_meta_learning/evaluator.py",
+      "line": 213,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(sub_adapter.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_meta_learning/evaluator.py",
+      "line": 222,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_meta_learning/reptile.py",
+      "line": 199,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_meta_learning/reptile.py",
+      "line": 104,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, tgt)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_meta_learning/reptile.py",
+      "line": 130,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(inner_adapter.parameters(), lr=self.inner_lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_meta_learning/reptile.py",
+      "line": 225,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, tgt)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_meta_learning/reptile.py",
+      "line": 117,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_b, t_b)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_meta_learning/reptile.py",
+      "line": 117,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_p, t_p)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_plan_discovery/causal_plan_benchmark.py",
+      "line": 110,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(final_logits.view(-1, 16), targets.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_plan_discovery/causal_plan_benchmark.py",
+      "line": 409,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(m_logits.view(-1, 16), test_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_plan_discovery/plan_discovery_engine.py",
+      "line": 147,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(final_logits.view(-1, 16), targets.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_program_learning/benchmark_m94.py",
+      "line": 209,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(substrate.parameters(), lr=lr_trunk, weight_decay=1e-05)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_program_learning/benchmark_m94.py",
+      "line": 214,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, all_y_tr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_program_learning/program_acquisition.py",
+      "line": 99,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(res_module.parameters(), lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_program_learning/program_acquisition.py",
+      "line": 106,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, y_t)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_reasoning/benchmark_m91.py",
+      "line": 156,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(substrate.parameters(), lr=lr_trunk, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_reasoning/benchmark_m91.py",
+      "line": 160,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.reshape(-1, 16), y_tr.reshape(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_reasoning/benchmark_m91.py",
+      "line": 203,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(substrate.residuals[st.task_id].parameters(), lr=0.015)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_reasoning/benchmark_m91.py",
+      "line": 206,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.reshape(-1, 16), y_st_tr.reshape(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_skill_acquisition/adapter_acquisition_engine.py",
+      "line": 132,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_skill_acquisition/adapter_acquisition_engine.py",
+      "line": 140,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), train_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_skill_acquisition/adapter_acquisition_engine.py",
+      "line": 175,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(final_q_logits.view(-1, 16), qual_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_skill_acquisition/adapter_acquisition_engine.py",
+      "line": 181,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(test_logits.view(-1, 16), test_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_skill_acquisition/adapter_acquisition_engine.py",
+      "line": 151,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(q_logits.view(-1, 16), qual_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_skill_composition/neural_composition_pipeline.py",
+      "line": 143,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits1.view(-1, 16), y1_true_t.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_skill_composition/neural_composition_pipeline.py",
+      "line": 144,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits2_cascaded.view(-1, 16), y2_true_t.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_skill_composition/primitive_skills.py",
+      "line": 105,
+      "operation": "cross_entropy",
+      "arguments": "torch.nn.functional.cross_entropy(q_logits.view(-1, 16), qual_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_weight_learning/lifelong_procedural_stream.py",
+      "line": 301,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), test_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_weight_learning/pathway_instrumentation.py",
+      "line": 133,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=lr, weight_decay=weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_weight_learning/pathway_instrumentation.py",
+      "line": 148,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), train_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_weight_learning/pathway_instrumentation.py",
+      "line": 139,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(pre_logits.view(-1, 16), dev_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_weight_learning/pathway_instrumentation.py",
+      "line": 164,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(post_logits.view(-1, 16), dev_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/neural_weight_learning/weight_ablation_benchmark.py",
+      "line": 76,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), test_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/persistent_memory/benchmark_m96.py",
+      "line": 190,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(substrate.parameters(), lr=lr_trunk, weight_decay=1e-05)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/persistent_memory/benchmark_m96.py",
+      "line": 195,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, all_y)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/probabilistic_uncertainty/benchmark_m93.py",
+      "line": 178,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(substrate.parameters(), lr=lr_trunk, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/probabilistic_uncertainty/benchmark_m93.py",
+      "line": 182,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.reshape(-1, 16), y_tr.reshape(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/probabilistic_uncertainty/neural_uncertainty.py",
+      "line": 86,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(scaled, dev_labels_flat)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/probabilistic_uncertainty/robust_rule_learner.py",
+      "line": 159,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(res_module.parameters(), lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/probabilistic_uncertainty/robust_rule_learner.py",
+      "line": 173,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.reshape(-1, 16), y_tr.reshape(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/reasoning/recurrent_audit.py",
+      "line": 103,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(reduction='none')"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/reliable_plan_discovery/causal_plan_benchmark_v2.py",
+      "line": 169,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(final_logits.view(-1, 16), targets.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/reliable_plan_discovery/causal_plan_benchmark_v2.py",
+      "line": 396,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(m_logits.view(-1, 16), test_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/reliable_plan_discovery/likelihood_plan_engine.py",
+      "line": 195,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(final_logits.view(-1, 16), targets.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/reliable_transfer/intervention.py",
+      "line": 138,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(trainable_params, lr=0.001, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/reliable_transfer/intervention.py",
+      "line": 139,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/reliable_transfer/transfer_engine.py",
+      "line": 170,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(trainable, lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/reliable_transfer/transfer_engine.py",
+      "line": 171,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/representation/corrective_efficiency.py",
+      "line": 171,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/representation/corrective_efficiency.py",
+      "line": 172,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/representation/positive_control.py",
+      "line": 142,
+      "operation": "AdamW",
+      "arguments": "AdamW(trainable_params, lr=lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/representation/positive_control.py",
+      "line": 143,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/representation/relational_arms.py",
+      "line": 207,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/representation/relational_arms.py",
+      "line": 208,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/representation/relational_arms.py",
+      "line": 264,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/representation/relational_arms.py",
+      "line": 265,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/representation/relational_arms.py",
+      "line": 326,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/representation/relational_arms.py",
+      "line": 327,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/research/knowledge_acquisition.py",
+      "line": 200,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(trainable_params, lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/research/knowledge_acquisition.py",
+      "line": 201,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/robust_lifelong_memory/lifelong_stream_engine.py",
+      "line": 128,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=0.001, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/robust_lifelong_memory/lifelong_stream_engine.py",
+      "line": 155,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt], device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rule_induction/continual_induction.py",
+      "line": 132,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rule_induction/continual_induction.py",
+      "line": 142,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rule_induction/continual_induction.py",
+      "line": 149,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rule_induction/learning_efficiency.py",
+      "line": 204,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rule_induction/learning_efficiency.py",
+      "line": 205,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rule_induction/rule_arms.py",
+      "line": 188,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rule_induction/rule_arms.py",
+      "line": 189,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rule_induction/rule_arms.py",
+      "line": 259,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rule_induction/rule_arms.py",
+      "line": 260,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rule_induction/rule_arms.py",
+      "line": 334,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rule_induction/rule_arms.py",
+      "line": 335,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rule_induction/transfer_evaluator.py",
+      "line": 97,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rule_induction/transfer_evaluator.py",
+      "line": 98,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rules/action_policy.py",
+      "line": 614,
+      "operation": "AdamW",
+      "arguments": "AdamW([p for p in policy_model.parameters() if p.requires_grad], lr=lr, weight_decay=weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rules/action_policy.py",
+      "line": 331,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, logits.size(-1)), tgt.view(-1), ignore_index=-1)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rules/arithmetic_evaluator.py",
+      "line": 267,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rules/arithmetic_evaluator.py",
+      "line": 224,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(s_log.view(-1, model.config.vocab_size), s_lab.view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rules/arithmetic_evaluator.py",
+      "line": 297,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(shift_logits.view(-1, model.config.vocab_size), shift_labels.view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rules/arithmetic_evaluator.py",
+      "line": 326,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(s_log.view(-1, model.config.vocab_size), s_lab.view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rules/procedural_evaluator.py",
+      "line": 263,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rules/procedural_evaluator.py",
+      "line": 223,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(shift_logits.view(-1, model.config.vocab_size), shift_labels.view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rules/procedural_evaluator.py",
+      "line": 296,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(shift_logits.view(-1, model.config.vocab_size), shift_labels.view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/rules/procedural_evaluator.py",
+      "line": 325,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(s_log.view(-1, model.config.vocab_size), s_lab.view(-1), ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/safe_meta_learning/ablation.py",
+      "line": 337,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(target_adapter.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/safe_meta_learning/ablation.py",
+      "line": 273,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, tgt)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/safe_meta_learning/ablation.py",
+      "line": 409,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, tgt)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/safe_meta_learning/ablation.py",
+      "line": 440,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(target_adapter.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/scientific_requalification_m102_2/persistent_student_m102_2.py",
+      "line": 163,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/scientific_requalification_m102_2/persistent_student_m102_2.py",
+      "line": 238,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([{'params': adapter_params, 'lr': self.plasticity_manager.fast_lr}, {'params': head_params, 'lr': 0.015}], weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/scientific_requalification_m102_2/persistent_student_m102_2.py",
+      "line": 361,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in self.parameters() if p.requires_grad], lr=self.plasticity_manager.slow_lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/scientific_requalification_m102_2/persistent_student_m102_2.py",
+      "line": 170,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, lbl)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/scientific_requalification_m102_2/persistent_student_m102_2.py",
+      "line": 261,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, goal.train_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/scientific_requalification_m102_2/persistent_student_m102_2.py",
+      "line": 265,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(self.head_manager.domain_router(h_emb), target_dom_tensor)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/scientific_requalification_m102_2/persistent_student_m102_2.py",
+      "line": 367,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, goal.train_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/scientific_requalification_m102_2/persistent_student_m102_2.py",
+      "line": 276,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(r_logits, r_lbl)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/scientific_requalification_m102_2/persistent_student_m102_2.py",
+      "line": 376,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(r_logits, r_lbl)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/selective_neural_memory/selective_continual_stream.py",
+      "line": 122,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=0.001, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/selective_neural_memory/selective_continual_stream.py",
+      "line": 149,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt], device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/self_directed_curriculum/benchmark_m99.py",
+      "line": 200,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(substrate.substrate.parameters(), lr=lr_trunk, weight_decay=1e-05)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/self_directed_curriculum/benchmark_m99.py",
+      "line": 204,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, all_y)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/self_directed_curriculum/future_learning_evaluator.py",
+      "line": 106,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(sub.substrate.parameters(), lr=lr, weight_decay=1e-05)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/self_directed_curriculum/future_learning_evaluator.py",
+      "line": 114,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(sub.forward_transition(s_tr, op_tr, v_tr), y_tr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/self_directed_curriculum/future_learning_evaluator.py",
+      "line": 115,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(sub.forward_transition(s_anc, op_anc, v_anc), y_anc)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/self_directed_curriculum/persistent_student_m99.py",
+      "line": 160,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.substrate.substrate.parameters(), lr=lr, weight_decay=1e-05)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/self_directed_curriculum/persistent_student_m99.py",
+      "line": 166,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(self.substrate.forward_transition(s_tr, op_tr, v_tr), y_tr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/self_directed_curriculum/persistent_student_m99.py",
+      "line": 167,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(self.substrate.forward_transition(s_anc, op_anc, v_anc), y_anc)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/skill_composition/composition_transfer.py",
+      "line": 172,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(trainable_params, lr=lr, weight_decay=0.001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/skill_composition/composition_transfer.py",
+      "line": 173,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/skill_reuse/adaptive_transfer.py",
+      "line": 165,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(adapter.parameters(), lr=lr, weight_decay=0.001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/skill_reuse/adaptive_transfer.py",
+      "line": 166,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/skill_reuse/retention.py",
+      "line": 137,
+      "operation": "AdamW",
+      "arguments": "optim.AdamW(adapter.parameters(), lr=lr, weight_decay=0.001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/skill_reuse/retention.py",
+      "line": 138,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/meta_evaluation.py",
+      "line": 171,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=0.001, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/meta_evaluation.py",
+      "line": 113,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(worker.parameters(), lr=self.inner_lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/meta_evaluation.py",
+      "line": 199,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_b, torch.tensor([t_b], dtype=torch.long, device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/meta_evaluation.py",
+      "line": 200,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_p, torch.tensor([t_p], dtype=torch.long, device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/meta_evaluation.py",
+      "line": 131,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_b, torch.tensor([t_b], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/meta_evaluation.py",
+      "line": 132,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_p, torch.tensor([t_p], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/stable_optimizer.py",
+      "line": 447,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=0.002, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/stable_optimizer.py",
+      "line": 450,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/stable_optimizer.py",
+      "line": 227,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, tgt)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/stable_optimizer.py",
+      "line": 347,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(sub_adapter.parameters(), lr=0.002, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/stable_optimizer.py",
+      "line": 361,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(sub_adapter.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/stable_optimizer.py",
+      "line": 355,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/stable_optimizer.py",
+      "line": 471,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/stable_optimizer.py",
+      "line": 384,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/stable_optimizer.py",
+      "line": 487,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_b, torch.tensor([t_b], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/stable_optimizer.py",
+      "line": 488,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_p, torch.tensor([t_p], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/stable_optimizer.py",
+      "line": 401,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_b, torch.tensor([t_b], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_few_shot/stable_optimizer.py",
+      "line": 402,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_p, torch.tensor([t_p], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_relational/continual_relational.py",
+      "line": 135,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_relational/continual_relational.py",
+      "line": 150,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_relational/continual_relational.py",
+      "line": 156,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_relational/continual_relational.py",
+      "line": 163,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_relational/learning_to_learn.py",
+      "line": 213,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_relational/learning_to_learn.py",
+      "line": 214,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_relational/relational_arms.py",
+      "line": 183,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_relational/relational_arms.py",
+      "line": 184,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_relational/relational_arms.py",
+      "line": 239,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_relational/relational_arms.py",
+      "line": 240,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_relational/relational_arms.py",
+      "line": 304,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.002)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/stable_relational/relational_arms.py",
+      "line": 305,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/sustainable_lifelong_learning/future_learning_evaluator_m101.py",
+      "line": 102,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(param_groups)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/sustainable_lifelong_learning/future_learning_evaluator_m101.py",
+      "line": 102,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(student.parameters(), lr=adapter_lr)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/sustainable_lifelong_learning/future_learning_evaluator_m101.py",
+      "line": 110,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, target_goal.train_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/sustainable_lifelong_learning/future_learning_evaluator_m101.py",
+      "line": 113,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(anc_logits, target_goal.anchor_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/sustainable_lifelong_learning/persistent_student_m101.py",
+      "line": 141,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(list(self.task_head.parameters()) + list(self.adapter_modules.parameters()), lr=0.04)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/sustainable_lifelong_learning/persistent_student_m101.py",
+      "line": 278,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in self.parameters() if p.requires_grad], lr=self.plasticity_manager.fast_lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/sustainable_lifelong_learning/persistent_student_m101.py",
+      "line": 147,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, lbl)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/sustainable_lifelong_learning/persistent_student_m101.py",
+      "line": 291,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, goal.train_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/sustainable_lifelong_learning/persistent_student_m101.py",
+      "line": 294,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(anc_logits, goal.anchor_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/sustainable_lifelong_learning/persistent_student_m101.py",
+      "line": 322,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW([p for p in self.parameters() if p.requires_grad], lr=0.015)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/sustainable_lifelong_learning/persistent_student_m101.py",
+      "line": 325,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(anc_logits, goal.anchor_labels)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/broad_meta_learning.py",
+      "line": 144,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=0.001, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/broad_meta_learning.py",
+      "line": 79,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(worker.parameters(), lr=self.inner_lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/broad_meta_learning.py",
+      "line": 170,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], dtype=torch.long, device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/broad_meta_learning.py",
+      "line": 91,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/broad_meta_learning.py",
+      "line": 181,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_b, torch.tensor([t_b], dtype=torch.long, device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/broad_meta_learning.py",
+      "line": 182,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_p, torch.tensor([t_p], dtype=torch.long, device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/broad_meta_learning.py",
+      "line": 102,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_b, torch.tensor([t_b], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/broad_meta_learning.py",
+      "line": 103,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_p, torch.tensor([t_p], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/three_class_engine.py",
+      "line": 326,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(sub_adapter.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/three_class_engine.py",
+      "line": 401,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/three_class_engine.py",
+      "line": 181,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, tgt)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/three_class_engine.py",
+      "line": 340,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/three_class_engine.py",
+      "line": 409,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/three_class_engine.py",
+      "line": 352,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_b, torch.tensor([t_b], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/three_class_engine.py",
+      "line": 353,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_p, torch.tensor([t_p], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/three_class_engine.py",
+      "line": 420,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_b, torch.tensor([t_b], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_class_meta/three_class_engine.py",
+      "line": 421,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_p, torch.tensor([t_p], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/engine.py",
+      "line": 508,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/engine.py",
+      "line": 440,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(sub_adapter.parameters(), lr=self.learning_rate, weight_decay=self.weight_decay)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/engine.py",
+      "line": 516,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/engine.py",
+      "line": 184,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, tgt)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/engine.py",
+      "line": 454,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/engine.py",
+      "line": 527,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_b, torch.tensor([t_b], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/engine.py",
+      "line": 528,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_p, torch.tensor([t_p], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/engine.py",
+      "line": 466,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_b, torch.tensor([t_b], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/engine.py",
+      "line": 467,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_p, torch.tensor([t_p], dtype=torch.long, device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/evaluator.py",
+      "line": 50,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=0.001, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/evaluator.py",
+      "line": 65,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/evaluator.py",
+      "line": 120,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(local_adapter.parameters(), lr=self.inner_lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/evaluator.py",
+      "line": 133,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/evaluator.py",
+      "line": 76,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_b, torch.tensor([t_b], device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/evaluator.py",
+      "line": 77,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_p, torch.tensor([t_p], device=device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/evaluator.py",
+      "line": 144,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_b, torch.tensor([t_b], device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/evaluator.py",
+      "line": 145,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(l_p, torch.tensor([t_p], device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/smoke_test.py",
+      "line": 115,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=self.learning_rate, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/smoke_test.py",
+      "line": 141,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/smoke_test.py",
+      "line": 165,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, torch.tensor([tgt_idx], device=self.device))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/three_valued_reasoning/smoke_test.py",
+      "line": 125,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, tgt)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/topology/structural_evaluator.py",
+      "line": 184,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(trainable_params, lr=lr, weight_decay=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/topology/structural_evaluator.py",
+      "line": 185,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/topology_adaptation/benchmark.py",
+      "line": 208,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(retention_adapter.parameters(), lr=0.01)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/topology_adaptation/benchmark.py",
+      "line": 213,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, 16), tr_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/topology_adaptation/sparse_trainer.py",
+      "line": 161,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(adapter.parameters(), lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/topology_adaptation/sparse_trainer.py",
+      "line": 187,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, adapter.num_symbols), train_y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/topology_adaptation/sparse_trainer.py",
+      "line": 87,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits.view(-1, adapter.num_symbols), y.view(-1))"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/topology_adaptation/topology_controller.py",
+      "line": 115,
+      "operation": "AdamW",
+      "arguments": "torch.optim.AdamW(self.parameters(), lr=0.015, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/topology_adaptation/topology_controller.py",
+      "line": 120,
+      "operation": "cross_entropy",
+      "arguments": "F.cross_entropy(logits, y_train)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/uncertainty/corrective_learning.py",
+      "line": 170,
+      "operation": "AdamW",
+      "arguments": "AdamW([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/uncertainty/corrective_learning.py",
+      "line": 171,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/uncertainty/learned_transfer.py",
+      "line": 162,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(schema_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/uncertainty/learned_transfer.py",
+      "line": 163,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss()"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/uncertainty/learning_efficiency.py",
+      "line": 234,
+      "operation": "AdamW",
+      "arguments": "AdamW([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=0.0001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/uncertainty/learning_efficiency.py",
+      "line": 235,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/uncertainty/tri_state_classifier.py",
+      "line": 340,
+      "operation": "AdamW",
+      "arguments": "AdamW([p for p in model.parameters() if p.requires_grad], lr=0.0005)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/uncertainty/tri_state_classifier.py",
+      "line": 341,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(ignore_index=-100)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/uncertainty/tri_state_classifier.py",
+      "line": 407,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(weight=weights)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/uncertainty/tri_state_classifier.py",
+      "line": 408,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.001)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/uncertainty/tri_state_classifier.py",
+      "line": 468,
+      "operation": "CrossEntropyLoss",
+      "arguments": "nn.CrossEntropyLoss(weight=weights)"
+    },
+    {
+      "path": "src/adaptive_mini_gpt/uncertainty/tri_state_classifier.py",
+      "line": 469,
+      "operation": "AdamW",
+      "arguments": "AdamW(list(tri_head.parameters()) + [p for p in model.parameters() if p.requires_grad], lr=0.001)"
+    }
+  ],
+  "scope": "Source inventory, not automatic semantic qualification"
+}

@@ -20,6 +20,8 @@ from typing import Any
 import torch
 import torch.nn as nn
 
+from adaptive_mini_gpt.training.optimizer_contract import optimizer_membership
+
 
 class ModificationOperatorTypeM105_A(StrEnum):
     SELECTIVE_BACKBONE_UPDATE = "selective_backbone_update"
@@ -211,6 +213,11 @@ class StructuralRollbackControllerM105_A:
 
             else:
                 raise NotImplementedError(f"Unsupported modification operator: {proposal.operator_type}")
+
+            if self.optimizer is not None:
+                ownership = optimizer_membership(self.target_model, self.optimizer)
+                if any(ownership.values()):
+                    raise RuntimeError(f"Optimizer ownership violation: {ownership}")
 
             # 3. Evaluate on validation set
             post_metric = active_val_fn()

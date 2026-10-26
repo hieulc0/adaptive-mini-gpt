@@ -57,6 +57,7 @@ from adaptive_mini_gpt.natural_language_learning_m103.text_student_m103 import (
 from adaptive_mini_gpt.natural_language_learning_m103.tokenizer_m103 import (
     ByteTextTokenizerM103,
 )
+from adaptive_mini_gpt.training.optimizer_contract import adamw_groups
 
 
 @dataclass
@@ -279,7 +280,7 @@ class ConceptLearnerM104_E:
                 default_strategy="entity_conditioned_attention",
             ).to(self.device)
 
-            opt_sel = torch.optim.AdamW([p for p in m_sel.parameters() if p.requires_grad], lr=lr, weight_decay=1e-4)
+            opt_sel = torch.optim.AdamW(adamw_groups(m_sel, 1e-4), lr=lr)
 
             for _ in range(steps):
                 opt_sel.zero_grad()
@@ -323,7 +324,7 @@ class ConceptLearnerM104_E:
             # 2. Frozen Backbone Control
             base_froz = TextStudentM103(prune_orphaned_lm_head=True).to(self.device)
             m_froz = IntegratedStudentM104_E(student=base_froz, mode="frozen_backbone").to(self.device)
-            opt_froz = torch.optim.AdamW([p for p in m_froz.parameters() if p.requires_grad], lr=lr)
+            opt_froz = torch.optim.AdamW(adamw_groups(m_froz, 0.01), lr=lr)
             for _ in range(steps):
                 opt_froz.zero_grad()
                 st_l, tag_l, _, _ = m_froz(tr_enc["prompts"], tr_enc["action_ids"])
@@ -339,7 +340,7 @@ class ConceptLearnerM104_E:
             # 3. Trainable Backbone Control
             base_train = TextStudentM103(prune_orphaned_lm_head=True).to(self.device)
             m_train = IntegratedStudentM104_E(student=base_train, mode="trainable_backbone").to(self.device)
-            opt_train = torch.optim.AdamW([p for p in m_train.parameters() if p.requires_grad], lr=lr * 0.5)
+            opt_train = torch.optim.AdamW(adamw_groups(m_train, 0.01), lr=lr * 0.5)
             for _ in range(steps):
                 opt_train.zero_grad()
                 st_l, tag_l, _, _ = m_train(tr_enc["prompts"], tr_enc["action_ids"])
@@ -355,7 +356,7 @@ class ConceptLearnerM104_E:
             # 4. No-Adapter Baseline
             base_none = TextStudentM103(prune_orphaned_lm_head=True).to(self.device)
             m_none = IntegratedStudentM104_E(student=base_none, mode="no_adapter").to(self.device)
-            opt_none = torch.optim.AdamW([p for p in m_none.parameters() if p.requires_grad], lr=lr)
+            opt_none = torch.optim.AdamW(adamw_groups(m_none, 0.01), lr=lr)
             for _ in range(steps):
                 opt_none.zero_grad()
                 st_l, _, _, _ = m_none(tr_enc["prompts"], tr_enc["action_ids"])
@@ -418,7 +419,7 @@ class ConceptLearnerM104_E:
 
         base_s = TextStudentM103(prune_orphaned_lm_head=True).to(self.device)
         student = IntegratedStudentM104_E(student=base_s, mode="selective_plasticity").to(self.device)
-        opt = torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr)
+        opt = torch.optim.AdamW(adamw_groups(student, 0.01), lr=lr)
 
         for _ in range(pre_steps):
             opt.zero_grad()
@@ -447,7 +448,7 @@ class ConceptLearnerM104_E:
         # 3. Continual Adaptation Regimes
         # Regime A: Rehearsal (Replay)
         student.load_state_dict(w1_state)
-        opt_rep = torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr)
+        opt_rep = torch.optim.AdamW(adamw_groups(student, 0.01), lr=lr)
         cf_train = ds1["counterfactual"][:max(8, len(ds1["counterfactual"]) // 2)]
         replay_pool = ds1["train"]
 
@@ -473,7 +474,7 @@ class ConceptLearnerM104_E:
 
         # Regime B: Selective Weight Update (without replay)
         student.load_state_dict(w1_state)
-        opt_sel = torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=lr)
+        opt_sel = torch.optim.AdamW(adamw_groups(student, 0.01), lr=lr)
         cf_enc_train = self._encode_batch_tensors(cf_train, world1.objects, tokenizer)
         for _ in range(adapt_steps):
             student.train()
@@ -535,7 +536,7 @@ class ConceptLearnerM104_E:
 
         exp_base = TextStudentM103(prune_orphaned_lm_head=True).to(self.device)
         exp_student_template = IntegratedStudentM104_E(student=exp_base, mode="selective_plasticity").to(self.device)
-        opt_exp = torch.optim.AdamW([p for p in exp_student_template.parameters() if p.requires_grad], lr=lr)
+        opt_exp = torch.optim.AdamW(adamw_groups(exp_student_template, 0.01), lr=lr)
 
         for _ in range(80):
             opt_exp.zero_grad()
@@ -572,21 +573,21 @@ class ConceptLearnerM104_E:
                     base_arm = TextStudentM103(prune_orphaned_lm_head=True).to(self.device)
                     s_arm = IntegratedStudentM104_E(student=base_arm, mode="selective_plasticity").to(self.device)
                     s_arm.load_state_dict(foundational_state)
-                    opt_arm = torch.optim.AdamW([p for p in s_arm.parameters() if p.requires_grad], lr=lr)
+                    opt_arm = torch.optim.AdamW(adamw_groups(s_arm, 0.01), lr=lr)
                 elif arm == "fresh":
                     base_arm = TextStudentM103(prune_orphaned_lm_head=True).to(self.device)
                     s_arm = IntegratedStudentM104_E(student=base_arm, mode="selective_plasticity").to(self.device)
-                    opt_arm = torch.optim.AdamW([p for p in s_arm.parameters() if p.requires_grad], lr=lr)
+                    opt_arm = torch.optim.AdamW(adamw_groups(s_arm, 0.01), lr=lr)
                 elif arm == "language_pretrained":
                     base_arm = TextStudentM103(prune_orphaned_lm_head=True).to(self.device)
                     s_arm = IntegratedStudentM104_E(student=base_arm, mode="selective_plasticity").to(self.device)
                     s_arm.load_state_dict(lang_state)
-                    opt_arm = torch.optim.AdamW([p for p in s_arm.parameters() if p.requires_grad], lr=lr)
+                    opt_arm = torch.optim.AdamW(adamw_groups(s_arm, 0.01), lr=lr)
                 else:  # frozen_backbone
                     base_arm = TextStudentM103(prune_orphaned_lm_head=True).to(self.device)
                     s_arm = IntegratedStudentM104_E(student=base_arm, mode="frozen_backbone").to(self.device)
                     s_arm.load_state_dict(foundational_state, strict=False)
-                    opt_arm = torch.optim.AdamW([p for p in s_arm.parameters() if p.requires_grad], lr=lr)
+                    opt_arm = torch.optim.AdamW(adamw_groups(s_arm, 0.01), lr=lr)
 
                 curve = []
                 steps_to_target = adaptation_budget
@@ -720,7 +721,7 @@ class ConceptLearnerM104_E:
 
         base_s = TextStudentM103(prune_orphaned_lm_head=True).to(self.device)
         student = IntegratedStudentM104_E(student=base_s, mode="selective_plasticity").to(self.device)
-        optimizer = torch.optim.AdamW([p for p in student.parameters() if p.requires_grad], lr=2e-3)
+        optimizer = torch.optim.AdamW(adamw_groups(student, 0.01), lr=2e-3)
 
         replay_buffer = list(ds["train"][:10])
 

@@ -97,7 +97,10 @@ class CausalSelfAttention(nn.Module):
             ).view(1, 1, t, t)
             alibi_mask = causal_triu + alibi_bias
             if attn_mask is not None:
-                alibi_mask = alibi_mask + attn_mask
+                if attn_mask.dtype == torch.bool:
+                    alibi_mask = alibi_mask.masked_fill(~attn_mask, float("-inf"))
+                else:
+                    alibi_mask = alibi_mask + attn_mask
 
             y = F.scaled_dot_product_attention(
                 q,
@@ -109,6 +112,11 @@ class CausalSelfAttention(nn.Module):
             )
         else:
             if attn_mask is not None:
+                causal = torch.ones(t, t, device=x.device, dtype=torch.bool).tril()
+                if attn_mask.dtype == torch.bool:
+                    attn_mask = attn_mask & causal
+                else:
+                    attn_mask = attn_mask.masked_fill(~causal, float("-inf"))
                 y = F.scaled_dot_product_attention(
                     q,
                     k,
