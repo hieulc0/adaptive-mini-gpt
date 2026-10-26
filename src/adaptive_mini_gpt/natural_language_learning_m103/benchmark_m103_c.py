@@ -61,6 +61,7 @@ class BenchmarkReportM103_C:
     timestamp: str
     device_name: str
     total_duration_sec: float
+    train_steps: int
     gates_passed_count: int
     total_gates: int
     overall_status: str
@@ -369,6 +370,7 @@ class BenchmarkRunnerM103_C:
             timestamp=time.strftime("%Y-%m-%d %H:%M:%S UTC", time.gmtime()),
             device_name=str(self.device),
             total_duration_sec=round(time.time() - t0, 2),
+            train_steps=self.train_steps,
             gates_passed_count=passed_count,
             total_gates=len(gates),
             overall_status=overall_status,
