@@ -171,17 +171,23 @@ class StructuralRollbackControllerM105_A:
     def apply_and_evaluate(
         self,
         proposal: NeuralModificationProposalM105_A,
-        val_eval_fn: Callable[[], float],
+        val_eval_fn: Callable[[], float] | None = None,
         retention_eval_fn: Callable[[], float] | None = None,
         min_gain_threshold: float = 0.0,
         min_retention_threshold: float = 40.0,
+        eval_fn: Callable[[], float] | None = None,
     ) -> ModificationEvaluationResultM105_A:
         """Applies modification transactionally on isolated candidate.
 
         Restores complete learning state if validation gain or retention requirements fail.
+        Supports both val_eval_fn and historical eval_fn alias.
         """
+        active_val_fn = val_eval_fn or eval_fn
+        if active_val_fn is None:
+            raise ValueError("Either val_eval_fn or eval_fn must be provided")
+
         start_time = time.perf_counter()
-        pre_metric = val_eval_fn()
+        pre_metric = active_val_fn()
         initial_params = sum(p.numel() for p in self.target_model.parameters())
 
         # 1. Capture complete learning-process snapshot
@@ -209,7 +215,7 @@ class StructuralRollbackControllerM105_A:
                     self.target_model.replay_ratio = ratio
 
             # 3. Evaluate on validation set
-            post_metric = val_eval_fn()
+            post_metric = active_val_fn()
             delta_gain = post_metric - pre_metric
 
             # 4. Check backward retention safeguard
@@ -304,7 +310,6 @@ class LearnedModificationControllerM105_A:
         op = result.operator_type
         reward = result.delta_gain if result.accepted else -abs(result.delta_gain)
         count = self.operator_counts[op]
-        # Incremental moving average update
         self.operator_values[op] += (reward - self.operator_values[op]) / (count + 1)
         self.operator_counts[op] += 1
 
