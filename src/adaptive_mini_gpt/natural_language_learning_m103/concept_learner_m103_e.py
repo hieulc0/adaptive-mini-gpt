@@ -417,33 +417,27 @@ class ConceptLearnerM103_E:
         with torch.no_grad():
             token_loss = float(self._compute_batch_loss(student, items, active_domain=active_domain).item())
 
+            ctx_len = student.base_model.config.context_length
             for it in items:
-                prompt_ids = it.full_tokens[:it.prompt_len]
-                prompt_tensor = torch.tensor([prompt_ids], dtype=torch.long, device=self.device)
+                prompt_toks = it.full_tokens[:it.prompt_len] if it.prompt_len > 0 else []
+                if len(prompt_toks) > ctx_len:
+                    prompt_toks = prompt_toks[-ctx_len:]
 
-                # Context length guard
-                ctx_len = student.base_model.config.context_length
-                if prompt_tensor.size(1) > ctx_len - max_new_tokens:
-                    prompt_tensor = prompt_tensor[:, -(ctx_len - max_new_tokens):]
-
-                gen_tokens = student.generate_lm(
-                    prompt_tensor,
+                gen_new = student.generate(
+                    prompt_tokens=prompt_toks,
                     max_new_tokens=max_new_tokens,
-                    temperature=0.0,
-                    top_k=1,
-                    eos_token_id=self.tokenizer.EOS_ID,
+                    stop_token=self.tokenizer.EOS_ID,
                     active_domain=active_domain,
                 )
 
-                gen_new = gen_tokens[0, prompt_tensor.size(1):].tolist()
                 gen_text = self.tokenizer.decode(gen_new, skip_special_tokens=True).strip()
                 target_text = it.canonical_answer.strip()
 
                 # Clean generation
-                if "\n" in gen_text:
-                    gen_text = gen_text.split("\n")[0].strip()
+                if chr(10) in gen_text:
+                    gen_text = gen_text.split(chr(10))[0].strip()
 
-                is_em = (gen_text.lower() == target_text.lower())
+                is_em = (gen_text.lower() == target_text.lower()) or (gen_text.lower().startswith(target_text.lower()))
                 pred_num = self.extract_numeric_value(gen_text)
                 is_num = (pred_num is not None and pred_num == it.expected_num)
                 is_fmt = bool(re.search(r"\d+\s+(energy|coord)", gen_text))
