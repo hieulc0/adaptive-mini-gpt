@@ -70,11 +70,8 @@ class TextStudentM103(nn.Module):
         # 2. Evolvable backbone substrate with dynamic layer skipping
         self.evolvable_backbone = DynamicEvolvableBackbone(base_model=self.base_model).to(self.device)
 
-        # 3. Dynamic layer skipping routers (16,776 params)
-        self.layer_routers = nn.ModuleList([
-            DynamicLayerSkippingRouter(d_model=128, hidden_dim=32).to(self.device)
-            for _ in range(4)
-        ])
+        # 3. Reference to dynamic layer skipping routers
+        self.layer_routers = self.evolvable_backbone.layer_routers
 
         # 4. Modular residual adapters for text rule domains (512 params each, rank-2)
         self.domains = [d.value for d in TextRuleDomainM103]
@@ -99,9 +96,7 @@ class TextStudentM103(nn.Module):
         # 7. Function-preserving persistent growth block (M102/M102.1/M102.2)
         self.growth_block_active = False
         if self.enable_persistent_growth:
-            self.evolvable_backbone.insert_identity_layer(position=4)
-            growth_router = DynamicLayerSkippingRouter(d_model=128, hidden_dim=32).to(self.device)
-            self.layer_routers.append(growth_router)
+            self.evolvable_backbone.insert_block_identity(insert_idx=len(self.base_model.blocks))
             self.growth_block_active = True
 
         # Rehearsal buffer for continuous learning
