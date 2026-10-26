@@ -81,4 +81,147 @@ Raw curve table: `data/manifests/concept_binding_v1_curves.csv`. Validation poin
 
 The negative study exposed an engineering ownership omission: its local `random.Random` minibatch sampler was not in the checkpoint graph. Future driver checkpoints now own that same sampler under `external`, record phase/update/example/token position and the output/action/tag label schema. Sample calls and seeds are unchanged; the original learning result and incomplete sampler checkpoints remain immutable and are not retroactively requalified.
 
-A focused remote check resumes both the **next sampled batch and optimizer update** in a fresh process, checks the sampler stream plus all global RNG streams, live controller-root aliases, gradients, flags, metadata, scheduler and moments. This follow-up changes persistence ownership and tests only; no neural architecture, loss, training budget, threshold or seed is changed, and no concept training is rerun. The final-core full suite at092441b is recorded separately from this final focused check.
+A focused remote check resumes both the **next sampled batch and optimizer update** in a fresh process, checks the sampler stream plus all global RNG streams, live controller-root aliases, gradients, flags, metadata, scheduler and moments. This follow-up changes persistence ownership and tests only; no neural architecture, loss, training budget, threshold or seed is changed, and no concept training is rerun. The final-core full suite at 092441b is recorded separately from this final focused check.
+
+## Final-core regression and support boundary
+
+The alias/root-handle correction at `092441b952ea2d7c7a46d9b301201e1dee13de55` completed Kaggle foundation kernel version 2: **33 contracts passed in 14.15s; 767 full-suite tests passed, no skips, in 626.03s**. All three historical bug reproducers independently failed as expected (routing, negative-logit growth and root aliases). The one full-suite warning is an existing invalid docstring escape. Evidence/hashes: `data/manifests/foundation_stabilization_v2.json`; artifacts `runs/kaggle-foundation-stabilization/output-v2/foundation-stabilization/`.
+
+The final sampler-owner driver/test change at `7b4b794f691f7c400a61bb6ef2bacc0d722951f4` has the same neural learning core; its separate CONTRACTS_ONLY run does not claim to rerun the full suite or concept study. Dataset identity and label schema must accompany future continuation. Arbitrary representation/width/vocabulary/context migrations, custom hooks, undeclared external side effects, cross-version Python class migration, production MoD training, automatic task-ID expansion and trained controller advantage remain unsupported or unqualified. No permanent architectural ceiling is introduced; these operations require their own future finite experiments.
+
+## Reproducible commands and revision map
+
+LOCAL: lint/type/syntax/mock-only. REMOTE: Kaggle or Colab GPU training/full tests. All actual neural forward/backward, checkpoint loading, behavioral comparisons and process-resume checks in this phase ran remotely.
+
+Local executed checks:
+
+```bash
+.venv/bin/python -m compileall -q src scripts tests kaggle
+.venv/bin/python -m pytest -q tests/test_foundation_mock_contracts.py
+.venv/bin/python -m pytest -q tests/test_architecture_audit_contracts.py -k optimizer
+.venv/bin/ruff check src/adaptive_mini_gpt/training/learning_state.py src/adaptive_mini_gpt/training/legacy_entrypoints.py src/adaptive_mini_gpt/training/optimizer_contract.py src/adaptive_mini_gpt/adaptive/router.py src/adaptive_mini_gpt/adaptive/experts.py src/adaptive_mini_gpt/adaptive/growth.py src/adaptive_mini_gpt/dynamic_transformer_evolution/dynamic_transformer_substrate.py tests/test_foundation_structure.py tests/test_foundation_mock_contracts.py scripts/verify_foundation_restart.py scripts/run_concept_binding.py src/adaptive_mini_gpt/data/concept_binding.py kaggle/launch_foundation_stabilization.py kaggle/launch_concept_binding.py
+```
+
+Scoped checks passed; five mock fixtures and two inspected optimizer fixtures pass. The root-alias mock first failed before repair. Type checking the new state/legacy/data/runner modules passed with the existing environment's explicit import paths (default Pyright path discovery cannot resolve installed Torch/NumPy):
+
+```bash
+python - <<'PYCODE'
+import json
+from pathlib import Path
+root=Path.cwd()
+Path('/tmp/amg-repair-pyright.json').write_text(json.dumps(dict(
+    extraPaths=[str(root/'src'),str(root/'scripts'),str(root/'.venv/lib/python3.12/site-packages')],
+    pythonVersion='3.12',typeCheckingMode='standard')))
+PYCODE
+.venv/bin/pyright --project /tmp/amg-repair-pyright.json src/adaptive_mini_gpt/training/learning_state.py src/adaptive_mini_gpt/training/legacy_entrypoints.py src/adaptive_mini_gpt/data/concept_binding.py scripts/run_concept_binding.py scripts/verify_foundation_restart.py
+```
+
+The plotting cache was initially populated in the temporary environment with network access; omit `--offline` for that initial install. Local analysis independently decoded all completed prompt artifacts and verified canonical data hashes; no model weights were loaded. Plotting uses only completed JSON, with optional Matplotlib in an isolated temporary environment and no project dependency change:
+
+```bash
+UV_CACHE_DIR=/tmp/amg-plot-cache UV_PYTHON_DOWNLOADS=never MPLCONFIGDIR=/tmp/amg-mpl uv run --offline --no-project --python .venv/bin/python --with matplotlib scripts/plot_concept_binding.py
+```
+
+Remote test commands, inside pinned Kaggle CUDA runtime:
+
+```bash
+python -m pytest -q tests/test_foundation_structure.py tests/test_foundation_mock_contracts.py tests/test_architecture_audit_contracts.py tests/test_audit_neural_regressions.py --junitxml=/kaggle/working/foundation-stabilization/contracts.xml
+AMG_RUN_GPU_TESTS=1 python -m pytest -q --junitxml=/kaggle/working/foundation-stabilization/full-suite.xml
+python scripts/run_concept_binding.py --output-dir /kaggle/working/concept-binding
+```
+
+The restart fixture invokes `scripts/verify_foundation_restart.py` in a **fresh remote Python process**, not an in-memory reload. Historical reproducer files are copied outside checkout, the old SHA is checked out, and each original failure runs independently before corrected tests. Exit 1 is expected only for those historical reproducers; all actual failed/timed-out phases remain failures.
+
+Prepare a pinned private job only after committing and pushing:
+
+```bash
+python - <<'PYCODE'
+from pathlib import Path
+import json
+sha='092441b952ea2d7c7a46d9b301201e1dee13de55'
+job=Path('runs/kaggle-foundation-stabilization/job');job.mkdir(parents=True,exist_ok=True)
+(job/'launch.py').write_text(Path('kaggle/launch_foundation_stabilization.py').read_text().replace('__PINNED_SHA__',sha))
+(job/'kernel-metadata.json').write_text(json.dumps(dict(
+    id='sparklinghydraulics0/amg-foundation-stabilization',title='amg-foundation-stabilization',
+    code_file='launch.py',language='python',kernel_type='script',is_private=True,
+    enable_gpu=True,enable_tpu=False,enable_internet=True,dataset_sources=[],competition_sources=[],kernel_sources=[],model_sources=[]),indent=2))
+PYCODE
+kaggle kernels push -p runs/kaggle-foundation-stabilization/job
+kaggle kernels status sparklinghydraulics0/amg-foundation-stabilization
+kaggle kernels output sparklinghydraulics0/amg-foundation-stabilization -p runs/kaggle-foundation-stabilization/output-v2
+```
+
+For the original negative concept study, use source `5a7b409fc0e8312708328fbddaca54cf0dd6e332`, template `kaggle/launch_concept_binding.py`, job directory `runs/kaggle-concept-binding/job`, kernel ID `sparklinghydraulics0/amg-concept-binding-foundation` (title without owner), and output `runs/kaggle-concept-binding/output-v1`. The exact source must be checked out to reproduce the original sampler-checkpoint limitation; do not pretend a rerun of a later commit is the historical result.
+
+For the final sampled-batch check, source `7b4b794f691f7c400a61bb6ef2bacc0d722951f4`, same foundation template, render `CONTRACTS_ONLY = False` to `CONTRACTS_ONLY = True` in the ignored job copy, preserving that run-scope parameter. This runs only contracts and historical reproducers; source/range and absence of a full-suite phase are recorded separately.
+
+Commits: `045371e` foundational implementation; `155f4a7` static ownership correction and first tested source; `5a7b409` prespecified concept study/immutable checkpoints; `092441b` reproduced root-alias correction; `7b4b794` sampler/schema ownership and exact sampled-update check. No historical experiment report is edited and no milestone number is advanced. Source rollback is an explicit Git revert of these scoped changes; no old checkpoint has been overwritten.
+
+## Exact changed files
+
+- `README.md`
+- `data/manifests/concept_binding_v1.json`
+- `data/manifests/concept_binding_v1_curves.csv`
+- `data/manifests/foundation_stabilization_v1.json`
+- `data/manifests/foundation_stabilization_v2.json`
+- `data/manifests/foundation_stabilization_v3.json`
+- `data/manifests/legacy_foundation_entrypoints.json`
+- `data/specs/concept_binding_v1.json`
+- `docs/02-architecture.md`
+- `docs/04-experiments.md`
+- `docs/05-roadmap.md`
+- `docs/06-data-pipeline.md`
+- `docs/ARCHITECTURE_AUDIT.md`
+- `docs/CANONICAL_LEARNING.md`
+- `docs/FOUNDATION_DEFECT_REGISTER.md`
+- `docs/FOUNDATION_STABILIZATION.md`
+- `docs/RESEARCH_INTEGRITY.md`
+- `docs/SCIENTIFIC_REVIEW_REPORT.md`
+- `docs/figures/concept_binding_v1_curves.svg`
+- `kaggle/launch_concept_binding.py`
+- `kaggle/launch_foundation_stabilization.py`
+- `scripts/plot_concept_binding.py`
+- `scripts/run_concept_binding.py`
+- `scripts/run_m103_a_benchmark.py`
+- `scripts/run_m103_b_benchmark.py`
+- `scripts/run_m103_c_benchmark.py`
+- `scripts/run_m103_d_benchmark.py`
+- `scripts/run_m103_e_benchmark.py`
+- `scripts/run_m103_f_benchmark.py`
+- `scripts/run_m103_g1_benchmark.py`
+- `scripts/run_m103_g_benchmark.py`
+- `scripts/run_m104_b_benchmark.py`
+- `scripts/run_m104_c_benchmark.py`
+- `scripts/run_m104_d_benchmark.py`
+- `scripts/run_m104_e_benchmark.py`
+- `scripts/verify_foundation_restart.py`
+- `src/adaptive_mini_gpt/adaptive/experts.py`
+- `src/adaptive_mini_gpt/adaptive/growth.py`
+- `src/adaptive_mini_gpt/adaptive/router.py`
+- `src/adaptive_mini_gpt/data/concept_binding.py`
+- `src/adaptive_mini_gpt/dynamic_transformer_evolution/dynamic_transformer_substrate.py`
+- `src/adaptive_mini_gpt/model/config.py`
+- `src/adaptive_mini_gpt/model/transformer.py`
+- `src/adaptive_mini_gpt/natural_language_learning_m103/semantic_bottleneck_m104_e.py`
+- `src/adaptive_mini_gpt/natural_language_learning_m103/text_student_m103.py`
+- `src/adaptive_mini_gpt/training/learning_state.py`
+- `src/adaptive_mini_gpt/training/legacy_entrypoints.py`
+- `src/adaptive_mini_gpt/training/optimizer_contract.py`
+- `tests/test_foundation_mock_contracts.py`
+- `tests/test_foundation_structure.py`
+
+## Final focused result and overall verdict
+
+Kaggle foundation kernel version 3, source `7b4b794f691f7c400a61bb6ef2bacc0d722951f4`, **COMPLETE, CONTRACTS_ONLY**: all 33 contracts pass in 17.36s, including exact next sampled batch and fresh-process model/optimizer/scheduler/RNG continuation. Historical reproducers each fail independently as expected. No full-suite or concept-study phase is claimed for that run. Manifest: `data/manifests/foundation_stabilization_v3.json`; artifacts: `runs/kaggle-foundation-stabilization/output-v3/foundation-stabilization/`.
+
+The final scalar capacity-ledger fix `2c9cfe7` counts per-cohort active experts (and one expert in task routing) rather than the old global top-k. A pure fake-parameter reproducer failed with 80 instead of 100 before repair; all five mock fixtures pass after repair. This changes introspection arithmetic only, not logits, gradients, optimization, RNG or any experimental result. The full neural-core 767-pass and sampled-resume 33-pass evidence above remains scoped to its exact revisions; the full suite is not falsely attributed to the final reporting/ledger HEAD.
+
+| Priority | Verdict | What remains |
+| --- | --- | --- |
+| P0 canonical input/update/persistence | VERIFIED within documented owner/schema/runtime scope | Arbitrary legacy paths and cross-version/undeclared side effects are not certified; original negative-study sampler omission stays recorded. |
+| P1 supported reversible adaptation | VERIFIED invariants and restart for tested mechanisms | Untested resize/representation/context/vocabulary/task-ID operations disabled or unqualified; competent old-task retention is not established by arbitrary probe equality. |
+| P2 reusable concept acquisition | **FAIL** | Frozen student fails larger-task acquisition; plastic arms fail joint tiny attribute qualification. No higher-capacity or extra-module response is justified. |
+| P3 learning-to-learn | NOT RUN | Requires concept generalization, established old competence and multiple independent future worlds. |
+| P4 learned self-modification | NOT RUN | Requires retention, future-learning benefit and independently qualified policy advantage. |
+
+**Overall PARTIAL:** a substantially more trustworthy experimental learning foundation, with a scientifically useful negative concept result. One persistent student is supported by the canonical owner and continuation tests; no ensemble of specialist solvers or autonomous promotion was introduced. No reusable concept, positive forward-learning efficiency or neural self-improvement is claimed. Stop here and retain all failure evidence.

@@ -148,3 +148,11 @@ Final execution boundary: LOCAL: lint/type/syntax/mock-only; REMOTE: Kaggle or C
 ## Approved targeted repair continuation
 
 The follow-up is recorded in [AUDIT_REPAIR_PHASE](AUDIT_REPAIR_PHASE.md), with exact revisions, complete-input evidence, M90 controls, changed files and commands. Its first T4 run passed 754 tests with one opt-in skip. Frozen/selective students and a bag-of-words control solve a narrow positive-only held-out description task; the fully trainable arm remains weaker. These results neither retract the historical negative findings nor qualify general conceptual learning, retention, future-task efficiency or autonomous self-modification. No milestone is advanced.
+
+
+## Canonical foundation stabilization
+
+Foundation work now follows [CANONICAL_LEARNING](CANONICAL_LEARNING.md). The first pinned T4 foundation run passed 763 tests including opt-in GPU qualification and reproduced old routing/growth defects. Further results and the root-alias correction are in [FOUNDATION_STABILIZATION](FOUNDATION_STABILIZATION.md); no historical negative result or milestone status is removed.
+
+
+Final stabilization evidence: neural-core regression **767 passed**, final sampled-restart contracts **33 passed** at separately recorded revisions. The prespecified two-trait concept study **FAILS** (frozen train/held-out50%; selective/full stopped at the tiny attribute gate). No learning-to-learn or learned-modification phase ran. See [FOUNDATION_STABILIZATION](FOUNDATION_STABILIZATION.md) for exact scope and immutable negative artifacts.

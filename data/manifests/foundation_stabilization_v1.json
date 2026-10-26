@@ -1,0 +1,60 @@
+{
+  "sha": "155f4a751fda540ab4e375d4ea40b6d9fd0bda9c",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "gpu": "Tesla T4",
+  "phases": {
+    "install": {
+      "exit_code": 0
+    },
+    "historical_negative_logit": {
+      "exit_code": 1
+    },
+    "historical_dynamic_routing": {
+      "exit_code": 1
+    },
+    "contracts": {
+      "exit_code": 0
+    },
+    "full_suite": {
+      "exit_code": 0
+    }
+  },
+  "kernel_id": "sparklinghydraulics0/amg-foundation-stabilization",
+  "kernel_version": 1,
+  "status": "COMPLETE",
+  "artifact_directory": "runs/kaggle-foundation-stabilization/output-v1/foundation-stabilization",
+  "test_counts": {
+    "contracts": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "29",
+      "time": "14.595",
+      "timestamp": "2026-10-26T13:53:21.267086+00:00",
+      "hostname": "4cdd69f9e17f"
+    },
+    "full-suite": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "763",
+      "time": "622.376",
+      "timestamp": "2026-10-26T13:53:38.372320+00:00",
+      "hostname": "4cdd69f9e17f"
+    }
+  },
+  "sha256": {
+    "test_historical_foundation.py": "87ad37b6e11d56dc68717be2cac297828f751f22f53cef34497cf625124a36a2",
+    "contracts.log": "ab243b06e7e19bae7c3c8e934deae718b67668573f7ef99496969061f9a972a9",
+    "full-suite.xml": "fa5ef62aa833f24e792ef51c8bd3c55c8d4bc879881405f017352917e013e76f",
+    "install.log": "e429aabcbbfc57350d5908f3ac66a8a6c86a4df991fdb66a49e3a7beb5d805b2",
+    "execution.json": "78478e0d4cb536356ac1e28633882f4685b71cf54f3c1d64b7aaada985dfa8b4",
+    "historical-negative_logit.log": "01b7c169e2d6853bb76b24e606b044a6e0995839627c6f2119bf6ec2f41d5ff8",
+    "full-suite.log": "721e14de962366e66c116abbca2947bbe692686b1b790f906bb6245e663e1953",
+    "historical-dynamic_routing.log": "bda17338ce148cc64c38e2de1c2133f793cb4503b97547f1988a45fa92062770",
+    "contracts.xml": "6b0ee2eeff2c147a595a18f0155bf10d197427cca45440a297d1bbf3f1106ddf"
+  }
+}

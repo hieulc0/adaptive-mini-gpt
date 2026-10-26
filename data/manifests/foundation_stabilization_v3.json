@@ -1,0 +1,52 @@
+{
+  "sha": "7b4b794f691f7c400a61bb6ef2bacc0d722951f4",
+  "scope": "CONTRACTS_ONLY",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "gpu": "Tesla T4",
+  "phases": {
+    "install": {
+      "exit_code": 0
+    },
+    "historical_negative_logit": {
+      "exit_code": 1
+    },
+    "historical_dynamic_routing": {
+      "exit_code": 1
+    },
+    "historical_root_alias": {
+      "exit_code": 1
+    },
+    "contracts": {
+      "exit_code": 0
+    }
+  },
+  "kernel_id": "sparklinghydraulics0/amg-foundation-stabilization",
+  "version": 3,
+  "status": "COMPLETE",
+  "artifact_directory": "runs/kaggle-foundation-stabilization/output-v3/foundation-stabilization",
+  "test_counts": {
+    "contracts": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "33",
+      "time": "17.358",
+      "timestamp": "2026-10-26T14:43:10.421811+00:00",
+      "hostname": "4e3de2f7337f"
+    }
+  },
+  "full_suite": "NOT_RUN_CONTRACTS_ONLY; final neural-core full suite at092441b:767 passed",
+  "sha256": {
+    "test_historical_foundation.py": "c4ca0faff689b4b1b401ab6b309282ca1331db06d2f3068af1f2728fc09dba3e",
+    "contracts.log": "5f08605728a98b94e925c1e6f7d1c6d52137bb8982f4ae9b01bc0adc72375350",
+    "historical-root-alias.log": "32217418874eda88f9371dea79e9e9e52b9c1f2efec817d9fa8697da229ed3ff",
+    "install.log": "88e87a33910ddc6d3fcaf52b0a3caf8669434b9c8066a0192e1c9b41402288b8",
+    "execution.json": "4f2a25fbe3d8a7708234a51e2b41acb24c932a3c1c60a01c0f34746f6a2f5d01",
+    "historical-negative_logit.log": "8a25574658a5963f416342b2dec0ed407e657610e3948d0ca2a45ff8c3e8f175",
+    "historical-dynamic_routing.log": "dcdbdb65979e4d7d8188c9230d7a1d38548e8e980456deaab799f5141320e60c",
+    "contracts.xml": "5b9ce039c90fc80ce424ce649da478eec59f445026c930cd54f62f04eeeef5d3",
+    "test_historical_root_alias.py": "0c7f8fed83bcb6640206e21599945320a1a739328eb3fa30cef43b2907740039"
+  }
+}

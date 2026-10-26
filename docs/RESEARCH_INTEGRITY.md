@@ -51,3 +51,8 @@ The version 1 independent run found 25 failures in a 744-case repository suite. 
 ## Approved audit repair continuation
 
 The current repair experiment uses prespecified seed 42, threshold 0.5, unchanged M90 >=85% gate, fixed update budgets and separate name/description robustness slices. Its positive-only attribute bundles, shared lexical vocabulary, fixed rule and correlated templates restrict conclusions. Simple baseline optimizer updates/examples and actual GPU times are reported separately; no compute-equivalence or learning-to-learn claim follows. See [AUDIT_REPAIR_PHASE](AUDIT_REPAIR_PHASE.md) and the complete source-call inventory for audited versus unqualified interfaces.
+
+
+## Canonical foundation stabilization
+
+Concept-binding feasibility requires matched-word pairs, independent joint entity combinations, strict per-family accuracy/attribute exact match and superiority over BoW and word1–3-gram controls at predeclared budgets. An oracle-feature MLP is labelled diagnostic only. The two-trait, familiar-law, single-seed scope cannot certify general language, learning-to-learn or learned self-modification. The old and new rollback implementations must not share a qualification claim.

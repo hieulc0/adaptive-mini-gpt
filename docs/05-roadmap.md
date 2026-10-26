@@ -133,3 +133,8 @@ The M104-E/M105-A source audit found truncated entity inputs, silently collapsed
 ## Approved audit repair continuation
 
 Remain in the approved targeted repair phase. No M105 structural growth, new learning module, capacity increase or new milestone is authorized by software fixes. The next decision depends on complete-input held-out learning and the unchanged M90 gate; see [AUDIT_REPAIR_PHASE](AUDIT_REPAIR_PHASE.md). Unqualified growth, routing and full-state rollback contracts remain blockers.
+
+
+## Canonical foundation stabilization
+
+Continue P0 trustworthy canonical learning and P1 reversible adaptation before P2 concept qualification. P3 future-task learning efficiency and P4 learned modification remain gated on independent concept/retention competence. No milestone number is advanced. See [FOUNDATION_STABILIZATION](FOUNDATION_STABILIZATION.md).

@@ -1,0 +1,80 @@
+{
+  "protocol": "concept-binding-v1",
+  "provenance": {
+    "platform": "kaggle",
+    "git_sha": "5a7b409fc0e8312708328fbddaca54cf0dd6e332",
+    "python": "3.13.15",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "gpu": "Tesla T4",
+    "seed": 42
+  },
+  "kernel": "sparklinghydraulics0/amg-concept-binding-foundation",
+  "version": 1,
+  "status": "COMPLETE",
+  "artifact_directory": "runs/kaggle-concept-binding/output-v1/concept-binding",
+  "manifest": {
+    "data_sha256": "c86584a57e3b80f78be302409ebcf3b50d7e6cf0071416d1c4889d8599945f9c",
+    "splits": {
+      "train": 256,
+      "validation": 64,
+      "description": 256,
+      "composition": 256,
+      "tiny": 8
+    },
+    "protocol": "concept-binding-v1",
+    "seed": 42,
+    "context_length": 256,
+    "max_tokens": 238,
+    "gates": {
+      "tiny_fit": 0.95,
+      "family_accuracy": 0.8,
+      "attribute_exact": 0.8,
+      "advantage_over_simple": 0.1
+    },
+    "steps": {
+      "tiny": 200,
+      "train": 800
+    }
+  },
+  "verdict": "FAIL_STOP_NO_TRANSFER_OR_GROWTH",
+  "test_counts": {
+    "contracts": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "10",
+      "time": "18.256",
+      "timestamp": "2026-10-26T14:12:38.346875+00:00",
+      "hostname": "98512d4590e4"
+    },
+    "full-suite": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "765",
+      "time": "606.168",
+      "timestamp": "2026-10-26T14:13:31.374456+00:00",
+      "hostname": "98512d4590e4"
+    }
+  },
+  "sha256": {
+    "contracts.log": "502758b99a43ee12885a13bf45234d7e5d8b39d1640dd44976aedff889828d47",
+    "frozen_backbone.pt": "c82783d02339a8846c55709e136fe5d1084b0cbdb0fd0218988a5db27ed67919",
+    "full-suite.xml": "624cda5e757805285ba698dad3e9d50be3ec4b11bff8a964f9e589e671951c4f",
+    "install.log": "ec69e4d27f46c9de675594dfc60ac6c08bae7132d5eebfc8030becaf6c676245",
+    "execution.json": "6f686abbdad8b605dc31b88f6cbbca7d426443bd9affd5c5a5357ad8ebde666a",
+    "cases.json": "dc0bdcc2617e953ca0a49415e4515a648036711c1630c54b5f4fc1790c6048b2",
+    "results.json": "d35ede8ed872ed2bf02c8b58ac79b8dbb455cac1b899097b5cc84c5cbc5dfd8f",
+    "study.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "manifest.json": "79abaae4b07c9f5a9e7285a3d700792c6868f8ea006552493fc196de51f7290d",
+    "full-suite.log": "43ebb3d5135fbeea455b1c5ade44bfddd65931dc069ec4095f3303ab6ea2a9ec",
+    "trainable_backbone.pt": "0217291965f2bc5622c9020cfe1efc6ca1606a6189d97eeb819bf6040fa35aee",
+    "selective_plasticity.pt": "4a4f79fcd07b5bbe58bad5da04ce1a934696438c8603e9e6296e398a4b5ed5d8",
+    "token_sequences.json": "7b36f98991143346c57c90931e87e0f918c532a3c8c0a867c7cd1107fa5b8326",
+    "contracts.xml": "10e517609e521333cbecdf0ea24e708dd6d9266398225f59910507feb6fff715",
+    "provenance.json": "8012862fa67078488ffbef1acd30b53f50e1d78cc3c58eedd45ffb6aebeb9f93"
+  }
+}

@@ -587,3 +587,8 @@ The M104-E/M105-A source audit found truncated entity inputs, silently collapsed
 ## Approved audit repair continuation
 
 The approved repair study stores complete rule/question text, annotation evidence, split identities and a canonical SHA256 of all cases. Every delivered token sequence and model-derived context budget is exported remotely. `input_protocol.py` validates the controlled positive-only fixture; it does not extract concepts for the student. Unknown labels, contradictory annotations and padding/context overflow reject explicitly on the approved path. Retained legacy runners still contain cropping paths and are not certified; see [AUDIT_REPAIR_PHASE](AUDIT_REPAIR_PHASE.md).
+
+
+## Canonical foundation stabilization
+
+The new controlled two-trait protocol is `data/specs/concept_binding_v1.json`, generated remotely by `data/concept_binding.py`. Exact-word-multiset counterfactual pairs swap entity/property binding; complete prompts and explicit absent/negated facts determine targets. `structured_diagnostic` fields never enter language inference. Split/source hashes, actual delivered tokens and all predictions are retained. Cases viewed for diagnosis must be retired from future sealed qualification.

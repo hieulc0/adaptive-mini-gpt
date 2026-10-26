@@ -112,3 +112,8 @@ A local-safe byte-fixture check constructed a wooden-tool question and a metal-v
 ## Approved audit repair continuation
 
 The approved targeted repair continuation, including explicit attention masks, padding overflow, optimizer ownership, M90 initialization and a fixed/unresolved legacy contract table, is recorded in [AUDIT_REPAIR_PHASE](AUDIT_REPAIR_PHASE.md). This addendum distinguishes prior repaired MoD/RoPE defects from still-unqualified expert growth, sequence routing and full transactional recovery.
+
+
+## Canonical foundation stabilization
+
+The active stabilization changes and fixed/unresolved/quarantined classifications are tracked in [FOUNDATION_DEFECT_REGISTER](FOUNDATION_DEFECT_REGISTER.md). Current canonical topology rollback is distinct from the legacy partial M105 helper. No learning benefit follows from structural invariant tests alone.

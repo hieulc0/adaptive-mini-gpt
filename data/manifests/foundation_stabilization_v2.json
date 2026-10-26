@@ -1,0 +1,65 @@
+{
+  "sha": "092441b952ea2d7c7a46d9b301201e1dee13de55",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "gpu": "Tesla T4",
+  "phases": {
+    "install": {
+      "exit_code": 0
+    },
+    "historical_negative_logit": {
+      "exit_code": 1
+    },
+    "historical_dynamic_routing": {
+      "exit_code": 1
+    },
+    "historical_root_alias": {
+      "exit_code": 1
+    },
+    "contracts": {
+      "exit_code": 0
+    },
+    "full_suite": {
+      "exit_code": 0
+    }
+  },
+  "kernel_id": "sparklinghydraulics0/amg-foundation-stabilization",
+  "version": 2,
+  "status": "COMPLETE",
+  "artifact_directory": "runs/kaggle-foundation-stabilization/output-v2/foundation-stabilization",
+  "test_counts": {
+    "contracts": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "33",
+      "time": "14.153",
+      "timestamp": "2026-10-26T14:19:35.583748+00:00",
+      "hostname": "f6dd4b396e41"
+    },
+    "full-suite": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "767",
+      "time": "626.027",
+      "timestamp": "2026-10-26T14:19:52.219342+00:00",
+      "hostname": "f6dd4b396e41"
+    }
+  },
+  "sha256": {
+    "test_historical_foundation.py": "60ba0b2f3b7350e1192f87df26c2ccf39ac4ef807dea493ff01ee91604f2942d",
+    "contracts.log": "6f80e0ce7a84aeff593ef6324755f00be32a3117fc7729b34bf8df3a12b55e07",
+    "historical-root-alias.log": "9d0743c7abf46fba8fa1da755bd6423c029214c17e1f188d89d41e82d99959a6",
+    "full-suite.xml": "bc35dfe4e7f7a464989c2f424f2dea4ca0b02ae2e932fb6f037847db0289abc4",
+    "install.log": "19d01de3bd337170bcd02b4c3f26a9565afb61defce5db6979d5055492dcf87c",
+    "execution.json": "1db8c21c56f0e2ab65306d8114ecb9038c8f9b91430caa60b06aabcdd3121ca2",
+    "historical-negative_logit.log": "313353b57d71729dc3933954b000e59a2e11d398c26f0b03ec53be0debf6e8c4",
+    "full-suite.log": "145135d486ab26578334063086d58080510590007fcf82b3366b1fa9bc05ab7d",
+    "historical-dynamic_routing.log": "3dba9c44acbb19d7b2c8f876343ee6597aaee842ceba582113d06c72cde796e2",
+    "contracts.xml": "2a50472b88c82ac6412f469110563e88dd30e54d83ce0c81a187d136eb2639cd",
+    "test_historical_root_alias.py": "0c7f8fed83bcb6640206e21599945320a1a739328eb3fa30cef43b2907740039"
+  }
+}

@@ -670,3 +670,11 @@ The M104-E/M105-A source audit found truncated entity inputs, silently collapsed
 ## Approved audit repair continuation
 
 The approved repair experiment is specified by `data/specs/audit_repair_v1.json` and executed by `scripts/run_audit_repair.py` through `kaggle/launch_audit_repair.py`. See [AUDIT_REPAIR_PHASE](AUDIT_REPAIR_PHASE.md) for actual source SHA, remote status, results and failures. The previous audit and historical benchmark outputs remain unchanged.
+
+
+## Canonical foundation stabilization
+
+The foundation stabilization experiment is separate from milestone acceptance. See [FOUNDATION_STABILIZATION](FOUNDATION_STABILIZATION.md) for pinned remote revisions, original reproducer failures, exact test counts and the prespecified concept-binding study. Historical metrics above are unchanged.
+
+
+Final stabilization evidence: neural-core regression **767 passed**, final sampled-restart contracts **33 passed** at separately recorded revisions. The prespecified two-trait concept study **FAILS** (frozen train/held-out50%; selective/full stopped at the tiny attribute gate). No learning-to-learn or learned-modification phase ran. See [FOUNDATION_STABILIZATION](FOUNDATION_STABILIZATION.md) for exact scope and immutable negative artifacts.
