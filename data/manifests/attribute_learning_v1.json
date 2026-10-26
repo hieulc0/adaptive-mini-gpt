@@ -1,0 +1,444 @@
+{
+  "protocol": "attribute-learning-v1",
+  "kernel": "sparklinghydraulics0/amg-attribute-learning",
+  "version": 1,
+  "status": "ERROR",
+  "provenance": {
+    "platform": "kaggle",
+    "git_sha": "216c3d5059b6e6e5bbb199f7c4ffbab4234488ba",
+    "python": "3.13.15",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "gpu": "Tesla T4",
+    "seed": 42
+  },
+  "execution": {
+    "sha": "216c3d5059b6e6e5bbb199f7c4ffbab4234488ba",
+    "gpu": "Tesla T4",
+    "phases": {
+      "install": {
+        "exit_code": 0
+      },
+      "contracts": {
+        "exit_code": 0
+      },
+      "attribute_study": {
+        "exit_code": 0
+      },
+      "full_suite": {
+        "exit_code": 1
+      }
+    }
+  },
+  "artifact_directory": "runs/kaggle-attribute-learning/output-v1/attribute-learning",
+  "scientific_verdict": "STOP_STAGE_A_NOT_QUALIFIED",
+  "input_verified": 429,
+  "manifest": {
+    "protocol": "attribute-learning-v1",
+    "data_sha256": "985f8fa3cefb9fdaec05f252a6d3fe56950d95c00f1f4a0ffccc9a144e6de18e",
+    "splits": {
+      "train": {
+        "cases": 168,
+        "positives": [
+          56,
+          56
+        ],
+        "families": {
+          "absent+absent": 8,
+          "absent+negated": 16,
+          "absent+positive": 8,
+          "negated+absent": 16,
+          "negated+negated": 32,
+          "negated+positive": 32,
+          "positive+absent": 8,
+          "positive+negated": 32,
+          "positive+positive": 16
+        }
+      },
+      "validation": {
+        "cases": 84,
+        "positives": [
+          28,
+          28
+        ],
+        "families": {
+          "absent+absent": 4,
+          "absent+negated": 8,
+          "absent+positive": 4,
+          "negated+absent": 8,
+          "negated+negated": 16,
+          "negated+positive": 16,
+          "positive+absent": 4,
+          "positive+negated": 16,
+          "positive+positive": 8
+        }
+      },
+      "names": {
+        "cases": 84,
+        "positives": [
+          28,
+          28
+        ],
+        "families": {
+          "absent+absent": 4,
+          "absent+negated": 8,
+          "absent+positive": 4,
+          "negated+absent": 8,
+          "negated+negated": 16,
+          "negated+positive": 16,
+          "positive+absent": 4,
+          "positive+negated": 16,
+          "positive+positive": 8
+        }
+      },
+      "syntax": {
+        "cases": 84,
+        "positives": [
+          28,
+          28
+        ],
+        "families": {
+          "absent+absent": 4,
+          "absent+negated": 8,
+          "absent+positive": 4,
+          "negated+absent": 8,
+          "negated+negated": 16,
+          "negated+positive": 16,
+          "positive+absent": 4,
+          "positive+negated": 16,
+          "positive+positive": 8
+        }
+      },
+      "tiny": {
+        "cases": 9,
+        "positives": [
+          3,
+          3
+        ],
+        "families": {
+          "absent+absent": 1,
+          "absent+negated": 1,
+          "absent+positive": 1,
+          "negated+absent": 1,
+          "negated+negated": 1,
+          "negated+positive": 1,
+          "positive+absent": 1,
+          "positive+negated": 1,
+          "positive+positive": 1
+        }
+      }
+    },
+    "boundary": "names: disjoint names, known grammar; syntax: disjoint names and templates; all nine annotation combinations in train. Not composition or unfamiliar-vocabulary transfer.",
+    "context_length": 256,
+    "max_tokens": 152,
+    "delivered": 429
+  },
+  "test_counts": {
+    "contracts": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "19",
+      "time": "19.125",
+      "timestamp": "2026-10-26T21:23:00.996782+00:00",
+      "hostname": "a10bf425acb6"
+    },
+    "full-suite": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "1",
+      "skipped": "0",
+      "tests": "774",
+      "time": "621.226",
+      "timestamp": "2026-10-26T21:24:31.338906+00:00",
+      "hostname": "a10bf425acb6"
+    }
+  },
+  "limitations": [
+    "One seed, correlated grammar cases; not world-level statistical qualification.",
+    "Syntax split also changes names: individual causal contributions are not isolated.",
+    "Parent historical checkpoint lacked sampler; new stage declares owned sampler, not retrospective exact resume.",
+    "773 full-suite passes and one GPU qualification failure; no clean regression claim.",
+    "Raw v1 computes numerical gaps from zero for unrun heldout arms; these are not measured comparisons and must be interpreted as NOT RUN. Future driver emits null."
+  ],
+  "neural": {
+    "continuing_selective_two": {
+      "initial_hash": "cb5c90b050daffbdf32712bba1a9acff5646121a11cb37943312553270434f4d",
+      "final_hash": "0a387f499ca38277660eef4dbd02bd0d29eac5dc5a43dd1746be337c2f8a97ef",
+      "checkpoint_sha256": "9b4d8a937e553c9d27befbd218612724e5fb43909f632f8ebbb988ed224c4f3e",
+      "initial_total_steps": 200,
+      "total_steps": 400,
+      "updates": 200,
+      "examples": 1800,
+      "tokens": 190800,
+      "gpu_wall_seconds": 3.5994687019999674,
+      "stored_parameters": 1255636,
+      "trainable_parameters": 406762,
+      "transition_weights_unchanged": true,
+      "basic_acquisition_pass": false,
+      "reusable_qualification_pass": false,
+      "metrics": {
+        "tiny": {
+          "exact": 0.8888888955116272,
+          "micro_f1": 0.9090909090909091,
+          "status_accuracy": {
+            "positive": 0.8333333333333334,
+            "negated": 1.0,
+            "absent": 1.0
+          }
+        }
+      },
+      "advantage_over_simple": {
+        "names": null,
+        "syntax": null
+      }
+    },
+    "fresh_frozen_two": {
+      "initial_hash": "b4b586814e27dc7dffbaf3471e098c54730e38651942fed62a6e8a00ed32242c",
+      "final_hash": "b554d467c7459f4253f8df4d86f475d0d071687682ad37c7be4316eebdc74fd3",
+      "checkpoint_sha256": "6c8427c81df7afc2e1a97c5afded16fb3d8517ff9d1048b1843bbe6c4a0ce43b",
+      "initial_total_steps": 0,
+      "total_steps": 1000,
+      "updates": 1000,
+      "examples": 14600,
+      "tokens": 1672297,
+      "gpu_wall_seconds": 12.780300986999919,
+      "stored_parameters": 1255636,
+      "trainable_parameters": 77162,
+      "transition_weights_unchanged": true,
+      "basic_acquisition_pass": false,
+      "reusable_qualification_pass": false,
+      "metrics": {
+        "tiny": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          }
+        },
+        "train": {
+          "exact": 0.9226190447807312,
+          "micro_f1": 0.9451476793248945,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.91875,
+            "absent": 1.0
+          }
+        },
+        "names": {
+          "exact": 0.9285714626312256,
+          "micro_f1": 0.9217391304347826,
+          "status_accuracy": {
+            "positive": 0.9464285714285714,
+            "negated": 0.925,
+            "absent": 1.0
+          }
+        },
+        "syntax": {
+          "exact": 0.4404762089252472,
+          "micro_f1": 0.03508771929824561,
+          "status_accuracy": {
+            "positive": 0.017857142857142856,
+            "negated": 1.0,
+            "absent": 1.0
+          }
+        }
+      },
+      "advantage_over_simple": {
+        "names": -0.07142853736877441,
+        "syntax": -0.5595237910747528
+      }
+    },
+    "fresh_selective_two": {
+      "initial_hash": "b4b586814e27dc7dffbaf3471e098c54730e38651942fed62a6e8a00ed32242c",
+      "final_hash": "4a81d1cb05703d410b0b70ad1a1e88b57398ca8cbbe947d4070f279fdf02e41d",
+      "checkpoint_sha256": "ed889fe42d39a4f3bec3352e47472721d39e9e7f495324efe1d7a54996626e9a",
+      "initial_total_steps": 0,
+      "total_steps": 1000,
+      "updates": 1000,
+      "examples": 14600,
+      "tokens": 1672297,
+      "gpu_wall_seconds": 16.74463134000007,
+      "stored_parameters": 1255636,
+      "trainable_parameters": 406762,
+      "transition_weights_unchanged": true,
+      "basic_acquisition_pass": false,
+      "reusable_qualification_pass": false,
+      "metrics": {
+        "tiny": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          }
+        },
+        "train": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          }
+        },
+        "names": {
+          "exact": 0.9404761791229248,
+          "micro_f1": 0.9572649572649573,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.9375,
+            "absent": 1.0
+          }
+        },
+        "syntax": {
+          "exact": 0.4285714328289032,
+          "micro_f1": 0.0,
+          "status_accuracy": {
+            "positive": 0.0,
+            "negated": 1.0,
+            "absent": 1.0
+          }
+        }
+      },
+      "advantage_over_simple": {
+        "names": -0.059523820877075195,
+        "syntax": -0.5714285671710968
+      }
+    },
+    "fresh_full_two": {
+      "initial_hash": "b4b586814e27dc7dffbaf3471e098c54730e38651942fed62a6e8a00ed32242c",
+      "final_hash": "98b7c406671bbf74e70a08518a58c54a7b5c6a3a326cda3e209c6b59648ef4d0",
+      "checkpoint_sha256": "fb0bdd2178ac8128d2a1193285a2fc83ff87ee45c0cc6dc91bf1001b5e9b55d4",
+      "initial_total_steps": 0,
+      "total_steps": 1000,
+      "updates": 1000,
+      "examples": 14600,
+      "tokens": 1672297,
+      "gpu_wall_seconds": 22.316365975000053,
+      "stored_parameters": 1255636,
+      "trainable_parameters": 1255636,
+      "transition_weights_unchanged": true,
+      "basic_acquisition_pass": false,
+      "reusable_qualification_pass": false,
+      "metrics": {
+        "tiny": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          }
+        },
+        "train": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          }
+        },
+        "names": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          }
+        },
+        "syntax": {
+          "exact": 0.4285714328289032,
+          "micro_f1": 0.0,
+          "status_accuracy": {
+            "positive": 0.0,
+            "negated": 1.0,
+            "absent": 1.0
+          }
+        }
+      },
+      "advantage_over_simple": {
+        "names": 0.0,
+        "syntax": -0.5714285671710968
+      }
+    },
+    "fresh_selective_all26": {
+      "initial_hash": "b4b586814e27dc7dffbaf3471e098c54730e38651942fed62a6e8a00ed32242c",
+      "final_hash": "e33d7acc0f41488eb4cf12ea54bbd635d5e3d70ae5af4011da8ff25913ccd3d1",
+      "checkpoint_sha256": "c446d995ac5721f28a827e85a91f81fe6b181021e5927119f2981859d75780a1",
+      "initial_total_steps": 0,
+      "total_steps": 200,
+      "updates": 200,
+      "examples": 1800,
+      "tokens": 190800,
+      "gpu_wall_seconds": 3.0121132669999042,
+      "stored_parameters": 1255636,
+      "trainable_parameters": 406762,
+      "transition_weights_unchanged": true,
+      "basic_acquisition_pass": false,
+      "reusable_qualification_pass": false,
+      "metrics": {
+        "tiny": {
+          "exact": 0.4444444477558136,
+          "micro_f1": 0.0,
+          "status_accuracy": {
+            "positive": 0.0,
+            "negated": 1.0,
+            "absent": 1.0
+          }
+        }
+      },
+      "advantage_over_simple": {
+        "names": null,
+        "syntax": null
+      }
+    }
+  },
+  "baselines": {
+    "bow_linear": {
+      "train": 0.6190476417541504,
+      "names": 0.6190476417541504,
+      "syntax": 0.6190476417541504
+    },
+    "bow_mlp": {
+      "train": 0.8095238208770752,
+      "names": 0.6190476417541504,
+      "syntax": 0.7142857313156128
+    },
+    "ngram_linear": {
+      "train": 1.0,
+      "names": 1.0,
+      "syntax": 1.0
+    },
+    "majority": {
+      "train": 0.4285714328289032,
+      "names": 0.4285714328289032,
+      "syntax": 0.4285714328289032
+    }
+  },
+  "sha256": {
+    "cases.json": "a5976ec74cd9508a0261f0179c11b052fe44f32f8303eac0ef9ae7d13b3c2d93",
+    "continuing_selective_two.pt": "9b4d8a937e553c9d27befbd218612724e5fb43909f632f8ebbb988ed224c4f3e",
+    "contracts.log": "0513339d6b58dd51e3c97c570509ed8a408a45e0dd7e291b523c332cf7da6a64",
+    "contracts.xml": "d6da22cf9f6dd2b5b48661c7e5bbd4c673ed4fed7a6ba03c7f221753b248ed38",
+    "execution.json": "63fd8674c8cc14fe351a8c8d2db37c7612132ff396b677efecd1c6faf75b2c9b",
+    "fresh_frozen_two.pt": "6c8427c81df7afc2e1a97c5afded16fb3d8517ff9d1048b1843bbe6c4a0ce43b",
+    "fresh_full_two.pt": "fb0bdd2178ac8128d2a1193285a2fc83ff87ee45c0cc6dc91bf1001b5e9b55d4",
+    "fresh_selective_all26.pt": "c446d995ac5721f28a827e85a91f81fe6b181021e5927119f2981859d75780a1",
+    "fresh_selective_two.pt": "ed889fe42d39a4f3bec3352e47472721d39e9e7f495324efe1d7a54996626e9a",
+    "full-suite.log": "ebe0eeaa167451207409d60e4dcfe50db72f1b403d06cf3d1de906c2f22dcb99",
+    "full-suite.xml": "0b7809458ab2111fdccdd61e3a0823c599758212cc87ae8ce724b3cd3bbd2343",
+    "install.log": "5bdcf2b75a79048af8561d596fd5b7f0804d64f74e71baa5db42a2418340600c",
+    "manifest.json": "7afa97b80913f534b182c850bf5eff9144b7dd14b027f916521d393853b43f53",
+    "provenance.json": "bce406e28c891dc267e6b973378557d7abbcf4a668ef9aecb8cfe9b15abcfba8",
+    "results.json": "ff094d054eeb58a7f64664e540065332a532fcca1012e0ca42bc68f00f8818f4",
+    "study.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "token_sequences.json": "3f99206c9549318cf4ad0a784a56e536463bb8bfa5b230f2a3ebf0cedbe8d464"
+  }
+}

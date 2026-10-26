@@ -141,3 +141,5 @@ Continue P0 trustworthy canonical learning and P1 reversible adaptation before P
 
 
 Stage A now isolates positive, negated and absent attributes using the existing persistent student and explicit attribute-only supervision. Protocol, fixed gates, lineage and actual run status: [ATTRIBUTE_LEARNING](ATTRIBUTE_LEARNING.md). No entity-binding, transition, transfer or architecture-growth milestone is advanced.
+
+Stage A result: **FAIL, STOP before entity binding**. Continuing tiny exact88.89%; fresh selective/full train100% but shifted-description exact42.86% versus n-gram100%. Kaggle full regression773passed/1failed (FP16 optimizer-counter qualification), not a clean pass. Exact evidence and unresolved backend diagnosis are in the Stage A report above.

@@ -21,4 +21,13 @@ Baseline `d7fbedd`; status/evidence in FOUNDATION_STABILIZATION.md. Historical r
 | Configured active-capacity estimate assumed a single top-k group | CONFIRMED BUG | Pure fake-parameter ledger fails before repair (80 instead of 100); final scalar accounting counts each cohort and exactly one task expert. Five mock fixtures pass. No neural computation or measured cost is changed; this is still an estimate, not profiling. |
 | More backbone plasticity or more capacity improves compositional learning | UNVERIFIED HYPOTHESIS | Fixed neural controls test plasticity; no capacity increase. Held-out results cannot be used to tune architecture/hyperparameters. |
 
+Stage A follow-up (source216c3d5; full job ERROR,19 focused contracts pass; details in [ATTRIBUTE_LEARNING](ATTRIBUTE_LEARNING.md)):
+
+| Finding | Classification | State / evidence |
+| --- | --- | --- |
+| Canonical joint objective cannot isolate attributes without a state target | DESIGN LIMITATION | Explicit attribute-only/subset supervision added, default joint formula preserved. Remote gradients and unused-transition checks pass. Fresh selective tiny accuracy100% with two columns vs44.44% with all26. This is one controlled loss contrast, not a historical-bug claim. |
+| Attribute training fits known frames but fails the combined new-name/template shift | SCIENTIFIC VALIDITY ISSUE | Fresh selective/full100% train,42.86% shifted exact,0% positive recall; n-gram control100%. No concept promotion. Name/template effects need a factorial development diagnosis before architecture changes. |
+| CLI model constructed before configured seed is set | CONFIRMED BUG | Unresolved: `cli.py:145` constructs weights, then `trainer.py:82` seeds. Static order is unambiguous; this run does not prove it caused the GPU failure. |
+| FP16 attempted global steps equated with applied Adam updates | SCIENTIFIC VALIDITY ISSUE | Unresolved: `trainer.py:288–303` advances global step/scheduler after possibly skipped GradScaler update; qualifier asserts Adam step4. Actual failing counters/scales were not exported; AMP skip explanation remains unverified. Full regression773pass/1fail is NOT clean. |
+
 No repository-wide semantic certification is claimed. The AST inventory remains an inventory. Canonical state owns only declared learning state; callbacks must not perform arbitrary filesystem/service side effects. Publication is atomic and immutable, blocked inside candidates. Arbitrary topology operations and learned policies remain disabled until independently specified and qualified.

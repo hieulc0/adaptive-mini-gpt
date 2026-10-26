@@ -330,13 +330,13 @@ def run(out, parent):
                 and min(m.get("status_accuracy", {"missing": 0}).values())
                 >= spec["gates"]["status_accuracy"]
             )
-            advantages[s] = m.get("exact", 0) - max(
-                b[s]["exact"] for b in result["baselines"].values()
+            advantages[s] = (
+                m["exact"] - max(b[s]["exact"] for b in result["baselines"].values()) if m else None
             )
         arm["basic_acquisition_pass"] = basic
         arm["advantage_over_strongest_simple"] = advantages
-        arm["reusable_qualification_pass"] = (
-            basic and min(advantages.values()) >= spec["gates"]["simple_advantage"]
+        arm["reusable_qualification_pass"] = basic and all(
+            v is not None and v >= spec["gates"]["simple_advantage"] for v in advantages.values()
         )
     primary = result["neural"]["continuing_selective_two"]
     result["verdict"] = (
