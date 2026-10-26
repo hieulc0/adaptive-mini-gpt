@@ -125,3 +125,8 @@ where:
 1. **Zero Logit Drift at Step 0:** Because $W_{\text{up}}^{\text{head}} = \mathbf{0}$, $\text{moe\_head}(h) = \mathbf{0}$ initially.
 2. **Bitwise Zero Forgetting on Prior Domain:** When $s_{b,t} = 0$, $s_{b,t} \cdot \text{moe\_head}(h) = \mathbf{0}$, guaranteeing exact IEEE-754 bitwise equivalence for all non-specialist prompts.
 3. **Full Output Expressivity:** Allows gradient updates to adapt logits for new task symbols without changing any frozen weights in $W_{\text{head}}$.
+
+
+## Independent review: current production target contract
+
+`TokenDataset` supplies already shifted next-token targets. `MiniGPT.forward(idx, targets)` compares every input-position logit with its aligned supplied target and accepts -1 or -100 as ignored labels. It must not shift those targets a second time. M103's custom `compute_qa_loss` separately shifts raw full sequences itself; these interfaces must not be conflated. The independent audit restored production generation/inspection APIs and repaired MoE/MoD auxiliary-key plumbing and rotary frequency pairing. See [ARCHITECTURE_AUDIT.md](ARCHITECTURE_AUDIT.md) for remaining growth, routing, context and transaction limitations and [SCIENTIFIC_REVIEW_REPORT.md](SCIENTIFIC_REVIEW_REPORT.md) for actual remote verification.

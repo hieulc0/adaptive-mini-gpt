@@ -11,6 +11,7 @@ from pathlib import Path
 import torch
 
 PINNED_SHA = "__PINNED_SHA__"
+CONTRACTS_ONLY = False
 REPO = Path("/tmp/amg-foundational-audit")
 OUT = Path("/kaggle/working/foundational-audit")
 
@@ -78,10 +79,15 @@ def main():
         cwd=REPO,
         check=True,
     )
-    baseline = run(
-        [sys.executable, "-m", "pytest", "-q", str(baseline_test)], "baseline-neural-tests", 90
-    )
-    status["baseline_expected_failure"] = baseline
+    # Each baseline test gets a fresh CUDA process. A device-side assert in
+    # the mask test must not contaminate the independent rotary regression.
+    status["baseline_expected_failure"] = {}
+    for name in ("production_targets", "rope_half_split"):
+        status["baseline_expected_failure"][name] = run(
+            [sys.executable, "-m", "pytest", "-q", str(baseline_test), "-k", name],
+            f"baseline-{name}",
+            90,
+        )
     subprocess.run(["git", "checkout", "--detach", PINNED_SHA], cwd=REPO, check=True)
     status["phases"]["audit_tests"] = run(
         [
@@ -97,6 +103,16 @@ def main():
         90,
     )
     (OUT / "execution.json").write_text(json.dumps(status, indent=2))
+    if CONTRACTS_ONLY:
+        status["run_scope"] = "CONTRACTS_ONLY"
+        status["phases"]["full_tests"] = {"status": "NOT_RUN_CONTRACTS_ONLY"}
+        (OUT / "execution.json").write_text(json.dumps(status, indent=2))
+        print(json.dumps(status, indent=2), flush=True)
+        if status["phases"]["audit_tests"]["exit_code"] != 0:
+            raise RuntimeError("Corrected contract tests failed")
+        if any(result["exit_code"] != 1 for result in status["baseline_expected_failure"].values()):
+            raise RuntimeError("Expected baseline failures were not independently reproduced")
+        return
     if status["phases"]["audit_tests"]["exit_code"] == 0:
         status["phases"]["feasibility"] = run(
             [

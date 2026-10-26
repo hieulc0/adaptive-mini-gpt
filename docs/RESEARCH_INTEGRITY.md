@@ -42,3 +42,7 @@ Self-modification trials require identical initial student/optimizer/memory/RNG 
 LOCAL: lint/type/syntax/mock-only. REMOTE: Kaggle or Colab GPU training/full tests. CPU training is not a local diagnostic option. New/modified scientific runners must fail outside the intended remote platform or without CUDA. Legacy CPU quick-start instructions are superseded by AGENTS.md.
 
 A qualified artifact records completed kernel/version or session ID, full source SHA, initial/final checkpoint hashes, manifest/split hashes, seeds/worlds, Python/PyTorch/CUDA/GPU versions, optimizer settings, actual updates/examples/tokens/query counts, measured GPU time, full test counts and per-arm predictions/curves. Missing provenance means NOT QUALIFIED. Completion and timeouts are not scientific passes. Store failure logs and negative findings. Use IMPLEMENTED, LOCALLY CHECKED (MOCK ONLY), REMOTE SUBMITTED, REMOTE VERIFIED and SCIENTIFICALLY QUALIFIED as separate statuses.
+
+## Full-suite coverage finding
+
+The version 1 independent run found 25 failures in a 744-case repository suite. The historical M104 launcher ran only two milestone files, despite prose referring to full regression. Selected recent tests passing therefore did not certify the CLI, generation, target alignment or old autonomous loops. Always record the exact test command, files collected, failures/skips and environment. The new remote launcher runs the actual repository suite after its bounded feasibility phase; it installs the package so console-script failures are distinguishable from source defects.

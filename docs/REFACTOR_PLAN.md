@@ -72,3 +72,9 @@ kaggle kernels status sparklinghydraulics0/amg-foundational-audit
 # After COMPLETE or ERROR, preserve outputs and logs; ERROR is not a pass:
 kaggle kernels output sparklinghydraulics0/amg-foundational-audit -p runs/kaggle-foundational-audit/output
 ```
+
+## Decisions after the first remote feasibility result
+
+Version 1 demonstrated perfect training fit and poor description generalization; do not advance to multi-seed experiments, lifelong claims or controller qualification. A fully trainable backbone's held-out 75% attribute F1 is neither robust causal competence nor evidence that a larger model is needed. Factor the next diagnostic into (a) new names with familiar syntax, (b) new syntax with familiar names, (c) both, and (d) controlled distractors/negation; current held-out rows change names and syntax together. Match lexical and shallow neural controls on exactly the delivered text. Compare a small mixture of training templates against the single-template curriculum before adding language corpora or semantic modules. Keep new evaluation vocabularies/worlds sealed from those design choices.
+
+The full regression uncovered justified compatibility repairs beyond the initial M104 focus. Reuse historical MiniGPT generation/inspection methods, restore already-shifted target semantics and both supported mask sentinels, repair actual MoE/MoD key plumbing, and fix rotary frequency pairing. These repairs are covered by existing failing regression tests and two new remote-only neural contract tests. They do not change the M103/M104 question-classifier's dense absolute-position computation, so the negative feasibility finding remains applicable. Version 2 reruns actual remote validation rather than inferring a pass from these edits. A passing regression suite would establish engineering compatibility only.
