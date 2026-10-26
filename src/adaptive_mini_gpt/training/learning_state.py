@@ -21,6 +21,35 @@ from adaptive_mini_gpt.training.optimizer_contract import adamw_groups, optimize
 from adaptive_mini_gpt.training.remote_runtime import require_remote_cuda
 
 
+def concept_supervision_loss(state_logits, tag_logits, tags, states=None, *, attribute_ids=None):
+    """Explicit supervision: no invented state labels or absent-label negatives.
+
+    Default joint supervision is unchanged. A declared attribute subset selects
+    observed columns only; other outputs receive no loss gradient. This is a
+    protocol choice, not a claim that historical fully annotated BCE was a bug.
+    """
+    if tags.shape != tag_logits.shape or tags.ndim != 2:
+        raise ValueError("Attribute targets must match B x C logits")
+    if attribute_ids is not None:
+        ids = tuple(attribute_ids)
+        if (
+            not ids
+            or len(set(ids)) != len(ids)
+            or any(
+                not isinstance(i, int) or isinstance(i, bool) or i < 0 or i >= tags.shape[1]
+                for i in ids
+            )
+        ):
+            raise ValueError("Attribute IDs must be unique, nonempty valid columns")
+        tag_logits, tags = tag_logits[:, ids], tags[:, ids]
+    if not torch.isfinite(tags).all() or not ((tags == 0) | (tags == 1)).all():
+        raise ValueError("Observed attribute labels must be finite binary values")
+    loss = F.binary_cross_entropy_with_logits(tag_logits, tags)
+    if states is not None:
+        loss = loss + F.cross_entropy(state_logits, states)
+    return loss
+
+
 def migrate_adamw(model, optimizer, replacements=()):
     """Identity-preserving migration; explicitly mapped resized tensors use prefix copy.
 
@@ -150,15 +179,15 @@ class LearningState:
         self.model._configure_plasticity()
         migrate_adamw(self.model, self.optimizer)
 
-    def step(self, tokens, actions, tags, states):
+    def step(self, tokens, actions, tags, states=None, *, attribute_ids=None):
         require_remote_cuda(str(tokens.device))
         if any(optimizer_membership(self.model, self.optimizer).values()):
             raise RuntimeError("Optimizer ownership violation")
         self.model.train()
         self.optimizer.zero_grad(set_to_none=True)
         state_logits, tag_logits, _, _ = self.model(tokens, actions)
-        loss = F.cross_entropy(state_logits, states) + F.binary_cross_entropy_with_logits(
-            tag_logits, tags
+        loss = concept_supervision_loss(
+            state_logits, tag_logits, tags, states, attribute_ids=attribute_ids
         )
         if not torch.isfinite(loss):
             raise ValueError("Nonfinite loss")

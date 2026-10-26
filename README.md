@@ -27,3 +27,6 @@ The M104-E/M105-A source audit found truncated entity inputs, silently collapsed
 ## Approved audit repair continuation
 
 The approved targeted repair phase is recorded in [AUDIT_REPAIR_PHASE](docs/AUDIT_REPAIR_PHASE.md). It keeps the existing student capacity, rejects incomplete prompts and invalid optimizer ownership, preserves causal explicit masks, and diagnoses M90 with declared initialization streams. Remote results and remaining limitations are reported there; no milestone is advanced.
+
+
+Stage A now isolates positive, negated and absent attributes using the existing persistent student and explicit attribute-only supervision. Protocol, fixed gates, lineage and actual run status: [ATTRIBUTE_LEARNING](docs/ATTRIBUTE_LEARNING.md). No entity-binding, transition, transfer or architecture-growth milestone is advanced.

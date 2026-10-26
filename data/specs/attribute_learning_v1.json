@@ -1,0 +1,23 @@
+{
+  "id": "attribute-learning-v1",
+  "status": "prespecified Stage A feasibility, no new milestone",
+  "seed": 42,
+  "traits": {"flammable":10,"conductive":15},
+  "semantics": "One object. Two independently annotated properties: positive=true, negated=false, absent=false. No entity references, actions, transitions or invented state targets. Existing transition branch computed but not supervised.",
+  "boundary": "All nine annotation combinations in train. Validation independent names with training grammar. Names heldout uses independent names and training grammar; syntax heldout uses independent names and two unseen templates. Known property words and negation operators, not novel vocabulary or causal laws.",
+  "updates": {"tiny":200,"train":800},
+  "batch_max":16,
+  "learning_rate":0.002,
+  "weight_decay":0,
+  "clip_norm":1,
+  "primary": "continuing_selective_two",
+  "parent_checkpoint_sha256": "4a4f79fcd07b5bbe58bad5da04ce1a934696438c8603e9e6296e398a4b5ed5d8",
+  "parent_kernel": "sparklinghydraulics0/amg-concept-binding-foundation/1",
+  "parent_scope": "Existing selective student and optimizer after 200 failed joint-study tiny updates. Not qualified knowledge. Preserve moments/weights, declare new sampler at stage boundary; old parent did not own sampler. No retrospective exact resume claim.",
+  "controls": ["fresh_frozen_two","fresh_selective_two","fresh_full_two","fresh_selective_all26","majority","bow_linear","bow_mlp","ngram_linear"],
+  "loss": "Existing attribute logits BCE only. Two columns in primary/fresh controls; all26 diagnostic has24 explicit absent labels. No architecture/pooling/capacity changes. Equal fresh initialization and new-stage sampling. Continuing history not budget matched; no transfer claim.",
+  "gates": {"tiny_exact":0.95,"train_exact":0.95,"heldout_exact":0.9,"status_accuracy":0.9,"simple_advantage":0.1},
+  "monitoring": "Validation every100 updates, fixed endpoint, fixed threshold0.5. No checkpoint/seed/hyperparameter selection. Tiny failure stops arm. Test once after main. Basic competence and superiority are separate; lexical tie is not reusable qualification.",
+  "progression": "No Stage B until continuing learner meets every gate. Single-seed feasibility cannot establish broad reusable concepts, retention or transfer even on PASS. No automated promotion.",
+  "runtime_seconds_max":600
+}

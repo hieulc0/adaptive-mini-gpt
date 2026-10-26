@@ -42,3 +42,6 @@ AMG_RUN_GPU_TESTS=1 python -m pytest -q --junitxml=/kaggle/working/full-suite.xm
 ```
 
 The pinned launchers are `kaggle/launch_foundation_stabilization.py` and `kaggle/launch_concept_binding.py`; render `__PINNED_SHA__` only after committing/pushing. Actual results, negative cases, revision and remaining gaps are in FOUNDATION_STABILIZATION.md. A software pass does not qualify concept acquisition or self-improvement.
+
+
+Stage A now isolates positive, negated and absent attributes using the existing persistent student and explicit attribute-only supervision. Protocol, fixed gates, lineage and actual run status: [ATTRIBUTE_LEARNING](ATTRIBUTE_LEARNING.md). No entity-binding, transition, transfer or architecture-growth milestone is advanced.

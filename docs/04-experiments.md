@@ -678,3 +678,6 @@ The foundation stabilization experiment is separate from milestone acceptance. S
 
 
 Final stabilization evidence: neural-core regression **767 passed**, final sampled-restart contracts **33 passed** at separately recorded revisions. The prespecified two-trait concept study **FAILS** (frozen train/held-out50%; selective/full stopped at the tiny attribute gate). No learning-to-learn or learned-modification phase ran. See [FOUNDATION_STABILIZATION](FOUNDATION_STABILIZATION.md) for exact scope and immutable negative artifacts.
+
+
+Stage A now isolates positive, negated and absent attributes using the existing persistent student and explicit attribute-only supervision. Protocol, fixed gates, lineage and actual run status: [ATTRIBUTE_LEARNING](ATTRIBUTE_LEARNING.md). No entity-binding, transition, transfer or architecture-growth milestone is advanced.

@@ -592,3 +592,6 @@ The approved repair study stores complete rule/question text, annotation evidenc
 ## Canonical foundation stabilization
 
 The new controlled two-trait protocol is `data/specs/concept_binding_v1.json`, generated remotely by `data/concept_binding.py`. Exact-word-multiset counterfactual pairs swap entity/property binding; complete prompts and explicit absent/negated facts determine targets. `structured_diagnostic` fields never enter language inference. Split/source hashes, actual delivered tokens and all predictions are retained. Cases viewed for diagnosis must be retired from future sealed qualification.
+
+
+Stage A now isolates positive, negated and absent attributes using the existing persistent student and explicit attribute-only supervision. Protocol, fixed gates, lineage and actual run status: [ATTRIBUTE_LEARNING](ATTRIBUTE_LEARNING.md). No entity-binding, transition, transfer or architecture-growth milestone is advanced.
