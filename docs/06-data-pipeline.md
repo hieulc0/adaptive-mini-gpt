@@ -582,3 +582,8 @@ eg A \lor B$), and conditional parity branching.
 ## Independent architecture review (2026-10-26)
 
 The M104-E/M105-A source audit found truncated entity inputs, silently collapsed transfer labels, and unqualified rollback/controller claims. Historical reports above remain unchanged and require the [audit addendum](ARCHITECTURE_AUDIT.md) when interpreted. See [long-term vision](LONG_TERM_VISION.md), [research integrity](RESEARCH_INTEGRITY.md), [minimal repair plan](REFACTOR_PLAN.md), and [execution report](SCIENTIFIC_REVIEW_REPORT.md). No new milestone or scientific PASS is assigned. Local work is lint/type/syntax/mock-only; real learning and full tests require Kaggle/Colab CUDA.
+
+
+## Approved audit repair continuation
+
+The approved repair study stores complete rule/question text, annotation evidence, split identities and a canonical SHA256 of all cases. Every delivered token sequence and model-derived context budget is exported remotely. `input_protocol.py` validates the controlled positive-only fixture; it does not extract concepts for the student. Unknown labels, contradictory annotations and padding/context overflow reject explicitly on the approved path. Retained legacy runners still contain cropping paths and are not certified; see [AUDIT_REPAIR_PHASE](AUDIT_REPAIR_PHASE.md).

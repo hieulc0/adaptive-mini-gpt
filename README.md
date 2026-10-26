@@ -20,3 +20,8 @@ Under a matched compute and token budget, **function-preserving modular growth**
 ## Independent architecture review (2026-10-26)
 
 The M104-E/M105-A source audit found truncated entity inputs, silently collapsed transfer labels, and unqualified rollback/controller claims. Historical reports above remain unchanged and require the [audit addendum](docs/ARCHITECTURE_AUDIT.md) when interpreted. See [long-term vision](docs/LONG_TERM_VISION.md), [research integrity](docs/RESEARCH_INTEGRITY.md), [minimal repair plan](docs/REFACTOR_PLAN.md), and [execution report](docs/SCIENTIFIC_REVIEW_REPORT.md). No new milestone or scientific PASS is assigned. Local work is lint/type/syntax/mock-only; real learning and full tests require Kaggle/Colab CUDA.
+
+
+## Approved audit repair continuation
+
+The approved targeted repair phase is recorded in [AUDIT_REPAIR_PHASE](docs/AUDIT_REPAIR_PHASE.md). It keeps the existing student capacity, rejects incomplete prompts and invalid optimizer ownership, preserves causal explicit masks, and diagnoses M90 with declared initialization streams. Remote results and remaining limitations are reported there; no milestone is advanced.

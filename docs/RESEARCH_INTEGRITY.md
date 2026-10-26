@@ -46,3 +46,8 @@ A qualified artifact records completed kernel/version or session ID, full source
 ## Full-suite coverage finding
 
 The version 1 independent run found 25 failures in a 744-case repository suite. The historical M104 launcher ran only two milestone files, despite prose referring to full regression. Selected recent tests passing therefore did not certify the CLI, generation, target alignment or old autonomous loops. Always record the exact test command, files collected, failures/skips and environment. The new remote launcher runs the actual repository suite after its bounded feasibility phase; it installs the package so console-script failures are distinguishable from source defects.
+
+
+## Approved audit repair continuation
+
+The current repair experiment uses prespecified seed 42, threshold 0.5, unchanged M90 >=85% gate, fixed update budgets and separate name/description robustness slices. Its positive-only attribute bundles, shared lexical vocabulary, fixed rule and correlated templates restrict conclusions. Simple baseline optimizer updates/examples and actual GPU times are reported separately; no compute-equivalence or learning-to-learn claim follows. See [AUDIT_REPAIR_PHASE](AUDIT_REPAIR_PHASE.md) and the complete source-call inventory for audited versus unqualified interfaces.

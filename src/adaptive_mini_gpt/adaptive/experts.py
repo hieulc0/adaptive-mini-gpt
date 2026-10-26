@@ -116,7 +116,11 @@ class AdaptiveMoELayer(nn.Module):
 
     @torch.no_grad()
     def add_experts(self, num_new: int, freeze_existing: bool = False) -> int:
-        """Function-preserving growth: append zero-initialized experts and expand router."""
+        """Append zero-output experts; learned top-k routing is NOT function-preserving.
+
+        New zero logits can displace or renormalize active old experts. This
+        legacy operation requires independent t0 validation before retention.
+        """
         if num_new <= 0:
             raise ValueError(f"num_new must be positive, got {num_new}")
 
@@ -134,7 +138,7 @@ class AdaptiveMoELayer(nn.Module):
                 d_expert=self.d_expert,
                 dropout=self.dropout,
                 bias=self.bias,
-                zero_init_output=True,  # Crucial: preserves exact forward pass at growth boundary
+                zero_init_output=True,  # Zero new outputs alone do not preserve learned routing
             ).to(device=device, dtype=dtype)
             self.experts.append(new_exp)
 
@@ -147,7 +151,7 @@ class AdaptiveMoELayer(nn.Module):
         old_weight = self.router.gate.weight.data
         new_gate = nn.Linear(self.d_model, new_n, bias=False).to(device=device, dtype=dtype)
         new_gate.weight.data[:old_n].copy_(old_weight)
-        # Initialize new router rows to zero so existing relative logits are unperturbed
+        # Old relative logits stay fixed, but selected sets/normalization can change.
         nn.init.zeros_(new_gate.weight.data[old_n:])
         self.router.gate = new_gate
 

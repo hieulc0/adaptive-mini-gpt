@@ -1,0 +1,54 @@
+{
+  "id": "approved-audit-repair-v1",
+  "spec": "data/specs/audit_repair_v1.json",
+  "spec_sha256": "440b1fc1ac17f25c99291e43f464ec9735be09268233869f6717cbc320695ec9",
+  "canonical_cases_sha256": "319f02b67efe519da41caf33fbda9e09044d57913c52897b65901f7c3ffde450",
+  "source": {
+    "platform": "kaggle",
+    "kernel": "sparklinghydraulics0/amg-approved-audit-repair",
+    "git_sha": "b76f4fecf4a8bec67c887cf0920726caac18270a",
+    "python": "3.13.15",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "gpu": "Tesla T4"
+  },
+  "kernel_version": 1,
+  "status": "COMPLETE",
+  "context_length": 256,
+  "max_delivered_tokens": 187,
+  "splits": {
+    "tiny": {
+      "cases": 8,
+      "canonical_json_sha256": "d7414a60aa63c05e05e049fe85b3918daa8fe068f72f0aeed2533b12999dafeb"
+    },
+    "train": {
+      "cases": 128,
+      "canonical_json_sha256": "99ce23b753545b6458577c3d404bddf0006e546a5142f955878e2bde59bcaf29"
+    },
+    "name_only": {
+      "cases": 32,
+      "canonical_json_sha256": "3e50520fcd0813af6a5444b4ad456d89877f933da2b855058293b5a977a8b7c1"
+    },
+    "description_only": {
+      "cases": 64,
+      "canonical_json_sha256": "e80ad84551cdb422ae4d589f9fd71198a6b35c4679b2ba7bfba1a2a226af1e9f"
+    },
+    "combined": {
+      "cases": 64,
+      "canonical_json_sha256": "b1cd7aff58dfe9f06831f0f9ed19b37427df2c19f0a3f611e23ceeba11e9b8ac"
+    }
+  },
+  "checkpoint_file_sha256": {
+    "frozen_backbone.pt": "832f411053ffb71cb348fb179a37804a57fe3bcff3b7e005ec918baa2e0d6e56",
+    "trainable_backbone.pt": "85e823fde1c24ebbaf9f5aa4acb1d8060dd2eb16ef2039d321dea6f7497842c8",
+    "selective_plasticity.pt": "8f46363416b346de8e6cbc18763d617192d988f68aa1c226fda252d342b0f77b"
+  },
+  "artifact_directory": "runs/kaggle-audit-repair/output-v1/audit-repair",
+  "limitations": [
+    "controlled positive-only annotations",
+    "two correlated attribute bundles",
+    "shared attribute vocabulary and world rule",
+    "one seed; no independent world inference",
+    "not a general language or learning-to-learn qualification"
+  ]
+}

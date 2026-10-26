@@ -107,3 +107,8 @@ Version 1 full suite completed with 718 passes / 25 failures / 1 skip. Further *
 ## Input indistinguishability proof
 
 A local-safe byte-fixture check constructed a wooden-tool question and a metal-vessel question with the same standard rule and Apply_Fire action. The reviewed encoder `encode(f"<bos><rule>{STANDARD_RULES}<sep><question>{question}<sep><answer>")[:220]` produced exactly identical token lists. Since `STANDARD_RULES` is 335 bytes, **all standard-rule examples share the same truncated neural text**. At deterministic evaluation, the attribute representation cannot distinguish their entities; the transition head has only the supplied action ID left to distinguish standard cases. This is a direct information loss proof, not a capacity hypothesis. Increasing model size cannot recover an omitted observation. It explains why a lexical baseline given the actual question is not a fair neural architecture comparator. Correcting inputs is necessary but not sufficient: the new complete-input feasibility result still shows a real generalization gap.
+
+
+## Approved audit repair continuation
+
+The approved targeted repair continuation, including explicit attention masks, padding overflow, optimizer ownership, M90 initialization and a fixed/unresolved legacy contract table, is recorded in [AUDIT_REPAIR_PHASE](AUDIT_REPAIR_PHASE.md). This addendum distinguishes prior repaired MoD/RoPE defects from still-unqualified expert growth, sequence routing and full transactional recovery.

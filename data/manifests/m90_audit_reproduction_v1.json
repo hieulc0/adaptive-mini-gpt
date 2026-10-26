@@ -1,0 +1,201 @@
+{
+  "historical_sha": "e8ab5760dbae452bd48de4478e19ee717c9afb42",
+  "repair_source_sha": "c77062dd779b8ae75eb0acdf010d624f4eae56a8",
+  "initial_process_seed": 42,
+  "gpu": "Tesla T4",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "scope": "one prespecified historical collection-order prefix through M90; no seed search",
+  "cases": {
+    "historical_prefix": {
+      "ranks_evaluated": [
+        16,
+        32
+      ],
+      "results_by_rank": {
+        "16": {
+          "rank": 16,
+          "trainable_parameters": 6336,
+          "budget_compliant": true,
+          "joint_qualification_em": 93.75,
+          "joint_test_em": 87.85,
+          "per_task_joint_ems": [
+            87.5,
+            100.0,
+            100.0,
+            93.75,
+            93.75,
+            87.5
+          ],
+          "sequential_qualification_em": 16.67,
+          "modular_reference_em": 100.0,
+          "gate_a_passed": true
+        },
+        "32": {
+          "rank": 32,
+          "trainable_parameters": 10624,
+          "budget_compliant": true,
+          "joint_qualification_em": 77.08,
+          "joint_test_em": 77.43,
+          "per_task_joint_ems": [
+            87.5,
+            56.25,
+            75.0,
+            56.25,
+            87.5,
+            100.0
+          ],
+          "sequential_qualification_em": 16.67,
+          "modular_reference_em": 100.0,
+          "gate_a_passed": false
+        }
+      },
+      "gate_a_overall_passed": false,
+      "selected_rank": 32,
+      "modular_reference_em": 100.0
+    },
+    "repaired_same_backbone_111": {
+      "ranks_evaluated": [
+        16,
+        32
+      ],
+      "results_by_rank": {
+        "16": {
+          "rank": 16,
+          "trainable_parameters": 6336,
+          "budget_compliant": true,
+          "joint_qualification_em": 96.88,
+          "joint_test_em": 96.88,
+          "per_task_joint_ems": [
+            100.0,
+            93.75,
+            93.75,
+            93.75,
+            100.0,
+            100.0
+          ],
+          "sequential_qualification_em": 16.67,
+          "modular_reference_em": 100.0,
+          "gate_a_passed": true
+        },
+        "32": {
+          "rank": 32,
+          "trainable_parameters": 10624,
+          "budget_compliant": true,
+          "joint_qualification_em": 94.79,
+          "joint_test_em": 95.49,
+          "per_task_joint_ems": [
+            100.0,
+            93.75,
+            93.75,
+            93.75,
+            93.75,
+            93.75
+          ],
+          "sequential_qualification_em": 16.67,
+          "modular_reference_em": 100.0,
+          "gate_a_passed": true
+        }
+      },
+      "gate_a_overall_passed": true,
+      "selected_rank": 32,
+      "modular_reference_em": 100.0,
+      "initialization_seeds": {
+        "reference:m89_place_scale_0": 822899650,
+        "reference:m89_affine_add_1": 3920033132,
+        "reference:m89_bool_xor_2": 3466910071,
+        "reference:m89_affine_sub_3": 248397327,
+        "reference:m89_comp_add_xor_4": 3614511323,
+        "reference:m89_inst_opcode_5": 522260867,
+        "joint:16": 2542339042,
+        "sequential:16": 2786829972,
+        "joint:32": 3256761218,
+        "sequential:32": 3973164065
+      }
+    },
+    "repaired_same_backbone_222": {
+      "ranks_evaluated": [
+        16,
+        32
+      ],
+      "results_by_rank": {
+        "16": {
+          "rank": 16,
+          "trainable_parameters": 6336,
+          "budget_compliant": true,
+          "joint_qualification_em": 96.88,
+          "joint_test_em": 96.88,
+          "per_task_joint_ems": [
+            100.0,
+            93.75,
+            93.75,
+            93.75,
+            100.0,
+            100.0
+          ],
+          "sequential_qualification_em": 16.67,
+          "modular_reference_em": 100.0,
+          "gate_a_passed": true
+        },
+        "32": {
+          "rank": 32,
+          "trainable_parameters": 10624,
+          "budget_compliant": true,
+          "joint_qualification_em": 94.79,
+          "joint_test_em": 95.49,
+          "per_task_joint_ems": [
+            100.0,
+            93.75,
+            93.75,
+            93.75,
+            93.75,
+            93.75
+          ],
+          "sequential_qualification_em": 16.67,
+          "modular_reference_em": 100.0,
+          "gate_a_passed": true
+        }
+      },
+      "gate_a_overall_passed": true,
+      "selected_rank": 32,
+      "modular_reference_em": 100.0,
+      "initialization_seeds": {
+        "reference:m89_place_scale_0": 822899650,
+        "reference:m89_affine_add_1": 3920033132,
+        "reference:m89_bool_xor_2": 3466910071,
+        "reference:m89_affine_sub_3": 248397327,
+        "reference:m89_comp_add_xor_4": 3614511323,
+        "reference:m89_inst_opcode_5": 522260867,
+        "joint:16": 2542339042,
+        "sequential:16": 2786829972,
+        "joint:32": 3256761218,
+        "sequential:32": 3973164065
+      }
+    }
+  },
+  "collected_prefix_tests": 667,
+  "pytest_exit_code": 1,
+  "kernel_id": "sparklinghydraulics0/amg-m90-audit-reproduction",
+  "kernel_version": 1,
+  "kernel_status": "COMPLETE",
+  "pytest_prefix_summary": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "1",
+    "skipped": "1",
+    "tests": "667",
+    "time": "576.010",
+    "timestamp": "2026-10-26T12:30:02.185151+00:00",
+    "hostname": "093a9845bd17"
+  },
+  "artifact_directory": "runs/kaggle-m90-reproduction/output-v1/m90-reproduction",
+  "artifact_sha256": {
+    "optimizer_contract.py": "c0a4bf487537d06fea05daa95dea358b8675952ff5c046234b126a3c45bd3685",
+    "prefix.log": "179d1508f2c0497219451432db0062904dff09db04eed2c83e4d998ee78024f6",
+    "prefix.xml": "30ff2cee833870321cd3613dabdb44b63280fa8670f28f4b06f5421dca377a3c",
+    "historical_m90_initial_state.pt": "964bb2dfb74893962f9881294f02573838de3a8f84a47b7a9f57ec46441f1832",
+    "repaired_capacity.py": "e1587589d458a84ee6a5cfadef1fbbdd31b3882bd1b806109dcf53d52f43eb60",
+    "reproducibility.py": "c841ac7808bb73a097157b4623beab865ad64725551e109f4f3235ef873a0118",
+    "diagnosis.json": "16665c9dadfed553dd1c6e90464b11a67ff808ac04deac5e379855a5e63e8720"
+  }
+}

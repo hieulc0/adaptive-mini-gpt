@@ -665,3 +665,8 @@
 ## Independent architecture review (2026-10-26)
 
 The M104-E/M105-A source audit found truncated entity inputs, silently collapsed transfer labels, and unqualified rollback/controller claims. Historical reports above remain unchanged and require the [audit addendum](ARCHITECTURE_AUDIT.md) when interpreted. See [long-term vision](LONG_TERM_VISION.md), [research integrity](RESEARCH_INTEGRITY.md), [minimal repair plan](REFACTOR_PLAN.md), and [execution report](SCIENTIFIC_REVIEW_REPORT.md). No new milestone or scientific PASS is assigned. Local work is lint/type/syntax/mock-only; real learning and full tests require Kaggle/Colab CUDA.
+
+
+## Approved audit repair continuation
+
+The approved repair experiment is specified by `data/specs/audit_repair_v1.json` and executed by `scripts/run_audit_repair.py` through `kaggle/launch_audit_repair.py`. See [AUDIT_REPAIR_PHASE](AUDIT_REPAIR_PHASE.md) for actual source SHA, remote status, results and failures. The previous audit and historical benchmark outputs remain unchanged.

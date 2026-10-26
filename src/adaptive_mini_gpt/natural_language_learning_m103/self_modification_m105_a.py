@@ -175,7 +175,8 @@ class StructuralRollbackControllerM105_A:
     ) -> ModificationEvaluationResultM105_A:
         """Applies modification transactionally on isolated candidate.
 
-        Restores complete learning state if validation gain or retention requirements fail.
+        Restores the supported fixed-topology snapshot fields after rejection.
+        This is not complete learning-state or resumed-learning recovery.
         Supports both val_eval_fn and historical eval_fn alias.
         """
         active_val_fn = val_eval_fn or eval_fn
@@ -186,7 +187,7 @@ class StructuralRollbackControllerM105_A:
         pre_metric = active_val_fn()
         initial_params = sum(p.numel() for p in self.target_model.parameters())
 
-        # 1. Capture complete learning-process snapshot
+        # 1. Capture the supported partial fixed-topology snapshot
         self.create_snapshot()
         retention_passed = False
 
