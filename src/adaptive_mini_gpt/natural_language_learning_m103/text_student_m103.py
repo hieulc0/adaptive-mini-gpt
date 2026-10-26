@@ -50,7 +50,7 @@ class TextStudentM103(nn.Module):
     ) -> None:
         super().__init__()
         self.tier = tier
-        self.device = device or torch.device("cpu")
+        self._device = device or torch.device("cpu")
         self.enable_persistent_growth = enable_persistent_growth
         self.step_counter = 0
 
@@ -109,6 +109,17 @@ class TextStudentM103(nn.Module):
         """Dynamic layer skipping routers hosted directly on the evolvable backbone."""
         return self.evolvable_backbone.layer_routers
 
+    @property
+    def device(self) -> torch.device:
+        try:
+            return next(self.parameters()).device
+        except StopIteration:
+            return getattr(self, "_device", torch.device("cpu"))
+
+    @device.setter
+    def device(self, val: torch.device) -> None:
+        self._device = val
+
     def forward_lm(
         self,
         tokens: torch.Tensor,
@@ -152,7 +163,9 @@ class TextStudentM103(nn.Module):
         if isinstance(prompt_tokens, list):
             cur_tokens = torch.tensor([prompt_tokens], dtype=torch.long, device=self.device)
         else:
-            cur_tokens = prompt_tokens.unsqueeze(0) if prompt_tokens.dim() == 1 else prompt_tokens
+            cur_tokens = prompt_tokens.to(self.device)
+            if cur_tokens.dim() == 1:
+                cur_tokens = cur_tokens.unsqueeze(0)
 
         ctx_len = self.base_model.config.context_length
         if cur_tokens.size(1) > ctx_len:
