@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import copy
 import os
+import random
 import subprocess
 import sys
 
+import numpy as np
 import torch
 
 from adaptive_mini_gpt.training.remote_runtime import require_remote_cuda
@@ -122,7 +124,17 @@ def test_topology_optimizer_rollback_and_process_restart(tmp_path):
     # Canonical checkpoint contains the joint topology/optimizer graph.
     source, resumed = tmp_path / "state.pt", tmp_path / "next.pt"
     owner.save(source)
+    import pytest
+
+    with pytest.raises(FileExistsError):
+        owner.save(source)
     expected_loss = owner.step(*batch)
+    expected_rng = [
+        random.random(),
+        float(np.random.random()),
+        torch.rand(2).tolist(),
+        torch.rand(2, device="cuda").tolist(),
+    ]
     expected = copy.deepcopy(owner.model.state_dict())
     expected_opt = copy.deepcopy(owner.optimizer.state_dict())
     env = os.environ.copy()
@@ -134,6 +146,7 @@ def test_topology_optimizer_rollback_and_process_restart(tmp_path):
     )
     restored = LearningState.load(resumed)
     assert restored.metadata["last_loss"] == expected_loss
+    assert restored.metadata["rng_after_update"] == expected_rng
     for k, v in expected.items():
         assert torch.equal(restored.model.state_dict()[k], v)
     actual_opt = restored.optimizer.state_dict()
@@ -247,3 +260,43 @@ def test_depth_insertion_preserves_dtype_and_adaptive_outputs():
     with torch.no_grad():
         assert torch.equal(before, dynamic.hidden_states(x))
     assert m.config.n_layers == 2
+
+
+def test_rejection_restores_rng_flags_and_blocks_checkpoint_publication(tmp_path):
+    require_remote_cuda()
+    import pytest
+
+    owner, batch = make_owner()
+    owner.model.train()
+    owner.model.student.base_model.blocks[0].eval()
+    flags = {n: m.training for n, m in owner.model.named_modules()}
+    masks = {n: p.requires_grad for n, p in owner.model.named_parameters()}
+    snapshot = owner.snapshot()
+
+    def draws():
+        return [
+            random.random(),
+            float(np.random.random()),
+            torch.rand(2).tolist(),
+            torch.rand(2, device="cuda").tolist(),
+        ]
+
+    expected = draws()
+    owner.restore(snapshot)
+    protected = tmp_path / "checkpoint.pt"
+    protected.write_bytes(b"immutable")
+
+    def mutate(state):
+        draws()
+        state.model.eval()
+        state.set_mode("trainable_backbone")
+        state.external["replay"].append({"mutable": [1]})
+        with pytest.raises(RuntimeError, match="cannot be published"):
+            state.save(protected)
+
+    assert not owner.candidate(mutate, lambda s: False)
+    assert draws() == expected
+    assert protected.read_bytes() == b"immutable"
+    assert flags == {n: m.training for n, m in owner.model.named_modules()}
+    assert masks == {n: p.requires_grad for n, p in owner.model.named_parameters()}
+    assert owner.external["replay"] == []

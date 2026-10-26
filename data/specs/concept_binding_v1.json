@@ -1,0 +1,23 @@
+{
+  "id": "concept-binding-v1",
+  "status": "prespecified single-seed feasibility, not milestone qualification",
+  "seed": 42,
+  "traits": ["flammable", "conductive"],
+  "semantics": "Two independent Boolean traits per entity; absent=false, explicit negation=false. Actions apply to query target. Fire/spark toggle the target light under the supplied law. Initial light is explicit.",
+  "counterfactual_pairs": "Swap two entities' trait bundles without changing word counts. Keep only pairs with different state labels. BoW state accuracy has a 50% ceiling on complete pairs.",
+  "train_test_boundary": "Known individual bundles; two joint entity-bundle relationships withheld. Disjoint (rules, question) strings. Test names U/V and description syntax withheld. Laws and trait vocabulary shared: not novel-rule or vocabulary transfer.",
+  "heldout_bundle_pairs": [[[false,false],[false,true]], [[true,false],[true,true]]],
+  "training_pairs_max": 128,
+  "split_pairs_max": 128,
+  "tiny_cases": 8,
+  "updates": {"tiny":200,"train":800},
+  "batch_max":16,
+  "learning_rate":0.002,
+  "weight_decay":0,
+  "neural_arms":["frozen_backbone","selective_plasticity","trainable_backbone"],
+  "controls":["majority","bow_linear","bow_mlp","word_1_to_3_gram_linear","structured_oracle_mlp (diagnostic only)"],
+  "gates":{"tiny_fit":0.95,"train_accuracy":0.95,"heldout_each_primary_family_accuracy":0.8,"heldout_attribute_exact":0.8,"advantage_over_strongest_unstructured_simple_control":0.1},
+  "monitoring":"Validation at 100-update intervals; no checkpoint or hyperparameter selection; held-out once after fixed budget. Tiny failure stops the neural arm.",
+  "later_phases":"No feedback retention, transfer or learned controller qualification until independent concept generalization is demonstrated. Negative result stops without architecture growth.",
+  "runtime_seconds_max":600
+}

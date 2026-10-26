@@ -27,3 +27,21 @@ def test_all_listed_quarantined_clis_enforce_the_boundary():
     assert len(manifest["quarantined"]) == 12
     for name in manifest["quarantined"]:
         assert f'require_historical_reproduction("{Path(name).name}")' in Path(name).read_text()
+
+
+def test_binding_counterfactual_changes_answer_with_identical_words():
+    from adaptive_mini_gpt.data.concept_binding import bag, pair_cases
+    from adaptive_mini_gpt.natural_language_learning_m103.tokenizer_m103 import (
+        ByteTextTokenizerM103,
+    )
+
+    rows = pair_cases("tiny", ((False, False), (False, True)), 0, 0, ("spark",), 2, 0)
+    assert rows[0].state == 0 and rows[1].state == 1
+    assert bag(rows[0].question) == bag(rows[1].question)
+    assert rows[0].question != rows[1].question
+    tok = ByteTextTokenizerM103()
+    for row in rows:
+        ids = tok.encode_prompt(row.question, row.rules, max_length=256)
+        assert tok.decode(ids[ids.index(tok.QUESTION_ID) + 1 : -1]) == row.question
+    negated = pair_cases("tiny", ((False, False), (True, True)), 0, 0, ("fire", "spark"), 0, 0)
+    assert negated[0].state == negated[1].state == 0

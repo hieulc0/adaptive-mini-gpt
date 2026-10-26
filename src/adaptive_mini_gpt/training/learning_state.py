@@ -31,6 +31,8 @@ def migrate_adamw(model, optimizer, replacements=()):
         raise ValueError("Canonical migration requires two-group AdamW")
     state = optimizer.state
     for old, new in replacements:
+        if old.dtype != new.dtype or old.device != new.device:
+            raise ValueError("Optimizer migration cannot silently change device or dtype")
         if old.ndim != new.ndim or any(a > b for a, b in zip(old.shape, new.shape, strict=True)):
             raise ValueError("Only explicitly mapped prefix expansion is supported")
         if old in state:
@@ -196,7 +198,14 @@ class LearningState:
                 torch.save(self.snapshot(), f)
                 f.flush()
                 os.fsync(f.fileno())
-            os.replace(temporary, path)
+            # Same-filesystem hard-link publication is atomic and cannot clobber
+            # an existing immutable checkpoint, including a concurrent publisher.
+            os.link(temporary, path)
+            directory = os.open(path.parent, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                os.fsync(directory)
+            finally:
+                os.close(directory)
         finally:
             if os.path.exists(temporary):
                 os.unlink(temporary)
