@@ -1,0 +1,3636 @@
+{
+  "provenance": {
+    "git_sha": "fd9d321c34fee6d1899f446180017b73793a09f6",
+    "platform": "kaggle",
+    "python": "3.13.15",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "gpu": "Tesla T4"
+  },
+  "protocol": {
+    "id": "selective-a4-v1",
+    "scope": "Conditional Stage A.4 frozen-backbone and existing ECA feasibility; no sealed data",
+    "trigger": "Matched replay primary failed acquisition, retention and development gates",
+    "parent_checkpoint_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+    "replay_reference_source": "4afeffce617d3b32a9b8b7c58c3f22e9a697b562",
+    "primary": "frozen_backbone_replay_6",
+    "updates": 1200,
+    "batch": 18,
+    "replay_per_batch": 6,
+    "learning_rate": 0.002,
+    "seed": 42,
+    "old_initial_competence": 0.95,
+    "old_retention": 0.95,
+    "training_gate": {
+      "updates": [
+        1000,
+        1100,
+        1200
+      ],
+      "exact": 0.99,
+      "each_frame": 0.99,
+      "each_status": 0.98
+    },
+    "development_gate": {
+      "exact": 0.9,
+      "each_family": 0.85,
+      "each_status": 0.95
+    },
+    "modular_rule": "Existing ECA path evaluated at t0; train it only if both old cells are >=95%. LM-domain adapters are not on the canonical attribute path.",
+    "optimizer": "Preserve named Adam states; freeze trainability only; no automatic resets",
+    "promotion": false
+  },
+  "parent_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+  "data_sha256": "bd11b5e879fcea3d1b575da85c100a1188865baf9eea53f8db81c15e69a7719c",
+  "reference_source": "4afeffce617d3b32a9b8b7c58c3f22e9a697b562",
+  "promoted": false,
+  "sealed_generated": false,
+  "initial_old": {
+    "old_known": {
+      "exact": 1.0,
+      "micro_f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_property_accuracy": [
+        1.0,
+        1.0
+      ],
+      "status_accuracy": {
+        "positive": 1.0,
+        "negated": 1.0,
+        "absent": 1.0
+      },
+      "family_exact": {
+        "absent+absent": 1.0,
+        "absent+negated": 1.0,
+        "absent+positive": 1.0,
+        "negated+absent": 1.0,
+        "negated+negated": 1.0,
+        "negated+positive": 1.0,
+        "positive+absent": 1.0,
+        "positive+negated": 1.0,
+        "positive+positive": 1.0
+      },
+      "per_property": [
+        {
+          "tp": 28,
+          "tn": 56,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "negative_recall": 1.0
+        },
+        {
+          "tp": 28,
+          "tn": 56,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "negative_recall": 1.0
+        }
+      ],
+      "bce": 9.639056440645316e-05
+    },
+    "old_renamed": {
+      "exact": 1.0,
+      "micro_f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_property_accuracy": [
+        1.0,
+        1.0
+      ],
+      "status_accuracy": {
+        "positive": 1.0,
+        "negated": 1.0,
+        "absent": 1.0
+      },
+      "family_exact": {
+        "absent+absent": 1.0,
+        "absent+negated": 1.0,
+        "absent+positive": 1.0,
+        "negated+absent": 1.0,
+        "negated+negated": 1.0,
+        "negated+positive": 1.0,
+        "positive+absent": 1.0,
+        "positive+negated": 1.0,
+        "positive+positive": 1.0
+      },
+      "per_property": [
+        {
+          "tp": 28,
+          "tn": 56,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "negative_recall": 1.0
+        },
+        {
+          "tp": 28,
+          "tn": 56,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "negative_recall": 1.0
+        }
+      ],
+      "bce": 0.003299435129594002
+    }
+  },
+  "initial_new": {
+    "exact": 0.28205129504203796,
+    "micro_f1": 0.5838509316770186,
+    "precision": 0.46534653465346537,
+    "recall": 0.7833333333333333,
+    "per_property_accuracy": [
+      0.692307710647583,
+      0.44871795177459717
+    ],
+    "status_accuracy": {
+      "positive": 0.7833333333333333,
+      "negated": 0.43333333333333335,
+      "absent": 0.4444444444444444
+    },
+    "family_exact": {
+      "frame_0": 0.23076924681663513,
+      "frame_1": 0.3076923191547394,
+      "frame_2": 0.3076923191547394
+    },
+    "per_property": [
+      {
+        "tp": 34,
+        "tn": 74,
+        "fp": 22,
+        "fn": 26,
+        "precision": 0.6071428571428571,
+        "recall": 0.5666666666666667,
+        "negative_recall": 0.7708333333333334
+      },
+      {
+        "tp": 60,
+        "tn": 10,
+        "fp": 86,
+        "fn": 0,
+        "precision": 0.410958904109589,
+        "recall": 1.0,
+        "negative_recall": 0.10416666666666667
+      }
+    ],
+    "bce": 2.924851596836294
+  },
+  "initial_development": {
+    "exact": 0.4871794879436493,
+    "micro_f1": 0.6086956521739131,
+    "precision": 0.5384615384615384,
+    "recall": 0.7,
+    "per_property_accuracy": [
+      0.6410256624221802,
+      0.6666666865348816
+    ],
+    "status_accuracy": {
+      "positive": 0.7,
+      "negated": 0.6,
+      "absent": 0.6666666666666666
+    },
+    "family_exact": {
+      "dev_0": 0.5384615659713745,
+      "dev_1": 0.1538461595773697,
+      "dev_2": 0.7692307829856873
+    },
+    "per_property": [
+      {
+        "tp": 18,
+        "tn": 32,
+        "fp": 16,
+        "fn": 12,
+        "precision": 0.5294117647058824,
+        "recall": 0.6,
+        "negative_recall": 0.6666666666666666
+      },
+      {
+        "tp": 24,
+        "tn": 28,
+        "fp": 20,
+        "fn": 6,
+        "precision": 0.5454545454545454,
+        "recall": 0.8,
+        "negative_recall": 0.5833333333333334
+      }
+    ],
+    "bce": 2.221795828334447
+  },
+  "eca_training_skipped": true,
+  "fresh_process_continuation": {
+    "exact": true,
+    "disposable_extra_updates": 2,
+    "candidate_unchanged": true
+  },
+  "qualification_admission": false,
+  "verdict": "SELECTIVE_GATE_FAIL_STOP",
+  "input": {
+    "new_training": 156,
+    "old_training": 9,
+    "development": 78,
+    "max_tokens": 158,
+    "context": 256
+  },
+  "arms": {
+    "frozen_backbone": {
+      "initial_weight_hash": "aed7480606a1a60e38ee7a95d22b5bcf14141f034f76cb45fb59680de277a33e",
+      "initial_optimizer_state_by_name_sha256": "d157ac3f8bbb4abbbdaa32653f6bbf91cc254f4f9b35e65ed11e6700660736f9",
+      "optimizer_states_unchanged_by_freeze": true,
+      "initial_old": {
+        "old_known": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 9.639056440645316e-05
+        },
+        "old_renamed": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.003299435129594002
+        }
+      },
+      "stored_parameters": 1255636,
+      "trainable_parameters": 77162,
+      "updates": 1200,
+      "examples": 21600,
+      "new_presentations": 14400,
+      "replay_presentations": 7200,
+      "tokens": 2591852,
+      "first_step_active_trainable_parameters": 12026,
+      "eca_first_step_gradient_norm": 0.0,
+      "final_new": {
+        "exact": 0.7756410241127014,
+        "micro_f1": 0.8352490421455939,
+        "precision": 0.7730496453900709,
+        "recall": 0.9083333333333333,
+        "per_property_accuracy": [
+          0.8525640964508057,
+          0.8717948794364929
+        ],
+        "status_accuracy": {
+          "positive": 0.9083333333333333,
+          "negated": 0.7666666666666667,
+          "absent": 0.9444444444444444
+        },
+        "family_exact": {
+          "frame_0": 0.7884615659713745,
+          "frame_1": 0.692307710647583,
+          "frame_2": 0.8461538553237915
+        },
+        "per_property": [
+          {
+            "tp": 53,
+            "tn": 80,
+            "fp": 16,
+            "fn": 7,
+            "precision": 0.7681159420289855,
+            "recall": 0.8833333333333333,
+            "negative_recall": 0.8333333333333334
+          },
+          {
+            "tp": 56,
+            "tn": 80,
+            "fp": 16,
+            "fn": 4,
+            "precision": 0.7777777777777778,
+            "recall": 0.9333333333333333,
+            "negative_recall": 0.8333333333333334
+          }
+        ],
+        "bce": 0.25022011064428407
+      },
+      "final_old_training": {
+        "exact": 0.8888888955116272,
+        "micro_f1": 0.9090909090909091,
+        "precision": 1.0,
+        "recall": 0.8333333333333334,
+        "per_property_accuracy": [
+          1.0,
+          0.8888888955116272
+        ],
+        "status_accuracy": {
+          "positive": 0.8333333333333334,
+          "negated": 1.0,
+          "absent": 1.0
+        },
+        "family_exact": {
+          "absent+absent": 1.0,
+          "absent+negated": 1.0,
+          "absent+positive": 1.0,
+          "negated+absent": 1.0,
+          "negated+negated": 1.0,
+          "negated+positive": 0.0,
+          "positive+absent": 1.0,
+          "positive+negated": 1.0,
+          "positive+positive": 1.0
+        },
+        "per_property": [
+          {
+            "tp": 3,
+            "tn": 6,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "negative_recall": 1.0
+          },
+          {
+            "tp": 2,
+            "tn": 6,
+            "fp": 0,
+            "fn": 1,
+            "precision": 1.0,
+            "recall": 0.6666666666666666,
+            "negative_recall": 1.0
+          }
+        ],
+        "bce": 0.22748192016416255
+      },
+      "final_development": {
+        "exact": 0.43589743971824646,
+        "micro_f1": 0.16666666666666666,
+        "precision": 0.5,
+        "recall": 0.1,
+        "per_property_accuracy": [
+          0.6410256624221802,
+          0.5897436141967773
+        ],
+        "status_accuracy": {
+          "positive": 0.1,
+          "negated": 0.9666666666666667,
+          "absent": 0.8888888888888888
+        },
+        "family_exact": {
+          "dev_0": 0.38461539149284363,
+          "dev_1": 0.5384615659713745,
+          "dev_2": 0.38461539149284363
+        },
+        "per_property": [
+          {
+            "tp": 6,
+            "tn": 44,
+            "fp": 4,
+            "fn": 24,
+            "precision": 0.6,
+            "recall": 0.2,
+            "negative_recall": 0.9166666666666666
+          },
+          {
+            "tp": 0,
+            "tn": 46,
+            "fp": 2,
+            "fn": 30,
+            "precision": 0.0,
+            "recall": 0.0,
+            "negative_recall": 0.9583333333333334
+          }
+        ],
+        "bce": 4.673753212991316
+      },
+      "retention": {
+        "old_known": {
+          "exact": 0.4285714328289032,
+          "micro_f1": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "per_property_accuracy": [
+            0.6666666865348816,
+            0.6666666865348816
+          ],
+          "status_accuracy": {
+            "positive": 0.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 0.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 0.0
+          },
+          "per_property": [
+            {
+              "tp": 0,
+              "tn": 56,
+              "fp": 0,
+              "fn": 28,
+              "precision": 0.0,
+              "recall": 0.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 0,
+              "tn": 56,
+              "fp": 0,
+              "fn": 28,
+              "precision": 0.0,
+              "recall": 0.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 4.774380444634436
+        },
+        "old_renamed": {
+          "exact": 0.4285714328289032,
+          "micro_f1": 0.03508771929824561,
+          "precision": 1.0,
+          "recall": 0.017857142857142856,
+          "per_property_accuracy": [
+            0.6666666865348816,
+            0.6785714626312256
+          ],
+          "status_accuracy": {
+            "positive": 0.017857142857142856,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 0.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 0.0
+          },
+          "per_property": [
+            {
+              "tp": 0,
+              "tn": 56,
+              "fp": 0,
+              "fn": 28,
+              "precision": 0.0,
+              "recall": 0.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 1,
+              "tn": 56,
+              "fp": 0,
+              "fn": 27,
+              "precision": 1.0,
+              "recall": 0.03571428571428571,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 4.8381775742572986
+        }
+      },
+      "stable_acquisition": false,
+      "retention_admission": false,
+      "development_admission": false,
+      "backbone_hash_unchanged": true,
+      "frozen_optimizer_states_unchanged": true,
+      "final_hash": "9ad8ea02e77a8e558a4f0f45b8e9d0396c75c449406a206b12ae4ac7bc4c14b2",
+      "lifetime_updates": 2600,
+      "adam_counters": {
+        "student.base_model.wte.weight": 1400,
+        "student.base_model.blocks.4.ln_1.weight": 1400,
+        "student.base_model.blocks.4.ln_1.bias": 1400,
+        "student.base_model.blocks.4.attn.c_attn.weight": 1400,
+        "student.base_model.blocks.4.attn.c_attn.bias": 1400,
+        "student.base_model.blocks.4.attn.c_proj.weight": 1400,
+        "student.base_model.blocks.4.attn.c_proj.bias": 1400,
+        "student.base_model.blocks.4.ln_2.weight": 1400,
+        "student.base_model.blocks.4.ln_2.bias": 1400,
+        "student.base_model.blocks.4.mlp.c_fc.weight": 1400,
+        "student.base_model.blocks.4.mlp.c_fc.bias": 1400,
+        "student.base_model.blocks.4.mlp.c_proj.weight": 1400,
+        "student.base_model.blocks.4.mlp.c_proj.bias": 1400,
+        "student.base_model.ln_f.weight": 1400,
+        "student.base_model.ln_f.bias": 1400,
+        "bottleneck.concept_proj.0.weight": 2600,
+        "bottleneck.concept_proj.0.bias": 2600,
+        "bottleneck.concept_proj.1.weight": 2600,
+        "bottleneck.concept_proj.1.bias": 2600,
+        "bottleneck.concept_proj.3.weight": 2600,
+        "bottleneck.concept_proj.3.bias": 2600,
+        "bottleneck.concept_proj.4.weight": 2600,
+        "bottleneck.concept_proj.4.bias": 2600,
+        "bottleneck.attribute_head.weight": 2600,
+        "bottleneck.attribute_head.bias": 2600,
+        "bottleneck.action_emb.weight": 200,
+        "bottleneck.transition_net.0.weight": 200,
+        "bottleneck.transition_net.0.bias": 200,
+        "bottleneck.transition_net.2.weight": 200,
+        "bottleneck.transition_net.2.bias": 200,
+        "bottleneck.post_norm.weight": 200,
+        "bottleneck.post_norm.bias": 200,
+        "bottleneck.state_head.weight": 200,
+        "bottleneck.state_head.bias": 200
+      },
+      "checkpoint_sha256": "8136ff5eeb0fc79d51c22ea70946dde9834355d2966b3980d4999176f55ec8cb",
+      "gpu_wall_seconds": 25.047294315000016
+    }
+  },
+  "curves": {
+    "frozen_backbone": [
+      {
+        "updates": 100,
+        "examples": 1800,
+        "loss": 0.43580982089042664,
+        "training": {
+          "exact": 0.6410256624221802,
+          "micro_f1": 0.7136563876651982,
+          "precision": 0.7570093457943925,
+          "recall": 0.675,
+          "per_property_accuracy": [
+            0.7628205418586731,
+            0.8205128312110901
+          ],
+          "status_accuracy": {
+            "positive": 0.675,
+            "negated": 0.8666666666666667,
+            "absent": 0.8611111111111112
+          },
+          "family_exact": {
+            "frame_0": 0.6153846383094788,
+            "frame_1": 0.6153846383094788,
+            "frame_2": 0.692307710647583
+          },
+          "per_property": [
+            {
+              "tp": 41,
+              "tn": 78,
+              "fp": 18,
+              "fn": 19,
+              "precision": 0.6949152542372882,
+              "recall": 0.6833333333333333,
+              "negative_recall": 0.8125
+            },
+            {
+              "tp": 40,
+              "tn": 88,
+              "fp": 8,
+              "fn": 20,
+              "precision": 0.8333333333333334,
+              "recall": 0.6666666666666666,
+              "negative_recall": 0.9166666666666666
+            }
+          ],
+          "bce": 0.38585712799134125
+        },
+        "old_training": {
+          "exact": 0.6666666865348816,
+          "micro_f1": 0.6666666666666666,
+          "precision": 0.5555555555555556,
+          "recall": 0.8333333333333334,
+          "per_property_accuracy": [
+            0.6666666865348816,
+            0.7777777910232544
+          ],
+          "status_accuracy": {
+            "positive": 0.8333333333333334,
+            "negated": 0.8333333333333334,
+            "absent": 0.5
+          },
+          "family_exact": {
+            "absent+absent": 0.0,
+            "absent+negated": 1.0,
+            "absent+positive": 0.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 2,
+              "tn": 4,
+              "fp": 2,
+              "fn": 1,
+              "precision": 0.5,
+              "recall": 0.6666666666666666,
+              "negative_recall": 0.6666666666666666
+            },
+            {
+              "tp": 3,
+              "tn": 4,
+              "fp": 2,
+              "fn": 0,
+              "precision": 0.6,
+              "recall": 1.0,
+              "negative_recall": 0.6666666666666666
+            }
+          ],
+          "bce": 0.47012022897820427
+        },
+        "development": {
+          "exact": 0.38461539149284363,
+          "micro_f1": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "per_property_accuracy": [
+            0.6153846383094788,
+            0.6153846383094788
+          ],
+          "status_accuracy": {
+            "positive": 0.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.38461539149284363,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 0,
+              "tn": 48,
+              "fp": 0,
+              "fn": 30,
+              "precision": 0.0,
+              "recall": 0.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 0,
+              "tn": 48,
+              "fp": 0,
+              "fn": 30,
+              "precision": 0.0,
+              "recall": 0.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 1.7926301659487678
+        },
+        "retention": {
+          "old_known": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.25,
+            "precision": 1.0,
+            "recall": 0.14285714285714285,
+            "per_property_accuracy": [
+              0.761904776096344,
+              0.6666666865348816
+            ],
+            "status_accuracy": {
+              "positive": 0.14285714285714285,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 8,
+                "tn": 56,
+                "fp": 0,
+                "fn": 20,
+                "precision": 1.0,
+                "recall": 0.2857142857142857,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 0,
+                "tn": 56,
+                "fp": 0,
+                "fn": 28,
+                "precision": 0.0,
+                "recall": 0.0,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 1.9891455611938182
+          },
+          "old_renamed": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.2222222222222222,
+            "precision": 1.0,
+            "recall": 0.125,
+            "per_property_accuracy": [
+              0.75,
+              0.6666666865348816
+            ],
+            "status_accuracy": {
+              "positive": 0.125,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 7,
+                "tn": 56,
+                "fp": 0,
+                "fn": 21,
+                "precision": 1.0,
+                "recall": 0.25,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 0,
+                "tn": 56,
+                "fp": 0,
+                "fn": 28,
+                "precision": 0.0,
+                "recall": 0.0,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 1.8910487341179052
+          }
+        }
+      },
+      {
+        "updates": 200,
+        "examples": 3600,
+        "loss": 0.39575937390327454,
+        "training": {
+          "exact": 0.7564102411270142,
+          "micro_f1": 0.7967479674796748,
+          "precision": 0.7777777777777778,
+          "recall": 0.8166666666666667,
+          "per_property_accuracy": [
+            0.8333333730697632,
+            0.8461538553237915
+          ],
+          "status_accuracy": {
+            "positive": 0.8166666666666667,
+            "negated": 0.8166666666666667,
+            "absent": 0.9166666666666666
+          },
+          "family_exact": {
+            "frame_0": 0.7307692766189575,
+            "frame_1": 0.7307692766189575,
+            "frame_2": 0.8076923489570618
+          },
+          "per_property": [
+            {
+              "tp": 44,
+              "tn": 86,
+              "fp": 10,
+              "fn": 16,
+              "precision": 0.8148148148148148,
+              "recall": 0.7333333333333333,
+              "negative_recall": 0.8958333333333334
+            },
+            {
+              "tp": 54,
+              "tn": 78,
+              "fp": 18,
+              "fn": 6,
+              "precision": 0.75,
+              "recall": 0.9,
+              "negative_recall": 0.8125
+            }
+          ],
+          "bce": 0.33057198265532267
+        },
+        "old_training": {
+          "exact": 0.8888888955116272,
+          "micro_f1": 0.8333333333333334,
+          "precision": 0.8333333333333334,
+          "recall": 0.8333333333333334,
+          "per_property_accuracy": [
+            0.8888888955116272,
+            0.8888888955116272
+          ],
+          "status_accuracy": {
+            "positive": 0.8333333333333334,
+            "negated": 0.8333333333333334,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 2,
+              "tn": 6,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 5,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.75,
+              "recall": 1.0,
+              "negative_recall": 0.8333333333333334
+            }
+          ],
+          "bce": 0.3069524104470471
+        },
+        "development": {
+          "exact": 0.38461539149284363,
+          "micro_f1": 0.17647058823529413,
+          "precision": 0.75,
+          "recall": 0.1,
+          "per_property_accuracy": [
+            0.6410256624221802,
+            0.6410256624221802
+          ],
+          "status_accuracy": {
+            "positive": 0.1,
+            "negated": 1.0,
+            "absent": 0.9444444444444444
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.38461539149284363,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 2,
+              "tn": 48,
+              "fp": 0,
+              "fn": 28,
+              "precision": 1.0,
+              "recall": 0.06666666666666667,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 4,
+              "tn": 46,
+              "fp": 2,
+              "fn": 26,
+              "precision": 0.6666666666666666,
+              "recall": 0.13333333333333333,
+              "negative_recall": 0.9583333333333334
+            }
+          ],
+          "bce": 2.0083827778861743
+        },
+        "retention": {
+          "old_known": {
+            "exact": 0.4761904776096344,
+            "micro_f1": 0.35294117647058826,
+            "precision": 1.0,
+            "recall": 0.21428571428571427,
+            "per_property_accuracy": [
+              0.761904776096344,
+              0.7142857313156128
+            ],
+            "status_accuracy": {
+              "positive": 0.21428571428571427,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.5
+            },
+            "per_property": [
+              {
+                "tp": 8,
+                "tn": 56,
+                "fp": 0,
+                "fn": 20,
+                "precision": 1.0,
+                "recall": 0.2857142857142857,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 2.6080878922415036
+          },
+          "old_renamed": {
+            "exact": 0.4761904776096344,
+            "micro_f1": 0.35294117647058826,
+            "precision": 1.0,
+            "recall": 0.21428571428571427,
+            "per_property_accuracy": [
+              0.761904776096344,
+              0.7142857313156128
+            ],
+            "status_accuracy": {
+              "positive": 0.21428571428571427,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.5
+            },
+            "per_property": [
+              {
+                "tp": 8,
+                "tn": 56,
+                "fp": 0,
+                "fn": 20,
+                "precision": 1.0,
+                "recall": 0.2857142857142857,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 2.500580161132768
+          }
+        }
+      },
+      {
+        "updates": 300,
+        "examples": 5400,
+        "loss": 0.22671259939670563,
+        "training": {
+          "exact": 0.7692307829856873,
+          "micro_f1": 0.7818181818181819,
+          "precision": 0.86,
+          "recall": 0.7166666666666667,
+          "per_property_accuracy": [
+            0.8333333730697632,
+            0.8589743971824646
+          ],
+          "status_accuracy": {
+            "positive": 0.7166666666666667,
+            "negated": 0.9,
+            "absent": 0.9722222222222222
+          },
+          "family_exact": {
+            "frame_0": 0.8461538553237915,
+            "frame_1": 0.692307710647583,
+            "frame_2": 0.7692307829856873
+          },
+          "per_property": [
+            {
+              "tp": 36,
+              "tn": 94,
+              "fp": 2,
+              "fn": 24,
+              "precision": 0.9473684210526315,
+              "recall": 0.6,
+              "negative_recall": 0.9791666666666666
+            },
+            {
+              "tp": 50,
+              "tn": 84,
+              "fp": 12,
+              "fn": 10,
+              "precision": 0.8064516129032258,
+              "recall": 0.8333333333333334,
+              "negative_recall": 0.875
+            }
+          ],
+          "bce": 0.29420020193776464
+        },
+        "old_training": {
+          "exact": 0.8888888955116272,
+          "micro_f1": 0.8333333333333334,
+          "precision": 0.8333333333333334,
+          "recall": 0.8333333333333334,
+          "per_property_accuracy": [
+            0.8888888955116272,
+            0.8888888955116272
+          ],
+          "status_accuracy": {
+            "positive": 0.8333333333333334,
+            "negated": 0.8333333333333334,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 2,
+              "tn": 6,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 5,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.75,
+              "recall": 1.0,
+              "negative_recall": 0.8333333333333334
+            }
+          ],
+          "bce": 0.1779388517206624
+        },
+        "development": {
+          "exact": 0.38461539149284363,
+          "micro_f1": 0.12121212121212122,
+          "precision": 0.6666666666666666,
+          "recall": 0.06666666666666667,
+          "per_property_accuracy": [
+            0.6153846383094788,
+            0.6410256624221802
+          ],
+          "status_accuracy": {
+            "positive": 0.06666666666666667,
+            "negated": 1.0,
+            "absent": 0.9444444444444444
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.38461539149284363,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 0,
+              "tn": 48,
+              "fp": 0,
+              "fn": 30,
+              "precision": 0.0,
+              "recall": 0.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 4,
+              "tn": 46,
+              "fp": 2,
+              "fn": 26,
+              "precision": 0.6666666666666666,
+              "recall": 0.13333333333333333,
+              "negative_recall": 0.9583333333333334
+            }
+          ],
+          "bce": 2.433521213731208
+        },
+        "retention": {
+          "old_known": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.25,
+            "precision": 1.0,
+            "recall": 0.14285714285714285,
+            "per_property_accuracy": [
+              0.7142857313156128,
+              0.7142857313156128
+            ],
+            "status_accuracy": {
+              "positive": 0.14285714285714285,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 2.9565669082371153
+          },
+          "old_renamed": {
+            "exact": 0.4404762089252472,
+            "micro_f1": 0.27692307692307694,
+            "precision": 1.0,
+            "recall": 0.16071428571428573,
+            "per_property_accuracy": [
+              0.7261905074119568,
+              0.7142857313156128
+            ],
+            "status_accuracy": {
+              "positive": 0.16071428571428573,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.125
+            },
+            "per_property": [
+              {
+                "tp": 5,
+                "tn": 56,
+                "fp": 0,
+                "fn": 23,
+                "precision": 1.0,
+                "recall": 0.17857142857142858,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 2.901522765417881
+          }
+        }
+      },
+      {
+        "updates": 400,
+        "examples": 7200,
+        "loss": 0.18905504047870636,
+        "training": {
+          "exact": 0.7884615659713745,
+          "micro_f1": 0.8311688311688312,
+          "precision": 0.8648648648648649,
+          "recall": 0.8,
+          "per_property_accuracy": [
+            0.8589743971824646,
+            0.8910256624221802
+          ],
+          "status_accuracy": {
+            "positive": 0.8,
+            "negated": 0.875,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.8076923489570618,
+            "frame_1": 0.75,
+            "frame_2": 0.8076923489570618
+          },
+          "per_property": [
+            {
+              "tp": 44,
+              "tn": 90,
+              "fp": 6,
+              "fn": 16,
+              "precision": 0.88,
+              "recall": 0.7333333333333333,
+              "negative_recall": 0.9375
+            },
+            {
+              "tp": 52,
+              "tn": 87,
+              "fp": 9,
+              "fn": 8,
+              "precision": 0.8524590163934426,
+              "recall": 0.8666666666666667,
+              "negative_recall": 0.90625
+            }
+          ],
+          "bce": 0.26931482787495425
+        },
+        "old_training": {
+          "exact": 0.8888888955116272,
+          "micro_f1": 0.9230769230769231,
+          "precision": 0.8571428571428571,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            0.8888888955116272
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.8333333333333334,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 5,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.75,
+              "recall": 1.0,
+              "negative_recall": 0.8333333333333334
+            }
+          ],
+          "bce": 0.12541119906320933
+        },
+        "development": {
+          "exact": 0.41025641560554504,
+          "micro_f1": 0.17142857142857143,
+          "precision": 0.6,
+          "recall": 0.1,
+          "per_property_accuracy": [
+            0.6153846383094788,
+            0.6410256624221802
+          ],
+          "status_accuracy": {
+            "positive": 0.1,
+            "negated": 0.9666666666666667,
+            "absent": 0.9444444444444444
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.46153849363327026,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 2,
+              "tn": 46,
+              "fp": 2,
+              "fn": 28,
+              "precision": 0.5,
+              "recall": 0.06666666666666667,
+              "negative_recall": 0.9583333333333334
+            },
+            {
+              "tp": 4,
+              "tn": 46,
+              "fp": 2,
+              "fn": 26,
+              "precision": 0.6666666666666666,
+              "recall": 0.13333333333333333,
+              "negative_recall": 0.9583333333333334
+            }
+          ],
+          "bce": 2.6186094236285635
+        },
+        "retention": {
+          "old_known": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.25,
+            "precision": 1.0,
+            "recall": 0.14285714285714285,
+            "per_property_accuracy": [
+              0.7142857313156128,
+              0.7142857313156128
+            ],
+            "status_accuracy": {
+              "positive": 0.14285714285714285,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 3.2688898995398277
+          },
+          "old_renamed": {
+            "exact": 0.4404762089252472,
+            "micro_f1": 0.27692307692307694,
+            "precision": 1.0,
+            "recall": 0.16071428571428573,
+            "per_property_accuracy": [
+              0.7261905074119568,
+              0.7142857313156128
+            ],
+            "status_accuracy": {
+              "positive": 0.16071428571428573,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.125
+            },
+            "per_property": [
+              {
+                "tp": 5,
+                "tn": 56,
+                "fp": 0,
+                "fn": 23,
+                "precision": 1.0,
+                "recall": 0.17857142857142858,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 3.223072998112939
+          }
+        }
+      },
+      {
+        "updates": 500,
+        "examples": 9000,
+        "loss": 0.28040850162506104,
+        "training": {
+          "exact": 0.7756410241127014,
+          "micro_f1": 0.8275862068965517,
+          "precision": 0.7659574468085106,
+          "recall": 0.9,
+          "per_property_accuracy": [
+            0.8525640964508057,
+            0.8589743971824646
+          ],
+          "status_accuracy": {
+            "positive": 0.9,
+            "negated": 0.75,
+            "absent": 0.9583333333333334
+          },
+          "family_exact": {
+            "frame_0": 0.8076923489570618,
+            "frame_1": 0.634615421295166,
+            "frame_2": 0.884615421295166
+          },
+          "per_property": [
+            {
+              "tp": 50,
+              "tn": 83,
+              "fp": 13,
+              "fn": 10,
+              "precision": 0.7936507936507936,
+              "recall": 0.8333333333333334,
+              "negative_recall": 0.8645833333333334
+            },
+            {
+              "tp": 58,
+              "tn": 76,
+              "fp": 20,
+              "fn": 2,
+              "precision": 0.7435897435897436,
+              "recall": 0.9666666666666667,
+              "negative_recall": 0.7916666666666666
+            }
+          ],
+          "bce": 0.26666676151107394
+        },
+        "old_training": {
+          "exact": 0.8888888955116272,
+          "micro_f1": 0.9230769230769231,
+          "precision": 0.8571428571428571,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            0.8888888955116272,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.8333333333333334,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 5,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.75,
+              "recall": 1.0,
+              "negative_recall": 0.8333333333333334
+            },
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.09232665645277939
+        },
+        "development": {
+          "exact": 0.43589743971824646,
+          "micro_f1": 0.2631578947368421,
+          "precision": 0.625,
+          "recall": 0.16666666666666666,
+          "per_property_accuracy": [
+            0.6410256624221802,
+            0.6410256624221802
+          ],
+          "status_accuracy": {
+            "positive": 0.16666666666666666,
+            "negated": 0.9666666666666667,
+            "absent": 0.8888888888888888
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.5384615659713745,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 6,
+              "tn": 44,
+              "fp": 4,
+              "fn": 24,
+              "precision": 0.6,
+              "recall": 0.2,
+              "negative_recall": 0.9166666666666666
+            },
+            {
+              "tp": 4,
+              "tn": 46,
+              "fp": 2,
+              "fn": 26,
+              "precision": 0.6666666666666666,
+              "recall": 0.13333333333333333,
+              "negative_recall": 0.9583333333333334
+            }
+          ],
+          "bce": 3.054815316722602
+        },
+        "retention": {
+          "old_known": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.25,
+            "precision": 1.0,
+            "recall": 0.14285714285714285,
+            "per_property_accuracy": [
+              0.7142857313156128,
+              0.7142857313156128
+            ],
+            "status_accuracy": {
+              "positive": 0.14285714285714285,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 3.5872131664647497
+          },
+          "old_renamed": {
+            "exact": 0.4404762089252472,
+            "micro_f1": 0.27692307692307694,
+            "precision": 1.0,
+            "recall": 0.16071428571428573,
+            "per_property_accuracy": [
+              0.7261905074119568,
+              0.7142857313156128
+            ],
+            "status_accuracy": {
+              "positive": 0.16071428571428573,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.125
+            },
+            "per_property": [
+              {
+                "tp": 5,
+                "tn": 56,
+                "fp": 0,
+                "fn": 23,
+                "precision": 1.0,
+                "recall": 0.17857142857142858,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 3.564860809665074
+          }
+        }
+      },
+      {
+        "updates": 600,
+        "examples": 10800,
+        "loss": 0.13499586284160614,
+        "training": {
+          "exact": 0.7371795177459717,
+          "micro_f1": 0.796812749003984,
+          "precision": 0.7633587786259542,
+          "recall": 0.8333333333333334,
+          "per_property_accuracy": [
+            0.8205128312110901,
+            0.8525640964508057
+          ],
+          "status_accuracy": {
+            "positive": 0.8333333333333334,
+            "negated": 0.7916666666666666,
+            "absent": 0.9166666666666666
+          },
+          "family_exact": {
+            "frame_0": 0.7692307829856873,
+            "frame_1": 0.7115384936332703,
+            "frame_2": 0.7307692766189575
+          },
+          "per_property": [
+            {
+              "tp": 52,
+              "tn": 76,
+              "fp": 20,
+              "fn": 8,
+              "precision": 0.7222222222222222,
+              "recall": 0.8666666666666667,
+              "negative_recall": 0.7916666666666666
+            },
+            {
+              "tp": 48,
+              "tn": 85,
+              "fp": 11,
+              "fn": 12,
+              "precision": 0.8135593220338984,
+              "recall": 0.8,
+              "negative_recall": 0.8854166666666666
+            }
+          ],
+          "bce": 0.2826814009824863
+        },
+        "old_training": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.02972038438887714
+        },
+        "development": {
+          "exact": 0.43589743971824646,
+          "micro_f1": 0.3,
+          "precision": 0.6,
+          "recall": 0.2,
+          "per_property_accuracy": [
+            0.6410256624221802,
+            0.6410256624221802
+          ],
+          "status_accuracy": {
+            "positive": 0.2,
+            "negated": 0.9333333333333333,
+            "absent": 0.8888888888888888
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.5384615659713745,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 8,
+              "tn": 42,
+              "fp": 6,
+              "fn": 22,
+              "precision": 0.5714285714285714,
+              "recall": 0.26666666666666666,
+              "negative_recall": 0.875
+            },
+            {
+              "tp": 4,
+              "tn": 46,
+              "fp": 2,
+              "fn": 26,
+              "precision": 0.6666666666666666,
+              "recall": 0.13333333333333333,
+              "negative_recall": 0.9583333333333334
+            }
+          ],
+          "bce": 3.2873460033202493
+        },
+        "retention": {
+          "old_known": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.25,
+            "precision": 1.0,
+            "recall": 0.14285714285714285,
+            "per_property_accuracy": [
+              0.7142857313156128,
+              0.7142857313156128
+            ],
+            "status_accuracy": {
+              "positive": 0.14285714285714285,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 3.725934546326278
+          },
+          "old_renamed": {
+            "exact": 0.4404762089252472,
+            "micro_f1": 0.27692307692307694,
+            "precision": 1.0,
+            "recall": 0.16071428571428573,
+            "per_property_accuracy": [
+              0.7261905074119568,
+              0.7142857313156128
+            ],
+            "status_accuracy": {
+              "positive": 0.16071428571428573,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.125
+            },
+            "per_property": [
+              {
+                "tp": 5,
+                "tn": 56,
+                "fp": 0,
+                "fn": 23,
+                "precision": 1.0,
+                "recall": 0.17857142857142858,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 3.7150590641249424
+          }
+        }
+      },
+      {
+        "updates": 700,
+        "examples": 12600,
+        "loss": 0.1969122439622879,
+        "training": {
+          "exact": 0.8141025900840759,
+          "micro_f1": 0.8215767634854771,
+          "precision": 0.8181818181818182,
+          "recall": 0.825,
+          "per_property_accuracy": [
+            0.8782051205635071,
+            0.8461538553237915
+          ],
+          "status_accuracy": {
+            "positive": 0.825,
+            "negated": 0.85,
+            "absent": 0.9444444444444444
+          },
+          "family_exact": {
+            "frame_0": 0.8461538553237915,
+            "frame_1": 0.75,
+            "frame_2": 0.8461538553237915
+          },
+          "per_property": [
+            {
+              "tp": 43,
+              "tn": 94,
+              "fp": 2,
+              "fn": 17,
+              "precision": 0.9555555555555556,
+              "recall": 0.7166666666666667,
+              "negative_recall": 0.9791666666666666
+            },
+            {
+              "tp": 56,
+              "tn": 76,
+              "fp": 20,
+              "fn": 4,
+              "precision": 0.7368421052631579,
+              "recall": 0.9333333333333333,
+              "negative_recall": 0.7916666666666666
+            }
+          ],
+          "bce": 0.268596394823494
+        },
+        "old_training": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.056276514566552596
+        },
+        "development": {
+          "exact": 0.41025641560554504,
+          "micro_f1": 0.16666666666666666,
+          "precision": 0.5,
+          "recall": 0.1,
+          "per_property_accuracy": [
+            0.5897436141967773,
+            0.6410256624221802
+          ],
+          "status_accuracy": {
+            "positive": 0.1,
+            "negated": 0.9666666666666667,
+            "absent": 0.8888888888888888
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.46153849363327026,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 2,
+              "tn": 44,
+              "fp": 4,
+              "fn": 28,
+              "precision": 0.3333333333333333,
+              "recall": 0.06666666666666667,
+              "negative_recall": 0.9166666666666666
+            },
+            {
+              "tp": 4,
+              "tn": 46,
+              "fp": 2,
+              "fn": 26,
+              "precision": 0.6666666666666666,
+              "recall": 0.13333333333333333,
+              "negative_recall": 0.9583333333333334
+            }
+          ],
+          "bce": 3.8385582630252295
+        },
+        "retention": {
+          "old_known": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.25,
+            "precision": 1.0,
+            "recall": 0.14285714285714285,
+            "per_property_accuracy": [
+              0.7142857313156128,
+              0.7142857313156128
+            ],
+            "status_accuracy": {
+              "positive": 0.14285714285714285,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 4.123523878920882
+          },
+          "old_renamed": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.25,
+            "precision": 1.0,
+            "recall": 0.14285714285714285,
+            "per_property_accuracy": [
+              0.7142857313156128,
+              0.7142857313156128
+            ],
+            "status_accuracy": {
+              "positive": 0.14285714285714285,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 4.1350644748925225
+          }
+        }
+      },
+      {
+        "updates": 800,
+        "examples": 14400,
+        "loss": 0.1753607541322708,
+        "training": {
+          "exact": 0.7820512652397156,
+          "micro_f1": 0.8307692307692308,
+          "precision": 0.7714285714285715,
+          "recall": 0.9,
+          "per_property_accuracy": [
+            0.8589743971824646,
+            0.8589743971824646
+          ],
+          "status_accuracy": {
+            "positive": 0.9,
+            "negated": 0.7666666666666667,
+            "absent": 0.9444444444444444
+          },
+          "family_exact": {
+            "frame_0": 0.826923131942749,
+            "frame_1": 0.634615421295166,
+            "frame_2": 0.884615421295166
+          },
+          "per_property": [
+            {
+              "tp": 50,
+              "tn": 84,
+              "fp": 12,
+              "fn": 10,
+              "precision": 0.8064516129032258,
+              "recall": 0.8333333333333334,
+              "negative_recall": 0.875
+            },
+            {
+              "tp": 58,
+              "tn": 76,
+              "fp": 20,
+              "fn": 2,
+              "precision": 0.7435897435897436,
+              "recall": 0.9666666666666667,
+              "negative_recall": 0.7916666666666666
+            }
+          ],
+          "bce": 0.244852459009172
+        },
+        "old_training": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.013202616829111056
+        },
+        "development": {
+          "exact": 0.43589743971824646,
+          "micro_f1": 0.2631578947368421,
+          "precision": 0.625,
+          "recall": 0.16666666666666666,
+          "per_property_accuracy": [
+            0.6410256624221802,
+            0.6410256624221802
+          ],
+          "status_accuracy": {
+            "positive": 0.16666666666666666,
+            "negated": 0.9666666666666667,
+            "absent": 0.8888888888888888
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.5384615659713745,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 6,
+              "tn": 44,
+              "fp": 4,
+              "fn": 24,
+              "precision": 0.6,
+              "recall": 0.2,
+              "negative_recall": 0.9166666666666666
+            },
+            {
+              "tp": 4,
+              "tn": 46,
+              "fp": 2,
+              "fn": 26,
+              "precision": 0.6666666666666666,
+              "recall": 0.13333333333333333,
+              "negative_recall": 0.9583333333333334
+            }
+          ],
+          "bce": 3.800234438731316
+        },
+        "retention": {
+          "old_known": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.13333333333333333,
+            "precision": 1.0,
+            "recall": 0.07142857142857142,
+            "per_property_accuracy": [
+              0.7142857313156128,
+              0.6666666865348816
+            ],
+            "status_accuracy": {
+              "positive": 0.07142857142857142,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 4,
+                "tn": 56,
+                "fp": 0,
+                "fn": 24,
+                "precision": 1.0,
+                "recall": 0.14285714285714285,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 0,
+                "tn": 56,
+                "fp": 0,
+                "fn": 28,
+                "precision": 0.0,
+                "recall": 0.0,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 4.130257522697456
+          },
+          "old_renamed": {
+            "exact": 0.4404762089252472,
+            "micro_f1": 0.1935483870967742,
+            "precision": 1.0,
+            "recall": 0.10714285714285714,
+            "per_property_accuracy": [
+              0.7261905074119568,
+              0.6785714626312256
+            ],
+            "status_accuracy": {
+              "positive": 0.10714285714285714,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.125
+            },
+            "per_property": [
+              {
+                "tp": 5,
+                "tn": 56,
+                "fp": 0,
+                "fn": 23,
+                "precision": 1.0,
+                "recall": 0.17857142857142858,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 1,
+                "tn": 56,
+                "fp": 0,
+                "fn": 27,
+                "precision": 1.0,
+                "recall": 0.03571428571428571,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 4.146348289611998
+          }
+        }
+      },
+      {
+        "updates": 900,
+        "examples": 16200,
+        "loss": 0.18489734828472137,
+        "training": {
+          "exact": 0.7756410241127014,
+          "micro_f1": 0.8105726872246696,
+          "precision": 0.8598130841121495,
+          "recall": 0.7666666666666667,
+          "per_property_accuracy": [
+            0.8525640964508057,
+            0.8717948794364929
+          ],
+          "status_accuracy": {
+            "positive": 0.7666666666666667,
+            "negated": 0.8833333333333333,
+            "absent": 0.9861111111111112
+          },
+          "family_exact": {
+            "frame_0": 0.8076923489570618,
+            "frame_1": 0.75,
+            "frame_2": 0.7692307829856873
+          },
+          "per_property": [
+            {
+              "tp": 44,
+              "tn": 89,
+              "fp": 7,
+              "fn": 16,
+              "precision": 0.8627450980392157,
+              "recall": 0.7333333333333333,
+              "negative_recall": 0.9270833333333334
+            },
+            {
+              "tp": 48,
+              "tn": 88,
+              "fp": 8,
+              "fn": 12,
+              "precision": 0.8571428571428571,
+              "recall": 0.8,
+              "negative_recall": 0.9166666666666666
+            }
+          ],
+          "bce": 0.24038206174343765
+        },
+        "old_training": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.015271630511741244
+        },
+        "development": {
+          "exact": 0.43589743971824646,
+          "micro_f1": 0.21052631578947367,
+          "precision": 0.5,
+          "recall": 0.13333333333333333,
+          "per_property_accuracy": [
+            0.6153846383094788,
+            0.6153846383094788
+          ],
+          "status_accuracy": {
+            "positive": 0.13333333333333333,
+            "negated": 0.9333333333333333,
+            "absent": 0.8888888888888888
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.5384615659713745,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 6,
+              "tn": 42,
+              "fp": 6,
+              "fn": 24,
+              "precision": 0.5,
+              "recall": 0.2,
+              "negative_recall": 0.875
+            },
+            {
+              "tp": 2,
+              "tn": 46,
+              "fp": 2,
+              "fn": 28,
+              "precision": 0.5,
+              "recall": 0.06666666666666667,
+              "negative_recall": 0.9583333333333334
+            }
+          ],
+          "bce": 3.980799820411356
+        },
+        "retention": {
+          "old_known": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.06896551724137931,
+            "precision": 1.0,
+            "recall": 0.03571428571428571,
+            "per_property_accuracy": [
+              0.6666666865348816,
+              0.6904761791229248
+            ],
+            "status_accuracy": {
+              "positive": 0.03571428571428571,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 0,
+                "tn": 56,
+                "fp": 0,
+                "fn": 28,
+                "precision": 0.0,
+                "recall": 0.0,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 2,
+                "tn": 56,
+                "fp": 0,
+                "fn": 26,
+                "precision": 1.0,
+                "recall": 0.07142857142857142,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 4.354017078790092
+          },
+          "old_renamed": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.13333333333333333,
+            "precision": 1.0,
+            "recall": 0.07142857142857142,
+            "per_property_accuracy": [
+              0.6785714626312256,
+              0.7023809552192688
+            ],
+            "status_accuracy": {
+              "positive": 0.07142857142857142,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 1,
+                "tn": 56,
+                "fp": 0,
+                "fn": 27,
+                "precision": 1.0,
+                "recall": 0.03571428571428571,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 3,
+                "tn": 56,
+                "fp": 0,
+                "fn": 25,
+                "precision": 1.0,
+                "recall": 0.10714285714285714,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 4.37630371218346
+          }
+        }
+      },
+      {
+        "updates": 1000,
+        "examples": 18000,
+        "loss": 0.07350979000329971,
+        "training": {
+          "exact": 0.7628205418586731,
+          "micro_f1": 0.7926267281105991,
+          "precision": 0.8865979381443299,
+          "recall": 0.7166666666666667,
+          "per_property_accuracy": [
+            0.8461538553237915,
+            0.8653846383094788
+          ],
+          "status_accuracy": {
+            "positive": 0.7166666666666667,
+            "negated": 0.9083333333333333,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.8076923489570618,
+            "frame_1": 0.7115384936332703,
+            "frame_2": 0.7692307829856873
+          },
+          "per_property": [
+            {
+              "tp": 44,
+              "tn": 88,
+              "fp": 8,
+              "fn": 16,
+              "precision": 0.8461538461538461,
+              "recall": 0.7333333333333333,
+              "negative_recall": 0.9166666666666666
+            },
+            {
+              "tp": 42,
+              "tn": 93,
+              "fp": 3,
+              "fn": 18,
+              "precision": 0.9333333333333333,
+              "recall": 0.7,
+              "negative_recall": 0.96875
+            }
+          ],
+          "bce": 0.2543012043577254
+        },
+        "old_training": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.00565385132611595
+        },
+        "development": {
+          "exact": 0.43589743971824646,
+          "micro_f1": 0.2631578947368421,
+          "precision": 0.625,
+          "recall": 0.16666666666666666,
+          "per_property_accuracy": [
+            0.6410256624221802,
+            0.6410256624221802
+          ],
+          "status_accuracy": {
+            "positive": 0.16666666666666666,
+            "negated": 0.9666666666666667,
+            "absent": 0.8888888888888888
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.5384615659713745,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 6,
+              "tn": 44,
+              "fp": 4,
+              "fn": 24,
+              "precision": 0.6,
+              "recall": 0.2,
+              "negative_recall": 0.9166666666666666
+            },
+            {
+              "tp": 4,
+              "tn": 46,
+              "fp": 2,
+              "fn": 26,
+              "precision": 0.6666666666666666,
+              "recall": 0.13333333333333333,
+              "negative_recall": 0.9583333333333334
+            }
+          ],
+          "bce": 4.248984087659685
+        },
+        "retention": {
+          "old_known": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "per_property_accuracy": [
+              0.6666666865348816,
+              0.6666666865348816
+            ],
+            "status_accuracy": {
+              "positive": 0.0,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 0,
+                "tn": 56,
+                "fp": 0,
+                "fn": 28,
+                "precision": 0.0,
+                "recall": 0.0,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 0,
+                "tn": 56,
+                "fp": 0,
+                "fn": 28,
+                "precision": 0.0,
+                "recall": 0.0,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 4.532814349911395
+          },
+          "old_renamed": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.06896551724137931,
+            "precision": 1.0,
+            "recall": 0.03571428571428571,
+            "per_property_accuracy": [
+              0.6785714626312256,
+              0.6785714626312256
+            ],
+            "status_accuracy": {
+              "positive": 0.03571428571428571,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 1,
+                "tn": 56,
+                "fp": 0,
+                "fn": 27,
+                "precision": 1.0,
+                "recall": 0.03571428571428571,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 1,
+                "tn": 56,
+                "fp": 0,
+                "fn": 27,
+                "precision": 1.0,
+                "recall": 0.03571428571428571,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 4.5650073653786665
+          }
+        }
+      },
+      {
+        "updates": 1100,
+        "examples": 19800,
+        "loss": 0.20510800182819366,
+        "training": {
+          "exact": 0.7692307829856873,
+          "micro_f1": 0.8067226890756303,
+          "precision": 0.8135593220338984,
+          "recall": 0.8,
+          "per_property_accuracy": [
+            0.8205128312110901,
+            0.884615421295166
+          ],
+          "status_accuracy": {
+            "positive": 0.8,
+            "negated": 0.85,
+            "absent": 0.9444444444444444
+          },
+          "family_exact": {
+            "frame_0": 0.8076923489570618,
+            "frame_1": 0.6538462042808533,
+            "frame_2": 0.8461538553237915
+          },
+          "per_property": [
+            {
+              "tp": 46,
+              "tn": 82,
+              "fp": 14,
+              "fn": 14,
+              "precision": 0.7666666666666667,
+              "recall": 0.7666666666666667,
+              "negative_recall": 0.8541666666666666
+            },
+            {
+              "tp": 50,
+              "tn": 88,
+              "fp": 8,
+              "fn": 10,
+              "precision": 0.8620689655172413,
+              "recall": 0.8333333333333334,
+              "negative_recall": 0.9166666666666666
+            }
+          ],
+          "bce": 0.23252994903852012
+        },
+        "old_training": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.03608913409286713
+        },
+        "development": {
+          "exact": 0.41025641560554504,
+          "micro_f1": 0.16666666666666666,
+          "precision": 0.5,
+          "recall": 0.1,
+          "per_property_accuracy": [
+            0.6153846383094788,
+            0.6153846383094788
+          ],
+          "status_accuracy": {
+            "positive": 0.1,
+            "negated": 0.9666666666666667,
+            "absent": 0.8888888888888888
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.46153849363327026,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 4,
+              "tn": 44,
+              "fp": 4,
+              "fn": 26,
+              "precision": 0.5,
+              "recall": 0.13333333333333333,
+              "negative_recall": 0.9166666666666666
+            },
+            {
+              "tp": 2,
+              "tn": 46,
+              "fp": 2,
+              "fn": 28,
+              "precision": 0.5,
+              "recall": 0.06666666666666667,
+              "negative_recall": 0.9583333333333334
+            }
+          ],
+          "bce": 4.376921578651208
+        },
+        "retention": {
+          "old_known": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "per_property_accuracy": [
+              0.6666666865348816,
+              0.6666666865348816
+            ],
+            "status_accuracy": {
+              "positive": 0.0,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 0,
+                "tn": 56,
+                "fp": 0,
+                "fn": 28,
+                "precision": 0.0,
+                "recall": 0.0,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 0,
+                "tn": 56,
+                "fp": 0,
+                "fn": 28,
+                "precision": 0.0,
+                "recall": 0.0,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 4.714432535952604
+          },
+          "old_renamed": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.06896551724137931,
+            "precision": 1.0,
+            "recall": 0.03571428571428571,
+            "per_property_accuracy": [
+              0.6785714626312256,
+              0.6785714626312256
+            ],
+            "status_accuracy": {
+              "positive": 0.03571428571428571,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 1,
+                "tn": 56,
+                "fp": 0,
+                "fn": 27,
+                "precision": 1.0,
+                "recall": 0.03571428571428571,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 1,
+                "tn": 56,
+                "fp": 0,
+                "fn": 27,
+                "precision": 1.0,
+                "recall": 0.03571428571428571,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 4.744206218795799
+          }
+        }
+      },
+      {
+        "updates": 1200,
+        "examples": 21600,
+        "loss": 0.12959840893745422,
+        "training": {
+          "exact": 0.7756410241127014,
+          "micro_f1": 0.8352490421455939,
+          "precision": 0.7730496453900709,
+          "recall": 0.9083333333333333,
+          "per_property_accuracy": [
+            0.8525640964508057,
+            0.8717948794364929
+          ],
+          "status_accuracy": {
+            "positive": 0.9083333333333333,
+            "negated": 0.7666666666666667,
+            "absent": 0.9444444444444444
+          },
+          "family_exact": {
+            "frame_0": 0.7884615659713745,
+            "frame_1": 0.692307710647583,
+            "frame_2": 0.8461538553237915
+          },
+          "per_property": [
+            {
+              "tp": 53,
+              "tn": 80,
+              "fp": 16,
+              "fn": 7,
+              "precision": 0.7681159420289855,
+              "recall": 0.8833333333333333,
+              "negative_recall": 0.8333333333333334
+            },
+            {
+              "tp": 56,
+              "tn": 80,
+              "fp": 16,
+              "fn": 4,
+              "precision": 0.7777777777777778,
+              "recall": 0.9333333333333333,
+              "negative_recall": 0.8333333333333334
+            }
+          ],
+          "bce": 0.25022011064428407
+        },
+        "old_training": {
+          "exact": 0.8888888955116272,
+          "micro_f1": 0.9090909090909091,
+          "precision": 1.0,
+          "recall": 0.8333333333333334,
+          "per_property_accuracy": [
+            1.0,
+            0.8888888955116272
+          ],
+          "status_accuracy": {
+            "positive": 0.8333333333333334,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 2,
+              "tn": 6,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.22748192016416255
+        },
+        "development": {
+          "exact": 0.43589743971824646,
+          "micro_f1": 0.16666666666666666,
+          "precision": 0.5,
+          "recall": 0.1,
+          "per_property_accuracy": [
+            0.6410256624221802,
+            0.5897436141967773
+          ],
+          "status_accuracy": {
+            "positive": 0.1,
+            "negated": 0.9666666666666667,
+            "absent": 0.8888888888888888
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.5384615659713745,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 6,
+              "tn": 44,
+              "fp": 4,
+              "fn": 24,
+              "precision": 0.6,
+              "recall": 0.2,
+              "negative_recall": 0.9166666666666666
+            },
+            {
+              "tp": 0,
+              "tn": 46,
+              "fp": 2,
+              "fn": 30,
+              "precision": 0.0,
+              "recall": 0.0,
+              "negative_recall": 0.9583333333333334
+            }
+          ],
+          "bce": 4.673753212991316
+        },
+        "retention": {
+          "old_known": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.0,
+            "precision": 0.0,
+            "recall": 0.0,
+            "per_property_accuracy": [
+              0.6666666865348816,
+              0.6666666865348816
+            ],
+            "status_accuracy": {
+              "positive": 0.0,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 0,
+                "tn": 56,
+                "fp": 0,
+                "fn": 28,
+                "precision": 0.0,
+                "recall": 0.0,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 0,
+                "tn": 56,
+                "fp": 0,
+                "fn": 28,
+                "precision": 0.0,
+                "recall": 0.0,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 4.774380444634436
+          },
+          "old_renamed": {
+            "exact": 0.4285714328289032,
+            "micro_f1": 0.03508771929824561,
+            "precision": 1.0,
+            "recall": 0.017857142857142856,
+            "per_property_accuracy": [
+              0.6666666865348816,
+              0.6785714626312256
+            ],
+            "status_accuracy": {
+              "positive": 0.017857142857142856,
+              "negated": 1.0,
+              "absent": 1.0
+            },
+            "family_exact": {
+              "absent+absent": 1.0,
+              "absent+negated": 1.0,
+              "absent+positive": 0.0,
+              "negated+absent": 1.0,
+              "negated+negated": 1.0,
+              "negated+positive": 0.0,
+              "positive+absent": 0.0,
+              "positive+negated": 0.0,
+              "positive+positive": 0.0
+            },
+            "per_property": [
+              {
+                "tp": 0,
+                "tn": 56,
+                "fp": 0,
+                "fn": 28,
+                "precision": 0.0,
+                "recall": 0.0,
+                "negative_recall": 1.0
+              },
+              {
+                "tp": 1,
+                "tn": 56,
+                "fp": 0,
+                "fn": 27,
+                "precision": 1.0,
+                "recall": 0.03571428571428571,
+                "negative_recall": 1.0
+              }
+            ],
+            "bce": 4.8381775742572986
+          }
+        }
+      }
+    ]
+  },
+  "eca_initial": {
+    "old": {
+      "old_known": {
+        "exact": 0.8571428656578064,
+        "micro_f1": 0.9032258064516129,
+        "precision": 0.8235294117647058,
+        "recall": 1.0,
+        "per_property_accuracy": [
+          1.0,
+          0.8571428656578064
+        ],
+        "status_accuracy": {
+          "positive": 1.0,
+          "negated": 0.85,
+          "absent": 1.0
+        },
+        "family_exact": {
+          "absent+absent": 1.0,
+          "absent+negated": 1.0,
+          "absent+positive": 1.0,
+          "negated+absent": 1.0,
+          "negated+negated": 1.0,
+          "negated+positive": 1.0,
+          "positive+absent": 1.0,
+          "positive+negated": 0.25,
+          "positive+positive": 1.0
+        },
+        "per_property": [
+          {
+            "tp": 28,
+            "tn": 56,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "negative_recall": 1.0
+          },
+          {
+            "tp": 28,
+            "tn": 44,
+            "fp": 12,
+            "fn": 0,
+            "precision": 0.7,
+            "recall": 1.0,
+            "negative_recall": 0.7857142857142857
+          }
+        ],
+        "bce": 0.27311746867232545
+      },
+      "old_renamed": {
+        "exact": 0.8333333730697632,
+        "micro_f1": 0.8888888888888888,
+        "precision": 0.8,
+        "recall": 1.0,
+        "per_property_accuracy": [
+          1.0,
+          0.8333333730697632
+        ],
+        "status_accuracy": {
+          "positive": 1.0,
+          "negated": 0.8375,
+          "absent": 0.96875
+        },
+        "family_exact": {
+          "absent+absent": 1.0,
+          "absent+negated": 1.0,
+          "absent+positive": 1.0,
+          "negated+absent": 1.0,
+          "negated+negated": 1.0,
+          "negated+positive": 1.0,
+          "positive+absent": 0.75,
+          "positive+negated": 0.1875,
+          "positive+positive": 1.0
+        },
+        "per_property": [
+          {
+            "tp": 28,
+            "tn": 56,
+            "fp": 0,
+            "fn": 0,
+            "precision": 1.0,
+            "recall": 1.0,
+            "negative_recall": 1.0
+          },
+          {
+            "tp": 28,
+            "tn": 42,
+            "fp": 14,
+            "fn": 0,
+            "precision": 0.6666666666666666,
+            "recall": 1.0,
+            "negative_recall": 0.75
+          }
+        ],
+        "bce": 0.329533279296892
+      }
+    },
+    "new": {
+      "exact": 0.3076923191547394,
+      "micro_f1": 0.5769230769230769,
+      "precision": 0.46875,
+      "recall": 0.75,
+      "per_property_accuracy": [
+        0.7051281929016113,
+        0.44871795177459717
+      ],
+      "status_accuracy": {
+        "positive": 0.75,
+        "negated": 0.48333333333333334,
+        "absent": 0.4444444444444444
+      },
+      "family_exact": {
+        "frame_0": 0.3461538553237915,
+        "frame_1": 0.3076923191547394,
+        "frame_2": 0.26923078298568726
+      },
+      "per_property": [
+        {
+          "tp": 30,
+          "tn": 80,
+          "fp": 16,
+          "fn": 30,
+          "precision": 0.6521739130434783,
+          "recall": 0.5,
+          "negative_recall": 0.8333333333333334
+        },
+        {
+          "tp": 60,
+          "tn": 10,
+          "fp": 86,
+          "fn": 0,
+          "precision": 0.410958904109589,
+          "recall": 1.0,
+          "negative_recall": 0.10416666666666667
+        }
+      ],
+      "bce": 2.8115437847094396
+    },
+    "development": {
+      "exact": 0.41025641560554504,
+      "micro_f1": 0.5671641791044776,
+      "precision": 0.5135135135135135,
+      "recall": 0.6333333333333333,
+      "per_property_accuracy": [
+        0.6153846383094788,
+        0.6410256624221802
+      ],
+      "status_accuracy": {
+        "positive": 0.6333333333333333,
+        "negated": 0.6,
+        "absent": 0.6666666666666666
+      },
+      "family_exact": {
+        "dev_0": 0.46153849363327026,
+        "dev_1": 0.1538461595773697,
+        "dev_2": 0.6153846383094788
+      },
+      "per_property": [
+        {
+          "tp": 14,
+          "tn": 34,
+          "fp": 14,
+          "fn": 16,
+          "precision": 0.5,
+          "recall": 0.4666666666666667,
+          "negative_recall": 0.7083333333333334
+        },
+        {
+          "tp": 24,
+          "tn": 26,
+          "fp": 22,
+          "fn": 6,
+          "precision": 0.5217391304347826,
+          "recall": 0.8,
+          "negative_recall": 0.5416666666666666
+        }
+      ],
+      "bce": 1.8505129934177238
+    },
+    "weight_hash_unchanged": true,
+    "stored_parameters": 1255636,
+    "admitted": false
+  },
+  "kernel": "sparklinghydraulics0/amg-stage-a4-selective",
+  "version": 1,
+  "status": "COMPLETE",
+  "artifact_directory": "runs/kaggle-stage-a4-selective/output-v1/a4-selective",
+  "execution": {
+    "sha": "fd9d321c34fee6d1899f446180017b73793a09f6",
+    "platform": "kaggle",
+    "python": "3.13.15",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "gpu": "Tesla T4",
+    "phases": {
+      "contracts": {
+        "exit_code": 0
+      },
+      "selective": {
+        "exit_code": 0
+      },
+      "full-suite": {
+        "exit_code": 0
+      }
+    }
+  },
+  "test_results": {
+    "contracts.xml": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time": 10.908
+    },
+    "full-suite.xml": {
+      "tests": 814,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time": 698.241
+    }
+  },
+  "artifact_validation": {
+    "sequence_roundtrips": 399,
+    "max_tokens": 158,
+    "checkpoint_hashes_verified": 1,
+    "same_data_as_replay": true,
+    "scope": "Saved JSON/string/hash analysis only; no local neural evaluation or checkpoint loading"
+  },
+  "sha256": {
+    "contracts.log": "3ce1030d7ecdf2d3dfea55ea6f6a16e750ea14e7ba4a35adbad99871e08743b0",
+    "contracts.xml": "1c45af83c2c5724f289ecd857d9a20954abed7a22308710a3c508007fbc51c43",
+    "dataset.json": "2f761b36afcdd5a238d602588718763990889e65a7d2a2d7d2decf7e1cde210c",
+    "execution.json": "b825c24235d4884271cddc3eceaa40dade9ca2dcd320705228962fce363e2c29",
+    "frozen_backbone.pt": "8136ff5eeb0fc79d51c22ea70946dde9834355d2966b3980d4999176f55ec8cb",
+    "full-suite.log": "0a69ddc36b9c8e9fec7ed01d0782ad651bf13ef51b2d6218c144fcf45173fafc",
+    "full-suite.xml": "c1bb7ca1d7875dbbc7411a74c353ed1c71f76d6b427d85a8125744f4f531db04",
+    "results.json": "6c3a2e21e4fc2033b6d1194209813894db999c7d160a18b3fa66206b62099756",
+    "resume_child.json": "986c8b484f869112141b3792e1d3dc77940ebfd0542d2ac34368d124bf39a82d",
+    "selective.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tokens.json": "06c1e96b7a0f9d10daddd142d185effe2784906ad45540cd61adfa8183f35499"
+  },
+  "warnings": {
+    "full-suite": [
+      "pre-existing reptile docstring escape SyntaxWarning",
+      "scheduler instrumentation UserWarning in test_diagnostic_loss_scaling_uses_same_owner_and_gradients"
+    ],
+    "contracts": []
+  }
+}
