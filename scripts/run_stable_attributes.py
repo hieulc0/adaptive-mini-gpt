@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 import platform
 import subprocess
 import sys
@@ -34,7 +35,11 @@ from adaptive_mini_gpt.data.attribute_diagnostic import factorial
 from adaptive_mini_gpt.data.attribute_learning import TAG_IDS
 from adaptive_mini_gpt.data.stable_attributes import corpus, minimal_pairs, streams
 from adaptive_mini_gpt.natural_language_learning_m103.tokenizer_m103 import ByteTextTokenizerM103
-from adaptive_mini_gpt.training.learning_state import LearningState
+from adaptive_mini_gpt.training.learning_state import (
+    LearningState,
+    deterministic_numerical_policy,
+    require_numerical_policy,
+)
 from adaptive_mini_gpt.training.remote_runtime import require_remote_cuda
 
 STEPS = 1200
@@ -184,6 +189,11 @@ def run(out, parent_path):
         cases=[asdict(r) for r in rows], minimal_pairs=[asdict(r) for r in mini], streams=plans
     )
     data_hash = hashlib.sha256(json.dumps(dataset, sort_keys=True).encode()).hexdigest()
+    numerical_protocol = json.loads(
+        Path("data/specs/stable_attributes_numerics_v1.json").read_text()
+    )
+    if data_hash != numerical_protocol["unchanged_data_sha256"]:
+        raise ValueError("Numerical repair must not change study data")
     (out / "dataset.json").write_text(json.dumps(dataset))
     (out / "tokens.json").write_text(json.dumps(dict(training=seqs, minimal_pairs=mseqs)))
     initial_retention = {s: evaluate(parent.model, rb[s], v) for s, v in retention.items()}
@@ -198,6 +208,8 @@ def run(out, parent_path):
             gpu=torch.cuda.get_device_name(0),
         ),
         parent_sha256=ROOT_HASH,
+        numerical_policy=deterministic_numerical_policy(),
+        numerical_protocol=numerical_protocol,
         data_sha256=data_hash,
         protocol=json.loads(Path("data/specs/stable_attributes_v1.json").read_text()),
         initial_retention=initial_retention,
@@ -257,6 +269,7 @@ def run(out, parent_path):
         )
         owner.metadata.update(
             a3_arm=arm,
+            numerical_policy=deterministic_numerical_policy(),
             supervision_schema=dict(
                 attribute_ids=TAG_IDS,
                 state_targets=None,
@@ -435,6 +448,11 @@ def main():
     p.add_argument("--resume-check")
     a = p.parse_args()
     require_remote_cuda()
+    if os.environ.get("CUBLAS_WORKSPACE_CONFIG") != ":4096:8":
+        raise RuntimeError("Set declared CUBLAS workspace before starting the remote process")
+    torch.use_deterministic_algorithms(True)
+    torch.backends.cudnn.benchmark = False
+    require_numerical_policy(deterministic_numerical_policy())
     out = Path(a.output_dir)
     out.mkdir(parents=True, exist_ok=True)
     if a.resume_check:

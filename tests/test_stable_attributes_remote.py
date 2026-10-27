@@ -103,3 +103,45 @@ print(json.dumps(dict(loss=loss,signature=signature(owner),steps=owner.metadata[
     )
     actual = json.loads(result)
     assert actual == dict(loss=expected_loss, signature=expected, steps=2)
+
+
+def test_declared_policy_repeats_full_shape_gradients_and_updates(monkeypatch):
+    require_remote_cuda()
+    monkeypatch.syspath_prepend(str(Path("scripts").resolve()))
+    from frame_a2_common import fork_owner, state_digest
+    from run_attribute_learning import encode
+    from test_foundation_structure import make_owner
+
+    from adaptive_mini_gpt.data.stable_attributes import corpus, streams
+    from adaptive_mini_gpt.natural_language_learning_m103.tokenizer_m103 import (
+        ByteTextTokenizerM103,
+    )
+    from adaptive_mini_gpt.training.learning_state import deterministic_numerical_policy
+
+    old = torch.are_deterministic_algorithms_enabled()
+    benchmark = torch.backends.cudnn.benchmark
+    torch.use_deterministic_algorithms(True)
+    torch.backends.cudnn.benchmark = False
+    try:
+        parent, _ = make_owner()
+        parent.scheduler = None
+        rows = corpus()
+        batch, _ = encode(rows, ByteTextTokenizerM103(), 256)
+        plan = streams(rows, 42, 24)["augmented"]
+        owners = [fork_owner(parent, 42), fork_owner(parent, 42)]
+        for owner in owners:
+            owner.metadata["numerical_policy"] = deterministic_numerical_policy()
+        for ix in plan:
+            for owner in owners:
+                owner.step(*[v[ix] for v in batch], attribute_ids=(10, 15))
+            assert state_digest(
+                (owners[0].model.state_dict(), owners[0].optimizer.state_dict())
+            ) == state_digest((owners[1].model.state_dict(), owners[1].optimizer.state_dict()))
+            for x, y in zip(
+                owners[0].model.parameters(), owners[1].model.parameters(), strict=True
+            ):
+                if x.grad is not None:
+                    assert torch.equal(x.grad, y.grad)
+    finally:
+        torch.use_deterministic_algorithms(old)
+        torch.backends.cudnn.benchmark = benchmark

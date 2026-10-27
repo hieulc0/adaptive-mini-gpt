@@ -22,6 +22,35 @@ from adaptive_mini_gpt.training.optimizer_contract import adamw_groups, optimize
 from adaptive_mini_gpt.training.remote_runtime import require_remote_cuda
 
 
+def deterministic_numerical_policy():
+    """Versioned opt-in execution contract, independent of architecture capacity."""
+    return {
+        "version": 1,
+        "deterministic_algorithms": True,
+        "cublas_workspace": ":4096:8",
+        "cudnn_benchmark": False,
+    }
+
+
+def require_numerical_policy(policy, *, torch_api=None, environ=None):
+    """Fail before an update if a declared checkpoint policy is not active.
+
+    This does not change global flags. Callers must configure the runtime before
+    CUDA initialization, including after process restart. Legacy undeclared
+    checkpoints keep their existing behavior and no universal repeatability claim.
+    """
+    if policy != deterministic_numerical_policy():
+        raise ValueError("Unsupported numerical policy")
+    api = torch if torch_api is None else torch_api
+    environment = os.environ if environ is None else environ
+    if (
+        not api.are_deterministic_algorithms_enabled()
+        or api.backends.cudnn.benchmark
+        or environment.get("CUBLAS_WORKSPACE_CONFIG") != policy["cublas_workspace"]
+    ):
+        raise RuntimeError("Declared numerical policy is not active; configure before CUDA init")
+
+
 def validate_consistency_pairs(pairs, batch_size):
     """Explicit disjoint training pairs; never infer equivalence from labels alone."""
     pairs = tuple(tuple(p) for p in pairs)
@@ -217,6 +246,8 @@ class LearningState:
         consistency_weight=0.0,
     ):
         require_remote_cuda(str(tokens.device))
+        if self.metadata.get("numerical_policy") is not None:
+            require_numerical_policy(self.metadata["numerical_policy"])
         if not math.isfinite(loss_scale) or loss_scale <= 0:
             raise ValueError("Loss scale must be finite and positive")
         if not math.isfinite(consistency_weight) or consistency_weight < 0:

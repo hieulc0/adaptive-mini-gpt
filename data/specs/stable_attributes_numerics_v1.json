@@ -1,0 +1,9 @@
+{
+  "id": "stable-attributes-numerics-v1",
+  "extends": "stable-attributes-v1",
+  "original_spec_sha256": "d13aa7ea7088d8d2820a483caeacccdd1deaa907c3aea1d9dc0ca782dbedf882",
+  "unchanged_data_sha256": "5b50f5f2b33c0f62cf2a619fd69a707a78a3feff711664165b08651dd1547edd",
+  "probe_kernel": "sparklinghydraulics0/amg-stage-a3-numerics/1",
+  "probe_source": "944df2ba8063d193fa18a9576ac05df6d738d154",
+  "correction": "Explicit deterministic algorithms, CUBLAS workspace4096:8 and cudnn benchmarkFalse; checkpoint-declared policy guard. No seed, data, budget, capacity, objective or gate change."
+}

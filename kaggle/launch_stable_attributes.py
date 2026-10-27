@@ -39,6 +39,7 @@ def main():
         "OMP_NUM_THREADS": "2",
         "MKL_NUM_THREADS": "2",
         "AMG_RUN_GPU_TESTS": "1",
+        "CUBLAS_WORKSPACE_CONFIG": ":4096:8",
     }
     subprocess.run(
         [sys.executable, "-m", "pip", "install", "--no-deps", "-e", str(REPO)], env=env, check=True
