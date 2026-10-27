@@ -1,0 +1,4458 @@
+{
+  "provenance": {
+    "git_sha": "69d8fc9c2883e57004529743d015d547b9a4c0a2",
+    "platform": "kaggle",
+    "python": "3.13.15",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "gpu": "Tesla T4"
+  },
+  "protocol": {
+    "id": "rehearsal-a5-v1",
+    "scope": "Stage A.5 phase2 development-only, joint acquisition prerequisite passed",
+    "parent_checkpoint_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+    "reference_source": "a79c74471f812067d45e6079c4e5d3e544ccd53c",
+    "primary": "synthetic_6",
+    "arms": [
+      "none",
+      "historical_6",
+      "synthetic_6",
+      "balanced_9"
+    ],
+    "synthetic_names": [
+      "N",
+      "P",
+      "Q",
+      "R"
+    ],
+    "seed": 42,
+    "updates": 1200,
+    "batch": 18,
+    "learning_rate": 0.002,
+    "weight_decay": 0,
+    "clip_norm": 1,
+    "new_presentations": [
+      21600,
+      14400,
+      14400,
+      10800
+    ],
+    "old_presentations": [
+      0,
+      7200,
+      7200,
+      10800
+    ],
+    "stable_updates": [
+      1000,
+      1100,
+      1200
+    ],
+    "training_exact": 0.99,
+    "training_each_family": 0.99,
+    "training_each_status": 0.98,
+    "old_each_cell_each_late_checkpoint": 0.95,
+    "development_final": {
+      "exact": 0.9,
+      "each_family": 0.85,
+      "each_status": 0.95
+    },
+    "optimizer": "inherited unchanged; no resets",
+    "supervision": "two observed labels BCE, no new objective",
+    "sealed_generated": false,
+    "promoted": false
+  },
+  "parent_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+  "data_sha256": "e93153d59f1f8119f97ffbea1d0efffbad7f96192e2901ba4df57a9461a69397",
+  "initial_evaluation_rows": 633,
+  "sealed_generated": false,
+  "promoted": false,
+  "fresh_process_continuation": {
+    "exact": true,
+    "disposable_extra_updates": 2,
+    "candidate_unchanged": true
+  },
+  "primary_preservation_admission": false,
+  "qualification_admission": false,
+  "verdict": "REHEARSAL_PRESERVATION_FAIL",
+  "input": {
+    "new": 126,
+    "historical": 9,
+    "synthetic": 168,
+    "context": 256,
+    "max_tokens": 158
+  },
+  "parent_unchanged": true,
+  "initial": {
+    "new": {
+      "exact": 0.15079365670681,
+      "micro_f1": 0.5119453924914675,
+      "precision": 0.3588516746411483,
+      "recall": 0.8928571428571429,
+      "per_property_accuracy": [
+        0.5079365372657776,
+        0.3571428656578064
+      ],
+      "status_accuracy": {
+        "positive": 0.8928571428571429,
+        "negated": 0.2,
+        "absent": 0.20833333333333334
+      },
+      "family_exact": {
+        "frame_2": 0.095238097012043,
+        "frame_3": 0.261904776096344,
+        "frame_4": 0.095238097012043
+      },
+      "per_property": [
+        {
+          "tp": 33,
+          "tn": 31,
+          "fp": 53,
+          "fn": 9,
+          "precision": 0.38372093023255816,
+          "recall": 0.7857142857142857,
+          "negative_recall": 0.36904761904761907
+        },
+        {
+          "tp": 42,
+          "tn": 3,
+          "fp": 81,
+          "fn": 0,
+          "precision": 0.34146341463414637,
+          "recall": 1.0,
+          "negative_recall": 0.03571428571428571
+        }
+      ],
+      "bce": 3.7081297689948296
+    },
+    "historical": {
+      "exact": 0.1111111119389534,
+      "micro_f1": 0.5454545454545454,
+      "precision": 0.375,
+      "recall": 1.0,
+      "per_property_accuracy": [
+        0.5555555820465088,
+        0.3333333432674408
+      ],
+      "status_accuracy": {
+        "positive": 1.0,
+        "negated": 0.16666666666666666,
+        "absent": 0.16666666666666666
+      },
+      "family_exact": {
+        "absent+absent": 0.0,
+        "absent+negated": 0.0,
+        "absent+positive": 0.0,
+        "negated+absent": 0.0,
+        "negated+negated": 0.0,
+        "negated+positive": 0.0,
+        "positive+absent": 0.0,
+        "positive+negated": 0.0,
+        "positive+positive": 1.0
+      },
+      "per_property": [
+        {
+          "tp": 3,
+          "tn": 2,
+          "fp": 4,
+          "fn": 0,
+          "precision": 0.42857142857142855,
+          "recall": 1.0,
+          "negative_recall": 0.3333333333333333
+        },
+        {
+          "tp": 3,
+          "tn": 0,
+          "fp": 6,
+          "fn": 0,
+          "precision": 0.3333333333333333,
+          "recall": 1.0,
+          "negative_recall": 0.0
+        }
+      ],
+      "bce": 4.597904593405022
+    },
+    "synthetic": {
+      "exact": 1.0,
+      "micro_f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_property_accuracy": [
+        1.0,
+        1.0
+      ],
+      "status_accuracy": {
+        "positive": 1.0,
+        "negated": 1.0,
+        "absent": 1.0
+      },
+      "family_exact": {
+        "frame_0": 1.0,
+        "frame_1": 1.0
+      },
+      "per_property": [
+        {
+          "tp": 56,
+          "tn": 112,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "negative_recall": 1.0
+        },
+        {
+          "tp": 56,
+          "tn": 112,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "negative_recall": 1.0
+        }
+      ],
+      "bce": 0.0032939655812523503
+    },
+    "prior_joint_old": {
+      "exact": 0.4642857313156128,
+      "micro_f1": 0.6883116883116883,
+      "precision": 0.5408163265306123,
+      "recall": 0.9464285714285714,
+      "per_property_accuracy": [
+        0.7142857313156128,
+        0.7142857313156128
+      ],
+      "status_accuracy": {
+        "positive": 0.9464285714285714,
+        "negated": 0.55,
+        "absent": 0.71875
+      },
+      "family_exact": {
+        "frame_0": 0.4285714328289032,
+        "frame_1": 0.5
+      },
+      "per_property": [
+        {
+          "tp": 25,
+          "tn": 35,
+          "fp": 21,
+          "fn": 3,
+          "precision": 0.5434782608695652,
+          "recall": 0.8928571428571429,
+          "negative_recall": 0.625
+        },
+        {
+          "tp": 28,
+          "tn": 32,
+          "fp": 24,
+          "fn": 0,
+          "precision": 0.5384615384615384,
+          "recall": 1.0,
+          "negative_recall": 0.5714285714285714
+        }
+      ],
+      "bce": 2.083123874987284
+    },
+    "old_known": {
+      "exact": 1.0,
+      "micro_f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_property_accuracy": [
+        1.0,
+        1.0
+      ],
+      "status_accuracy": {
+        "positive": 1.0,
+        "negated": 1.0,
+        "absent": 1.0
+      },
+      "family_exact": {
+        "absent+absent": 1.0,
+        "absent+negated": 1.0,
+        "absent+positive": 1.0,
+        "negated+absent": 1.0,
+        "negated+negated": 1.0,
+        "negated+positive": 1.0,
+        "positive+absent": 1.0,
+        "positive+negated": 1.0,
+        "positive+positive": 1.0
+      },
+      "per_property": [
+        {
+          "tp": 28,
+          "tn": 56,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "negative_recall": 1.0
+        },
+        {
+          "tp": 28,
+          "tn": 56,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "negative_recall": 1.0
+        }
+      ],
+      "bce": 9.639056440645316e-05
+    },
+    "old_renamed": {
+      "exact": 1.0,
+      "micro_f1": 1.0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "per_property_accuracy": [
+        1.0,
+        1.0
+      ],
+      "status_accuracy": {
+        "positive": 1.0,
+        "negated": 1.0,
+        "absent": 1.0
+      },
+      "family_exact": {
+        "absent+absent": 1.0,
+        "absent+negated": 1.0,
+        "absent+positive": 1.0,
+        "negated+absent": 1.0,
+        "negated+negated": 1.0,
+        "negated+positive": 1.0,
+        "positive+absent": 1.0,
+        "positive+negated": 1.0,
+        "positive+positive": 1.0
+      },
+      "per_property": [
+        {
+          "tp": 28,
+          "tn": 56,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "negative_recall": 1.0
+        },
+        {
+          "tp": 28,
+          "tn": 56,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "negative_recall": 1.0
+        }
+      ],
+      "bce": 0.003299435129594002
+    },
+    "development": {
+      "exact": 0.4871794879436493,
+      "micro_f1": 0.6086956521739131,
+      "precision": 0.5384615384615384,
+      "recall": 0.7,
+      "per_property_accuracy": [
+        0.6410256624221802,
+        0.6666666865348816
+      ],
+      "status_accuracy": {
+        "positive": 0.7,
+        "negated": 0.6,
+        "absent": 0.6666666666666666
+      },
+      "family_exact": {
+        "dev_0": 0.5384615659713745,
+        "dev_1": 0.1538461595773697,
+        "dev_2": 0.7692307829856873
+      },
+      "per_property": [
+        {
+          "tp": 18,
+          "tn": 32,
+          "fp": 16,
+          "fn": 12,
+          "precision": 0.5294117647058824,
+          "recall": 0.6,
+          "negative_recall": 0.6666666666666666
+        },
+        {
+          "tp": 24,
+          "tn": 28,
+          "fp": 20,
+          "fn": 6,
+          "precision": 0.5454545454545454,
+          "recall": 0.8,
+          "negative_recall": 0.5833333333333334
+        }
+      ],
+      "bce": 2.221795828334447
+    }
+  },
+  "arms": {
+    "none": {
+      "initial_hash": "aed7480606a1a60e38ee7a95d22b5bcf14141f034f76cb45fb59680de277a33e",
+      "initial_optimizer_hash": "f278a7bbcbcdcc9f4a06c64e237057f503bd91a7cb1080a6e30412e45fc4dca6",
+      "stored_parameters": 1255636,
+      "trainable_parameters": 406762,
+      "updates": 1200,
+      "examples": 21600,
+      "tokens": 2707096,
+      "new_presentations": 21600,
+      "old_presentations": 0,
+      "evaluation_rows": 7596,
+      "evaluation_forward_batches": 276,
+      "first_update_active_parameters": 341626,
+      "final": {
+        "new": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_2": 1.0,
+            "frame_3": 1.0,
+            "frame_4": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 42,
+              "tn": 84,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 42,
+              "tn": 84,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 7.116040309831786e-05
+        },
+        "historical": {
+          "exact": 0.1111111119389534,
+          "micro_f1": 0.5714285714285714,
+          "precision": 0.4,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            0.5555555820465088,
+            0.4444444477558136
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.16666666666666666,
+            "absent": 0.3333333333333333
+          },
+          "family_exact": {
+            "absent+absent": 0.0,
+            "absent+negated": 0.0,
+            "absent+positive": 0.0,
+            "negated+absent": 0.0,
+            "negated+negated": 0.0,
+            "negated+positive": 0.0,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 2,
+              "fp": 4,
+              "fn": 0,
+              "precision": 0.42857142857142855,
+              "recall": 1.0,
+              "negative_recall": 0.3333333333333333
+            },
+            {
+              "tp": 3,
+              "tn": 1,
+              "fp": 5,
+              "fn": 0,
+              "precision": 0.375,
+              "recall": 1.0,
+              "negative_recall": 0.16666666666666666
+            }
+          ],
+          "bce": 4.984003511978894
+        },
+        "synthetic": {
+          "exact": 0.4285714328289032,
+          "micro_f1": 0.25,
+          "precision": 1.0,
+          "recall": 0.14285714285714285,
+          "per_property_accuracy": [
+            0.7142857313156128,
+            0.7142857313156128
+          ],
+          "status_accuracy": {
+            "positive": 0.14285714285714285,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.4285714328289032,
+            "frame_1": 0.4285714328289032
+          },
+          "per_property": [
+            {
+              "tp": 8,
+              "tn": 112,
+              "fp": 0,
+              "fn": 48,
+              "precision": 1.0,
+              "recall": 0.14285714285714285,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 8,
+              "tn": 112,
+              "fp": 0,
+              "fn": 48,
+              "precision": 1.0,
+              "recall": 0.14285714285714285,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 3.3315507156311943
+        },
+        "prior_joint_old": {
+          "exact": 0.511904776096344,
+          "micro_f1": 0.40540540540540543,
+          "precision": 0.8333333333333334,
+          "recall": 0.26785714285714285,
+          "per_property_accuracy": [
+            0.7142857313156128,
+            0.761904776096344
+          ],
+          "status_accuracy": {
+            "positive": 0.26785714285714285,
+            "negated": 0.9625,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.4523809552192688,
+            "frame_1": 0.5714285969734192
+          },
+          "per_property": [
+            {
+              "tp": 4,
+              "tn": 56,
+              "fp": 0,
+              "fn": 24,
+              "precision": 1.0,
+              "recall": 0.14285714285714285,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 11,
+              "tn": 53,
+              "fp": 3,
+              "fn": 17,
+              "precision": 0.7857142857142857,
+              "recall": 0.39285714285714285,
+              "negative_recall": 0.9464285714285714
+            }
+          ],
+          "bce": 2.709626876639768
+        },
+        "old_known": {
+          "exact": 0.4285714328289032,
+          "micro_f1": 0.25,
+          "precision": 1.0,
+          "recall": 0.14285714285714285,
+          "per_property_accuracy": [
+            0.7142857313156128,
+            0.7142857313156128
+          ],
+          "status_accuracy": {
+            "positive": 0.14285714285714285,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 0.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 0.0
+          },
+          "per_property": [
+            {
+              "tp": 4,
+              "tn": 56,
+              "fp": 0,
+              "fn": 24,
+              "precision": 1.0,
+              "recall": 0.14285714285714285,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 4,
+              "tn": 56,
+              "fp": 0,
+              "fn": 24,
+              "precision": 1.0,
+              "recall": 0.14285714285714285,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 3.3786382142244094
+        },
+        "old_renamed": {
+          "exact": 0.4285714328289032,
+          "micro_f1": 0.25,
+          "precision": 1.0,
+          "recall": 0.14285714285714285,
+          "per_property_accuracy": [
+            0.7142857313156128,
+            0.7142857313156128
+          ],
+          "status_accuracy": {
+            "positive": 0.14285714285714285,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 0.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 0.0
+          },
+          "per_property": [
+            {
+              "tp": 4,
+              "tn": 56,
+              "fp": 0,
+              "fn": 24,
+              "precision": 1.0,
+              "recall": 0.14285714285714285,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 4,
+              "tn": 56,
+              "fp": 0,
+              "fn": 24,
+              "precision": 1.0,
+              "recall": 0.14285714285714285,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 3.3596004797585883
+        },
+        "development": {
+          "exact": 0.41025641560554504,
+          "micro_f1": 0.3181818181818182,
+          "precision": 0.5,
+          "recall": 0.23333333333333334,
+          "per_property_accuracy": [
+            0.5641025900840759,
+            0.6666666865348816
+          ],
+          "status_accuracy": {
+            "positive": 0.23333333333333334,
+            "negated": 0.8333333333333334,
+            "absent": 0.8888888888888888
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.46153849363327026,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 10,
+              "tn": 34,
+              "fp": 14,
+              "fn": 20,
+              "precision": 0.4166666666666667,
+              "recall": 0.3333333333333333,
+              "negative_recall": 0.7083333333333334
+            },
+            {
+              "tp": 4,
+              "tn": 48,
+              "fp": 0,
+              "fn": 26,
+              "precision": 1.0,
+              "recall": 0.13333333333333333,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 4.053567316287394
+        }
+      },
+      "stable_new_acquisition": true,
+      "stable_old_observations": false,
+      "development_admission": false,
+      "final_hash": "27a672065175fe1775a8912ea6778d193e29ae7674a2688fd68403fcd1ebc99d",
+      "final_optimizer_hash": "40b4d265f121ef3eb014a1083713370169845a5f6b6ec416d370e7e73dcbd6df",
+      "lifetime_updates": 2600,
+      "adam_counters": {
+        "student.base_model.wte.weight": 2600,
+        "student.base_model.blocks.4.ln_1.weight": 2600,
+        "student.base_model.blocks.4.ln_1.bias": 2600,
+        "student.base_model.blocks.4.attn.c_attn.weight": 2600,
+        "student.base_model.blocks.4.attn.c_attn.bias": 2600,
+        "student.base_model.blocks.4.attn.c_proj.weight": 2600,
+        "student.base_model.blocks.4.attn.c_proj.bias": 2600,
+        "student.base_model.blocks.4.ln_2.weight": 2600,
+        "student.base_model.blocks.4.ln_2.bias": 2600,
+        "student.base_model.blocks.4.mlp.c_fc.weight": 2600,
+        "student.base_model.blocks.4.mlp.c_fc.bias": 2600,
+        "student.base_model.blocks.4.mlp.c_proj.weight": 2600,
+        "student.base_model.blocks.4.mlp.c_proj.bias": 2600,
+        "student.base_model.ln_f.weight": 2600,
+        "student.base_model.ln_f.bias": 2600,
+        "bottleneck.concept_proj.0.weight": 2600,
+        "bottleneck.concept_proj.0.bias": 2600,
+        "bottleneck.concept_proj.1.weight": 2600,
+        "bottleneck.concept_proj.1.bias": 2600,
+        "bottleneck.concept_proj.3.weight": 2600,
+        "bottleneck.concept_proj.3.bias": 2600,
+        "bottleneck.concept_proj.4.weight": 2600,
+        "bottleneck.concept_proj.4.bias": 2600,
+        "bottleneck.attribute_head.weight": 2600,
+        "bottleneck.attribute_head.bias": 2600,
+        "bottleneck.action_emb.weight": 200,
+        "bottleneck.transition_net.0.weight": 200,
+        "bottleneck.transition_net.0.bias": 200,
+        "bottleneck.transition_net.2.weight": 200,
+        "bottleneck.transition_net.2.bias": 200,
+        "bottleneck.post_norm.weight": 200,
+        "bottleneck.post_norm.bias": 200,
+        "bottleneck.state_head.weight": 200,
+        "bottleneck.state_head.bias": 200
+      },
+      "checkpoint_sha256": "964d33ec750116f753e35228a5b18edef60fce311a72a933e0596865cea3d104",
+      "synchronized_wall_seconds": 36.121279641
+    },
+    "historical_6": {
+      "initial_hash": "aed7480606a1a60e38ee7a95d22b5bcf14141f034f76cb45fb59680de277a33e",
+      "initial_optimizer_hash": "f278a7bbcbcdcc9f4a06c64e237057f503bd91a7cb1080a6e30412e45fc4dca6",
+      "stored_parameters": 1255636,
+      "trainable_parameters": 406762,
+      "updates": 1200,
+      "examples": 21600,
+      "tokens": 2567904,
+      "new_presentations": 14400,
+      "old_presentations": 7200,
+      "evaluation_rows": 7596,
+      "evaluation_forward_batches": 276,
+      "first_update_active_parameters": 341626,
+      "final": {
+        "new": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_2": 1.0,
+            "frame_3": 1.0,
+            "frame_4": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 42,
+              "tn": 84,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 42,
+              "tn": 84,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 4.2236563867471995e-05
+        },
+        "historical": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 2.7011174442089614e-05
+        },
+        "synthetic": {
+          "exact": 0.4285714328289032,
+          "micro_f1": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "per_property_accuracy": [
+            0.6666666865348816,
+            0.6666666865348816
+          ],
+          "status_accuracy": {
+            "positive": 0.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.4285714328289032,
+            "frame_1": 0.4285714328289032
+          },
+          "per_property": [
+            {
+              "tp": 0,
+              "tn": 112,
+              "fp": 0,
+              "fn": 56,
+              "precision": 0.0,
+              "recall": 0.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 0,
+              "tn": 112,
+              "fp": 0,
+              "fn": 56,
+              "precision": 0.0,
+              "recall": 0.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 4.3544525286324705
+        },
+        "prior_joint_old": {
+          "exact": 0.4285714328289032,
+          "micro_f1": 0.25,
+          "precision": 1.0,
+          "recall": 0.14285714285714285,
+          "per_property_accuracy": [
+            0.7142857313156128,
+            0.7142857313156128
+          ],
+          "status_accuracy": {
+            "positive": 0.14285714285714285,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.4285714328289032,
+            "frame_1": 0.4285714328289032
+          },
+          "per_property": [
+            {
+              "tp": 4,
+              "tn": 56,
+              "fp": 0,
+              "fn": 24,
+              "precision": 1.0,
+              "recall": 0.14285714285714285,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 4,
+              "tn": 56,
+              "fp": 0,
+              "fn": 24,
+              "precision": 1.0,
+              "recall": 0.14285714285714285,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 3.1887953953002417
+        },
+        "old_known": {
+          "exact": 0.4285714328289032,
+          "micro_f1": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "per_property_accuracy": [
+            0.6666666865348816,
+            0.6666666865348816
+          ],
+          "status_accuracy": {
+            "positive": 0.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 0.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 0.0
+          },
+          "per_property": [
+            {
+              "tp": 0,
+              "tn": 56,
+              "fp": 0,
+              "fn": 28,
+              "precision": 0.0,
+              "recall": 0.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 0,
+              "tn": 56,
+              "fp": 0,
+              "fn": 28,
+              "precision": 0.0,
+              "recall": 0.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 4.362874208832243
+        },
+        "old_renamed": {
+          "exact": 0.4285714328289032,
+          "micro_f1": 0.0,
+          "precision": 0.0,
+          "recall": 0.0,
+          "per_property_accuracy": [
+            0.6666666865348816,
+            0.6666666865348816
+          ],
+          "status_accuracy": {
+            "positive": 0.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 0.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 0.0
+          },
+          "per_property": [
+            {
+              "tp": 0,
+              "tn": 56,
+              "fp": 0,
+              "fn": 28,
+              "precision": 0.0,
+              "recall": 0.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 0,
+              "tn": 56,
+              "fp": 0,
+              "fn": 28,
+              "precision": 0.0,
+              "recall": 0.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 4.365589624117893
+        },
+        "development": {
+          "exact": 0.4615384638309479,
+          "micro_f1": 0.2631578947368421,
+          "precision": 0.625,
+          "recall": 0.16666666666666666,
+          "per_property_accuracy": [
+            0.6153846383094788,
+            0.6666666865348816
+          ],
+          "status_accuracy": {
+            "positive": 0.16666666666666666,
+            "negated": 0.9333333333333333,
+            "absent": 0.9444444444444444
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.6153846383094788,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 0,
+              "tn": 48,
+              "fp": 0,
+              "fn": 30,
+              "precision": 0.0,
+              "recall": 0.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 10,
+              "tn": 42,
+              "fp": 6,
+              "fn": 20,
+              "precision": 0.625,
+              "recall": 0.3333333333333333,
+              "negative_recall": 0.875
+            }
+          ],
+          "bce": 4.2276429044773005
+        }
+      },
+      "stable_new_acquisition": true,
+      "stable_old_observations": false,
+      "development_admission": false,
+      "final_hash": "1b03b07ee66eed25bc4df13d9b36d79080bf979d3aac9ee3172b014003dbd7e2",
+      "final_optimizer_hash": "6bff693942615de215bf0e89786d175ec2fdb280e9078e2331358f89d4c81d39",
+      "lifetime_updates": 2600,
+      "adam_counters": {
+        "student.base_model.wte.weight": 2600,
+        "student.base_model.blocks.4.ln_1.weight": 2600,
+        "student.base_model.blocks.4.ln_1.bias": 2600,
+        "student.base_model.blocks.4.attn.c_attn.weight": 2600,
+        "student.base_model.blocks.4.attn.c_attn.bias": 2600,
+        "student.base_model.blocks.4.attn.c_proj.weight": 2600,
+        "student.base_model.blocks.4.attn.c_proj.bias": 2600,
+        "student.base_model.blocks.4.ln_2.weight": 2600,
+        "student.base_model.blocks.4.ln_2.bias": 2600,
+        "student.base_model.blocks.4.mlp.c_fc.weight": 2600,
+        "student.base_model.blocks.4.mlp.c_fc.bias": 2600,
+        "student.base_model.blocks.4.mlp.c_proj.weight": 2600,
+        "student.base_model.blocks.4.mlp.c_proj.bias": 2600,
+        "student.base_model.ln_f.weight": 2600,
+        "student.base_model.ln_f.bias": 2600,
+        "bottleneck.concept_proj.0.weight": 2600,
+        "bottleneck.concept_proj.0.bias": 2600,
+        "bottleneck.concept_proj.1.weight": 2600,
+        "bottleneck.concept_proj.1.bias": 2600,
+        "bottleneck.concept_proj.3.weight": 2600,
+        "bottleneck.concept_proj.3.bias": 2600,
+        "bottleneck.concept_proj.4.weight": 2600,
+        "bottleneck.concept_proj.4.bias": 2600,
+        "bottleneck.attribute_head.weight": 2600,
+        "bottleneck.attribute_head.bias": 2600,
+        "bottleneck.action_emb.weight": 200,
+        "bottleneck.transition_net.0.weight": 200,
+        "bottleneck.transition_net.0.bias": 200,
+        "bottleneck.transition_net.2.weight": 200,
+        "bottleneck.transition_net.2.bias": 200,
+        "bottleneck.post_norm.weight": 200,
+        "bottleneck.post_norm.bias": 200,
+        "bottleneck.state_head.weight": 200,
+        "bottleneck.state_head.bias": 200
+      },
+      "checkpoint_sha256": "fbe374c0dc0d8f6670133f0f2d0d8ccf7c0e6b7de4bcfb846abfa92286793cc1",
+      "synchronized_wall_seconds": 35.665029952
+    },
+    "synthetic_6": {
+      "initial_hash": "aed7480606a1a60e38ee7a95d22b5bcf14141f034f76cb45fb59680de277a33e",
+      "initial_optimizer_hash": "f278a7bbcbcdcc9f4a06c64e237057f503bd91a7cb1080a6e30412e45fc4dca6",
+      "stored_parameters": 1255636,
+      "trainable_parameters": 406762,
+      "updates": 1200,
+      "examples": 21600,
+      "tokens": 2635096,
+      "new_presentations": 14400,
+      "old_presentations": 7200,
+      "evaluation_rows": 7596,
+      "evaluation_forward_batches": 276,
+      "first_update_active_parameters": 341626,
+      "final": {
+        "new": {
+          "exact": 0.9841270446777344,
+          "micro_f1": 0.9820359281437125,
+          "precision": 0.9879518072289156,
+          "recall": 0.9761904761904762,
+          "per_property_accuracy": [
+            0.9920635223388672,
+            0.9841270446777344
+          ],
+          "status_accuracy": {
+            "positive": 0.9761904761904762,
+            "negated": 0.9916666666666667,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_2": 0.9523809552192688,
+            "frame_3": 1.0,
+            "frame_4": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 42,
+              "tn": 83,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.9767441860465116,
+              "recall": 1.0,
+              "negative_recall": 0.9880952380952381
+            },
+            {
+              "tp": 40,
+              "tn": 84,
+              "fp": 0,
+              "fn": 2,
+              "precision": 1.0,
+              "recall": 0.9523809523809523,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.02815371328987851
+        },
+        "historical": {
+          "exact": 0.6666666865348816,
+          "micro_f1": 0.7142857142857143,
+          "precision": 0.625,
+          "recall": 0.8333333333333334,
+          "per_property_accuracy": [
+            0.8888888955116272,
+            0.6666666865348816
+          ],
+          "status_accuracy": {
+            "positive": 0.8333333333333334,
+            "negated": 0.8333333333333334,
+            "absent": 0.6666666666666666
+          },
+          "family_exact": {
+            "absent+absent": 0.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 2,
+              "tn": 6,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 3,
+              "fp": 3,
+              "fn": 0,
+              "precision": 0.5,
+              "recall": 1.0,
+              "negative_recall": 0.5
+            }
+          ],
+          "bce": 1.6125216332699648
+        },
+        "synthetic": {
+          "exact": 0.9880952835083008,
+          "micro_f1": 0.9865470852017937,
+          "precision": 0.990990990990991,
+          "recall": 0.9821428571428571,
+          "per_property_accuracy": [
+            0.9940476417541504,
+            0.9880952835083008
+          ],
+          "status_accuracy": {
+            "positive": 0.9821428571428571,
+            "negated": 0.99375,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 1.0,
+            "frame_1": 0.9761905074119568
+          },
+          "per_property": [
+            {
+              "tp": 55,
+              "tn": 112,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.9821428571428571,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 55,
+              "tn": 111,
+              "fp": 1,
+              "fn": 1,
+              "precision": 0.9821428571428571,
+              "recall": 0.9821428571428571,
+              "negative_recall": 0.9910714285714286
+            }
+          ],
+          "bce": 0.024686362361707855
+        },
+        "prior_joint_old": {
+          "exact": 0.5357142686843872,
+          "micro_f1": 0.6131386861313869,
+          "precision": 0.5185185185185185,
+          "recall": 0.75,
+          "per_property_accuracy": [
+            0.7142857313156128,
+            0.6547619104385376
+          ],
+          "status_accuracy": {
+            "positive": 0.75,
+            "negated": 0.6,
+            "absent": 0.78125
+          },
+          "family_exact": {
+            "frame_0": 0.523809552192688,
+            "frame_1": 0.5476190447807312
+          },
+          "per_property": [
+            {
+              "tp": 16,
+              "tn": 44,
+              "fp": 12,
+              "fn": 12,
+              "precision": 0.5714285714285714,
+              "recall": 0.5714285714285714,
+              "negative_recall": 0.7857142857142857
+            },
+            {
+              "tp": 26,
+              "tn": 29,
+              "fp": 27,
+              "fn": 2,
+              "precision": 0.49056603773584906,
+              "recall": 0.9285714285714286,
+              "negative_recall": 0.5178571428571429
+            }
+          ],
+          "bce": 1.6346753302403607
+        },
+        "old_known": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.012901935150805807
+        },
+        "old_renamed": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.014975379629403792
+        },
+        "development": {
+          "exact": 0.38461539149284363,
+          "micro_f1": 0.5098039215686274,
+          "precision": 0.6190476190476191,
+          "recall": 0.43333333333333335,
+          "per_property_accuracy": [
+            0.7179487347602844,
+            0.6410256624221802
+          ],
+          "status_accuracy": {
+            "positive": 0.43333333333333335,
+            "negated": 0.8333333333333334,
+            "absent": 0.8333333333333334
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.38461539149284363,
+            "dev_2": 0.38461539149284363
+          },
+          "per_property": [
+            {
+              "tp": 8,
+              "tn": 48,
+              "fp": 0,
+              "fn": 22,
+              "precision": 1.0,
+              "recall": 0.26666666666666666,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 18,
+              "tn": 32,
+              "fp": 16,
+              "fn": 12,
+              "precision": 0.5294117647058824,
+              "recall": 0.6,
+              "negative_recall": 0.6666666666666666
+            }
+          ],
+          "bce": 2.067807224269487
+        }
+      },
+      "stable_new_acquisition": false,
+      "stable_old_observations": false,
+      "development_admission": false,
+      "final_hash": "d2441ec90f3e77af6ef09d1ad5101a76b0a414d0149d5f5fe01926a586dfbd63",
+      "final_optimizer_hash": "202f484b2d2ba160c1226e071e485ba82e227ca04f6065ea41171320057cc55d",
+      "lifetime_updates": 2600,
+      "adam_counters": {
+        "student.base_model.wte.weight": 2600,
+        "student.base_model.blocks.4.ln_1.weight": 2600,
+        "student.base_model.blocks.4.ln_1.bias": 2600,
+        "student.base_model.blocks.4.attn.c_attn.weight": 2600,
+        "student.base_model.blocks.4.attn.c_attn.bias": 2600,
+        "student.base_model.blocks.4.attn.c_proj.weight": 2600,
+        "student.base_model.blocks.4.attn.c_proj.bias": 2600,
+        "student.base_model.blocks.4.ln_2.weight": 2600,
+        "student.base_model.blocks.4.ln_2.bias": 2600,
+        "student.base_model.blocks.4.mlp.c_fc.weight": 2600,
+        "student.base_model.blocks.4.mlp.c_fc.bias": 2600,
+        "student.base_model.blocks.4.mlp.c_proj.weight": 2600,
+        "student.base_model.blocks.4.mlp.c_proj.bias": 2600,
+        "student.base_model.ln_f.weight": 2600,
+        "student.base_model.ln_f.bias": 2600,
+        "bottleneck.concept_proj.0.weight": 2600,
+        "bottleneck.concept_proj.0.bias": 2600,
+        "bottleneck.concept_proj.1.weight": 2600,
+        "bottleneck.concept_proj.1.bias": 2600,
+        "bottleneck.concept_proj.3.weight": 2600,
+        "bottleneck.concept_proj.3.bias": 2600,
+        "bottleneck.concept_proj.4.weight": 2600,
+        "bottleneck.concept_proj.4.bias": 2600,
+        "bottleneck.attribute_head.weight": 2600,
+        "bottleneck.attribute_head.bias": 2600,
+        "bottleneck.action_emb.weight": 200,
+        "bottleneck.transition_net.0.weight": 200,
+        "bottleneck.transition_net.0.bias": 200,
+        "bottleneck.transition_net.2.weight": 200,
+        "bottleneck.transition_net.2.bias": 200,
+        "bottleneck.post_norm.weight": 200,
+        "bottleneck.post_norm.bias": 200,
+        "bottleneck.state_head.weight": 200,
+        "bottleneck.state_head.bias": 200
+      },
+      "checkpoint_sha256": "291b4b135f04a0444c2e18d50de72dbf5ddfd335876d716ada30c1db5369fb89",
+      "synchronized_wall_seconds": 35.652017666000006
+    },
+    "balanced_9": {
+      "initial_hash": "aed7480606a1a60e38ee7a95d22b5bcf14141f034f76cb45fb59680de277a33e",
+      "initial_optimizer_hash": "f278a7bbcbcdcc9f4a06c64e237057f503bd91a7cb1080a6e30412e45fc4dca6",
+      "stored_parameters": 1255636,
+      "trainable_parameters": 406762,
+      "updates": 1200,
+      "examples": 21600,
+      "tokens": 2599096,
+      "new_presentations": 10800,
+      "old_presentations": 10800,
+      "evaluation_rows": 7596,
+      "evaluation_forward_batches": 276,
+      "first_update_active_parameters": 341626,
+      "final": {
+        "new": {
+          "exact": 0.9126984477043152,
+          "micro_f1": 0.8690476190476191,
+          "precision": 0.8690476190476191,
+          "recall": 0.8690476190476191,
+          "per_property_accuracy": [
+            0.9126984477043152,
+            0.9126984477043152
+          ],
+          "status_accuracy": {
+            "positive": 0.8690476190476191,
+            "negated": 0.9083333333333333,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_2": 0.9761905074119568,
+            "frame_3": 0.9047619104385376,
+            "frame_4": 0.8571428656578064
+          },
+          "per_property": [
+            {
+              "tp": 31,
+              "tn": 84,
+              "fp": 0,
+              "fn": 11,
+              "precision": 1.0,
+              "recall": 0.7380952380952381,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 42,
+              "tn": 73,
+              "fp": 11,
+              "fn": 0,
+              "precision": 0.7924528301886793,
+              "recall": 1.0,
+              "negative_recall": 0.8690476190476191
+            }
+          ],
+          "bce": 0.15116001390426734
+        },
+        "historical": {
+          "exact": 0.1111111119389534,
+          "micro_f1": 0.5,
+          "precision": 0.3333333333333333,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            0.3333333432674408,
+            0.3333333432674408
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.0,
+            "absent": 0.0
+          },
+          "family_exact": {
+            "absent+absent": 0.0,
+            "absent+negated": 0.0,
+            "absent+positive": 0.0,
+            "negated+absent": 0.0,
+            "negated+negated": 0.0,
+            "negated+positive": 0.0,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 0,
+              "fp": 6,
+              "fn": 0,
+              "precision": 0.3333333333333333,
+              "recall": 1.0,
+              "negative_recall": 0.0
+            },
+            {
+              "tp": 3,
+              "tn": 0,
+              "fp": 6,
+              "fn": 0,
+              "precision": 0.3333333333333333,
+              "recall": 1.0,
+              "negative_recall": 0.0
+            }
+          ],
+          "bce": 6.564444470894723
+        },
+        "synthetic": {
+          "exact": 0.9642857313156128,
+          "micro_f1": 0.9557522123893806,
+          "precision": 0.9473684210526315,
+          "recall": 0.9642857142857143,
+          "per_property_accuracy": [
+            0.9642857313156128,
+            0.9761905074119568
+          ],
+          "status_accuracy": {
+            "positive": 0.9642857142857143,
+            "negated": 0.9625,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.9523809552192688,
+            "frame_1": 0.9761905074119568
+          },
+          "per_property": [
+            {
+              "tp": 52,
+              "tn": 110,
+              "fp": 2,
+              "fn": 4,
+              "precision": 0.9629629629629629,
+              "recall": 0.9285714285714286,
+              "negative_recall": 0.9821428571428571
+            },
+            {
+              "tp": 56,
+              "tn": 108,
+              "fp": 4,
+              "fn": 0,
+              "precision": 0.9333333333333333,
+              "recall": 1.0,
+              "negative_recall": 0.9642857142857143
+            }
+          ],
+          "bce": 0.0828037092057497
+        },
+        "prior_joint_old": {
+          "exact": 0.8571428656578064,
+          "micro_f1": 0.8214285714285714,
+          "precision": 0.8214285714285714,
+          "recall": 0.8214285714285714,
+          "per_property_accuracy": [
+            0.8571428656578064,
+            0.9047619104385376
+          ],
+          "status_accuracy": {
+            "positive": 0.8214285714285714,
+            "negated": 0.875,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.8333333730697632,
+            "frame_1": 0.8809524178504944
+          },
+          "per_property": [
+            {
+              "tp": 23,
+              "tn": 49,
+              "fp": 7,
+              "fn": 5,
+              "precision": 0.7666666666666667,
+              "recall": 0.8214285714285714,
+              "negative_recall": 0.875
+            },
+            {
+              "tp": 23,
+              "tn": 53,
+              "fp": 3,
+              "fn": 5,
+              "precision": 0.8846153846153846,
+              "recall": 0.8214285714285714,
+              "negative_recall": 0.9464285714285714
+            }
+          ],
+          "bce": 0.239802817385837
+        },
+        "old_known": {
+          "exact": 0.9047619104385376,
+          "micro_f1": 0.8571428571428571,
+          "precision": 0.8571428571428571,
+          "recall": 0.8571428571428571,
+          "per_property_accuracy": [
+            0.9047619104385376,
+            0.9047619104385376
+          ],
+          "status_accuracy": {
+            "positive": 0.8571428571428571,
+            "negated": 0.9,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.5,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 20,
+              "tn": 56,
+              "fp": 0,
+              "fn": 8,
+              "precision": 1.0,
+              "recall": 0.7142857142857143,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 48,
+              "fp": 8,
+              "fn": 0,
+              "precision": 0.7777777777777778,
+              "recall": 1.0,
+              "negative_recall": 0.8571428571428571
+            }
+          ],
+          "bce": 0.24406275254790805
+        },
+        "old_renamed": {
+          "exact": 0.9761905074119568,
+          "micro_f1": 0.9824561403508771,
+          "precision": 0.9655172413793104,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            0.9761905074119568,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.975,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.875,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 54,
+              "fp": 2,
+              "fn": 0,
+              "precision": 0.9333333333333333,
+              "recall": 1.0,
+              "negative_recall": 0.9642857142857143
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.07481589246748475
+        },
+        "development": {
+          "exact": 0.5128205418586731,
+          "micro_f1": 0.5964912280701754,
+          "precision": 0.6296296296296297,
+          "recall": 0.5666666666666667,
+          "per_property_accuracy": [
+            0.8205128312110901,
+            0.5897436141967773
+          ],
+          "status_accuracy": {
+            "positive": 0.5666666666666667,
+            "negated": 0.7666666666666667,
+            "absent": 0.8333333333333334
+          },
+          "family_exact": {
+            "dev_0": 0.38461539149284363,
+            "dev_1": 0.38461539149284363,
+            "dev_2": 0.7692307829856873
+          },
+          "per_property": [
+            {
+              "tp": 16,
+              "tn": 48,
+              "fp": 0,
+              "fn": 14,
+              "precision": 1.0,
+              "recall": 0.5333333333333333,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 18,
+              "tn": 28,
+              "fp": 20,
+              "fn": 12,
+              "precision": 0.47368421052631576,
+              "recall": 0.6,
+              "negative_recall": 0.5833333333333334
+            }
+          ],
+          "bce": 1.3583567828358272
+        }
+      },
+      "stable_new_acquisition": false,
+      "stable_old_observations": false,
+      "development_admission": false,
+      "final_hash": "5aa63afa381c11a6a99dfb5412d88e32752cf64b750ca2f2e71d4edb964f741f",
+      "final_optimizer_hash": "9d81166ba17705569c5ece20fb7d8f9610f31629dc4571057fc849c5f6e8b51f",
+      "lifetime_updates": 2600,
+      "adam_counters": {
+        "student.base_model.wte.weight": 2600,
+        "student.base_model.blocks.4.ln_1.weight": 2600,
+        "student.base_model.blocks.4.ln_1.bias": 2600,
+        "student.base_model.blocks.4.attn.c_attn.weight": 2600,
+        "student.base_model.blocks.4.attn.c_attn.bias": 2600,
+        "student.base_model.blocks.4.attn.c_proj.weight": 2600,
+        "student.base_model.blocks.4.attn.c_proj.bias": 2600,
+        "student.base_model.blocks.4.ln_2.weight": 2600,
+        "student.base_model.blocks.4.ln_2.bias": 2600,
+        "student.base_model.blocks.4.mlp.c_fc.weight": 2600,
+        "student.base_model.blocks.4.mlp.c_fc.bias": 2600,
+        "student.base_model.blocks.4.mlp.c_proj.weight": 2600,
+        "student.base_model.blocks.4.mlp.c_proj.bias": 2600,
+        "student.base_model.ln_f.weight": 2600,
+        "student.base_model.ln_f.bias": 2600,
+        "bottleneck.concept_proj.0.weight": 2600,
+        "bottleneck.concept_proj.0.bias": 2600,
+        "bottleneck.concept_proj.1.weight": 2600,
+        "bottleneck.concept_proj.1.bias": 2600,
+        "bottleneck.concept_proj.3.weight": 2600,
+        "bottleneck.concept_proj.3.bias": 2600,
+        "bottleneck.concept_proj.4.weight": 2600,
+        "bottleneck.concept_proj.4.bias": 2600,
+        "bottleneck.attribute_head.weight": 2600,
+        "bottleneck.attribute_head.bias": 2600,
+        "bottleneck.action_emb.weight": 200,
+        "bottleneck.transition_net.0.weight": 200,
+        "bottleneck.transition_net.0.bias": 200,
+        "bottleneck.transition_net.2.weight": 200,
+        "bottleneck.transition_net.2.bias": 200,
+        "bottleneck.post_norm.weight": 200,
+        "bottleneck.post_norm.bias": 200,
+        "bottleneck.state_head.weight": 200,
+        "bottleneck.state_head.bias": 200
+      },
+      "checkpoint_sha256": "bcb137c3a8c1816caf5b0c7cdf1239b399cf5230403999547d0587732fc9b34b",
+      "synchronized_wall_seconds": 35.393730001999984
+    }
+  },
+  "baselines": {
+    "bow_linear_none": {
+      "metrics": {
+        "new": {
+          "exact": 0.6190476417541504,
+          "micro_f1": 0.6,
+          "precision": 1.0,
+          "recall": 0.42857142857142855,
+          "per_property_accuracy": [
+            0.80952388048172,
+            0.80952388048172
+          ],
+          "status_accuracy": {
+            "positive": 0.42857142857142855,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_2": 0.6190476417541504,
+            "frame_3": 0.6190476417541504,
+            "frame_4": 0.6190476417541504
+          },
+          "per_property": [
+            {
+              "tp": 18,
+              "tn": 84,
+              "fp": 0,
+              "fn": 24,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 18,
+              "tn": 84,
+              "fp": 0,
+              "fn": 24,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.4249356152241532
+        },
+        "historical": {
+          "exact": 0.5555555820465088,
+          "micro_f1": 0.75,
+          "precision": 0.6,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            0.7777777910232544,
+            0.7777777910232544
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.3333333333333333,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 0.0,
+            "absent+positive": 1.0,
+            "negated+absent": 0.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 4,
+              "fp": 2,
+              "fn": 0,
+              "precision": 0.6,
+              "recall": 1.0,
+              "negative_recall": 0.6666666666666666
+            },
+            {
+              "tp": 3,
+              "tn": 4,
+              "fp": 2,
+              "fn": 0,
+              "precision": 0.6,
+              "recall": 1.0,
+              "negative_recall": 0.6666666666666666
+            }
+          ],
+          "bce": 0.47790131004005865
+        },
+        "synthetic": {
+          "exact": 0.4285714328289032,
+          "micro_f1": 0.7,
+          "precision": 0.5384615384615384,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            0.7142857313156128,
+            0.7142857313156128
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.4,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.4285714328289032,
+            "frame_1": 0.4285714328289032
+          },
+          "per_property": [
+            {
+              "tp": 56,
+              "tn": 64,
+              "fp": 48,
+              "fn": 0,
+              "precision": 0.5384615384615384,
+              "recall": 1.0,
+              "negative_recall": 0.5714285714285714
+            },
+            {
+              "tp": 56,
+              "tn": 64,
+              "fp": 48,
+              "fn": 0,
+              "precision": 0.5384615384615384,
+              "recall": 1.0,
+              "negative_recall": 0.5714285714285714
+            }
+          ],
+          "bce": 0.5352454261663361
+        },
+        "prior_joint_old": {
+          "exact": 0.523809552192688,
+          "micro_f1": 0.7368421052631579,
+          "precision": 0.5833333333333334,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            0.7142857313156128,
+            0.8095238208770752
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.5,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.523809552192688,
+            "frame_1": 0.523809552192688
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 32,
+              "fp": 24,
+              "fn": 0,
+              "precision": 0.5384615384615384,
+              "recall": 1.0,
+              "negative_recall": 0.5714285714285714
+            },
+            {
+              "tp": 28,
+              "tn": 40,
+              "fp": 16,
+              "fn": 0,
+              "precision": 0.6363636363636364,
+              "recall": 1.0,
+              "negative_recall": 0.7142857142857143
+            }
+          ],
+          "bce": 0.4814589577875014
+        },
+        "old_known": {
+          "exact": 0.4285714328289032,
+          "micro_f1": 0.7,
+          "precision": 0.5384615384615384,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            0.7142857313156128,
+            0.7142857313156128
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.4,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 0.0,
+            "absent+positive": 1.0,
+            "negated+absent": 0.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 32,
+              "fp": 24,
+              "fn": 0,
+              "precision": 0.5384615384615384,
+              "recall": 1.0,
+              "negative_recall": 0.5714285714285714
+            },
+            {
+              "tp": 28,
+              "tn": 32,
+              "fp": 24,
+              "fn": 0,
+              "precision": 0.5384615384615384,
+              "recall": 1.0,
+              "negative_recall": 0.5714285714285714
+            }
+          ],
+          "bce": 0.5352454261663361
+        },
+        "old_renamed": {
+          "exact": 0.4285714328289032,
+          "micro_f1": 0.7,
+          "precision": 0.5384615384615384,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            0.7142857313156128,
+            0.7142857313156128
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.4,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 0.0,
+            "absent+positive": 1.0,
+            "negated+absent": 0.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 32,
+              "fp": 24,
+              "fn": 0,
+              "precision": 0.5384615384615384,
+              "recall": 1.0,
+              "negative_recall": 0.5714285714285714
+            },
+            {
+              "tp": 28,
+              "tn": 32,
+              "fp": 24,
+              "fn": 0,
+              "precision": 0.5384615384615384,
+              "recall": 1.0,
+              "negative_recall": 0.5714285714285714
+            }
+          ],
+          "bce": 0.5352454261663361
+        },
+        "development": {
+          "exact": 0.5384615659713745,
+          "micro_f1": 0.7692307692307693,
+          "precision": 0.625,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            0.7692307829856873,
+            0.7692307829856873
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.4,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "dev_0": 0.5384615659713745,
+            "dev_1": 0.5384615659713745,
+            "dev_2": 0.5384615659713745
+          },
+          "per_property": [
+            {
+              "tp": 30,
+              "tn": 30,
+              "fp": 18,
+              "fn": 0,
+              "precision": 0.625,
+              "recall": 1.0,
+              "negative_recall": 0.625
+            },
+            {
+              "tp": 30,
+              "tn": 30,
+              "fp": 18,
+              "fn": 0,
+              "precision": 0.625,
+              "recall": 1.0,
+              "negative_recall": 0.625
+            }
+          ],
+          "bce": 0.49557407935692827
+        }
+      },
+      "parameters": 34,
+      "updates": 1200,
+      "examples": 21600,
+      "synchronized_wall_seconds": 1.910880708000036
+    },
+    "bow_linear_historical_6": {
+      "metrics": {
+        "new": {
+          "exact": 0.6349206566810608,
+          "micro_f1": 0.6153846153846154,
+          "precision": 0.8695652173913043,
+          "recall": 0.47619047619047616,
+          "per_property_accuracy": [
+            0.80952388048172,
+            0.7936508655548096
+          ],
+          "status_accuracy": {
+            "positive": 0.47619047619047616,
+            "negated": 0.95,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_2": 0.6190476417541504,
+            "frame_3": 0.6666666865348816,
+            "frame_4": 0.6190476417541504
+          },
+          "per_property": [
+            {
+              "tp": 18,
+              "tn": 84,
+              "fp": 0,
+              "fn": 24,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 22,
+              "tn": 78,
+              "fp": 6,
+              "fn": 20,
+              "precision": 0.7857142857142857,
+              "recall": 0.5238095238095238,
+              "negative_recall": 0.9285714285714286
+            }
+          ],
+          "bce": 0.43293415218207054
+        },
+        "historical": {
+          "exact": 0.7777777910232544,
+          "micro_f1": 0.8,
+          "precision": 1.0,
+          "recall": 0.6666666666666666,
+          "per_property_accuracy": [
+            0.8888888955116272,
+            0.8888888955116272
+          ],
+          "status_accuracy": {
+            "positive": 0.6666666666666666,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 2,
+              "tn": 6,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 2,
+              "tn": 6,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.3555312958696519
+        },
+        "synthetic": {
+          "exact": 0.4761904776096344,
+          "micro_f1": 0.717948717948718,
+          "precision": 0.56,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            0.7142857313156128,
+            0.761904776096344
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.45,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.4761904776096344,
+            "frame_1": 0.4761904776096344
+          },
+          "per_property": [
+            {
+              "tp": 56,
+              "tn": 64,
+              "fp": 48,
+              "fn": 0,
+              "precision": 0.5384615384615384,
+              "recall": 1.0,
+              "negative_recall": 0.5714285714285714
+            },
+            {
+              "tp": 56,
+              "tn": 72,
+              "fp": 40,
+              "fn": 0,
+              "precision": 0.5833333333333334,
+              "recall": 1.0,
+              "negative_recall": 0.6428571428571429
+            }
+          ],
+          "bce": 0.4884785457368651
+        },
+        "prior_joint_old": {
+          "exact": 0.6190476417541504,
+          "micro_f1": 0.7058823529411765,
+          "precision": 0.6,
+          "recall": 0.8571428571428571,
+          "per_property_accuracy": [
+            0.7142857313156128,
+            0.8095238208770752
+          ],
+          "status_accuracy": {
+            "positive": 0.8571428571428571,
+            "negated": 0.6,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.6190476417541504,
+            "frame_1": 0.6190476417541504
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 32,
+              "fp": 24,
+              "fn": 0,
+              "precision": 0.5384615384615384,
+              "recall": 1.0,
+              "negative_recall": 0.5714285714285714
+            },
+            {
+              "tp": 20,
+              "tn": 48,
+              "fp": 8,
+              "fn": 8,
+              "precision": 0.7142857142857143,
+              "recall": 0.7142857142857143,
+              "negative_recall": 0.8571428571428571
+            }
+          ],
+          "bce": 0.45647351864369834
+        },
+        "old_known": {
+          "exact": 0.4761904776096344,
+          "micro_f1": 0.717948717948718,
+          "precision": 0.56,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            0.7142857313156128,
+            0.761904776096344
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.45,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 0.5,
+            "absent+positive": 1.0,
+            "negated+absent": 0.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 32,
+              "fp": 24,
+              "fn": 0,
+              "precision": 0.5384615384615384,
+              "recall": 1.0,
+              "negative_recall": 0.5714285714285714
+            },
+            {
+              "tp": 28,
+              "tn": 36,
+              "fp": 20,
+              "fn": 0,
+              "precision": 0.5833333333333334,
+              "recall": 1.0,
+              "negative_recall": 0.6428571428571429
+            }
+          ],
+          "bce": 0.4884785457368651
+        },
+        "old_renamed": {
+          "exact": 0.4761904776096344,
+          "micro_f1": 0.717948717948718,
+          "precision": 0.56,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            0.7142857313156128,
+            0.761904776096344
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.45,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 0.5,
+            "absent+positive": 1.0,
+            "negated+absent": 0.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 32,
+              "fp": 24,
+              "fn": 0,
+              "precision": 0.5384615384615384,
+              "recall": 1.0,
+              "negative_recall": 0.5714285714285714
+            },
+            {
+              "tp": 28,
+              "tn": 36,
+              "fp": 20,
+              "fn": 0,
+              "precision": 0.5833333333333334,
+              "recall": 1.0,
+              "negative_recall": 0.6428571428571429
+            }
+          ],
+          "bce": 0.4884785457368651
+        },
+        "development": {
+          "exact": 0.6666666865348816,
+          "micro_f1": 0.7887323943661971,
+          "precision": 0.6829268292682927,
+          "recall": 0.9333333333333333,
+          "per_property_accuracy": [
+            0.7692307829856873,
+            0.8461538553237915
+          ],
+          "status_accuracy": {
+            "positive": 0.9333333333333333,
+            "negated": 0.5666666666666667,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "dev_0": 0.7692307829856873,
+            "dev_1": 0.6153846383094788,
+            "dev_2": 0.6153846383094788
+          },
+          "per_property": [
+            {
+              "tp": 30,
+              "tn": 30,
+              "fp": 18,
+              "fn": 0,
+              "precision": 0.625,
+              "recall": 1.0,
+              "negative_recall": 0.625
+            },
+            {
+              "tp": 26,
+              "tn": 40,
+              "fp": 8,
+              "fn": 4,
+              "precision": 0.7647058823529411,
+              "recall": 0.8666666666666667,
+              "negative_recall": 0.8333333333333334
+            }
+          ],
+          "bce": 0.42388400223141315
+        }
+      },
+      "parameters": 38,
+      "updates": 1200,
+      "examples": 21600,
+      "synchronized_wall_seconds": 1.9135083369999961
+    },
+    "bow_linear_synthetic_6": {
+      "metrics": {
+        "new": {
+          "exact": 0.682539701461792,
+          "micro_f1": 0.6470588235294118,
+          "precision": 0.8461538461538461,
+          "recall": 0.5238095238095238,
+          "per_property_accuracy": [
+            0.80952388048172,
+            0.80952388048172
+          ],
+          "status_accuracy": {
+            "positive": 0.5238095238095238,
+            "negated": 0.9333333333333333,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_2": 0.6190476417541504,
+            "frame_3": 0.8095238208770752,
+            "frame_4": 0.6190476417541504
+          },
+          "per_property": [
+            {
+              "tp": 18,
+              "tn": 84,
+              "fp": 0,
+              "fn": 24,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 26,
+              "tn": 76,
+              "fp": 8,
+              "fn": 16,
+              "precision": 0.7647058823529411,
+              "recall": 0.6190476190476191,
+              "negative_recall": 0.9047619047619048
+            }
+          ],
+          "bce": 0.43885506903989274
+        },
+        "historical": {
+          "exact": 0.7777777910232544,
+          "micro_f1": 0.7692307692307693,
+          "precision": 0.7142857142857143,
+          "recall": 0.8333333333333334,
+          "per_property_accuracy": [
+            0.7777777910232544,
+            0.8888888955116272
+          ],
+          "status_accuracy": {
+            "positive": 0.8333333333333334,
+            "negated": 0.6666666666666666,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 0.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 4,
+              "fp": 2,
+              "fn": 0,
+              "precision": 0.6,
+              "recall": 1.0,
+              "negative_recall": 0.6666666666666666
+            },
+            {
+              "tp": 2,
+              "tn": 6,
+              "fp": 0,
+              "fn": 1,
+              "precision": 1.0,
+              "recall": 0.6666666666666666,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.41976155366534873
+        },
+        "synthetic": {
+          "exact": 0.6190476417541504,
+          "micro_f1": 0.6,
+          "precision": 1.0,
+          "recall": 0.42857142857142855,
+          "per_property_accuracy": [
+            0.8095238208770752,
+            0.8095238208770752
+          ],
+          "status_accuracy": {
+            "positive": 0.42857142857142855,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.6190476417541504,
+            "frame_1": 0.6190476417541504
+          },
+          "per_property": [
+            {
+              "tp": 24,
+              "tn": 112,
+              "fp": 0,
+              "fn": 32,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 24,
+              "tn": 112,
+              "fp": 0,
+              "fn": 32,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.4304021777320717
+        },
+        "prior_joint_old": {
+          "exact": 0.6190476417541504,
+          "micro_f1": 0.6,
+          "precision": 1.0,
+          "recall": 0.42857142857142855,
+          "per_property_accuracy": [
+            0.8095238208770752,
+            0.8095238208770752
+          ],
+          "status_accuracy": {
+            "positive": 0.42857142857142855,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.6190476417541504,
+            "frame_1": 0.6190476417541504
+          },
+          "per_property": [
+            {
+              "tp": 12,
+              "tn": 56,
+              "fp": 0,
+              "fn": 16,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 12,
+              "tn": 56,
+              "fp": 0,
+              "fn": 16,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.43101702111329143
+        },
+        "old_known": {
+          "exact": 0.6190476417541504,
+          "micro_f1": 0.6,
+          "precision": 1.0,
+          "recall": 0.42857142857142855,
+          "per_property_accuracy": [
+            0.8095238208770752,
+            0.8095238208770752
+          ],
+          "status_accuracy": {
+            "positive": 0.42857142857142855,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 12,
+              "tn": 56,
+              "fp": 0,
+              "fn": 16,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 12,
+              "tn": 56,
+              "fp": 0,
+              "fn": 16,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.4337187650526363
+        },
+        "old_renamed": {
+          "exact": 0.6190476417541504,
+          "micro_f1": 0.6,
+          "precision": 1.0,
+          "recall": 0.42857142857142855,
+          "per_property_accuracy": [
+            0.8095238208770752,
+            0.8095238208770752
+          ],
+          "status_accuracy": {
+            "positive": 0.42857142857142855,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 12,
+              "tn": 56,
+              "fp": 0,
+              "fn": 16,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 12,
+              "tn": 56,
+              "fp": 0,
+              "fn": 16,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.4337187650526363
+        },
+        "development": {
+          "exact": 0.7692307829856873,
+          "micro_f1": 0.7619047619047619,
+          "precision": 0.7272727272727273,
+          "recall": 0.8,
+          "per_property_accuracy": [
+            0.7692307829856873,
+            0.8461538553237915
+          ],
+          "status_accuracy": {
+            "positive": 0.8,
+            "negated": 0.7,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "dev_0": 0.7692307829856873,
+            "dev_1": 0.7692307829856873,
+            "dev_2": 0.7692307829856873
+          },
+          "per_property": [
+            {
+              "tp": 30,
+              "tn": 30,
+              "fp": 18,
+              "fn": 0,
+              "precision": 0.625,
+              "recall": 1.0,
+              "negative_recall": 0.625
+            },
+            {
+              "tp": 18,
+              "tn": 48,
+              "fp": 0,
+              "fn": 12,
+              "precision": 1.0,
+              "recall": 0.6,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.4336963039684609
+        }
+      },
+      "parameters": 50,
+      "updates": 1200,
+      "examples": 21600,
+      "synchronized_wall_seconds": 1.9775105570000164
+    },
+    "bow_linear_balanced_9": {
+      "metrics": {
+        "new": {
+          "exact": 0.6190476417541504,
+          "micro_f1": 0.6,
+          "precision": 1.0,
+          "recall": 0.42857142857142855,
+          "per_property_accuracy": [
+            0.80952388048172,
+            0.80952388048172
+          ],
+          "status_accuracy": {
+            "positive": 0.42857142857142855,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_2": 0.6190476417541504,
+            "frame_3": 0.6190476417541504,
+            "frame_4": 0.6190476417541504
+          },
+          "per_property": [
+            {
+              "tp": 18,
+              "tn": 84,
+              "fp": 0,
+              "fn": 24,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 18,
+              "tn": 84,
+              "fp": 0,
+              "fn": 24,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.4290522112196699
+        },
+        "historical": {
+          "exact": 0.6666666865348816,
+          "micro_f1": 0.8,
+          "precision": 0.6666666666666666,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            0.7777777910232544,
+            0.8888888955116272
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.5,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 0.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 4,
+              "fp": 2,
+              "fn": 0,
+              "precision": 0.6,
+              "recall": 1.0,
+              "negative_recall": 0.6666666666666666
+            },
+            {
+              "tp": 3,
+              "tn": 5,
+              "fp": 1,
+              "fn": 0,
+              "precision": 0.75,
+              "recall": 1.0,
+              "negative_recall": 0.8333333333333334
+            }
+          ],
+          "bce": 0.42718282876061886
+        },
+        "synthetic": {
+          "exact": 0.6190476417541504,
+          "micro_f1": 0.6,
+          "precision": 1.0,
+          "recall": 0.42857142857142855,
+          "per_property_accuracy": [
+            0.8095238208770752,
+            0.8095238208770752
+          ],
+          "status_accuracy": {
+            "positive": 0.42857142857142855,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.6190476417541504,
+            "frame_1": 0.6190476417541504
+          },
+          "per_property": [
+            {
+              "tp": 24,
+              "tn": 112,
+              "fp": 0,
+              "fn": 32,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 24,
+              "tn": 112,
+              "fp": 0,
+              "fn": 32,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.4290874632025476
+        },
+        "prior_joint_old": {
+          "exact": 0.6190476417541504,
+          "micro_f1": 0.6,
+          "precision": 1.0,
+          "recall": 0.42857142857142855,
+          "per_property_accuracy": [
+            0.8095238208770752,
+            0.8095238208770752
+          ],
+          "status_accuracy": {
+            "positive": 0.42857142857142855,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 0.6190476417541504,
+            "frame_1": 0.6190476417541504
+          },
+          "per_property": [
+            {
+              "tp": 12,
+              "tn": 56,
+              "fp": 0,
+              "fn": 16,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 12,
+              "tn": 56,
+              "fp": 0,
+              "fn": 16,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.4303591736601942
+        },
+        "old_known": {
+          "exact": 0.6190476417541504,
+          "micro_f1": 0.6,
+          "precision": 1.0,
+          "recall": 0.42857142857142855,
+          "per_property_accuracy": [
+            0.8095238208770752,
+            0.8095238208770752
+          ],
+          "status_accuracy": {
+            "positive": 0.42857142857142855,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 12,
+              "tn": 56,
+              "fp": 0,
+              "fn": 16,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 12,
+              "tn": 56,
+              "fp": 0,
+              "fn": 16,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.43167808069818714
+        },
+        "old_renamed": {
+          "exact": 0.6190476417541504,
+          "micro_f1": 0.6,
+          "precision": 1.0,
+          "recall": 0.42857142857142855,
+          "per_property_accuracy": [
+            0.8095238208770752,
+            0.8095238208770752
+          ],
+          "status_accuracy": {
+            "positive": 0.42857142857142855,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 12,
+              "tn": 56,
+              "fp": 0,
+              "fn": 16,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 12,
+              "tn": 56,
+              "fp": 0,
+              "fn": 16,
+              "precision": 1.0,
+              "recall": 0.42857142857142855,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.43167808069818714
+        },
+        "development": {
+          "exact": 0.6666666865348816,
+          "micro_f1": 0.7887323943661971,
+          "precision": 0.6829268292682927,
+          "recall": 0.9333333333333333,
+          "per_property_accuracy": [
+            0.7692307829856873,
+            0.8461538553237915
+          ],
+          "status_accuracy": {
+            "positive": 0.9333333333333333,
+            "negated": 0.5666666666666667,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "dev_0": 0.6153846383094788,
+            "dev_1": 0.7692307829856873,
+            "dev_2": 0.6153846383094788
+          },
+          "per_property": [
+            {
+              "tp": 30,
+              "tn": 30,
+              "fp": 18,
+              "fn": 0,
+              "precision": 0.625,
+              "recall": 1.0,
+              "negative_recall": 0.625
+            },
+            {
+              "tp": 26,
+              "tn": 40,
+              "fp": 8,
+              "fn": 4,
+              "precision": 0.7647058823529411,
+              "recall": 0.8666666666666667,
+              "negative_recall": 0.8333333333333334
+            }
+          ],
+          "bce": 0.4369065334982315
+        }
+      },
+      "parameters": 50,
+      "updates": 1200,
+      "examples": 21600,
+      "synchronized_wall_seconds": 1.9625571020000052
+    },
+    "ngram_linear_none": {
+      "metrics": {
+        "new": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_2": 1.0,
+            "frame_3": 1.0,
+            "frame_4": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 42,
+              "tn": 84,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 42,
+              "tn": 84,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.07992202031706007
+        },
+        "historical": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.27512550654711637
+        },
+        "synthetic": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 1.0,
+            "frame_1": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 56,
+              "tn": 112,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 56,
+              "tn": 112,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.23604993074047861
+        },
+        "prior_joint_old": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 1.0,
+            "frame_1": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.22154670136662574
+        },
+        "old_known": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.23604993074047861
+        },
+        "old_renamed": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.23604993074047861
+        },
+        "development": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "dev_0": 1.0,
+            "dev_1": 1.0,
+            "dev_2": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 30,
+              "tn": 48,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 30,
+              "tn": 48,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.23846288863136075
+        }
+      },
+      "parameters": 268,
+      "updates": 1200,
+      "examples": 21600,
+      "synchronized_wall_seconds": 1.9269612100000018
+    },
+    "ngram_linear_historical_6": {
+      "metrics": {
+        "new": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_2": 1.0,
+            "frame_3": 1.0,
+            "frame_4": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 42,
+              "tn": 84,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 42,
+              "tn": 84,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.08492404385610341
+        },
+        "historical": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.045193272216742485
+        },
+        "synthetic": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 1.0,
+            "frame_1": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 56,
+              "tn": 112,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 56,
+              "tn": 112,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.2027866247140732
+        },
+        "prior_joint_old": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 1.0,
+            "frame_1": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.1929885903391607
+        },
+        "old_known": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.2027866247140732
+        },
+        "old_renamed": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.2027866247140732
+        },
+        "development": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "dev_0": 1.0,
+            "dev_1": 1.0,
+            "dev_2": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 30,
+              "tn": 48,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 30,
+              "tn": 48,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.2044390390601904
+        }
+      },
+      "parameters": 298,
+      "updates": 1200,
+      "examples": 21600,
+      "synchronized_wall_seconds": 1.939919137000004
+    },
+    "ngram_linear_synthetic_6": {
+      "metrics": {
+        "new": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_2": 1.0,
+            "frame_3": 1.0,
+            "frame_4": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 42,
+              "tn": 84,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 42,
+              "tn": 84,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.08684323490864379
+        },
+        "historical": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.2541268544151032
+        },
+        "synthetic": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 1.0,
+            "frame_1": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 56,
+              "tn": 112,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 56,
+              "tn": 112,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.07974617325084929
+        },
+        "prior_joint_old": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 1.0,
+            "frame_1": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.12340268871318677
+        },
+        "old_known": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.12430321417389607
+        },
+        "old_renamed": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.12430321417389607
+        },
+        "development": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "dev_0": 1.0,
+            "dev_1": 1.0,
+            "dev_2": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 30,
+              "tn": 48,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 30,
+              "tn": 48,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.21798662692611925
+        }
+      },
+      "parameters": 520,
+      "updates": 1200,
+      "examples": 21600,
+      "synchronized_wall_seconds": 1.9722833989999913
+    },
+    "ngram_linear_balanced_9": {
+      "metrics": {
+        "new": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_2": 1.0,
+            "frame_3": 1.0,
+            "frame_4": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 42,
+              "tn": 84,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 42,
+              "tn": 84,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.08719986586988028
+        },
+        "historical": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 3,
+              "tn": 6,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.2617487652854806
+        },
+        "synthetic": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 1.0,
+            "frame_1": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 56,
+              "tn": 112,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 56,
+              "tn": 112,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.07292116273833901
+        },
+        "prior_joint_old": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "frame_0": 1.0,
+            "frame_1": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.12096054544261149
+        },
+        "old_known": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.12142663956530886
+        },
+        "old_renamed": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 28,
+              "tn": 56,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.12142663956530886
+        },
+        "development": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "precision": 1.0,
+          "recall": 1.0,
+          "per_property_accuracy": [
+            1.0,
+            1.0
+          ],
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "dev_0": 1.0,
+            "dev_1": 1.0,
+            "dev_2": 1.0
+          },
+          "per_property": [
+            {
+              "tp": 30,
+              "tn": 48,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            },
+            {
+              "tp": 30,
+              "tn": 48,
+              "fp": 0,
+              "fn": 0,
+              "precision": 1.0,
+              "recall": 1.0,
+              "negative_recall": 1.0
+            }
+          ],
+          "bce": 0.22328754772040055
+        }
+      },
+      "parameters": 520,
+      "updates": 1200,
+      "examples": 21600,
+      "synchronized_wall_seconds": 1.9041932949999705
+    }
+  },
+  "kernel": "sparklinghydraulics0/amg-stage-a5-rehearsal",
+  "kernel_version": 1,
+  "study_version": 1,
+  "status": "COMPLETE",
+  "scientific_validity": "INVALID_SAMPLING",
+  "eligible_for_qualification": false,
+  "artifact_directory": "runs/kaggle-stage-a5-rehearsal/output-v1/a5-rehearsal",
+  "execution": {
+    "sha": "69d8fc9c2883e57004529743d015d547b9a4c0a2",
+    "platform": "kaggle",
+    "python": "3.13.15",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "gpu": "Tesla T4",
+    "phases": {
+      "contracts": {
+        "exit_code": 0
+      },
+      "rehearsal": {
+        "exit_code": 0
+      },
+      "full-suite": {
+        "exit_code": 0
+      }
+    }
+  },
+  "test_results": {
+    "contracts.xml": {
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time": 9.181
+    },
+    "full-suite.xml": {
+      "tests": 819,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "time": 681.51
+    }
+  },
+  "artifact_validation": {
+    "sequence_roundtrips": 633,
+    "checkpoint_hashes_verified": 4,
+    "data_hash_verified": true,
+    "new_frame_status_count_ranges": {
+      "none": {
+        "max_range": 0,
+        "by_status": {
+          "('absent', 'absent')": 0,
+          "('absent', 'negated')": 0,
+          "('absent', 'positive')": 0,
+          "('negated', 'absent')": 0,
+          "('negated', 'negated')": 0,
+          "('negated', 'positive')": 0,
+          "('positive', 'absent')": 0,
+          "('positive', 'negated')": 0,
+          "('positive', 'positive')": 0
+        }
+      },
+      "historical_6": {
+        "max_range": 400,
+        "by_status": {
+          "('absent', 'absent')": 400,
+          "('absent', 'negated')": 400,
+          "('absent', 'positive')": 400,
+          "('negated', 'absent')": 400,
+          "('negated', 'negated')": 400,
+          "('negated', 'positive')": 400,
+          "('positive', 'absent')": 400,
+          "('positive', 'negated')": 400,
+          "('positive', 'positive')": 400
+        }
+      },
+      "synthetic_6": {
+        "max_range": 400,
+        "by_status": {
+          "('absent', 'absent')": 400,
+          "('absent', 'negated')": 400,
+          "('absent', 'positive')": 400,
+          "('negated', 'absent')": 400,
+          "('negated', 'negated')": 400,
+          "('negated', 'positive')": 400,
+          "('positive', 'absent')": 400,
+          "('positive', 'negated')": 400,
+          "('positive', 'positive')": 400
+        }
+      },
+      "balanced_9": {
+        "max_range": 0,
+        "by_status": {
+          "('absent', 'absent')": 0,
+          "('absent', 'negated')": 0,
+          "('absent', 'positive')": 0,
+          "('negated', 'absent')": 0,
+          "('negated', 'negated')": 0,
+          "('negated', 'positive')": 0,
+          "('positive', 'absent')": 0,
+          "('positive', 'negated')": 0,
+          "('positive', 'positive')": 0
+        }
+      }
+    },
+    "scope": "Saved JSON/string/hash analysis only; no local neural execution"
+  },
+  "sha256": {
+    "balanced_9.pt": "bcb137c3a8c1816caf5b0c7cdf1239b399cf5230403999547d0587732fc9b34b",
+    "contracts.log": "ec08902200e4a2a4eba56227cd432e85040b51cda4d4b702faccb5780ff201e5",
+    "contracts.xml": "16935ec8b20ff27cf827574da02a6e0bb94821ed657dd0b84377cd3a3583e901",
+    "dataset.json": "d3a4c8c0ab66a154c94398caf51f1fd22a7ccbfeec0f02e4783933530234edf6",
+    "evaluation_cases.json": "e837e7ddeccc21fe0d85c35c5ed29431f0a6937bc6b4487652dd1f98173fbd04",
+    "execution.json": "721c4132e3437086ad70ae2d2c649c9a7de44707abcc09ec1fff1a5018019567",
+    "full-suite.log": "9d574ea4d641b1cdfb4b131de87971307d80912f2ce126976f2459e862c81c9d",
+    "full-suite.xml": "5cc152aeab5d4b7a6e30192d2e98da83c93bc06b10c510f9c9e25dd2757207ec",
+    "historical_6.pt": "fbe374c0dc0d8f6670133f0f2d0d8ccf7c0e6b7de4bcfb846abfa92286793cc1",
+    "none.pt": "964d33ec750116f753e35228a5b18edef60fce311a72a933e0596865cea3d104",
+    "rehearsal.log": "75f1fb541a78dec8815c2cddfff4875f1ff6ae0745c555865f94fb9fe92d03de",
+    "results.json": "07902a54fd4e5706997082a15d97760c6d583ec3e4ebfe7cd4c96bca3b564ecf",
+    "resume_child.json": "7ff306c0a872b363428dcaf940c9d129f2f66137a383951f49b1704d1edfdcc7",
+    "synthetic_6.pt": "291b4b135f04a0444c2e18d50de72dbf5ddfd335876d716ada30c1db5369fb89",
+    "tokens.json": "09d03a98adec907d6e10a101f84b8d8a6285fd2832ebe66e96db90871ce7f83c"
+  }
+}

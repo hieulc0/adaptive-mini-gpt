@@ -31,5 +31,15 @@
     "replay budgets",
     "scientific thresholds"
   ],
-  "status": "v1 NOT QUALIFIED; preserve all eventual artifacts; fixed run not yet submitted"
+  "status": "v1 NOT QUALIFIED; preserve all eventual artifacts; fixed run not yet submitted",
+  "resolution": {
+    "source": "63d8acf27b0c2e373d119c75bce2f9f846cd1409",
+    "kernel": "sparklinghydraulics0/amg-stage-a5-rehearsal-balanced/1",
+    "status": "COMPLETE",
+    "full_regression_passed": 820,
+    "focused_passed": 7,
+    "new_frame_status_range_max": 1,
+    "original_run_preserved": "runs/kaggle-stage-a5-rehearsal/output-v1/a5-rehearsal",
+    "outcomes_not_used_to_choose_correction": true
+  }
 }
