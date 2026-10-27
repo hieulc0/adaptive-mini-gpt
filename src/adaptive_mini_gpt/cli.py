@@ -33,6 +33,7 @@ from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.training.checkpoint import CheckpointManager
 from adaptive_mini_gpt.training.config import TrainingConfig
+from adaptive_mini_gpt.training.reproducibility import seed_all
 from adaptive_mini_gpt.training.trainer import Trainer, build_cosine_lr_schedule
 
 
@@ -142,6 +143,8 @@ def cmd_train(args: argparse.Namespace) -> int:
         newline_token_id=newline_id,
     )
 
+    # Seed before initialization; Trainer seeding alone happens after weights exist.
+    seed_all(training_config.seed)
     model = MiniGPT(model_config)
     if args.freeze_backbone:
         model.freeze_backbone(freeze_existing_experts=args.freeze_old_experts)
@@ -165,6 +168,9 @@ def cmd_train(args: argparse.Namespace) -> int:
         # When transitioning to a new dataset/stage in continual learning:
         if args.allow_new_dataset:
             trainer.step = 0
+            trainer.attempted_updates = 0
+            trainer.skipped_updates = 0
+            trainer.consecutive_skipped_updates = 0
             trainer.data_position = 0
             trainer.best_val_loss = float("inf")
         # Re-apply freeze flags and rebuild optimizer/scheduler for trainable subset

@@ -14,6 +14,8 @@ import torch
 from adaptive_mini_gpt.model.config import ModelConfig
 from adaptive_mini_gpt.model.transformer import MiniGPT
 from adaptive_mini_gpt.training.checkpoint import CheckpointManager
+from adaptive_mini_gpt.training.remote_runtime import require_remote_cuda
+from adaptive_mini_gpt.training.reproducibility import seed_all
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -108,8 +110,26 @@ def qualify_cli(output: Path, device: str = "cuda") -> dict:
                 raise RuntimeError(f"amg train failed; see {log.name}")
     a = CheckpointManager.load_raw_checkpoint(first / "latest.pt")
     b = CheckpointManager.load_raw_checkpoint(resumed / "latest.pt")
+    summaries = {}
+    for name, raw in (("first", a), ("resumed", b)):
+        summaries[name] = {
+            "step": raw["step"],
+            "tokens_seen": raw["tokens_seen"],
+            "data_position": raw["data_position"],
+            "update_progress": raw.get("update_progress"),
+            "optimizer_steps": [
+                int(v["step"]) for v in raw["optimizer_state_dict"]["state"].values() if "step" in v
+            ],
+            "scaler": raw["scaler_state_dict"],
+            "scheduler": raw["scheduler_state_dict"],
+        }
+    (output / "checkpoint-progress.json").write_text(json.dumps(summaries, indent=2))
     assert (a["step"], b["step"]) == (2, 4)
-    assert b["tokens_seen"] == 2 * a["tokens_seen"]
+    for raw in (a, b):
+        progress = raw["update_progress"]
+        assert progress["applied_updates"] == raw["step"]
+        assert progress["attempted_updates"] == raw["step"] + progress["skipped_updates"]
+        assert raw["tokens_seen"] == progress["attempted_updates"] * 64
     assert b["data_position"] > a["data_position"]
     assert a["optimizer_state_dict"]["state"] and b["optimizer_state_dict"]["state"]
     for state in b["optimizer_state_dict"]["state"].values():
@@ -138,6 +158,7 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, default=Path("runs/gpu-qualification"))
     parser.add_argument("--runtime-only", action="store_true")
     args = parser.parse_args()
+    require_remote_cuda()
     args.output_dir = args.output_dir.resolve()
     args.output_dir.mkdir(parents=True, exist_ok=True)
     info = runtime_info()
@@ -146,6 +167,8 @@ def main() -> None:
         return
     if any((args.output_dir / name).exists() for name in ("first", "resumed")):
         raise RuntimeError("Use a fresh output directory for each qualification")
+    seed_all(42)
+    info["seed"] = 42
     qualify_fp16()
     info.update(qualify_cli(args.output_dir))
     info.update(fp16_forward_backward_optimizer="passed", status="passed")

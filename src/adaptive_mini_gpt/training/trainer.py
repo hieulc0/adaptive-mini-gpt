@@ -116,7 +116,10 @@ class Trainer:
         )
 
         # State tracking
-        self.step = 0
+        self.step = 0  # Applied optimizer updates, never AMP attempts.
+        self.attempted_updates = 0
+        self.skipped_updates = 0
+        self.consecutive_skipped_updates = 0
         self.tokens_seen = 0
         self.data_position = 0
         self.best_val_loss = float("inf")
@@ -155,6 +158,31 @@ class Trainer:
             allow_growth=allow_growth,
         )
         self.step = meta["step"]
+        progress = meta.get("update_progress")
+        if progress is None:
+            counts = {int(v["step"]) for v in self.optimizer.state.values() if "step" in v}
+            if self.step and counts != {self.step}:
+                raise ValueError(
+                    "Legacy checkpoint has ambiguous applied-update counters; explicit migration required"
+                )
+            progress = {
+                "applied_updates": self.step,
+                "attempted_updates": self.step,
+                "skipped_updates": 0,
+            }
+        if any(
+            not isinstance(progress[k], int) or progress[k] < 0
+            for k in ("applied_updates", "attempted_updates", "skipped_updates")
+        ):
+            raise ValueError("Invalid checkpoint update counters")
+        if (
+            progress["applied_updates"] != self.step
+            or progress["attempted_updates"] != self.step + progress["skipped_updates"]
+        ):
+            raise ValueError("Inconsistent checkpoint update accounting")
+        self.attempted_updates = progress["attempted_updates"]
+        self.skipped_updates = progress["skipped_updates"]
+        self.consecutive_skipped_updates = progress.get("consecutive_skipped_updates", 0)
         self.tokens_seen = meta["tokens_seen"]
         self.data_position = meta.get("data_position", 0)
         self.best_val_loss = meta.get("best_val_loss", float("inf"))
@@ -211,6 +239,13 @@ class Trainer:
             scaler=self.scaler,
             scheduler=self.scheduler,
             is_best=is_best,
+            update_progress={
+                "schema": 1,
+                "applied_updates": self.step,
+                "attempted_updates": self.attempted_updates,
+                "skipped_updates": self.skipped_updates,
+                "consecutive_skipped_updates": self.consecutive_skipped_updates,
+            },
         )
         duration = time.time() - t0
         self._log_metric(
@@ -223,6 +258,48 @@ class Trainer:
             }
         )
         return duration
+
+    def _apply_update(self) -> dict[str, Any]:
+        """Observe actual optimizer execution; remove hook before any checkpoint."""
+        applied = False
+
+        def mark_applied(optimizer, args, kwargs):
+            nonlocal applied
+            applied = True
+
+        handle = self.optimizer.register_step_post_hook(mark_applied)
+        scale_before = self.scaler.get_scale() if self.scaler.is_enabled() else None
+        try:
+            if self.scaler.is_enabled():
+                if self.config.grad_clip > 0:
+                    self.scaler.unscale_(self.optimizer)
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.config.grad_clip)
+                self.scaler.step(self.optimizer)
+                self.scaler.update()
+            else:
+                if self.config.grad_clip > 0:
+                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.config.grad_clip)
+                self.optimizer.step()
+        finally:
+            handle.remove()
+        self.attempted_updates += 1
+        if applied:
+            self.step += 1
+            self.consecutive_skipped_updates = 0
+            if self.scheduler is not None:
+                self.scheduler.step()
+        else:
+            self.skipped_updates += 1
+            self.consecutive_skipped_updates += 1
+        return {
+            "update_applied": applied,
+            "attempted_updates": self.attempted_updates,
+            "optimizer_updates": self.step,
+            "skipped_updates": self.skipped_updates,
+            "scale_before": scale_before,
+            "scale_after": self.scaler.get_scale() if self.scaler.is_enabled() else None,
+            "scheduler_epoch": self.scheduler.last_epoch if self.scheduler is not None else None,
+        }
 
     def train(self) -> dict[str, Any]:
         """Execute the training loop with mixed precision and progress tracking."""
@@ -284,23 +361,23 @@ class Trainer:
 
                 accum_loss += loss.item() / self.config.gradient_accumulation
 
-            # Gradient clipping & Optimizer Step
-            if self.scaler.is_enabled():
-                if self.config.grad_clip > 0:
-                    self.scaler.unscale_(self.optimizer)
-                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.config.grad_clip)
-                self.scaler.step(self.optimizer)
-                self.scaler.update()
-            else:
-                if self.config.grad_clip > 0:
-                    torch.nn.utils.clip_grad_norm_(self.model.parameters(), self.config.grad_clip)
-                self.optimizer.step()
-
-            if self.scheduler is not None:
-                self.scheduler.step()
-
-            self.step += 1
+            update = self._apply_update()
+            # Data was consumed even when an overflow prevented a weight update.
             self.tokens_seen += step_tokens
+            if not update["update_applied"]:
+                record = {
+                    "type": "skipped_update",
+                    "step": self.step,
+                    "tokens_seen": self.tokens_seen,
+                    **update,
+                }
+                self._log_metric(record)
+                if self.config.json_output:
+                    print(json.dumps(record))
+                if self.consecutive_skipped_updates >= self.config.max_consecutive_skipped_updates:
+                    self._save_checkpoint_now("failed_amp.pt")
+                    raise RuntimeError("Consecutive skipped-update budget exhausted")
+                continue
 
             step_duration = max(time.time() - step_start, 1e-5)
             throughput = step_tokens / step_duration
@@ -309,6 +386,7 @@ class Trainer:
             # Log training metrics
             train_record: dict[str, Any] = {
                 "type": "train",
+                **update,
                 "step": self.step,
                 "loss": accum_loss,
                 "tokens_seen": self.tokens_seen,
@@ -391,6 +469,8 @@ class Trainer:
             "step": self.step,
             "tokens_seen": self.tokens_seen,
             "best_val_loss": self.best_val_loss,
+            "attempted_updates": self.attempted_updates,
+            "skipped_updates": self.skipped_updates,
             "save_dir": str(self.save_dir),
             "gpu_type": self.gpu_name,
         }

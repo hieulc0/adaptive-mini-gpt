@@ -21,6 +21,7 @@ class TrainingConfig:
     device: str = "auto"  # "auto", "cpu", "cuda"
     precision: str = "fp32"  # "fp32", "fp16", "bf16"
     grad_clip: float = 1.0
+    max_consecutive_skipped_updates: int = 16
     save_dir: str = "runs/exp-001"
     backup_dir: str | None = None  # Google Drive or persistent external backup path
     lr_schedule: str = "cosine"  # "constant", "cosine"
@@ -32,6 +33,8 @@ class TrainingConfig:
     json_output: bool = False
 
     def __post_init__(self) -> None:
+        if self.max_consecutive_skipped_updates <= 0:
+            raise ValueError("max_consecutive_skipped_updates must be positive")
         if self.batch_size <= 0:
             raise ValueError(f"batch_size must be positive, got {self.batch_size}")
         if self.gradient_accumulation <= 0:

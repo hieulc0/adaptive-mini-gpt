@@ -111,11 +111,13 @@ class CheckpointManager:
         scaler: Any | None = None,
         scheduler: LRScheduler | None = None,
         is_best: bool = False,
+        update_progress: dict[str, Any] | None = None,
     ) -> Path:
         """Save a complete checkpoint atomically and update manifest and optional backup."""
         save_start = time.time()
         checkpoint_data: dict[str, Any] = {
             "format_version": "1.0",
+            "update_progress": update_progress,
             "run_id": run_id,
             "step": step,
             "tokens_seen": tokens_seen,
@@ -532,6 +534,7 @@ class CheckpointManager:
 
         return {
             "step": checkpoint.get("step", 0),
+            "update_progress": checkpoint.get("update_progress"),
             "tokens_seen": checkpoint.get("tokens_seen", 0),
             "data_position": checkpoint.get("data_position", 0),
             "best_val_loss": checkpoint.get("best_val_loss", float("inf")),
