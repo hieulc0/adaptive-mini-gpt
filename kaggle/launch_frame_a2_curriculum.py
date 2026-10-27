@@ -11,6 +11,7 @@ from pathlib import Path
 import torch
 
 PINNED_SHA = "__PINNED_SHA__"
+VERIFY_ONLY = False
 REPO = Path("/tmp/amg-frame-a2-curriculum")
 OUT = Path("/kaggle/working/frame-a2-curriculum")
 
@@ -44,7 +45,12 @@ def main():
         env=env,
         check=True,
     )
-    status = {"sha": PINNED_SHA, "gpu": torch.cuda.get_device_name(0), "phases": {}}
+    status = {
+        "sha": PINNED_SHA,
+        "verification_only": VERIFY_ONLY,
+        "gpu": torch.cuda.get_device_name(0),
+        "phases": {},
+    }
 
     def run(cmd, name, timeout):
         with (OUT / f"{name}.log").open("w") as f:
@@ -93,18 +99,19 @@ def main():
             180,
         ):
             raise RuntimeError("Provenance verification failed; preserve raw inputs")
-        run(
-            [
-                sys.executable,
-                "scripts/run_frame_a2_curriculum.py",
-                "--root",
-                str(roots[0]),
-                "--output-dir",
-                str(OUT),
-            ],
-            "curriculum",
-            900,
-        )
+        if not VERIFY_ONLY:
+            run(
+                [
+                    sys.executable,
+                    "scripts/run_frame_a2_curriculum.py",
+                    "--root",
+                    str(roots[0]),
+                    "--output-dir",
+                    str(OUT),
+                ],
+                "curriculum",
+                900,
+            )
         run(
             [sys.executable, "-m", "pytest", "-q", f"--junitxml={OUT / 'full-suite.xml'}"],
             "full-suite",

@@ -52,7 +52,7 @@ def main():
         "training_source_sha": result["provenance"]["git_sha"],
         "publication_source_sha": publisher,
         "copies": {},
-        "scope": "metadata only; two next-update checks per copy are restored and never retained",
+        "scope": "metadata only; saved before disposable next-update checks, never retained",
     }
     for name, arm in result["optimizer"].items():
         raw = source / f"optimizer_{name}.pt"
@@ -66,10 +66,12 @@ def main():
             owner,
             training_sha=result["provenance"]["git_sha"],
             publication_sha=publisher,
-            parent_hash=ORIGINAL,
+            parent_hash=None if name == "fresh" else ORIGINAL,
+            comparison_hash=ORIGINAL,
             data_hash=file_hash("data/fixtures/stage_a_original_tiny.json"),
             stage="A.2_optimizer_diagnostic",
         )
+        owner.metadata["parent_sha256"] = None if name == "fresh" else ORIGINAL
         owner.metadata["supervision_schema"] = {
             "attribute_ids": (10, 15),
             "state_targets": None,

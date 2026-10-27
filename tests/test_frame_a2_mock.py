@@ -91,3 +91,20 @@ def test_checkpoint_provenance_preserves_parent_and_global_progress():
     assert owner.metadata["git_sha"] == "new" and owner.metadata["data_hash"] == "new-data"
     assert owner.metadata["frame_a2_parent_provenance"]["git_sha"] == "old"
     assert owner.metadata["steps"] == 1400 and not owner.metadata["promoted"]
+
+
+def test_fresh_control_has_comparison_reference_but_no_weight_parent():
+    m = module()
+    owner = SimpleNamespace(metadata={"steps": 0})
+    m.record_stage_provenance(
+        owner,
+        training_sha="new",
+        publication_sha="publisher",
+        parent_hash=None,
+        comparison_hash="comparison-only",
+        data_hash="new-data",
+        stage="A.2",
+    )
+    assert owner.metadata["parent_checkpoint_sha256"] is None
+    assert owner.metadata["comparison_checkpoint_sha256"] == "comparison-only"
+    assert owner.metadata["steps"] == 0

@@ -83,7 +83,9 @@ def state_digest(value):
     return h.hexdigest()
 
 
-def record_stage_provenance(owner, *, training_sha, publication_sha, parent_hash, data_hash, stage):
+def record_stage_provenance(
+    owner, *, training_sha, publication_sha, parent_hash, data_hash, stage, comparison_hash=None
+):
     """Preserve ancestor attribution; never mistake inherited metadata for producer."""
     previous = {k: owner.metadata.get(k) for k in ("git_sha", "data_hash", "stage", "steps")}
     owner.metadata.update(
@@ -91,6 +93,7 @@ def record_stage_provenance(owner, *, training_sha, publication_sha, parent_hash
         git_sha=training_sha,
         checkpoint_publication_sha=publication_sha,
         parent_checkpoint_sha256=parent_hash,
+        comparison_checkpoint_sha256=comparison_hash,
         data_hash=data_hash,
         stage=stage,
         promoted=False,

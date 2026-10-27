@@ -177,7 +177,8 @@ def run(out, root_path, original_path):
             owner,
             training_sha=result["provenance"]["git_sha"],
             publication_sha=result["provenance"]["git_sha"],
-            parent_hash=ORIGINAL,
+            parent_hash=None if strategy == "fresh" else ORIGINAL,
+            comparison_hash=ORIGINAL,
             data_hash=file_hash("data/fixtures/stage_a_original_tiny.json"),
             stage="A.2_optimizer_diagnostic",
         )
@@ -189,7 +190,7 @@ def run(out, root_path, original_path):
             },
             a2_strategy=strategy,
             optimizer_policy="constant LR, global update clock retained; warm-moment age reset explicitly changes bias correction",
-            parent_sha256=ORIGINAL,
+            parent_sha256=None if strategy == "fresh" else ORIGINAL,
         )
         arm = {
             "initial_hash": digest(owner.model.state_dict()),
