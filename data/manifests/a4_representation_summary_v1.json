@@ -1,0 +1,29 @@
+{
+  "source_kernel": "sparklinghydraulics0/amg-stage-a4-localization/1",
+  "scope": "Descriptive L2 summaries of already-saved per-case outputs; dimensions differ and values are not comparable causal contributions",
+  "roundtrip_sequences": 324,
+  "max_tokens": 158,
+  "mean_l2": {
+    "old_known": {
+      "token_embedding_mean": 0.07069974948599479,
+      "embedding_plus_position_mean": 0.07069975024414726,
+      "transformer_pooled": 1.333411928002802,
+      "concept": 9.934005922809156,
+      "logits": 9.288249558928735
+    },
+    "old_renamed": {
+      "token_embedding_mean": 0.06968888651728622,
+      "embedding_plus_position_mean": 0.06968888723016221,
+      "transformer_pooled": 1.3336927760153483,
+      "concept": 10.261996205968561,
+      "logits": 9.623290832264441
+    },
+    "new_training": {
+      "token_embedding_mean": 0.08440651513391646,
+      "embedding_plus_position_mean": 0.08440651524294823,
+      "transformer_pooled": 1.6632422441185046,
+      "concept": 15.098656593962765,
+      "logits": 15.823975132666385
+    }
+  }
+}

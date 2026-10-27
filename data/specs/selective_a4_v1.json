@@ -1,0 +1,20 @@
+{
+  "id": "selective-a4-v1",
+  "scope": "Conditional Stage A.4 frozen-backbone and existing ECA feasibility; no sealed data",
+  "trigger": "Matched replay primary failed acquisition, retention and development gates",
+  "parent_checkpoint_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+  "replay_reference_source": "4afeffce617d3b32a9b8b7c58c3f22e9a697b562",
+  "primary": "frozen_backbone_replay_6",
+  "updates": 1200,
+  "batch": 18,
+  "replay_per_batch": 6,
+  "learning_rate": 0.002,
+  "seed": 42,
+  "old_initial_competence": 0.95,
+  "old_retention": 0.95,
+  "training_gate": {"updates":[1000,1100,1200],"exact":0.99,"each_frame":0.99,"each_status":0.98},
+  "development_gate": {"exact":0.90,"each_family":0.85,"each_status":0.95},
+  "modular_rule": "Existing ECA path evaluated at t0; train it only if both old cells are >=95%. LM-domain adapters are not on the canonical attribute path.",
+  "optimizer": "Preserve named Adam states; freeze trainability only; no automatic resets",
+  "promotion": false
+}
