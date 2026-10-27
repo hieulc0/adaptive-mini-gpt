@@ -33,7 +33,7 @@ from run_foundational_audit import digest
 from run_stable_attributes import compact, enrich
 
 from adaptive_mini_gpt.data.attribute_learning import TAG_IDS
-from adaptive_mini_gpt.data.joint_acquisition_a5 import validate_disjoint
+from adaptive_mini_gpt.data.joint_acquisition_a5 import STATUSES, validate_disjoint
 from adaptive_mini_gpt.data.rehearsal_a5 import ARMS, plans, stable_new, stable_old, synthetic_old
 from adaptive_mini_gpt.natural_language_learning_m103.tokenizer_m103 import ByteTextTokenizerM103
 from adaptive_mini_gpt.training.learning_state import (
@@ -45,7 +45,7 @@ from adaptive_mini_gpt.training.optimizer_contract import optimizer_membership
 from adaptive_mini_gpt.training.remote_runtime import require_remote_cuda
 from adaptive_mini_gpt.training.reproducibility import seed_all
 
-SPEC = Path("data/specs/rehearsal_a5_v1.json")
+SPEC = Path("data/specs/rehearsal_a5_v2.json")
 
 
 def prepare():
@@ -92,6 +92,13 @@ def prepare():
     for arm, indices in streams.items():
         counts = Counter(i for ix in indices for i in ix)
         statuses = Counter(tuple(rows[i].statuses) for ix in indices for i in ix)
+        new_families = Counter(
+            (rows[i].frame, tuple(rows[i].statuses)) for ix in indices for i in ix if i < len(new)
+        )
+        for status in STATUSES:
+            frequencies = [new_families[(f, status)] for f in range(2, 5)]
+            if max(frequencies) - min(frequencies) > 1:
+                raise ValueError("New grammar/status composition is confounded")
         if set(statuses.values()) != {2400}:
             raise ValueError("Unequal annotation exposure")
         old = sum(n for i, n in counts.items() if i >= len(new))
@@ -109,6 +116,7 @@ def prepare():
             unique_historical=sum(len(new) <= i < len(new) + len(historical) for i in counts),
             unique_synthetic=sum(i >= len(new) + len(historical) for i in counts),
             counts_by_case=[counts[i] for i in range(len(rows))],
+            new_frame_status_counts={str(k): v for k, v in new_families.items()},
         )
     sets = dict(
         new=new,

@@ -42,8 +42,11 @@ def plans(new, historical, synthetic, seed, steps):
             status = STATUSES[j]
             name, content = rng.choice(choices[status])
             old_name = rng.choice(SYNTHETIC_NAMES)
-            left = ni[(2 + (step + j) % 3, status, name, content)]
-            right = ni[(2 + (step + j + 1) % 3, status, name, content)]
+            # Rotate both within and between three-step replacement cycles.
+            # A flat step%3 rotation aliases grammar to the second status label.
+            frame = (step // 3 + step % 3 + j) % 3
+            left = ni[(2 + frame, status, name, content)]
+            right = ni[(2 + (frame + 1) % 3, status, name, content)]
             syn = si[((step + j) % 2, status, old_name, content)]
             selected = j % 3 != step % 3  # six slots; each status replaced twice per3steps
             for arm in ARMS:

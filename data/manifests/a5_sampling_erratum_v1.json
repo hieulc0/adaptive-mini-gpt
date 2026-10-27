@@ -1,0 +1,35 @@
+{
+  "classification": "CONFIRMED experimental sampling defect; no neural/model defect claimed",
+  "invalid_source": "69d8fc9c2883e57004529743d015d547b9a4c0a2",
+  "kernel": "sparklinghydraulics0/amg-stage-a5-rehearsal/1",
+  "found_before_neural_outcome_inspection": true,
+  "reproducer": "LOCAL MOCK ONLY: test_rehearsal_does_not_confounds_status_and_grammar, nine fake steps",
+  "before": {
+    "expected_new_count_per_frame_status": 4,
+    "observed_counts": [
+      3,
+      6
+    ],
+    "pytest": "1 failed,2 deselected"
+  },
+  "correction": "independent within/between three-step frame rotation; max-min new frame count per status<=1 remotely enforced",
+  "after": {
+    "pytest": "6 inspected mock cases passed",
+    "ruff": "PASS",
+    "pyright": "0 errors,0 warnings"
+  },
+  "protocol_v1_preserved": true,
+  "replacement_spec": "data/specs/rehearsal_a5_v2.json",
+  "unchanged": [
+    "seed",
+    "model capacity",
+    "loss",
+    "optimizer inheritance",
+    "learning rate",
+    "total observations",
+    "updates",
+    "replay budgets",
+    "scientific thresholds"
+  ],
+  "status": "v1 NOT QUALIFIED; preserve all eventual artifacts; fixed run not yet submitted"
+}

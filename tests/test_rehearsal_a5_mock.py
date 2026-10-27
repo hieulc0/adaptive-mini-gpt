@@ -49,3 +49,25 @@ def test_stable_preservation_requires_each_late_cell():
     assert not stable_old(good[1:])
     good[0]["retention"]["old_known"]["exact"] = 0.94
     assert not stable_old(good)
+
+
+def test_rehearsal_does_not_confounds_status_and_grammar():
+    new = [
+        SimpleNamespace(frame=f, statuses=s, name="fake", content=str(s))
+        for f in range(2, 5)
+        for s in STATUSES
+    ]
+    historical = [SimpleNamespace(statuses=s) for s in STATUSES]
+    synthetic = [
+        SimpleNamespace(frame=f, statuses=s, name=n, content=str(s))
+        for f in range(2)
+        for s in STATUSES
+        for n in SYNTHETIC_NAMES
+    ]
+    streams = plans(new, historical, synthetic, 42, 9)
+    for arm, batches in streams.items():
+        counts = Counter(
+            (new[i].frame, new[i].statuses) for ix in batches for i in ix if i < len(new)
+        )
+        expected = 6 if arm == "none" else 3 if arm == "balanced_9" else 4
+        assert set(counts.values()) == {expected}
