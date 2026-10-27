@@ -31,3 +31,15 @@ Stage A follow-up (source216c3d5; full job ERROR,19 focused contracts pass; deta
 | FP16 attempted global steps equated with applied Adam updates | SCIENTIFIC VALIDITY ISSUE | Repaired at db9ef68 after deterministic forced-overflow trace: old global4/Adam3/scheduler4, repaired4/4/4 with5 consumed attempts. Original773pass/1fail remains preserved; ordinary repeat passes. Strict Adam4 assertion retained, progress/scales exported, exact interrupted continuation verified. STAGE_A_DIAGNOSTIC.md scopes the proof and original lost-state uncertainty. |
 
 No repository-wide semantic certification is claimed. The AST inventory remains an inventory. Canonical state owns only declared learning state; callbacks must not perform arbitrary filesystem/service side effects. Publication is atomic and immutable, blocked inside candidates. Arbitrary topology operations and learned policies remain disabled until independently specified and qualified.
+
+Stage A.2 follow-up (final source `d25a9bf`,792remote passes; [evidence](STAGE_A2.md)):
+
+| Finding | Classification | State / evidence |
+| --- | --- | --- |
+| New study applies flat tensor hash to nested optimizer dictionary | CONFIRMED BUG | Source366b66c remote curriculum errors before its first update; preserved alongside independent790-pass suite. Typed recursive state digest and pure mock reproducer repair; corrected study completes. No threshold/data/seed change. |
+| New study checkpoints inherit ancestor git/data fields as producer | SCIENTIFIC VALIDITY ISSUE | New publication binds actual producing revision, protocol/stream/parent hashes and supervision, preserving ancestor attribution. Raw diagnostic artifacts immutable; six separate corrected metadata-only copies retain exact model/optimizer/RNG/flags and identical next sampled update. |
+| Exact pinned model is strongly absolute-position dependent | DESIGN LIMITATION | Unchanged tokens at position+4 reduce familiar exact100% to38.1%; test ensures hooks removed and capacity checked. Offset also moves rule/BOS; it does not identify sole natural-grammar cause. No positional architecture change. |
+| Varied grammars/order/prefixes suffice for invariant concepts | UNVERIFIED HYPOTHESIS | Prespecified primary stream42/43 endpoints60%/52% versus n-gram100%, training probe80.2%/67.7%; all development-admission conditions not met. No module/growth/pooling change introduced to force success. |
+| Attribute learning preserves prior behavior through shared heads | DESIGN LIMITATION | Main old competent familiar frames degrade from100%; historical8-case state TRAINING probe also degrades despite unchanged state-head weights. No independent lifelong-retention/negative-transfer claim from unmatched controls. |
+
+Final `cbf2f82` also separates the fresh diagnostic’s comparison reference from a null weight parent; pure fake-state regression reproduces the missing contract before repair. Final remote793passes/13focused contracts and six exact metadata-copy continuations pass. Producer attribution repair does not change the failed learning outcome.

@@ -1,0 +1,56 @@
+{
+  "kernel": "sparklinghydraulics0/amg-frame-a2-curriculum",
+  "version": 1,
+  "status": "ERROR",
+  "artifact_directory": "runs/kaggle-frame-a2-curriculum/output-v1/frame-a2-curriculum",
+  "execution": {
+    "sha": "366b66c763f41fd5e8524047120bb696c387160e",
+    "gpu": "Tesla T4",
+    "phases": {
+      "contracts": {
+        "exit_code": 0
+      },
+      "curriculum": {
+        "exit_code": 1
+      },
+      "full-suite": {
+        "exit_code": 0
+      }
+    }
+  },
+  "reason": "Flat weight-only hash called on nested optimizer state before first learning update",
+  "scientific_updates": 0,
+  "tests": {
+    "contracts": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "10",
+      "time": "10.065",
+      "timestamp": "2026-10-27T03:11:41.746537+00:00",
+      "hostname": "facd2fdf420a"
+    },
+    "full-suite": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "790",
+      "time": "618.009",
+      "timestamp": "2026-10-27T03:12:01.867428+00:00",
+      "hostname": "facd2fdf420a"
+    }
+  },
+  "sha256": {
+    "curriculum.log": "26cd6be189b3359f7d5afe79e6e24f8ae03ec2664b74823d17c14dde0a796788",
+    "contracts.log": "9e5bbc5581ffca5d2f3ca872f1c32676b684b141426502729176e2c76d9ec0db",
+    "factor_stream_42.json": "aca6746b4f9ceed19914d5da2a1a051cece2d07745282b29e8b7b74fa3fa403f",
+    "full-suite.xml": "656a0eac9bb4d2870ca102041742b5ab3f90ee94a389605af1480bed2717128c",
+    "execution.json": "0401044f451be7220fcb0c1f63f58fb5b83303556a24f9f547313c68b37af881",
+    "development_tokens.json": "b10469c0c2799726d8d0c36535bc885049d5da26d8864a59ff4e8cbe661c8ec0",
+    "development_cases.json": "c26b93a30b6322dfd292671ab26136aa03579c28877a1e190b6675e7a2fedd6f",
+    "full-suite.log": "3c3bcc3fcda7deba4aa862b04ca1afec4ce047f87f95230ab537001b1e4a1a3a",
+    "contracts.xml": "7e315f29a6bad3a7d6fa5059e638781fce9ea1500a1b622f1f3fd217a07a3bfa"
+  }
+}

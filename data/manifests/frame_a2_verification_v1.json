@@ -1,0 +1,139 @@
+{
+  "kernel": "sparklinghydraulics0/amg-frame-a2-verification",
+  "version": 1,
+  "status": "COMPLETE",
+  "scope": "final-source engineering verification only; no curriculum rerun, no sealed evaluation or promotion",
+  "execution": {
+    "sha": "cbf2f82b9dd0cd39665b3a15cc5bf7ac76bb27b0",
+    "verification_only": true,
+    "gpu": "Tesla T4",
+    "phases": {
+      "contracts": {
+        "exit_code": 0
+      },
+      "provenance": {
+        "exit_code": 0
+      },
+      "full-suite": {
+        "exit_code": 0
+      }
+    }
+  },
+  "tests": {
+    "contracts": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "13",
+      "time": "10.422",
+      "timestamp": "2026-10-27T03:52:54.179180+00:00",
+      "hostname": "fb50719b9e0e"
+    },
+    "full-suite": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "793",
+      "time": "608.923",
+      "timestamp": "2026-10-27T03:53:19.734112+00:00",
+      "hostname": "fb50719b9e0e"
+    }
+  },
+  "annotation": {
+    "training_source_sha": "98c8d98b28aea03a5ef5ded39d94f9c146d228ec",
+    "publication_source_sha": "cbf2f82b9dd0cd39665b3a15cc5bf7ac76bb27b0",
+    "copies": {
+      "inherit": {
+        "raw_sha256": "ed72f0b1d9c770eb4e1c11f03ac1833b44e5954ec30e327c5b50a8800542e888",
+        "corrected_sha256": "6bf339d1c94962f4649a7e1a4c873052820d9e4f926455914d20f4146842378c",
+        "state_signature_unchanged": "f08865db22bcce3fe609b980b4021e1d2adc79f00376a649eda76da350a8370b",
+        "next_update_identical": true,
+        "raw_inherited_metadata": {
+          "git_sha": "5a7b409fc0e8312708328fbddaca54cf0dd6e332",
+          "data_hash": "c86584a57e3b80f78be302409ebcf3b50d7e6cf0071416d1c4889d8599945f9c",
+          "steps": 400
+        }
+      },
+      "moments": {
+        "raw_sha256": "0b2b45a413e800b47ca28d1005f357127775633d1fdfac5a1340cb3ae72900b4",
+        "corrected_sha256": "c9aaf4002d4b71459210f4ab1093f1929aecfaa1a45c608e16d943c75d96a9c3",
+        "state_signature_unchanged": "f724ae59ae96ef09a4cc11253d7237a7dec9e97fe62cdacca500a9b4554e1b01",
+        "next_update_identical": true,
+        "raw_inherited_metadata": {
+          "git_sha": "5a7b409fc0e8312708328fbddaca54cf0dd6e332",
+          "data_hash": "c86584a57e3b80f78be302409ebcf3b50d7e6cf0071416d1c4889d8599945f9c",
+          "steps": 400
+        }
+      },
+      "age": {
+        "raw_sha256": "102dd2112cf650ba46eac75c153e32b5a640b45cdb83999d57475ab2436e6b03",
+        "corrected_sha256": "9d554412c824e118b83fe5cb82083662251e63572cc60c5c16ae0d24403bb60e",
+        "state_signature_unchanged": "dde400f469da6c2b830f27982573547b1a999d30ecc7c522a6cf7187c10f1208",
+        "next_update_identical": true,
+        "raw_inherited_metadata": {
+          "git_sha": "5a7b409fc0e8312708328fbddaca54cf0dd6e332",
+          "data_hash": "c86584a57e3b80f78be302409ebcf3b50d7e6cf0071416d1c4889d8599945f9c",
+          "steps": 400
+        }
+      },
+      "complete": {
+        "raw_sha256": "5ba976a1136ffd86c491b45e53bcb4faa334777be47bee7aef03866dc2c10670",
+        "corrected_sha256": "f5a33ece84b2342573c0613997edbd96e42839f4144ba60daddcb98353b0c4f0",
+        "state_signature_unchanged": "4e6b0bb81a8258fd1b9d8df1b54d4decda20196f70d8aa9e20523ffe35db6f2f",
+        "next_update_identical": true,
+        "raw_inherited_metadata": {
+          "git_sha": "5a7b409fc0e8312708328fbddaca54cf0dd6e332",
+          "data_hash": "c86584a57e3b80f78be302409ebcf3b50d7e6cf0071416d1c4889d8599945f9c",
+          "steps": 400
+        }
+      },
+      "fresh": {
+        "raw_sha256": "fef5e9863fc7b39b758a3d360e23ca2ceb52a673719d7bea060c64b65316b220",
+        "corrected_sha256": "80e0d639cfec91d27884870207f453f2f4bcaf511e5a6e9effd2c6c1a7e4a53a",
+        "state_signature_unchanged": "17774bc08437d4094332eaab3446d1c30ff56f329af241da77a73ec7af589ee7",
+        "next_update_identical": true,
+        "raw_inherited_metadata": {
+          "git_sha": null,
+          "data_hash": null,
+          "steps": 200
+        }
+      },
+      "rebase": {
+        "raw_sha256": "14d4bfb9e7e0430382619f2ac02df5fcf1555cb57cf412b98d7deee239ca6a03",
+        "corrected_sha256": "777b68fa7670978db98e538bffaa0bc9f073e55e6bac6e586ecf021911c18af5",
+        "state_signature_unchanged": "f08865db22bcce3fe609b980b4021e1d2adc79f00376a649eda76da350a8370b",
+        "next_update_identical": true,
+        "raw_inherited_metadata": {
+          "git_sha": "5a7b409fc0e8312708328fbddaca54cf0dd6e332",
+          "data_hash": "c86584a57e3b80f78be302409ebcf3b50d7e6cf0071416d1c4889d8599945f9c",
+          "steps": 400
+        }
+      }
+    },
+    "scope": "metadata only; saved before disposable next-update checks, never retained"
+  },
+  "artifact_directory": "runs/kaggle-frame-a2-verification/output-v1/frame-a2-curriculum",
+  "versions_scope": "Verification-only launcher records GPU and source; full Python/PyTorch/CUDA versions independently emitted by the preceding curriculum run. Do not treat those as newly measured versions here.",
+  "local_mock_reproducer": {
+    "test": "test_fresh_control_has_comparison_reference_but_no_weight_parent",
+    "before": "TypeError: unexpected keyword argument comparison_hash",
+    "after": "10 inspected mock/string-only tests pass; no neural execution"
+  },
+  "sha256": {
+    "annotated-diagnostics/annotation.json": "490dc6477e9d8542dc38458229bcb9da0de3d3b1da0b42b6b855f1baac086fea",
+    "annotated-diagnostics/corrected_optimizer_age.pt": "9d554412c824e118b83fe5cb82083662251e63572cc60c5c16ae0d24403bb60e",
+    "annotated-diagnostics/corrected_optimizer_complete.pt": "f5a33ece84b2342573c0613997edbd96e42839f4144ba60daddcb98353b0c4f0",
+    "annotated-diagnostics/corrected_optimizer_fresh.pt": "80e0d639cfec91d27884870207f453f2f4bcaf511e5a6e9effd2c6c1a7e4a53a",
+    "annotated-diagnostics/corrected_optimizer_inherit.pt": "6bf339d1c94962f4649a7e1a4c873052820d9e4f926455914d20f4146842378c",
+    "annotated-diagnostics/corrected_optimizer_moments.pt": "c9aaf4002d4b71459210f4ab1093f1929aecfaa1a45c608e16d943c75d96a9c3",
+    "annotated-diagnostics/corrected_optimizer_rebase.pt": "777b68fa7670978db98e538bffaa0bc9f073e55e6bac6e586ecf021911c18af5",
+    "contracts.log": "23ba018e9abdea690e14873c03c7775e65ee071d05cb01633b4b93f781ba1851",
+    "contracts.xml": "bd86d3408f628018dcf9df9512e94562f782f88a739737a9963bd81041bb5c4b",
+    "execution.json": "ba19428efce790dd15c89d6c0c99c69880515a2e5813370b44c524aaa45c1f1f",
+    "full-suite.log": "67690e22234a91d60be91d02d009963b6e5e8a4b0d10b3c42e73fc3130a33599",
+    "full-suite.xml": "ef05bfc150dfb94000fcbcaa23acf779dca779c7a7ca4d06b9c7951f7a208d93",
+    "provenance.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  }
+}
