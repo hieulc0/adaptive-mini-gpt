@@ -278,7 +278,7 @@ def run(out, latest_path, original_path):
         "baselines": {},
         "provenance": {
             "git_sha": subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip(),
-            "platform": "kaggle_or_colab",
+            "platform": require_remote_cuda(),
             "python": platform.python_version(),
             "torch": torch.__version__,
             "cuda": torch.version.cuda,

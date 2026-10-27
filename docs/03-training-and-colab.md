@@ -248,3 +248,6 @@ uvx --from google-colab-cli colab stop -s amg-t4
 | **`401 / 403 Unauthorized`** | Missing OAuth token or expired token | Run `colab usage`; if prompt appears, provide the OAuth URL to the user to paste the code. |
 | **`FileNotFoundError: configs/tiny.yaml`** | Process executed from `/content` rather than repo directory | Always `cd /content/adaptive-mini-gpt` before invoking `pytest` or python scripts. |
 | **High idle compute charge** | VM left running after script completion | Always run `colab stop -s <name>` at the end of the workflow. |
+
+
+Stage A diagnostic/backend continuation: [protocol and evidence](STAGE_A_DIAGNOSTIC.md). FP16 progress now distinguishes attempted/skipped/applied updates, seeds before initialization, and restores exact tested continuation. Backend source db9ef68 passes778 remote full-suite tests. The historical773pass/1fail result stays preserved; development-only language/history diagnostics do not qualify concepts or advance Stage B.

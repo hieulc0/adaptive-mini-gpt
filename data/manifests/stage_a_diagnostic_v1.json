@@ -1,0 +1,1994 @@
+{
+  "kernel": "sparklinghydraulics0/amg-stage-a-diagnostic",
+  "version": 2,
+  "status": "COMPLETE",
+  "execution": {
+    "sha": "17d8c6f3aba083b43abc9251e0a27108e511b6d9",
+    "gpu": "Tesla T4",
+    "phases": {
+      "install": {
+        "exit_code": 0
+      },
+      "contracts": {
+        "exit_code": 0
+      },
+      "development_diagnostic": {
+        "exit_code": 0
+      },
+      "full_suite": {
+        "exit_code": 0
+      }
+    }
+  },
+  "provenance": {
+    "git_sha": "17d8c6f3aba083b43abc9251e0a27108e511b6d9",
+    "platform": "kaggle_or_colab",
+    "python": "3.13.15",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "gpu": "Tesla T4",
+    "seed": 42
+  },
+  "artifact_directory": "runs/kaggle-stage-a-diagnostic/output-v2/stage-a-diagnostic",
+  "input": {
+    "cases": 429,
+    "max_tokens": 155,
+    "context": 256,
+    "all_four_cells_matched": true,
+    "unseen_token_ids_by_cell": {
+      "familiar_familiar": [],
+      "novel_familiar": [
+        89,
+        90
+      ],
+      "familiar_novel": [],
+      "novel_novel": [
+        89,
+        90
+      ]
+    }
+  },
+  "input_independently_decoded": 429,
+  "data_hash": "c2f7f254a540367f037f60f1832e1dc7c6a4fe9d5c3267f5f1d9fdaf7ff08ffb",
+  "parent_latest": "9b4d8a937e553c9d27befbd218612724e5fb43909f632f8ebbb988ed224c4f3e",
+  "parent_original": "4a4f79fcd07b5bbe58bad5da04ce1a934696438c8603e9e6296e398a4b5ed5d8",
+  "spec_sha256": "e977dcff35f19d5c5840926eb900b298e6ce67b36bb40c863f8956bea9391f63",
+  "tests": {
+    "contracts": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "26",
+      "time": "18.710",
+      "timestamp": "2026-10-27T01:56:04.916565+00:00",
+      "hostname": "d30fdfc73235"
+    },
+    "full-suite": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "781",
+      "time": "603.832",
+      "timestamp": "2026-10-27T01:57:57.925328+00:00",
+      "hostname": "d30fdfc73235"
+    }
+  },
+  "neural": {
+    "inherited_weights_inherited_moments": {
+      "initial_hash": "0a387f499ca38277660eef4dbd02bd0d29eac5dc5a43dd1746be337c2f8a97ef",
+      "initial_steps": 400,
+      "initial_adam_step_counts": {
+        "400": 25,
+        "200": 9
+      },
+      "stored_parameters": 1255636,
+      "trainable_parameters": 406762,
+      "updates": 1000,
+      "examples": 14600,
+      "tokens": 1739030,
+      "gpu_wall_seconds": 16.82074847900003,
+      "final_hash": "aed7480606a1a60e38ee7a95d22b5bcf14141f034f76cb45fb59680de277a33e",
+      "total_steps": 1400,
+      "checkpoint_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+      "gradient_initial": {
+        "active_loss": 1.5807888507843018,
+        "inactive_loss": 0.000839365879073739,
+        "all26_loss": 0.12237394601106644,
+        "per_label_loss": [
+          0.00045082304859533906,
+          0.0008381737861782312,
+          0.0004496574401855469,
+          0.0005884700221940875,
+          0.001373079139739275,
+          0.0007917616167105734,
+          0.0008674727869220078,
+          0.0003689659934025258,
+          0.0013304816093295813,
+          0.001167085487395525,
+          2.779374361038208,
+          0.00036742951488122344,
+          0.0004123052058275789,
+          0.0010332001838833094,
+          0.00032785203075036407,
+          0.38220348954200745,
+          0.0005174212856218219,
+          0.0011230044765397906,
+          0.0014370812568813562,
+          0.0009606149396859109,
+          0.0012528632069006562,
+          0.0010563532123342156,
+          0.0009858343983069062,
+          0.0007758670253679156,
+          0.0009040302829816937,
+          0.0007649527979083359
+        ],
+        "active_total_norm": 5.078195095062256,
+        "inactive_total_norm": 0.010838482528924942,
+        "all26_total_norm": 0.3951042592525482,
+        "active_shared_norm": 4.596151351928711,
+        "inactive_shared_norm": 0.010596423409879208,
+        "shared_cosine": 0.49378088116645813,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "gradient_tiny": {
+        "active_loss": 0.00022688617173116654,
+        "inactive_loss": 0.05905444547533989,
+        "all26_loss": 0.054529253393411636,
+        "per_label_loss": [
+          0.04139704257249832,
+          0.06122325733304024,
+          0.06157587841153145,
+          0.06466015428304672,
+          0.125440314412117,
+          0.0543774776160717,
+          0.05501176416873932,
+          0.046237535774707794,
+          0.060204651206731796,
+          0.05762631446123123,
+          0.00022244759020395577,
+          0.03817097470164299,
+          0.04781165346503258,
+          0.07290325313806534,
+          0.038289349526166916,
+          0.00023132472415454686,
+          0.06616822630167007,
+          0.0770186185836792,
+          0.06327486038208008,
+          0.04724276065826416,
+          0.048828814178705215,
+          0.06383442878723145,
+          0.05249285697937012,
+          0.05093163996934891,
+          0.06889566034078598,
+          0.053689319640398026
+        ],
+        "active_total_norm": 0.001563557772897184,
+        "inactive_total_norm": 0.5283955335617065,
+        "all26_total_norm": 0.4877115488052368,
+        "active_shared_norm": 0.0011036709183827043,
+        "inactive_shared_norm": 0.5189597010612488,
+        "shared_cosine": -0.45856499671936035,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "gradient_train": {
+        "active_loss": 0.00011406144039938226,
+        "inactive_loss": 0.17850176990032196,
+        "all26_loss": 0.1647796332836151,
+        "per_label_loss": [
+          0.12889783084392548,
+          0.18898864090442657,
+          0.18510830402374268,
+          0.2091124802827835,
+          0.39058494567871094,
+          0.2310706526041031,
+          0.17390720546245575,
+          0.18477903306484222,
+          0.18179962038993835,
+          0.18626122176647186,
+          5.852464892086573e-05,
+          0.12489411979913712,
+          0.16663828492164612,
+          0.20528364181518555,
+          0.13466371595859528,
+          0.0001695982355158776,
+          0.21102121472358704,
+          0.23244206607341766,
+          0.17492930591106415,
+          0.12383714318275452,
+          0.12632222473621368,
+          0.11759880930185318,
+          0.14840088784694672,
+          0.10617739707231522,
+          0.17619581520557404,
+          0.1751278042793274
+        ],
+        "active_total_norm": 0.0044483221136033535,
+        "inactive_total_norm": 2.6123156547546387,
+        "all26_total_norm": 2.411322832107544,
+        "active_shared_norm": 0.004381492733955383,
+        "inactive_shared_norm": 2.596161127090454,
+        "shared_cosine": -0.13603173196315765,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "tiny_exact": 1.0,
+      "train_exact": 1.0,
+      "cells": {
+        "familiar_familiar": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.09523809523809523,
+          "matched_shift": {
+            "pooled_cosine_mean": 1.0,
+            "concept_cosine_mean": 1.0
+          },
+          "attention": {
+            "reconstruction_max_abs": 1.1444091796875e-05,
+            "pool_size": 41,
+            "attention_mass": {
+              "rule": 0.8984751105308533,
+              "property_text": 0.07259981334209442,
+              "frame_and_name": 0.028925025835633278
+            },
+            "question": "J has properties: flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        },
+        "novel_familiar": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.09523809523809523,
+          "matched_shift": {
+            "pooled_cosine_mean": 0.9924408197402954,
+            "concept_cosine_mean": 0.9806520342826843
+          },
+          "attention": {
+            "reconstruction_max_abs": 1.1444091796875e-05,
+            "pool_size": 41,
+            "attention_mass": {
+              "rule": 0.8986282348632812,
+              "property_text": 0.07232432067394257,
+              "frame_and_name": 0.029043469578027725
+            },
+            "question": "Y has properties: flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        },
+        "familiar_novel": {
+          "exact": 0.2142857164144516,
+          "micro_f1": 0.5263157894736842,
+          "status_accuracy": {
+            "positive": 0.8928571428571429,
+            "negated": 0.25,
+            "absent": 0.25
+          },
+          "family_exact": {
+            "absent+absent": 0.0,
+            "absent+negated": 0.0,
+            "absent+positive": 0.5,
+            "negated+absent": 0.0,
+            "negated+negated": 0.0,
+            "negated+positive": 0.5,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.10714285714285714,
+          "matched_shift": {
+            "pooled_cosine_mean": 0.6041974425315857,
+            "concept_cosine_mean": -0.008449909277260303
+          },
+          "attention": {
+            "reconstruction_max_abs": 1.1444091796875e-05,
+            "pool_size": 48,
+            "attention_mass": {
+              "rule": 0.8919745087623596,
+              "property_text": 0.05375124514102936,
+              "frame_and_name": 0.05426490306854248
+            },
+            "question": "properties for J include flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        },
+        "novel_novel": {
+          "exact": 0.2142857164144516,
+          "micro_f1": 0.5368421052631579,
+          "status_accuracy": {
+            "positive": 0.9107142857142857,
+            "negated": 0.25,
+            "absent": 0.28125
+          },
+          "family_exact": {
+            "absent+absent": 0.0,
+            "absent+negated": 0.0,
+            "absent+positive": 0.5,
+            "negated+absent": 0.0,
+            "negated+negated": 0.0,
+            "negated+positive": 0.5,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.09523809523809523,
+          "matched_shift": {
+            "pooled_cosine_mean": 0.6512220501899719,
+            "concept_cosine_mean": 0.006540732923895121
+          },
+          "attention": {
+            "reconstruction_max_abs": 1.1444091796875e-05,
+            "pool_size": 48,
+            "attention_mass": {
+              "rule": 0.8935433030128479,
+              "property_text": 0.05328768491744995,
+              "frame_and_name": 0.05315934494137764
+            },
+            "question": "properties for Y include flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        }
+      }
+    },
+    "inherited_weights_fresh_moments": {
+      "initial_hash": "0a387f499ca38277660eef4dbd02bd0d29eac5dc5a43dd1746be337c2f8a97ef",
+      "initial_steps": 400,
+      "initial_adam_step_counts": {},
+      "stored_parameters": 1255636,
+      "trainable_parameters": 406762,
+      "updates": 1000,
+      "examples": 14600,
+      "tokens": 1739030,
+      "gpu_wall_seconds": 16.62776670400001,
+      "final_hash": "ab8b94361125bebd0e83e81bb1de968ce7f2ae9f1e02c5be7fb40b32d6b048fc",
+      "total_steps": 1400,
+      "checkpoint_sha256": "fa5436417345e351083a3cf4cdee9da33d78d3322e2d0ad5a4b33701392f21d1",
+      "gradient_initial": {
+        "active_loss": 1.5807888507843018,
+        "inactive_loss": 0.000839365879073739,
+        "all26_loss": 0.12237394601106644,
+        "per_label_loss": [
+          0.00045082304859533906,
+          0.0008381737861782312,
+          0.0004496574401855469,
+          0.0005884700221940875,
+          0.001373079139739275,
+          0.0007917616167105734,
+          0.0008674727869220078,
+          0.0003689659934025258,
+          0.0013304816093295813,
+          0.001167085487395525,
+          2.779374361038208,
+          0.00036742951488122344,
+          0.0004123052058275789,
+          0.0010332001838833094,
+          0.00032785203075036407,
+          0.38220348954200745,
+          0.0005174212856218219,
+          0.0011230044765397906,
+          0.0014370812568813562,
+          0.0009606149396859109,
+          0.0012528632069006562,
+          0.0010563532123342156,
+          0.0009858343983069062,
+          0.0007758670253679156,
+          0.0009040302829816937,
+          0.0007649527979083359
+        ],
+        "active_total_norm": 5.078195095062256,
+        "inactive_total_norm": 0.010838482528924942,
+        "all26_total_norm": 0.3951042592525482,
+        "active_shared_norm": 4.596151351928711,
+        "inactive_shared_norm": 0.010596423409879208,
+        "shared_cosine": 0.49378088116645813,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "gradient_tiny": {
+        "active_loss": 0.00011358479969203472,
+        "inactive_loss": 0.06184098497033119,
+        "all26_loss": 0.05709272250533104,
+        "per_label_loss": [
+          0.06303414702415466,
+          0.05259214714169502,
+          0.03696693480014801,
+          0.07252516597509384,
+          0.06935372948646545,
+          0.05102992057800293,
+          0.055530522018671036,
+          0.03755054250359535,
+          0.05604361370205879,
+          0.06184782087802887,
+          0.00012030060315737501,
+          0.0510127954185009,
+          0.04897276684641838,
+          0.061146605759859085,
+          0.04077425226569176,
+          0.00010686900350265205,
+          0.05249707028269768,
+          0.060231685638427734,
+          0.06409978866577148,
+          0.06262672692537308,
+          0.058820657432079315,
+          0.1132877916097641,
+          0.0689929649233818,
+          0.10176779329776764,
+          0.09438631683588028,
+          0.04909178987145424
+        ],
+        "active_total_norm": 0.0008058183011598885,
+        "inactive_total_norm": 1.1602317094802856,
+        "all26_total_norm": 1.0709761381149292,
+        "active_shared_norm": 0.0005348066333681345,
+        "inactive_shared_norm": 1.1571897268295288,
+        "shared_cosine": -0.16954919695854187,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "gradient_train": {
+        "active_loss": 1.4686383110529277e-05,
+        "inactive_loss": 0.2552405595779419,
+        "all26_loss": 0.2356078177690506,
+        "per_label_loss": [
+          0.2866351008415222,
+          0.24000899493694305,
+          0.21051070094108582,
+          0.34212303161621094,
+          0.35546553134918213,
+          0.3216680586338043,
+          0.21808944642543793,
+          0.2200489640235901,
+          0.21388137340545654,
+          0.21105533838272095,
+          1.8193376263297978e-06,
+          0.2369658648967743,
+          0.25532013177871704,
+          0.26435279846191406,
+          0.197867289185524,
+          2.7553427571547218e-05,
+          0.2675001323223114,
+          0.2571837604045868,
+          0.225796177983284,
+          0.22876641154289246,
+          0.21235939860343933,
+          0.2656996548175812,
+          0.23606188595294952,
+          0.2781892418861389,
+          0.34174099564552307,
+          0.23848329484462738
+        ],
+        "active_total_norm": 0.0006116266595199704,
+        "inactive_total_norm": 5.372865676879883,
+        "all26_total_norm": 4.959549903869629,
+        "active_shared_norm": 0.0006032043020240963,
+        "inactive_shared_norm": 5.3672027587890625,
+        "shared_cosine": -0.3959411382675171,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "tiny_exact": 1.0,
+      "train_exact": 1.0,
+      "cells": {
+        "familiar_familiar": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.5714285714285714,
+          "matched_shift": {
+            "pooled_cosine_mean": 1.0,
+            "concept_cosine_mean": 1.0
+          },
+          "attention": {
+            "reconstruction_max_abs": 1.1444091796875e-05,
+            "pool_size": 41,
+            "attention_mass": {
+              "rule": 0.6010773777961731,
+              "property_text": 0.13067099452018738,
+              "frame_and_name": 0.10343847423791885
+            },
+            "question": "J has properties: flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        },
+        "novel_familiar": {
+          "exact": 0.7142857313156128,
+          "micro_f1": 0.7272727272727273,
+          "status_accuracy": {
+            "positive": 0.5714285714285714,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 0.5,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.5,
+            "positive+absent": 0.5,
+            "positive+negated": 0.5,
+            "positive+positive": 0.5
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.5714285714285714,
+          "matched_shift": {
+            "pooled_cosine_mean": 0.9987501502037048,
+            "concept_cosine_mean": 0.8290731310844421
+          },
+          "attention": {
+            "reconstruction_max_abs": 7.62939453125e-06,
+            "pool_size": 41,
+            "attention_mass": {
+              "rule": 0.6013007164001465,
+              "property_text": 0.13073527812957764,
+              "frame_and_name": 0.10315601527690887
+            },
+            "question": "Y has properties: flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        },
+        "familiar_novel": {
+          "exact": 0.523809552192688,
+          "micro_f1": 0.38095238095238093,
+          "status_accuracy": {
+            "positive": 0.2857142857142857,
+            "negated": 0.875,
+            "absent": 0.9375
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 0.5,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.125,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 0.5
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.5714285714285714,
+          "matched_shift": {
+            "pooled_cosine_mean": 0.9865562915802002,
+            "concept_cosine_mean": 0.48164722323417664
+          },
+          "attention": {
+            "reconstruction_max_abs": 1.1444091796875e-05,
+            "pool_size": 48,
+            "attention_mass": {
+              "rule": 0.6499775648117065,
+              "property_text": 0.079634889960289,
+              "frame_and_name": 0.11019107699394226
+            },
+            "question": "properties for J include flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        },
+        "novel_novel": {
+          "exact": 0.4523809552192688,
+          "micro_f1": 0.1935483870967742,
+          "status_accuracy": {
+            "positive": 0.10714285714285714,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 0.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.0,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 0.25
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.5714285714285714,
+          "matched_shift": {
+            "pooled_cosine_mean": 0.9828928112983704,
+            "concept_cosine_mean": 0.3993591070175171
+          },
+          "attention": {
+            "reconstruction_max_abs": 7.62939453125e-06,
+            "pool_size": 48,
+            "attention_mass": {
+              "rule": 0.652704119682312,
+              "property_text": 0.07939129322767258,
+              "frame_and_name": 0.10815832018852234
+            },
+            "question": "properties for Y include flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        }
+      }
+    },
+    "fresh_weights_inherited_moments": {
+      "initial_hash": "b4b586814e27dc7dffbaf3471e098c54730e38651942fed62a6e8a00ed32242c",
+      "initial_steps": 0,
+      "initial_adam_step_counts": {
+        "400": 25,
+        "200": 9
+      },
+      "stored_parameters": 1255636,
+      "trainable_parameters": 406762,
+      "updates": 1000,
+      "examples": 14600,
+      "tokens": 1739030,
+      "gpu_wall_seconds": 16.78104525599997,
+      "final_hash": "967acbae33b2e5faeacdbab7101f5c6987ec11a44e8153b7080ca1052095441e",
+      "total_steps": 1000,
+      "checkpoint_sha256": "ba7ee3fe8da010783943f27371b96b8a53642c0c8d141c9ea3542ad53b79efc1",
+      "gradient_initial": {
+        "active_loss": 0.6625022888183594,
+        "inactive_loss": 0.7955402731895447,
+        "all26_loss": 0.7853066325187683,
+        "per_label_loss": [
+          0.7187662124633789,
+          0.6280590891838074,
+          0.45138826966285706,
+          0.5702028274536133,
+          0.7598724365234375,
+          1.3137062788009644,
+          0.9883734583854675,
+          0.3835025131702423,
+          0.6878682374954224,
+          1.4114303588867188,
+          0.6713400483131409,
+          0.6443755030632019,
+          0.6240794062614441,
+          0.4066689908504486,
+          0.5537872314453125,
+          0.6536646485328674,
+          0.5369054675102234,
+          0.8106284737586975,
+          1.370985507965088,
+          0.6526145935058594,
+          1.0519323348999023,
+          0.8812108635902405,
+          0.5621188282966614,
+          0.6493242383003235,
+          1.1709529161453247,
+          1.2642133235931396
+        ],
+        "active_total_norm": 6.018084526062012,
+        "inactive_total_norm": 22.78550910949707,
+        "all26_total_norm": 20.94093132019043,
+        "active_shared_norm": 6.008126258850098,
+        "inactive_shared_norm": 22.75303077697754,
+        "shared_cosine": -0.20961685478687286,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 17,
+          "active_zero": 8,
+          "active_unused": 23,
+          "inactive_nonzero": 17,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "gradient_tiny": {
+        "active_loss": 0.5348869562149048,
+        "inactive_loss": 0.6995880007743835,
+        "all26_loss": 0.6869187951087952,
+        "per_label_loss": [
+          0.8288363218307495,
+          0.5924485325813293,
+          0.4467601180076599,
+          0.5878704190254211,
+          0.9272293448448181,
+          0.6607649326324463,
+          0.563573956489563,
+          0.3047381341457367,
+          0.8759908676147461,
+          1.086499571800232,
+          0.44722285866737366,
+          0.606128990650177,
+          0.4661795198917389,
+          0.22954967617988586,
+          0.4139932096004486,
+          0.6225510835647583,
+          0.2477487176656723,
+          0.7240799069404602,
+          0.8125974535942078,
+          0.7930706739425659,
+          0.663023829460144,
+          1.0389262437820435,
+          0.573115348815918,
+          1.276473879814148,
+          1.1387197971343994,
+          0.9317933320999146
+        ],
+        "active_total_norm": 0.8262476921081543,
+        "inactive_total_norm": 1.1545581817626953,
+        "all26_total_norm": 1.0674632787704468,
+        "active_shared_norm": 0.5744619965553284,
+        "inactive_shared_norm": 0.5069233179092407,
+        "shared_cosine": -0.0091011393815279,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "gradient_train": {
+        "active_loss": 0.00029582265415228903,
+        "inactive_loss": 0.7247324585914612,
+        "all26_loss": 0.6690065860748291,
+        "per_label_loss": [
+          0.58575838804245,
+          0.6126821637153625,
+          0.538857102394104,
+          0.7395151853561401,
+          0.8696505427360535,
+          0.9214914441108704,
+          0.6045472025871277,
+          0.8137449622154236,
+          0.7738263010978699,
+          1.074469804763794,
+          0.00018827283929567784,
+          0.6532841324806213,
+          0.651870608329773,
+          0.6444082260131836,
+          0.804368793964386,
+          0.00040337248356081545,
+          0.6766252517700195,
+          0.7874656319618225,
+          0.6415587663650513,
+          0.728520929813385,
+          0.6147595047950745,
+          0.6127063035964966,
+          0.6930192112922668,
+          0.8012419939041138,
+          0.7445243000984192,
+          0.8046812415122986
+        ],
+        "active_total_norm": 0.00378542416729033,
+        "inactive_total_norm": 0.7213261723518372,
+        "all26_total_norm": 0.665851354598999,
+        "active_shared_norm": 0.0033202546183019876,
+        "inactive_shared_norm": 0.5028303265571594,
+        "shared_cosine": 0.06623955070972443,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "tiny_exact": 0.4444444477558136,
+      "train_exact": 1.0,
+      "cells": {
+        "familiar_familiar": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.2619047619047619,
+          "matched_shift": {
+            "pooled_cosine_mean": 1.0,
+            "concept_cosine_mean": 1.0
+          },
+          "attention": {
+            "reconstruction_max_abs": 1.52587890625e-05,
+            "pool_size": 41,
+            "attention_mass": {
+              "rule": 0.8017256855964661,
+              "property_text": 0.09922844171524048,
+              "frame_and_name": 0.09904254972934723
+            },
+            "question": "J has properties: flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        },
+        "novel_familiar": {
+          "exact": 0.9761905074119568,
+          "micro_f1": 0.9734513274336283,
+          "status_accuracy": {
+            "positive": 0.9821428571428571,
+            "negated": 0.975,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 0.875,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.2619047619047619,
+          "matched_shift": {
+            "pooled_cosine_mean": 0.9894858002662659,
+            "concept_cosine_mean": 0.9661297798156738
+          },
+          "attention": {
+            "reconstruction_max_abs": 1.52587890625e-05,
+            "pool_size": 41,
+            "attention_mass": {
+              "rule": 0.801448404788971,
+              "property_text": 0.09924057126045227,
+              "frame_and_name": 0.09923862665891647
+            },
+            "question": "Y has properties: flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        },
+        "familiar_novel": {
+          "exact": 0.1428571492433548,
+          "micro_f1": 0.56,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.225,
+            "absent": 0.1875
+          },
+          "family_exact": {
+            "absent+absent": 0.0,
+            "absent+negated": 0.0,
+            "absent+positive": 0.0,
+            "negated+absent": 0.0,
+            "negated+negated": 0.25,
+            "negated+positive": 0.0,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.2976190476190476,
+          "matched_shift": {
+            "pooled_cosine_mean": 0.35997501015663147,
+            "concept_cosine_mean": -0.05745307728648186
+          },
+          "attention": {
+            "reconstruction_max_abs": 1.52587890625e-05,
+            "pool_size": 48,
+            "attention_mass": {
+              "rule": 0.7961465716362,
+              "property_text": 0.015570543706417084,
+              "frame_and_name": 0.18820247054100037
+            },
+            "question": "properties for J include flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        },
+        "novel_novel": {
+          "exact": 0.130952388048172,
+          "micro_f1": 0.5544554455445545,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.2125,
+            "absent": 0.15625
+          },
+          "family_exact": {
+            "absent+absent": 0.0,
+            "absent+negated": 0.0,
+            "absent+positive": 0.0,
+            "negated+absent": 0.0,
+            "negated+negated": 0.1875,
+            "negated+positive": 0.0,
+            "positive+absent": 0.0,
+            "positive+negated": 0.0,
+            "positive+positive": 1.0
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.30952380952380953,
+          "matched_shift": {
+            "pooled_cosine_mean": 0.36956098675727844,
+            "concept_cosine_mean": -0.06944930553436279
+          },
+          "attention": {
+            "reconstruction_max_abs": 1.52587890625e-05,
+            "pool_size": 48,
+            "attention_mass": {
+              "rule": 0.8044469952583313,
+              "property_text": 0.015365352854132652,
+              "frame_and_name": 0.17959028482437134
+            },
+            "question": "properties for Y include flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        }
+      }
+    },
+    "fresh_weights_fresh_moments": {
+      "initial_hash": "b4b586814e27dc7dffbaf3471e098c54730e38651942fed62a6e8a00ed32242c",
+      "initial_steps": 0,
+      "initial_adam_step_counts": {},
+      "stored_parameters": 1255636,
+      "trainable_parameters": 406762,
+      "updates": 1000,
+      "examples": 14600,
+      "tokens": 1739030,
+      "gpu_wall_seconds": 16.889136860999997,
+      "final_hash": "098d8d308dc069a292bfbc2fd675dd33a00d91fae3acaed48df0bb73a680492b",
+      "total_steps": 1000,
+      "checkpoint_sha256": "9c6cf1a8ede08a0533326b152f2b3aa9eca14db8be17a23ae32405d2b71b9b86",
+      "gradient_initial": {
+        "active_loss": 0.6625022888183594,
+        "inactive_loss": 0.7955402731895447,
+        "all26_loss": 0.7853066325187683,
+        "per_label_loss": [
+          0.7187662124633789,
+          0.6280590891838074,
+          0.45138826966285706,
+          0.5702028274536133,
+          0.7598724365234375,
+          1.3137062788009644,
+          0.9883734583854675,
+          0.3835025131702423,
+          0.6878682374954224,
+          1.4114303588867188,
+          0.6713400483131409,
+          0.6443755030632019,
+          0.6240794062614441,
+          0.4066689908504486,
+          0.5537872314453125,
+          0.6536646485328674,
+          0.5369054675102234,
+          0.8106284737586975,
+          1.370985507965088,
+          0.6526145935058594,
+          1.0519323348999023,
+          0.8812108635902405,
+          0.5621188282966614,
+          0.6493242383003235,
+          1.1709529161453247,
+          1.2642133235931396
+        ],
+        "active_total_norm": 6.018084526062012,
+        "inactive_total_norm": 22.78550910949707,
+        "all26_total_norm": 20.94093132019043,
+        "active_shared_norm": 6.008126258850098,
+        "inactive_shared_norm": 22.75303077697754,
+        "shared_cosine": -0.20961685478687286,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 17,
+          "active_zero": 8,
+          "active_unused": 23,
+          "inactive_nonzero": 17,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "gradient_tiny": {
+        "active_loss": 0.0006406304310075939,
+        "inactive_loss": 0.7406699061393738,
+        "all26_loss": 0.6837446093559265,
+        "per_label_loss": [
+          0.6554246544837952,
+          0.6743229031562805,
+          0.6103042960166931,
+          0.6665762066841125,
+          0.6868842840194702,
+          0.9092017412185669,
+          0.6946018934249878,
+          0.5526198148727417,
+          0.7583416104316711,
+          1.2183830738067627,
+          0.000551593373529613,
+          0.6186784505844116,
+          0.5834813714027405,
+          0.6419063210487366,
+          0.5728031992912292,
+          0.0007296674302779138,
+          0.6473640203475952,
+          0.9726280570030212,
+          0.8615986704826355,
+          0.649088978767395,
+          0.7542102336883545,
+          0.7623154520988464,
+          0.6981363296508789,
+          0.6555930376052856,
+          1.0747451782226562,
+          0.8568680882453918
+        ],
+        "active_total_norm": 0.004028678871691227,
+        "inactive_total_norm": 0.9571049809455872,
+        "all26_total_norm": 0.8834818005561829,
+        "active_shared_norm": 0.0010162825929000974,
+        "inactive_shared_norm": 0.7881426811218262,
+        "shared_cosine": 0.0031951386481523514,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "gradient_train": {
+        "active_loss": 0.00011809268471552059,
+        "inactive_loss": 0.7400124073028564,
+        "all26_loss": 0.6830975413322449,
+        "per_label_loss": [
+          0.6670165657997131,
+          0.6759875416755676,
+          0.6810306906700134,
+          0.6804932951927185,
+          0.7415216565132141,
+          0.9018645882606506,
+          0.7783362865447998,
+          0.5545740127563477,
+          0.7701541185379028,
+          1.1980072259902954,
+          7.02787801856175e-05,
+          0.6092782020568848,
+          0.6697028279304504,
+          0.595687210559845,
+          0.5939366817474365,
+          0.00016590658924542367,
+          0.6615182757377625,
+          0.968558132648468,
+          0.8613401055335999,
+          0.6703991293907166,
+          0.6771053671836853,
+          0.7356346249580383,
+          0.6428363919258118,
+          0.6079714298248291,
+          0.957231342792511,
+          0.8601126074790955
+        ],
+        "active_total_norm": 0.0013110842555761337,
+        "inactive_total_norm": 0.842437207698822,
+        "all26_total_norm": 0.7776196599006653,
+        "active_shared_norm": 0.0011337086325511336,
+        "inactive_shared_norm": 0.6327141523361206,
+        "shared_cosine": -0.22520890831947327,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "tiny_exact": 1.0,
+      "train_exact": 1.0,
+      "cells": {
+        "familiar_familiar": {
+          "exact": 1.0,
+          "micro_f1": 1.0,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 1.0,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 1.0,
+            "positive+positive": 1.0
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.21428571428571427,
+          "matched_shift": {
+            "pooled_cosine_mean": 1.0,
+            "concept_cosine_mean": 1.0
+          },
+          "attention": {
+            "reconstruction_max_abs": 1.430511474609375e-06,
+            "pool_size": 41,
+            "attention_mass": {
+              "rule": 0.6729756593704224,
+              "property_text": 0.18455393612384796,
+              "frame_and_name": 0.1415722817182541
+            },
+            "question": "J has properties: flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        },
+        "novel_familiar": {
+          "exact": 0.9285714626312256,
+          "micro_f1": 0.9491525423728814,
+          "status_accuracy": {
+            "positive": 1.0,
+            "negated": 0.925,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 1.0,
+            "negated+absent": 1.0,
+            "negated+negated": 1.0,
+            "negated+positive": 1.0,
+            "positive+absent": 1.0,
+            "positive+negated": 0.625,
+            "positive+positive": 1.0
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.21428571428571427,
+          "matched_shift": {
+            "pooled_cosine_mean": 0.9948252439498901,
+            "concept_cosine_mean": 0.906650185585022
+          },
+          "attention": {
+            "reconstruction_max_abs": 1.9073486328125e-06,
+            "pool_size": 41,
+            "attention_mass": {
+              "rule": 0.671924352645874,
+              "property_text": 0.1850525140762329,
+              "frame_and_name": 0.1418936550617218
+            },
+            "question": "Y has properties: flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        },
+        "familiar_novel": {
+          "exact": 0.5714285969734192,
+          "micro_f1": 0.5384615384615384,
+          "status_accuracy": {
+            "positive": 0.5,
+            "negated": 0.75,
+            "absent": 1.0
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 1.0,
+            "absent+positive": 0.5,
+            "negated+absent": 0.5,
+            "negated+negated": 0.875,
+            "negated+positive": 0.25,
+            "positive+absent": 0.5,
+            "positive+negated": 0.375,
+            "positive+positive": 0.5
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.14285714285714285,
+          "matched_shift": {
+            "pooled_cosine_mean": 0.9309685826301575,
+            "concept_cosine_mean": 0.45563212037086487
+          },
+          "attention": {
+            "reconstruction_max_abs": 1.1920928955078125e-06,
+            "pool_size": 48,
+            "attention_mass": {
+              "rule": 0.6518170833587646,
+              "property_text": 0.14291051030158997,
+              "frame_and_name": 0.20374375581741333
+            },
+            "question": "properties for J include flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        },
+        "novel_novel": {
+          "exact": 0.5,
+          "micro_f1": 0.56,
+          "status_accuracy": {
+            "positive": 0.625,
+            "negated": 0.6,
+            "absent": 0.9375
+          },
+          "family_exact": {
+            "absent+absent": 1.0,
+            "absent+negated": 0.875,
+            "absent+positive": 0.75,
+            "negated+absent": 0.5,
+            "negated+negated": 0.625,
+            "negated+positive": 0.4375,
+            "positive+absent": 0.25,
+            "positive+negated": 0.125,
+            "positive+positive": 0.5
+          },
+          "span_pool_exact_DIAGNOSTIC_ONLY": 0.14285714285714285,
+          "matched_shift": {
+            "pooled_cosine_mean": 0.9289698600769043,
+            "concept_cosine_mean": 0.41430550813674927
+          },
+          "attention": {
+            "reconstruction_max_abs": 1.1920928955078125e-06,
+            "pool_size": 48,
+            "attention_mass": {
+              "rule": 0.6513833999633789,
+              "property_text": 0.1432337611913681,
+              "frame_and_name": 0.20344802737236023
+            },
+            "question": "properties for Y include flammable; conductive.",
+            "scope": "last-layer attention averaged across pooled query positions/heads; inspection, not causal explanation"
+          }
+        }
+      }
+    }
+  },
+  "loss_controls": {
+    "active2": {
+      "exact": 1.0,
+      "f1": 1.0,
+      "initial_hash": "b4b586814e27dc7dffbaf3471e098c54730e38651942fed62a6e8a00ed32242c",
+      "final_hash": "05b082f418fbaa0087652b4eb2a9dc567c253d535f2723b643c590c4ff7e25aa",
+      "loss_scale": 1.0,
+      "gradient_initial": {
+        "active_loss": 0.6625022888183594,
+        "inactive_loss": 0.7955402731895447,
+        "all26_loss": 0.7853066325187683,
+        "per_label_loss": [
+          0.7187662124633789,
+          0.6280590891838074,
+          0.45138826966285706,
+          0.5702028274536133,
+          0.7598724365234375,
+          1.3137062788009644,
+          0.9883734583854675,
+          0.3835025131702423,
+          0.6878682374954224,
+          1.4114303588867188,
+          0.6713400483131409,
+          0.6443755030632019,
+          0.6240794062614441,
+          0.4066689908504486,
+          0.5537872314453125,
+          0.6536646485328674,
+          0.5369054675102234,
+          0.8106284737586975,
+          1.370985507965088,
+          0.6526145935058594,
+          1.0519323348999023,
+          0.8812108635902405,
+          0.5621188282966614,
+          0.6493242383003235,
+          1.1709529161453247,
+          1.2642133235931396
+        ],
+        "active_total_norm": 6.018084526062012,
+        "inactive_total_norm": 22.78550910949707,
+        "all26_total_norm": 20.94093132019043,
+        "active_shared_norm": 6.008126258850098,
+        "inactive_shared_norm": 22.75303077697754,
+        "shared_cosine": -0.20961685478687286,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 17,
+          "active_zero": 8,
+          "active_unused": 23,
+          "inactive_nonzero": 17,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "gradient_final": {
+        "active_loss": 0.0006406304310075939,
+        "inactive_loss": 0.7406699061393738,
+        "all26_loss": 0.6837446093559265,
+        "per_label_loss": [
+          0.6554246544837952,
+          0.6743229031562805,
+          0.6103042960166931,
+          0.6665762066841125,
+          0.6868842840194702,
+          0.9092017412185669,
+          0.6946018934249878,
+          0.5526198148727417,
+          0.7583416104316711,
+          1.2183830738067627,
+          0.000551593373529613,
+          0.6186784505844116,
+          0.5834813714027405,
+          0.6419063210487366,
+          0.5728031992912292,
+          0.0007296674302779138,
+          0.6473640203475952,
+          0.9726280570030212,
+          0.8615986704826355,
+          0.649088978767395,
+          0.7542102336883545,
+          0.7623154520988464,
+          0.6981363296508789,
+          0.6555930376052856,
+          1.0747451782226562,
+          0.8568680882453918
+        ],
+        "active_total_norm": 0.004028678871691227,
+        "inactive_total_norm": 0.9571049809455872,
+        "all26_total_norm": 0.8834818005561829,
+        "active_shared_norm": 0.0010162825929000974,
+        "inactive_shared_norm": 0.7881426811218262,
+        "shared_cosine": 0.0031951386481523514,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "updates": 200,
+      "examples": 1800,
+      "gpu_wall_seconds": 2.875831887000004
+    },
+    "active2_div13": {
+      "exact": 1.0,
+      "f1": 1.0,
+      "initial_hash": "b4b586814e27dc7dffbaf3471e098c54730e38651942fed62a6e8a00ed32242c",
+      "final_hash": "450dd54d2ee989f3e53c6e40135bfb129139d38b15a9e05c33dd534710ad5333",
+      "loss_scale": 0.07692307692307693,
+      "gradient_initial": {
+        "active_loss": 0.6625022888183594,
+        "inactive_loss": 0.7955402731895447,
+        "all26_loss": 0.7853066325187683,
+        "per_label_loss": [
+          0.7187662124633789,
+          0.6280590891838074,
+          0.45138826966285706,
+          0.5702028274536133,
+          0.7598724365234375,
+          1.3137062788009644,
+          0.9883734583854675,
+          0.3835025131702423,
+          0.6878682374954224,
+          1.4114303588867188,
+          0.6713400483131409,
+          0.6443755030632019,
+          0.6240794062614441,
+          0.4066689908504486,
+          0.5537872314453125,
+          0.6536646485328674,
+          0.5369054675102234,
+          0.8106284737586975,
+          1.370985507965088,
+          0.6526145935058594,
+          1.0519323348999023,
+          0.8812108635902405,
+          0.5621188282966614,
+          0.6493242383003235,
+          1.1709529161453247,
+          1.2642133235931396
+        ],
+        "active_total_norm": 6.018084526062012,
+        "inactive_total_norm": 22.78550910949707,
+        "all26_total_norm": 20.94093132019043,
+        "active_shared_norm": 6.008126258850098,
+        "inactive_shared_norm": 22.75303077697754,
+        "shared_cosine": -0.20961685478687286,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 17,
+          "active_zero": 8,
+          "active_unused": 23,
+          "inactive_nonzero": 17,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "gradient_final": {
+        "active_loss": 0.0009531851974315941,
+        "inactive_loss": 0.7138709425926208,
+        "all26_loss": 0.6590311527252197,
+        "per_label_loss": [
+          0.6180407404899597,
+          0.6466736793518066,
+          0.6807117462158203,
+          0.6851348876953125,
+          0.7480276823043823,
+          1.0430771112442017,
+          0.5998223423957825,
+          0.6000673174858093,
+          0.6839553117752075,
+          0.9349896311759949,
+          0.000975166738498956,
+          0.5606579184532166,
+          0.6211937665939331,
+          0.660329282283783,
+          0.5585887432098389,
+          0.0009312035981565714,
+          0.7254980802536011,
+          1.0410264730453491,
+          0.7415984272956848,
+          0.5652189254760742,
+          0.7354704141616821,
+          0.726499617099762,
+          0.6962348222732544,
+          0.6318070888519287,
+          0.7038294076919556,
+          0.9244492650032043
+        ],
+        "active_total_norm": 0.005761509761214256,
+        "inactive_total_norm": 1.5469937324523926,
+        "all26_total_norm": 1.427993893623352,
+        "active_shared_norm": 0.0013565558474510908,
+        "inactive_shared_norm": 1.4641327857971191,
+        "shared_cosine": -0.004173371009528637,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "updates": 200,
+      "examples": 1800,
+      "gpu_wall_seconds": 2.9365695799999685
+    },
+    "all26": {
+      "exact": 0.6666666865348816,
+      "f1": 0.6666666666666666,
+      "initial_hash": "b4b586814e27dc7dffbaf3471e098c54730e38651942fed62a6e8a00ed32242c",
+      "final_hash": "c072b4e5b0ff68b69771f105c33f4f9662518d8ecb6c7222591184a595dc02f4",
+      "loss_scale": 1.0,
+      "gradient_initial": {
+        "active_loss": 0.6625022888183594,
+        "inactive_loss": 0.7955402731895447,
+        "all26_loss": 0.7853066325187683,
+        "per_label_loss": [
+          0.7187662124633789,
+          0.6280590891838074,
+          0.45138826966285706,
+          0.5702028274536133,
+          0.7598724365234375,
+          1.3137062788009644,
+          0.9883734583854675,
+          0.3835025131702423,
+          0.6878682374954224,
+          1.4114303588867188,
+          0.6713400483131409,
+          0.6443755030632019,
+          0.6240794062614441,
+          0.4066689908504486,
+          0.5537872314453125,
+          0.6536646485328674,
+          0.5369054675102234,
+          0.8106284737586975,
+          1.370985507965088,
+          0.6526145935058594,
+          1.0519323348999023,
+          0.8812108635902405,
+          0.5621188282966614,
+          0.6493242383003235,
+          1.1709529161453247,
+          1.2642133235931396
+        ],
+        "active_total_norm": 6.018084526062012,
+        "inactive_total_norm": 22.78550910949707,
+        "all26_total_norm": 20.94093132019043,
+        "active_shared_norm": 6.008126258850098,
+        "inactive_shared_norm": 22.75303077697754,
+        "shared_cosine": -0.20961685478687286,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 17,
+          "active_zero": 8,
+          "active_unused": 23,
+          "inactive_nonzero": 17,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "gradient_final": {
+        "active_loss": 0.3196156620979309,
+        "inactive_loss": 0.0017856558552011847,
+        "all26_loss": 0.02623411826789379,
+        "per_label_loss": [
+          0.0009177525644190609,
+          0.001679367502219975,
+          0.001336309709586203,
+          0.00164863804820925,
+          0.0012007819022983313,
+          0.0019442770862951875,
+          0.0006923675537109375,
+          0.0017719798488542438,
+          0.0019606484565883875,
+          0.0024565591011196375,
+          0.008790158666670322,
+          0.00229061977006495,
+          0.0014697180595248938,
+          0.002177768386900425,
+          0.001196914236061275,
+          0.6304411292076111,
+          0.0015548070659860969,
+          0.002270433586090803,
+          0.0022535324096679688,
+          0.0017642974853515625,
+          0.0025497013702988625,
+          0.0023697747383266687,
+          0.0016365580959245563,
+          0.0015293756732717156,
+          0.0014976925449445844,
+          0.0026858646888285875
+        ],
+        "active_total_norm": 0.12765000760555267,
+        "inactive_total_norm": 0.017482155933976173,
+        "all26_total_norm": 0.011030067689716816,
+        "active_shared_norm": 0.11604995280504227,
+        "inactive_shared_norm": 0.016959238797426224,
+        "shared_cosine": -0.8414060473442078,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "updates": 200,
+      "examples": 1800,
+      "gpu_wall_seconds": 2.827742095000019
+    },
+    "all26_times13": {
+      "exact": 1.0,
+      "f1": 1.0,
+      "initial_hash": "b4b586814e27dc7dffbaf3471e098c54730e38651942fed62a6e8a00ed32242c",
+      "final_hash": "734b134d9b38d7d40cdfbccd2ab9781583e2fa49859b1e370e3a5a55eb5f8db0",
+      "loss_scale": 13.0,
+      "gradient_initial": {
+        "active_loss": 0.6625022888183594,
+        "inactive_loss": 0.7955402731895447,
+        "all26_loss": 0.7853066325187683,
+        "per_label_loss": [
+          0.7187662124633789,
+          0.6280590891838074,
+          0.45138826966285706,
+          0.5702028274536133,
+          0.7598724365234375,
+          1.3137062788009644,
+          0.9883734583854675,
+          0.3835025131702423,
+          0.6878682374954224,
+          1.4114303588867188,
+          0.6713400483131409,
+          0.6443755030632019,
+          0.6240794062614441,
+          0.4066689908504486,
+          0.5537872314453125,
+          0.6536646485328674,
+          0.5369054675102234,
+          0.8106284737586975,
+          1.370985507965088,
+          0.6526145935058594,
+          1.0519323348999023,
+          0.8812108635902405,
+          0.5621188282966614,
+          0.6493242383003235,
+          1.1709529161453247,
+          1.2642133235931396
+        ],
+        "active_total_norm": 6.018084526062012,
+        "inactive_total_norm": 22.78550910949707,
+        "all26_total_norm": 20.94093132019043,
+        "active_shared_norm": 6.008126258850098,
+        "inactive_shared_norm": 22.75303077697754,
+        "shared_cosine": -0.20961685478687286,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 17,
+          "active_zero": 8,
+          "active_unused": 23,
+          "inactive_nonzero": 17,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "gradient_final": {
+        "active_loss": 0.0016543518286198378,
+        "inactive_loss": 0.0001345056080026552,
+        "all26_loss": 0.000251416873652488,
+        "per_label_loss": [
+          7.947286212584004e-05,
+          0.00013319651770871133,
+          8.879767847247422e-05,
+          0.00015799204993527383,
+          8.847978460835293e-05,
+          0.00010723537707235664,
+          5.361768853617832e-05,
+          0.00011995103704975918,
+          0.00016684002184774727,
+          0.00020779503392986953,
+          0.0012984985951334238,
+          0.00017134349036496133,
+          0.00011179182183695957,
+          0.00015735626220703125,
+          8.318159234477207e-05,
+          0.0020102050621062517,
+          0.00012175241863587871,
+          0.00013669331383425742,
+          0.0002040863037109375,
+          0.00015491909289266914,
+          0.0002198749134549871,
+          0.00015926361083984375,
+          0.00012387169408611953,
+          0.00011052026093238965,
+          0.00010140737140318379,
+          0.00016869438695721328
+        ],
+        "active_total_norm": 0.01932908035814762,
+        "inactive_total_norm": 0.0015022789593786001,
+        "all26_total_norm": 0.0006842196453362703,
+        "active_shared_norm": 0.01779879629611969,
+        "inactive_shared_norm": 0.0014706793008372188,
+        "shared_cosine": -0.9860696196556091,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "updates": 200,
+      "examples": 1800,
+      "gpu_wall_seconds": 2.8772083709999947
+    }
+  },
+  "baseline": {
+    "updates": 1000,
+    "examples": 14600,
+    "gpu_wall_seconds": 1.3613802549999718,
+    "feature_dimensions": 103
+  },
+  "original_reproduction": {
+    "updates": 200,
+    "final_hash": "0a387f499ca38277660eef4dbd02bd0d29eac5dc5a43dd1746be337c2f8a97ef",
+    "equals_archived_latest_tensor_hash": true,
+    "scope": "original training subset only, no prior heldout accessed"
+  },
+  "original_reproduction_exact": 0.8888888955116272,
+  "loss_repetition_exact": true,
+  "sha256": {
+    "cases.json": "0743e36c27b31ab479aafcc10b5aa60374df196ee9c858e2cf7dc7a79b0af9e3",
+    "contracts.log": "40b7fc659eee66613532f8928f5fafa7a0d5fe5309e67cf39e66ff503bd71310",
+    "contracts.xml": "893867f2a25060bcad8aef05c720c82c37f1926fabcd8b7bb195e9cbdfee7e85",
+    "execution.json": "8bd3019beb84bf5117f17311347ca1dd82ad0f8372dd16ca085ee59681cd9475",
+    "fresh_weights_fresh_moments.pt": "9c6cf1a8ede08a0533326b152f2b3aa9eca14db8be17a23ae32405d2b71b9b86",
+    "fresh_weights_inherited_moments.pt": "ba7ee3fe8da010783943f27371b96b8a53642c0c8d141c9ea3542ad53b79efc1",
+    "full-suite.log": "181a4566499ace44f5163ffd88f5fa639eb02c328ab1284478783cc04a962357",
+    "full-suite.xml": "dd626513fc3af9e818f487f64ed7a852160185f41dcd7dba2e60ded5fea09009",
+    "inherited_weights_fresh_moments.pt": "fa5436417345e351083a3cf4cdee9da33d78d3322e2d0ad5a4b33701392f21d1",
+    "inherited_weights_inherited_moments.pt": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+    "install.log": "372cf3b19bce3ce7f328e77b9965714d9588ab0220de9f9827c7e8b50d29ec88",
+    "results.json": "9c7a198c2038a40be7ba79b566a232e375dad73bed73580c3ffbb517cc112438",
+    "study.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "token_sequences.json": "51308244cf1a93b430094930bddf67eca6121460ee570acc53ed2a018fd4f548"
+  },
+  "verdict": {
+    "engineering": "PASS within tested source/scope",
+    "learning": "FAIL: template generalization unresolved; no sealed qualification or promotion"
+  },
+  "ngram_linear": {
+    "familiar_familiar": {
+      "exact": 1.0,
+      "micro_f1": 1.0,
+      "status_accuracy": {
+        "positive": 1.0,
+        "negated": 1.0,
+        "absent": 1.0
+      },
+      "family_exact": {
+        "absent+absent": 1.0,
+        "absent+negated": 1.0,
+        "absent+positive": 1.0,
+        "negated+absent": 1.0,
+        "negated+negated": 1.0,
+        "negated+positive": 1.0,
+        "positive+absent": 1.0,
+        "positive+negated": 1.0,
+        "positive+positive": 1.0
+      }
+    },
+    "novel_familiar": {
+      "exact": 1.0,
+      "micro_f1": 1.0,
+      "status_accuracy": {
+        "positive": 1.0,
+        "negated": 1.0,
+        "absent": 1.0
+      },
+      "family_exact": {
+        "absent+absent": 1.0,
+        "absent+negated": 1.0,
+        "absent+positive": 1.0,
+        "negated+absent": 1.0,
+        "negated+negated": 1.0,
+        "negated+positive": 1.0,
+        "positive+absent": 1.0,
+        "positive+negated": 1.0,
+        "positive+positive": 1.0
+      }
+    },
+    "familiar_novel": {
+      "exact": 1.0,
+      "micro_f1": 1.0,
+      "status_accuracy": {
+        "positive": 1.0,
+        "negated": 1.0,
+        "absent": 1.0
+      },
+      "family_exact": {
+        "absent+absent": 1.0,
+        "absent+negated": 1.0,
+        "absent+positive": 1.0,
+        "negated+absent": 1.0,
+        "negated+negated": 1.0,
+        "negated+positive": 1.0,
+        "positive+absent": 1.0,
+        "positive+negated": 1.0,
+        "positive+positive": 1.0
+      }
+    },
+    "novel_novel": {
+      "exact": 1.0,
+      "micro_f1": 1.0,
+      "status_accuracy": {
+        "positive": 1.0,
+        "negated": 1.0,
+        "absent": 1.0
+      },
+      "family_exact": {
+        "absent+absent": 1.0,
+        "absent+negated": 1.0,
+        "absent+positive": 1.0,
+        "negated+absent": 1.0,
+        "negated+negated": 1.0,
+        "negated+positive": 1.0,
+        "positive+absent": 1.0,
+        "positive+negated": 1.0,
+        "positive+positive": 1.0
+      }
+    }
+  },
+  "actual_platform": "kaggle",
+  "reported_platform_note": "Source17d8c6f wrote generic kaggle_or_colab in raw JSON; platform is established by pinned Kaggle launcher/kernel. Future driver records exact guard-returned platform."
+}

@@ -143,3 +143,8 @@ Continue P0 trustworthy canonical learning and P1 reversible adaptation before P
 Stage A now isolates positive, negated and absent attributes using the existing persistent student and explicit attribute-only supervision. Protocol, fixed gates, lineage and actual run status: [ATTRIBUTE_LEARNING](ATTRIBUTE_LEARNING.md). No entity-binding, transition, transfer or architecture-growth milestone is advanced.
 
 Stage A result: **FAIL, STOP before entity binding**. Continuing tiny exact88.89%; fresh selective/full train100% but shifted-description exact42.86% versus n-gram100%. Kaggle full regression773passed/1failed (FP16 optimizer-counter qualification), not a clean pass. Exact evidence and unresolved backend diagnosis are in the Stage A report above.
+
+
+Stage A diagnostic/backend continuation: [protocol and evidence](STAGE_A_DIAGNOSTIC.md). FP16 progress now distinguishes attempted/skipped/applied updates, seeds before initialization, and restores exact tested continuation. Backend source db9ef68 passes778 remote full-suite tests. The historical773pass/1fail result stays preserved; development-only language/history diagnostics do not qualify concepts or advance Stage B.
+
+Final Stage A diagnostic core17d8c6f: **781 remote tests pass**. Continuing student100% on familiar frames with familiar/new names, but21.43% on new frames despite known byte IDs; n-gram100% in all four cells. Original88.9% tiny fitting is rescued by resetting backbone Adam state in a controlled training-only ablation. This does not repair wording generalization or qualify transfer. No checkpoint promotion or Stage B; full evidence is in STAGE_A_DIAGNOSTIC.md.

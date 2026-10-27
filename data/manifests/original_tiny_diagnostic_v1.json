@@ -1,0 +1,1593 @@
+{
+  "kernel": "sparklinghydraulics0/amg-original-tiny-diagnostic",
+  "version": 1,
+  "status": "COMPLETE",
+  "execution": {
+    "sha": "8d143de29651db4840d035af0e3a353c25bb158a",
+    "exit_code": 0
+  },
+  "provenance": {
+    "git_sha": "8d143de29651db4840d035af0e3a353c25bb158a",
+    "platform": "kaggle",
+    "python": "3.13.15",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "gpu": "Tesla T4"
+  },
+  "artifact_directory": "runs/kaggle-original-tiny-diagnostic/output-v1/original-tiny-diagnostic",
+  "scope": "original9 training cases only, never viewed old heldout",
+  "parent_sha256": "4a4f79fcd07b5bbe58bad5da04ce1a934696438c8603e9e6296e398a4b5ed5d8",
+  "new_updates": 200,
+  "examples_per_arm": 1800,
+  "arms": {
+    "inherited_weights_inherited_adam": {
+      "initial_hash": "cb5c90b050daffbdf32712bba1a9acff5646121a11cb37943312553270434f4d",
+      "final_hash": "0a387f499ca38277660eef4dbd02bd0d29eac5dc5a43dd1746be337c2f8a97ef",
+      "checkpoint_sha256": "60bf3428c24750b7c209c7d796a04658899565a14622e792bd84287024cd3bd1",
+      "cleared_optimizer_state_names": [],
+      "curves": [
+        {
+          "updates": 50,
+          "loss": 0.6190587282180786,
+          "exact": 0.3333333432674408
+        },
+        {
+          "updates": 100,
+          "loss": 0.3187026083469391,
+          "exact": 0.6666666865348816
+        },
+        {
+          "updates": 150,
+          "loss": 0.28842034935951233,
+          "exact": 0.5555555820465088
+        },
+        {
+          "updates": 200,
+          "loss": 0.20272567868232727,
+          "exact": 0.8888888955116272
+        }
+      ],
+      "gpu_wall_seconds": 3.0572576209999625,
+      "initial_gradient": {
+        "active_loss": 2.1374828815460205,
+        "inactive_loss": 0.0004739849828183651,
+        "all26_loss": 0.16485927999019623,
+        "per_label_loss": [
+          0.0004251798090990633,
+          0.0003683831891976297,
+          0.0001773834228515625,
+          0.0005428526201285422,
+          0.00041882196092046797,
+          0.0008764266967773438,
+          0.00021425883460324258,
+          0.0002370410511502996,
+          0.0003618664341047406,
+          0.00035709806252270937,
+          3.5125443935394287,
+          0.00029087066650390625,
+          0.0002921422419603914,
+          0.00048356587649323046,
+          0.00026946599246002734,
+          0.7624209523200989,
+          0.00019952986622229218,
+          0.0005661646719090641,
+          0.00040748383617028594,
+          0.00045050514745526016,
+          0.0008913676138035953,
+          0.00062269635964185,
+          0.0005039639072492719,
+          0.0007811652612872422,
+          0.0010723537998273969,
+          0.0005650520324707031
+        ],
+        "active_total_norm": 7.893582344055176,
+        "inactive_total_norm": 0.013542336411774158,
+        "all26_total_norm": 0.6033506989479065,
+        "active_shared_norm": 6.497689247131348,
+        "inactive_shared_norm": 0.013473556376993656,
+        "shared_cosine": -0.3872396647930145,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "final_gradient": {
+        "active_loss": 0.16153612732887268,
+        "inactive_loss": 0.001240606652572751,
+        "all26_loss": 0.013571031391620636,
+        "per_label_loss": [
+          0.0008733537397347391,
+          0.0011216269340366125,
+          0.0005036990041844547,
+          0.000977728166617453,
+          0.001437028287909925,
+          0.0012916988926008344,
+          0.0010903676738962531,
+          0.0004657109675463289,
+          0.0015933779068291187,
+          0.0013852649135515094,
+          0.0025241891853511333,
+          0.0006536378059536219,
+          0.0006474389228969812,
+          0.0012483596801757812,
+          0.000492095947265625,
+          0.32054805755615234,
+          0.0006469620857387781,
+          0.0016042391071096063,
+          0.0017593702068552375,
+          0.0015318659134209156,
+          0.0017878744984045625,
+          0.001915242988616228,
+          0.0013294749660417438,
+          0.001957840519025922,
+          0.0024722416419535875,
+          0.0009880595607683063
+        ],
+        "active_total_norm": 0.4642964005470276,
+        "inactive_total_norm": 0.009572341106832027,
+        "all26_total_norm": 0.03493306785821915,
+        "active_shared_norm": 0.4314408004283905,
+        "inactive_shared_norm": 0.009125190787017345,
+        "shared_cosine": -0.23846399784088135,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "initial_exact": 0.1111111119389534,
+      "final_exact": 0.8888888955116272,
+      "predictions": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "logits": [
+        [
+          -7.762319087982178,
+          -5.826568603515625
+        ],
+        [
+          -9.311518669128418,
+          -0.30429360270500183
+        ],
+        [
+          -9.457208633422852,
+          1.776974081993103
+        ],
+        [
+          -8.216312408447266,
+          -3.6558620929718018
+        ],
+        [
+          -8.890012741088867,
+          -1.4354192018508911
+        ],
+        [
+          -9.048521995544434,
+          -0.5436896085739136
+        ],
+        [
+          4.041597366333008,
+          -2.1228766441345215
+        ],
+        [
+          6.180643558502197,
+          -1.3949377536773682
+        ],
+        [
+          6.157520771026611,
+          0.19987350702285767
+        ]
+      ],
+      "truth": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    "inherited_weights_fresh_adam": {
+      "initial_hash": "cb5c90b050daffbdf32712bba1a9acff5646121a11cb37943312553270434f4d",
+      "final_hash": "347c33cad97566edf6c6a00c165b76a3a4be0c5cf4ca039025d165204035e2b2",
+      "checkpoint_sha256": "61173e7f12dfbb8a9d8b80d6688a8be566f487794bb1e880c880a962370980e7",
+      "cleared_optimizer_state_names": [],
+      "curves": [
+        {
+          "updates": 50,
+          "loss": 0.4149568974971771,
+          "exact": 0.6666666865348816
+        },
+        {
+          "updates": 100,
+          "loss": 0.48787254095077515,
+          "exact": 0.7777777910232544
+        },
+        {
+          "updates": 150,
+          "loss": 0.0010928618721663952,
+          "exact": 1.0
+        },
+        {
+          "updates": 200,
+          "loss": 0.00023584553855471313,
+          "exact": 1.0
+        }
+      ],
+      "gpu_wall_seconds": 2.8444697649999853,
+      "initial_gradient": {
+        "active_loss": 2.1374828815460205,
+        "inactive_loss": 0.0004739849828183651,
+        "all26_loss": 0.16485927999019623,
+        "per_label_loss": [
+          0.0004251798090990633,
+          0.0003683831891976297,
+          0.0001773834228515625,
+          0.0005428526201285422,
+          0.00041882196092046797,
+          0.0008764266967773438,
+          0.00021425883460324258,
+          0.0002370410511502996,
+          0.0003618664341047406,
+          0.00035709806252270937,
+          3.5125443935394287,
+          0.00029087066650390625,
+          0.0002921422419603914,
+          0.00048356587649323046,
+          0.00026946599246002734,
+          0.7624209523200989,
+          0.00019952986622229218,
+          0.0005661646719090641,
+          0.00040748383617028594,
+          0.00045050514745526016,
+          0.0008913676138035953,
+          0.00062269635964185,
+          0.0005039639072492719,
+          0.0007811652612872422,
+          0.0010723537998273969,
+          0.0005650520324707031
+        ],
+        "active_total_norm": 7.893582344055176,
+        "inactive_total_norm": 0.013542336411774158,
+        "all26_total_norm": 0.6033506989479065,
+        "active_shared_norm": 6.497689247131348,
+        "inactive_shared_norm": 0.013473556376993656,
+        "shared_cosine": -0.3872396647930145,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "final_gradient": {
+        "active_loss": 0.0002338702033739537,
+        "inactive_loss": 0.14872875809669495,
+        "all26_loss": 0.1373060941696167,
+        "per_label_loss": [
+          0.143986314535141,
+          0.17289920151233673,
+          0.13013486564159393,
+          0.15235602855682373,
+          0.17561277747154236,
+          0.11860588937997818,
+          0.1877257376909256,
+          0.12186678498983383,
+          0.16584256291389465,
+          0.1744896024465561,
+          0.00016283505829051137,
+          0.13064035773277283,
+          0.11647476255893707,
+          0.16992619633674622,
+          0.10282935202121735,
+          0.0003049053775612265,
+          0.18592768907546997,
+          0.14788146317005157,
+          0.15284132957458496,
+          0.15047717094421387,
+          0.13214069604873657,
+          0.17738944292068481,
+          0.13867521286010742,
+          0.12111221253871918,
+          0.1398075670003891,
+          0.15984736382961273
+        ],
+        "active_total_norm": 0.0031111089047044516,
+        "inactive_total_norm": 3.0665652751922607,
+        "all26_total_norm": 2.830630302429199,
+        "active_shared_norm": 0.0027505047619342804,
+        "inactive_shared_norm": 3.0614545345306396,
+        "shared_cosine": -0.21526673436164856,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "initial_exact": 0.1111111119389534,
+      "final_exact": 1.0,
+      "predictions": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "logits": [
+        [
+          -9.551666259765625,
+          -8.564346313476562
+        ],
+        [
+          -9.248191833496094,
+          -8.72702407836914
+        ],
+        [
+          -9.006473541259766,
+          9.38388729095459
+        ],
+        [
+          -7.717319965362549,
+          -9.412934303283691
+        ],
+        [
+          -11.110169410705566,
+          -7.461103439331055
+        ],
+        [
+          -11.398848533630371,
+          7.642096996307373
+        ],
+        [
+          8.71798038482666,
+          -7.985663414001465
+        ],
+        [
+          7.9873456954956055,
+          -8.178361892700195
+        ],
+        [
+          8.518234252929688,
+          7.506054401397705
+        ]
+      ],
+      "truth": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    "fresh_weights_inherited_adam": {
+      "initial_hash": "b4b586814e27dc7dffbaf3471e098c54730e38651942fed62a6e8a00ed32242c",
+      "final_hash": "5271298d3454eed7e9ff9d3ea3f590d595ad992e9815f7d406ef4d8ce48ddf97",
+      "checkpoint_sha256": "99374b5712427f10ab85f87ec3e673a8846bae5f1e6eba0ce95d5b3de07d69f3",
+      "cleared_optimizer_state_names": [],
+      "curves": [
+        {
+          "updates": 50,
+          "loss": 0.6521177887916565,
+          "exact": 0.5555555820465088
+        },
+        {
+          "updates": 100,
+          "loss": 0.3421173095703125,
+          "exact": 0.5555555820465088
+        },
+        {
+          "updates": 150,
+          "loss": 0.2933644652366638,
+          "exact": 0.6666666865348816
+        },
+        {
+          "updates": 200,
+          "loss": 0.4885213077068329,
+          "exact": 0.7777777910232544
+        }
+      ],
+      "gpu_wall_seconds": 2.8738889390000395,
+      "initial_gradient": {
+        "active_loss": 0.6442156434059143,
+        "inactive_loss": 0.7955566644668579,
+        "all26_loss": 0.783915102481842,
+        "per_label_loss": [
+          0.7857282757759094,
+          0.645402729511261,
+          0.4323897957801819,
+          0.519116997718811,
+          0.6538798809051514,
+          1.2862498760223389,
+          0.8742192983627319,
+          0.3717373013496399,
+          0.6567533612251282,
+          1.473707914352417,
+          0.6632033586502075,
+          0.5353921055793762,
+          0.6927288174629211,
+          0.4511937201023102,
+          0.6068013310432434,
+          0.6252278089523315,
+          0.5293307900428772,
+          0.8053524494171143,
+          1.3184359073638916,
+          0.5720903873443604,
+          1.062549352645874,
+          0.8799723982810974,
+          0.6113346219062805,
+          0.753649115562439,
+          1.381330132484436,
+          1.1940141916275024
+        ],
+        "active_total_norm": 5.626708984375,
+        "inactive_total_norm": 20.338220596313477,
+        "all26_total_norm": 18.88324546813965,
+        "active_shared_norm": 5.616682052612305,
+        "inactive_shared_norm": 20.301664352416992,
+        "shared_cosine": 0.24307756125926971,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 17,
+          "active_zero": 8,
+          "active_unused": 23,
+          "inactive_nonzero": 17,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "final_gradient": {
+        "active_loss": 0.29634103178977966,
+        "inactive_loss": 0.6828852891921997,
+        "all26_loss": 0.6531511545181274,
+        "per_label_loss": [
+          0.807317852973938,
+          0.5433186292648315,
+          0.7401928305625916,
+          0.6056244969367981,
+          0.45139482617378235,
+          0.8065553307533264,
+          0.6665265560150146,
+          0.9997488856315613,
+          0.5785089135169983,
+          0.4739345908164978,
+          0.16230779886245728,
+          0.3403884470462799,
+          0.5893638134002686,
+          0.6188511848449707,
+          0.8209004998207092,
+          0.43037426471710205,
+          0.5981877446174622,
+          0.9441826939582825,
+          0.6248566508293152,
+          0.5648236870765686,
+          0.5750005841255188,
+          0.7653526067733765,
+          0.8243368864059448,
+          0.458526074886322,
+          0.8653733134269714,
+          1.1259795427322388
+        ],
+        "active_total_norm": 3.2933523654937744,
+        "inactive_total_norm": 1.1282559633255005,
+        "all26_total_norm": 1.080346941947937,
+        "active_shared_norm": 3.1894896030426025,
+        "inactive_shared_norm": 0.694597601890564,
+        "shared_cosine": 0.05822109431028366,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "initial_exact": 0.4444444477558136,
+      "final_exact": 0.7777777910232544,
+      "predictions": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "logits": [
+        [
+          -6.923992156982422,
+          -3.7297093868255615
+        ],
+        [
+          -10.025498390197754,
+          -4.744811058044434
+        ],
+        [
+          1.1609516143798828,
+          -0.4410724341869354
+        ],
+        [
+          -7.951186180114746,
+          -3.835444927215576
+        ],
+        [
+          -9.331503868103027,
+          -4.190732479095459
+        ],
+        [
+          -3.68874192237854,
+          -1.241763710975647
+        ],
+        [
+          7.884136199951172,
+          -0.39446553587913513
+        ],
+        [
+          7.1713457107543945,
+          -0.8038799166679382
+        ],
+        [
+          9.85929012298584,
+          0.4683864712715149
+        ]
+      ],
+      "truth": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    "fresh_weights_fresh_adam": {
+      "initial_hash": "b4b586814e27dc7dffbaf3471e098c54730e38651942fed62a6e8a00ed32242c",
+      "final_hash": "48563e6c956e876764144d2a03f7265904c8d8c66ea8824d5c0b0e938b20aa73",
+      "checkpoint_sha256": "15546bed074eeb48bfaf11112f671f5b53b8713ddbe64892b17f32ca1d01979b",
+      "cleared_optimizer_state_names": [],
+      "curves": [
+        {
+          "updates": 50,
+          "loss": 0.03382046893239021,
+          "exact": 0.8888888955116272
+        },
+        {
+          "updates": 100,
+          "loss": 0.002070583403110504,
+          "exact": 1.0
+        },
+        {
+          "updates": 150,
+          "loss": 0.001035656314343214,
+          "exact": 1.0
+        },
+        {
+          "updates": 200,
+          "loss": 0.0006740585085935891,
+          "exact": 1.0
+        }
+      ],
+      "gpu_wall_seconds": 2.851070062000076,
+      "initial_gradient": {
+        "active_loss": 0.6442156434059143,
+        "inactive_loss": 0.7955566644668579,
+        "all26_loss": 0.783915102481842,
+        "per_label_loss": [
+          0.7857282757759094,
+          0.645402729511261,
+          0.4323897957801819,
+          0.519116997718811,
+          0.6538798809051514,
+          1.2862498760223389,
+          0.8742192983627319,
+          0.3717373013496399,
+          0.6567533612251282,
+          1.473707914352417,
+          0.6632033586502075,
+          0.5353921055793762,
+          0.6927288174629211,
+          0.4511937201023102,
+          0.6068013310432434,
+          0.6252278089523315,
+          0.5293307900428772,
+          0.8053524494171143,
+          1.3184359073638916,
+          0.5720903873443604,
+          1.062549352645874,
+          0.8799723982810974,
+          0.6113346219062805,
+          0.753649115562439,
+          1.381330132484436,
+          1.1940141916275024
+        ],
+        "active_total_norm": 5.626708984375,
+        "inactive_total_norm": 20.338220596313477,
+        "all26_total_norm": 18.88324546813965,
+        "active_shared_norm": 5.616682052612305,
+        "inactive_shared_norm": 20.301664352416992,
+        "shared_cosine": 0.24307756125926971,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 17,
+          "active_zero": 8,
+          "active_unused": 23,
+          "inactive_nonzero": 17,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "final_gradient": {
+        "active_loss": 0.0006689834990538657,
+        "inactive_loss": 0.7130264043807983,
+        "all26_loss": 0.6582297086715698,
+        "per_label_loss": [
+          0.6618444919586182,
+          0.6317130327224731,
+          0.6654180884361267,
+          0.7070650458335876,
+          0.7739683985710144,
+          0.8932937979698181,
+          0.587891697883606,
+          0.6505104899406433,
+          0.7538261413574219,
+          0.8600752353668213,
+          0.0006377006066031754,
+          0.6086676120758057,
+          0.5552657842636108,
+          0.6000238656997681,
+          0.5897944569587708,
+          0.0007002663915045559,
+          0.7198089361190796,
+          1.0805810689926147,
+          0.7200593948364258,
+          0.636705756187439,
+          0.7193644642829895,
+          0.7872903943061829,
+          0.7961733341217041,
+          0.5939330458641052,
+          0.8082345128059387,
+          0.7111238241195679
+        ],
+        "active_total_norm": 0.004061805550009012,
+        "inactive_total_norm": 0.8177293539047241,
+        "all26_total_norm": 0.7548273205757141,
+        "active_shared_norm": 0.0008592984522692859,
+        "inactive_shared_norm": 0.6583130955696106,
+        "shared_cosine": 0.0026703267358243465,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "initial_exact": 0.4444444477558136,
+      "final_exact": 1.0,
+      "predictions": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "logits": [
+        [
+          -7.071427822113037,
+          -7.811529636383057
+        ],
+        [
+          -7.856608867645264,
+          -7.324355602264404
+        ],
+        [
+          -7.27938175201416,
+          7.192630767822266
+        ],
+        [
+          -7.889163494110107,
+          -7.325595378875732
+        ],
+        [
+          -7.655110836029053,
+          -7.468324661254883
+        ],
+        [
+          -7.292586326599121,
+          7.1929850578308105
+        ],
+        [
+          7.199299335479736,
+          -7.16558837890625
+        ],
+        [
+          7.242299556732178,
+          -7.142856121063232
+        ],
+        [
+          7.102315425872803,
+          6.965140342712402
+        ]
+      ],
+      "truth": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    "inherited_weights_reset_semantic_adam": {
+      "initial_hash": "cb5c90b050daffbdf32712bba1a9acff5646121a11cb37943312553270434f4d",
+      "final_hash": "df9755dc16a9fc4c300582c11aee08d6ec279fcf43980f4d36ae4caea3aebc67",
+      "checkpoint_sha256": "1f190b51b9f27cf52f0433bc8442155ef6878dfda6858a91061c33d60fb5e3b0",
+      "cleared_optimizer_state_names": [
+        "bottleneck.concept_proj.0.weight",
+        "bottleneck.concept_proj.0.bias",
+        "bottleneck.concept_proj.1.weight",
+        "bottleneck.concept_proj.1.bias",
+        "bottleneck.concept_proj.3.weight",
+        "bottleneck.concept_proj.3.bias",
+        "bottleneck.concept_proj.4.weight",
+        "bottleneck.concept_proj.4.bias",
+        "bottleneck.attribute_head.weight",
+        "bottleneck.attribute_head.bias"
+      ],
+      "curves": [
+        {
+          "updates": 50,
+          "loss": 0.5490447282791138,
+          "exact": 0.4444444477558136
+        },
+        {
+          "updates": 100,
+          "loss": 0.1085646003484726,
+          "exact": 0.8888888955116272
+        },
+        {
+          "updates": 150,
+          "loss": 0.7383315563201904,
+          "exact": 0.6666666865348816
+        },
+        {
+          "updates": 200,
+          "loss": 0.07812041789293289,
+          "exact": 0.8888888955116272
+        }
+      ],
+      "gpu_wall_seconds": 2.874919955999985,
+      "initial_gradient": {
+        "active_loss": 2.1374828815460205,
+        "inactive_loss": 0.0004739849828183651,
+        "all26_loss": 0.16485927999019623,
+        "per_label_loss": [
+          0.0004251798090990633,
+          0.0003683831891976297,
+          0.0001773834228515625,
+          0.0005428526201285422,
+          0.00041882196092046797,
+          0.0008764266967773438,
+          0.00021425883460324258,
+          0.0002370410511502996,
+          0.0003618664341047406,
+          0.00035709806252270937,
+          3.5125443935394287,
+          0.00029087066650390625,
+          0.0002921422419603914,
+          0.00048356587649323046,
+          0.00026946599246002734,
+          0.7624209523200989,
+          0.00019952986622229218,
+          0.0005661646719090641,
+          0.00040748383617028594,
+          0.00045050514745526016,
+          0.0008913676138035953,
+          0.00062269635964185,
+          0.0005039639072492719,
+          0.0007811652612872422,
+          0.0010723537998273969,
+          0.0005650520324707031
+        ],
+        "active_total_norm": 7.893582344055176,
+        "inactive_total_norm": 0.013542336411774158,
+        "all26_total_norm": 0.6033506989479065,
+        "active_shared_norm": 6.497689247131348,
+        "inactive_shared_norm": 0.013473556376993656,
+        "shared_cosine": -0.3872396647930145,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "final_gradient": {
+        "active_loss": 0.07757505029439926,
+        "inactive_loss": 0.34593531489372253,
+        "all26_loss": 0.3252922296524048,
+        "per_label_loss": [
+          0.19195076823234558,
+          0.46397289633750916,
+          0.3467242419719696,
+          0.2664974331855774,
+          0.4242250919342041,
+          0.31248751282691956,
+          0.19136005640029907,
+          0.4658173620700836,
+          0.4543156027793884,
+          0.4836847484111786,
+          0.00046798319090157747,
+          0.2295559048652649,
+          0.25781822204589844,
+          0.2924729883670807,
+          0.32629701495170593,
+          0.15468211472034454,
+          0.55106121301651,
+          0.46625757217407227,
+          0.3795562982559204,
+          0.22403764724731445,
+          0.38050734996795654,
+          0.31260377168655396,
+          0.35469913482666016,
+          0.27938732504844666,
+          0.24213075637817383,
+          0.405026912689209
+        ],
+        "active_total_norm": 0.1157173290848732,
+        "inactive_total_norm": 3.4921534061431885,
+        "all26_total_norm": 3.223257303237915,
+        "active_shared_norm": 0.09757670760154724,
+        "inactive_shared_norm": 3.4501583576202393,
+        "shared_cosine": -0.037924326956272125,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "initial_exact": 0.1111111119389534,
+      "final_exact": 0.8888888955116272,
+      "predictions": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ]
+      ],
+      "logits": [
+        [
+          -10.146539688110352,
+          -8.82740306854248
+        ],
+        [
+          -12.362292289733887,
+          -7.343111991882324
+        ],
+        [
+          -7.226378440856934,
+          8.399941444396973
+        ],
+        [
+          -10.542872428894043,
+          -8.566823959350586
+        ],
+        [
+          -13.809208869934082,
+          -4.179436683654785
+        ],
+        [
+          -7.201526165008545,
+          7.657290458679199
+        ],
+        [
+          6.040946960449219,
+          -3.734849214553833
+        ],
+        [
+          8.749235153198242,
+          -0.25005632638931274
+        ],
+        [
+          8.915873527526855,
+          -0.15890991687774658
+        ]
+      ],
+      "truth": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    },
+    "inherited_weights_reset_backbone_adam": {
+      "initial_hash": "cb5c90b050daffbdf32712bba1a9acff5646121a11cb37943312553270434f4d",
+      "final_hash": "e48ecdddc9906e93b049388b0bddbf2eedc509f713a22e23c21a430bdf24ca06",
+      "checkpoint_sha256": "70ba8d49764fb6f3687238b69f5a428f662e7a310ed4af2f12b928efbecb834e",
+      "cleared_optimizer_state_names": [
+        "student.base_model.wte.weight",
+        "student.base_model.blocks.4.ln_1.weight",
+        "student.base_model.blocks.4.ln_1.bias",
+        "student.base_model.blocks.4.attn.c_attn.weight",
+        "student.base_model.blocks.4.attn.c_attn.bias",
+        "student.base_model.blocks.4.attn.c_proj.weight",
+        "student.base_model.blocks.4.attn.c_proj.bias",
+        "student.base_model.blocks.4.ln_2.weight",
+        "student.base_model.blocks.4.ln_2.bias",
+        "student.base_model.blocks.4.mlp.c_fc.weight",
+        "student.base_model.blocks.4.mlp.c_fc.bias",
+        "student.base_model.blocks.4.mlp.c_proj.weight",
+        "student.base_model.blocks.4.mlp.c_proj.bias",
+        "student.base_model.ln_f.weight",
+        "student.base_model.ln_f.bias"
+      ],
+      "curves": [
+        {
+          "updates": 50,
+          "loss": 0.49822869896888733,
+          "exact": 0.6666666865348816
+        },
+        {
+          "updates": 100,
+          "loss": 0.30436235666275024,
+          "exact": 0.6666666865348816
+        },
+        {
+          "updates": 150,
+          "loss": 0.04771464690566063,
+          "exact": 1.0
+        },
+        {
+          "updates": 200,
+          "loss": 0.00046283239498734474,
+          "exact": 1.0
+        }
+      ],
+      "gpu_wall_seconds": 2.8773422489999803,
+      "initial_gradient": {
+        "active_loss": 2.1374828815460205,
+        "inactive_loss": 0.0004739849828183651,
+        "all26_loss": 0.16485927999019623,
+        "per_label_loss": [
+          0.0004251798090990633,
+          0.0003683831891976297,
+          0.0001773834228515625,
+          0.0005428526201285422,
+          0.00041882196092046797,
+          0.0008764266967773438,
+          0.00021425883460324258,
+          0.0002370410511502996,
+          0.0003618664341047406,
+          0.00035709806252270937,
+          3.5125443935394287,
+          0.00029087066650390625,
+          0.0002921422419603914,
+          0.00048356587649323046,
+          0.00026946599246002734,
+          0.7624209523200989,
+          0.00019952986622229218,
+          0.0005661646719090641,
+          0.00040748383617028594,
+          0.00045050514745526016,
+          0.0008913676138035953,
+          0.00062269635964185,
+          0.0005039639072492719,
+          0.0007811652612872422,
+          0.0010723537998273969,
+          0.0005650520324707031
+        ],
+        "active_total_norm": 7.893582344055176,
+        "inactive_total_norm": 0.013542336411774158,
+        "all26_total_norm": 0.6033506989479065,
+        "active_shared_norm": 6.497689247131348,
+        "inactive_shared_norm": 0.013473556376993656,
+        "shared_cosine": -0.3872396647930145,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "final_gradient": {
+        "active_loss": 0.00044044418609701097,
+        "inactive_loss": 0.4099845886230469,
+        "all26_loss": 0.3784811794757843,
+        "per_label_loss": [
+          0.33122768998146057,
+          0.534514844417572,
+          0.2748790383338928,
+          0.5087659358978271,
+          0.7537424564361572,
+          0.5660507082939148,
+          0.3919438421726227,
+          0.40718021988868713,
+          0.514372706413269,
+          0.5486940741539001,
+          0.00011455731146270409,
+          0.22665636241436005,
+          0.27142947912216187,
+          0.5024666786193848,
+          0.3160046637058258,
+          0.0007663310971111059,
+          0.5805666446685791,
+          0.5967128872871399,
+          0.31833547353744507,
+          0.34711554646492004,
+          0.4159899950027466,
+          0.2344704270362854,
+          0.32569628953933716,
+          0.18815398216247559,
+          0.3687998354434967,
+          0.3158600330352783
+        ],
+        "active_total_norm": 0.058031510561704636,
+        "inactive_total_norm": 25.06795883178711,
+        "all26_total_norm": 23.136381149291992,
+        "active_shared_norm": 0.05793554335832596,
+        "inactive_shared_norm": 25.062063217163086,
+        "shared_cosine": -0.7348582148551941,
+        "all26_active_gradient_coefficient": 0.07692307692307693,
+        "all26_inactive_gradient_coefficient": 0.9230769230769231,
+        "optimizer_membership": {
+          "missing_trainable": [],
+          "duplicate_entries": 0,
+          "stale_entries": 0
+        },
+        "parameter_flow_counts": {
+          "registered_trainable": 48,
+          "active_nonzero": 25,
+          "active_zero": 0,
+          "active_unused": 23,
+          "inactive_nonzero": 25,
+          "frozen": 77
+        },
+        "detail_location": "full per-parameter flow and frozen names retained in hashed results.json"
+      },
+      "initial_exact": 0.1111111119389534,
+      "final_exact": 1.0,
+      "predictions": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ],
+      "logits": [
+        [
+          -12.030632972717285,
+          -8.494305610656738
+        ],
+        [
+          -9.64428997039795,
+          -9.804696083068848
+        ],
+        [
+          -10.066442489624023,
+          8.00120735168457
+        ],
+        [
+          -10.965206146240234,
+          -8.280731201171875
+        ],
+        [
+          -10.722628593444824,
+          -8.152556419372559
+        ],
+        [
+          -11.704641342163086,
+          7.117379188537598
+        ],
+        [
+          7.543857574462891,
+          -8.089387893676758
+        ],
+        [
+          7.98561429977417,
+          -7.797072410583496
+        ],
+        [
+          14.816113471984863,
+          5.463139057159424
+        ]
+      ],
+      "truth": [
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          0
+        ],
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          0
+        ],
+        [
+          1,
+          1
+        ]
+      ]
+    }
+  },
+  "sha256": {
+    "diagnostic.log": "59d990f151caf89dcb66df03000cb6e66d49e60b71adc010f1ac0709c187e677",
+    "execution.json": "35823728ad5359a7e0c253c51b90a87c656324dc966ef1c7409a3d9ae22f3473",
+    "fresh_weights_fresh_adam.pt": "15546bed074eeb48bfaf11112f671f5b53b8713ddbe64892b17f32ca1d01979b",
+    "fresh_weights_inherited_adam.pt": "99374b5712427f10ab85f87ec3e673a8846bae5f1e6eba0ce95d5b3de07d69f3",
+    "inherited_weights_fresh_adam.pt": "61173e7f12dfbb8a9d8b80d6688a8be566f487794bb1e880c880a962370980e7",
+    "inherited_weights_inherited_adam.pt": "60bf3428c24750b7c209c7d796a04658899565a14622e792bd84287024cd3bd1",
+    "inherited_weights_reset_backbone_adam.pt": "70ba8d49764fb6f3687238b69f5a428f662e7a310ed4af2f12b928efbecb834e",
+    "inherited_weights_reset_semantic_adam.pt": "1f190b51b9f27cf52f0433bc8442155ef6878dfda6858a91061c33d60fb5e3b0",
+    "results.json": "949817c0bebc8c2b024442498d5fe82305b07f19770dced9ba2bdee32f3b9e15"
+  },
+  "verdict": "Backbone Adam-state intervention rescues original tiny acquisition in this seed; no generalization, retention or transfer qualification"
+}

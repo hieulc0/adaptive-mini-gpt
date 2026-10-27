@@ -1,0 +1,656 @@
+{
+  "kernel": "sparklinghydraulics0/amg-backend-repair",
+  "version": 1,
+  "status": "COMPLETE",
+  "execution": {
+    "sha": "db9ef688dd00ef63ce6bfc1d606a71cace507bff",
+    "gpu": "Tesla T4",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "phases": {
+      "contracts": {
+        "exit_code": 0
+      },
+      "seed42-first": {
+        "exit_code": 0
+      },
+      "seed42-resumed": {
+        "exit_code": 0
+      },
+      "seed43-first": {
+        "exit_code": 0
+      },
+      "seed43-resumed": {
+        "exit_code": 0
+      },
+      "seed42-forced-first": {
+        "exit_code": 0
+      },
+      "seed42-forced-resumed": {
+        "exit_code": 0
+      },
+      "full-suite": {
+        "exit_code": 0
+      }
+    }
+  },
+  "artifacts": "runs/kaggle-backend-repair/output-v1/backend-repair",
+  "tests": {
+    "full-suite": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "778",
+      "time": "626.404",
+      "timestamp": "2026-10-27T01:39:01.887048+00:00",
+      "hostname": "032c44293475"
+    },
+    "contracts": {
+      "name": "pytest",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "tests": "13",
+      "time": "32.682",
+      "timestamp": "2026-10-27T01:38:00.063194+00:00",
+      "hostname": "032c44293475"
+    }
+  },
+  "traces": {
+    "seed43/resumed": {
+      "initialization": {
+        "event": "initialization",
+        "ambient_seed": 43,
+        "tensor_hash": "34eaa547629638e39bbce31f8e224144a72981889e54e33488142c6423f12074"
+      },
+      "scales": [
+        {
+          "event": "amp_scale",
+          "before": 65536.0,
+          "after": 65536.0,
+          "applied_so_far": 1
+        },
+        {
+          "event": "amp_scale",
+          "before": 65536.0,
+          "after": 65536.0,
+          "applied_so_far": 2
+        }
+      ],
+      "final_checkpoint": {
+        "event": "checkpoint",
+        "name": "latest.pt",
+        "step": 4,
+        "tokens": 256,
+        "data_position": 256,
+        "progress": {
+          "schema": 1,
+          "applied_updates": 4,
+          "attempted_updates": 4,
+          "skipped_updates": 0,
+          "consecutive_skipped_updates": 0
+        },
+        "optimizer_steps": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "scaler": {
+          "scale": 65536.0,
+          "growth_factor": 2.0,
+          "backoff_factor": 0.5,
+          "growth_interval": 2000,
+          "_growth_tracker": 4
+        },
+        "scheduler": {
+          "base_lrs": [
+            0.0003,
+            0.0003
+          ],
+          "last_epoch": 4,
+          "_step_count": 5,
+          "_is_initial": false,
+          "_get_lr_called_within_step": false,
+          "_last_lr": [
+            1e-05,
+            1e-05
+          ],
+          "lr_lambdas": [
+            null,
+            null
+          ]
+        },
+        "tensor_hash": "5f6ac6a299a3b2519b1cf282364577aa570176c7e406125dcae5da5a2a35053e"
+      }
+    },
+    "seed43/first": {
+      "initialization": {
+        "event": "initialization",
+        "ambient_seed": 43,
+        "tensor_hash": "34eaa547629638e39bbce31f8e224144a72981889e54e33488142c6423f12074"
+      },
+      "scales": [
+        {
+          "event": "amp_scale",
+          "before": 65536.0,
+          "after": 65536.0,
+          "applied_so_far": 1
+        },
+        {
+          "event": "amp_scale",
+          "before": 65536.0,
+          "after": 65536.0,
+          "applied_so_far": 2
+        }
+      ],
+      "final_checkpoint": {
+        "event": "checkpoint",
+        "name": "latest.pt",
+        "step": 2,
+        "tokens": 128,
+        "data_position": 128,
+        "progress": {
+          "schema": 1,
+          "applied_updates": 2,
+          "attempted_updates": 2,
+          "skipped_updates": 0,
+          "consecutive_skipped_updates": 0
+        },
+        "optimizer_steps": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "scaler": {
+          "scale": 65536.0,
+          "growth_factor": 2.0,
+          "backoff_factor": 0.5,
+          "growth_interval": 2000,
+          "_growth_tracker": 2
+        },
+        "scheduler": {
+          "base_lrs": [
+            0.0003,
+            0.0003
+          ],
+          "last_epoch": 2,
+          "_step_count": 3,
+          "_is_initial": false,
+          "_get_lr_called_within_step": false,
+          "_last_lr": [
+            1e-05,
+            1e-05
+          ],
+          "lr_lambdas": [
+            null,
+            null
+          ]
+        },
+        "tensor_hash": "01161bd74c251f5ce7e3fd7700dd7c07bb95b09ae636d17953e7292f64854efa"
+      }
+    },
+    "seed42/resumed": {
+      "initialization": {
+        "event": "initialization",
+        "ambient_seed": 42,
+        "tensor_hash": "34eaa547629638e39bbce31f8e224144a72981889e54e33488142c6423f12074"
+      },
+      "scales": [
+        {
+          "event": "amp_scale",
+          "before": 65536.0,
+          "after": 65536.0,
+          "applied_so_far": 1
+        },
+        {
+          "event": "amp_scale",
+          "before": 65536.0,
+          "after": 65536.0,
+          "applied_so_far": 2
+        }
+      ],
+      "final_checkpoint": {
+        "event": "checkpoint",
+        "name": "latest.pt",
+        "step": 4,
+        "tokens": 256,
+        "data_position": 256,
+        "progress": {
+          "schema": 1,
+          "applied_updates": 4,
+          "attempted_updates": 4,
+          "skipped_updates": 0,
+          "consecutive_skipped_updates": 0
+        },
+        "optimizer_steps": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "scaler": {
+          "scale": 65536.0,
+          "growth_factor": 2.0,
+          "backoff_factor": 0.5,
+          "growth_interval": 2000,
+          "_growth_tracker": 4
+        },
+        "scheduler": {
+          "base_lrs": [
+            0.0003,
+            0.0003
+          ],
+          "last_epoch": 4,
+          "_step_count": 5,
+          "_is_initial": false,
+          "_get_lr_called_within_step": false,
+          "_last_lr": [
+            1e-05,
+            1e-05
+          ],
+          "lr_lambdas": [
+            null,
+            null
+          ]
+        },
+        "tensor_hash": "5f6ac6a299a3b2519b1cf282364577aa570176c7e406125dcae5da5a2a35053e"
+      }
+    },
+    "seed42/first": {
+      "initialization": {
+        "event": "initialization",
+        "ambient_seed": 42,
+        "tensor_hash": "34eaa547629638e39bbce31f8e224144a72981889e54e33488142c6423f12074"
+      },
+      "scales": [
+        {
+          "event": "amp_scale",
+          "before": 65536.0,
+          "after": 65536.0,
+          "applied_so_far": 1
+        },
+        {
+          "event": "amp_scale",
+          "before": 65536.0,
+          "after": 65536.0,
+          "applied_so_far": 2
+        }
+      ],
+      "final_checkpoint": {
+        "event": "checkpoint",
+        "name": "latest.pt",
+        "step": 2,
+        "tokens": 128,
+        "data_position": 128,
+        "progress": {
+          "schema": 1,
+          "applied_updates": 2,
+          "attempted_updates": 2,
+          "skipped_updates": 0,
+          "consecutive_skipped_updates": 0
+        },
+        "optimizer_steps": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "scaler": {
+          "scale": 65536.0,
+          "growth_factor": 2.0,
+          "backoff_factor": 0.5,
+          "growth_interval": 2000,
+          "_growth_tracker": 2
+        },
+        "scheduler": {
+          "base_lrs": [
+            0.0003,
+            0.0003
+          ],
+          "last_epoch": 2,
+          "_step_count": 3,
+          "_is_initial": false,
+          "_get_lr_called_within_step": false,
+          "_last_lr": [
+            1e-05,
+            1e-05
+          ],
+          "lr_lambdas": [
+            null,
+            null
+          ]
+        },
+        "tensor_hash": "01161bd74c251f5ce7e3fd7700dd7c07bb95b09ae636d17953e7292f64854efa"
+      }
+    },
+    "seed42-forced/resumed": {
+      "initialization": {
+        "event": "initialization",
+        "ambient_seed": 42,
+        "tensor_hash": "34eaa547629638e39bbce31f8e224144a72981889e54e33488142c6423f12074"
+      },
+      "scales": [
+        {
+          "event": "amp_scale",
+          "before": 32768.0,
+          "after": 32768.0,
+          "applied_so_far": 1
+        },
+        {
+          "event": "amp_scale",
+          "before": 32768.0,
+          "after": 32768.0,
+          "applied_so_far": 2
+        }
+      ],
+      "final_checkpoint": {
+        "event": "checkpoint",
+        "name": "latest.pt",
+        "step": 4,
+        "tokens": 320,
+        "data_position": 320,
+        "progress": {
+          "schema": 1,
+          "applied_updates": 4,
+          "attempted_updates": 5,
+          "skipped_updates": 1,
+          "consecutive_skipped_updates": 0
+        },
+        "optimizer_steps": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4,
+          4
+        ],
+        "scaler": {
+          "scale": 32768.0,
+          "growth_factor": 2.0,
+          "backoff_factor": 0.5,
+          "growth_interval": 2000,
+          "_growth_tracker": 4
+        },
+        "scheduler": {
+          "base_lrs": [
+            0.0003,
+            0.0003
+          ],
+          "last_epoch": 4,
+          "_step_count": 5,
+          "_is_initial": false,
+          "_get_lr_called_within_step": false,
+          "_last_lr": [
+            1e-05,
+            1e-05
+          ],
+          "lr_lambdas": [
+            null,
+            null
+          ]
+        },
+        "tensor_hash": "29898af618eafcd078b2724f3f87196322017641a2c341432e945491af7a0781"
+      }
+    },
+    "seed42-forced/first": {
+      "initialization": {
+        "event": "initialization",
+        "ambient_seed": 42,
+        "tensor_hash": "34eaa547629638e39bbce31f8e224144a72981889e54e33488142c6423f12074"
+      },
+      "scales": [
+        {
+          "event": "amp_scale",
+          "before": 65536.0,
+          "after": 32768.0,
+          "applied_so_far": 0
+        },
+        {
+          "event": "amp_scale",
+          "before": 32768.0,
+          "after": 32768.0,
+          "applied_so_far": 1
+        },
+        {
+          "event": "amp_scale",
+          "before": 32768.0,
+          "after": 32768.0,
+          "applied_so_far": 2
+        }
+      ],
+      "final_checkpoint": {
+        "event": "checkpoint",
+        "name": "latest.pt",
+        "step": 2,
+        "tokens": 192,
+        "data_position": 192,
+        "progress": {
+          "schema": 1,
+          "applied_updates": 2,
+          "attempted_updates": 3,
+          "skipped_updates": 1,
+          "consecutive_skipped_updates": 0
+        },
+        "optimizer_steps": [
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2,
+          2
+        ],
+        "scaler": {
+          "scale": 32768.0,
+          "growth_factor": 2.0,
+          "backoff_factor": 0.5,
+          "growth_interval": 2000,
+          "_growth_tracker": 2
+        },
+        "scheduler": {
+          "base_lrs": [
+            0.0003,
+            0.0003
+          ],
+          "last_epoch": 2,
+          "_step_count": 3,
+          "_is_initial": false,
+          "_get_lr_called_within_step": false,
+          "_last_lr": [
+            1e-05,
+            1e-05
+          ],
+          "lr_lambdas": [
+            null,
+            null
+          ]
+        },
+        "tensor_hash": "acc83ffe6f87feb71c3e5f539806e9ae3cb155a9d0223bb2f85aef790cc6ecfc"
+      }
+    }
+  },
+  "sha256": {
+    "contracts-preserved/test_bootstrap_reuses_cli_and_0/__pycache__/launch.cpython-313.pyc": "7f09a41b6144357de07d330f126b7b61addfea7cb928ae5e397443975712973a",
+    "contracts-preserved/test_bootstrap_reuses_cli_and_0/input/datasets/tester/amg-code/amg-code.zip": "eb5fde8bbbc610039b4cdbd727fce4a0a3a2aa11f9d29c6e33e161e19b819edb",
+    "contracts-preserved/test_bootstrap_reuses_cli_and_0/launch.py": "6fea1b7d7083d213834094369252b40137e021e88ff73e5681413c02ab109915",
+    "contracts-preserved/test_bootstrap_reuses_cli_and_0/working/amg/job.json": "24e6fce0b82bdc4d7ecf35dc62ec08dc4f6b158cb91e0b07aa7b8c3ed2fdbbf4",
+    "contracts-preserved/test_bootstrap_reuses_cli_and_0/working/amg-code/pyproject.toml": "b37b032c11ac07c8881f1ac2b41c8c3148e571ec124b9984477661ab9c0ed5b4",
+    "contracts-preserved/test_bootstrap_reuses_cli_and_1/__pycache__/launch.cpython-313.pyc": "1c634b9dca377f7f0ff4538e05958dd0982b2be27f2fe9292b2ac14d9a6e5692",
+    "contracts-preserved/test_bootstrap_reuses_cli_and_1/input/datasets/tester/amg-code/amg-code.zip": "eb5fde8bbbc610039b4cdbd727fce4a0a3a2aa11f9d29c6e33e161e19b819edb",
+    "contracts-preserved/test_bootstrap_reuses_cli_and_1/launch.py": "e6a456e31472dc5afb8907b2e3f74ac606b3d8ed6184bedcec3bf7cc3db2763e",
+    "contracts-preserved/test_bootstrap_reuses_cli_and_1/working/amg/job.json": "d9d2b923453c42bb0cafb744b98ae1973c591c97d423cc14e83702df55eb87cf",
+    "contracts-preserved/test_bootstrap_reuses_cli_and_1/working/amg-code/pyproject.toml": "b37b032c11ac07c8881f1ac2b41c8c3148e571ec124b9984477661ab9c0ed5b4",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/full/best.pt": "6527c0f2dc2abf0cea2a31dbbc65cdd709a7aa1bc369fc4e33526a4f015d8c4e",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/full/latest.pt": "5aeb1521c094206b141ffe0cfb2f0c6da2625e189c3c88ac28e060f36aa749e3",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/full/manifest.json": "dfc9679ec54b6bb209582792d95f0b79acde3114fda85a956869bf637773c0fe",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/full/metrics.jsonl": "f971d62eb81e0e44a047b71d5ec516b4bf8bf4aab22164c18eb339de13e8aa62",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/full/step_000002.pt": "d7bc8b9bb04ed2681eb62cde047ff6ec3ecf25424bfef6bd1fe9509917759c28",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/full/step_000004.pt": "559a3c1f1315a81c7b2e9c60157647e1cb269cf9b52a75ddb019e5c099f23a68",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/partial/best.pt": "4093a786212cd5693e11839338f2505c5bc1dc6c553519c8f656ade3b28e6f93",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/partial/manifest.json": "2c527b71e8d1e8bd423d4cd95397b589251f17b94b0ee940e1b22bbc15945fa1",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/partial/metrics.jsonl": "0c4aa298a8ea11dbb824abae68ecc340b288483cadc8e883b93e250bbfe28ea5",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/partial/step_000002.pt": "0f7ca7027600377753b74ef2b18d579004bd712e2867f7a348b4257e140b80bc",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/resumed/best.pt": "3175804593c806240eee7da962fea4174d010851e80d31e72eb0bc4abdd045c6",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/resumed/latest.pt": "6365cdcf4f9c519c565310b89a74b148e6e99545dda1dfd364d3733e4d72e6d9",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/resumed/manifest.json": "faf981e7ab481d4eb73327367e6e07c9051be84195adc7a2b869e1eba931c925",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/resumed/metrics.jsonl": "261a520ea4a7f3c6e8d698e71c64746d8a9aa8eb7917b5968e3bca815f11edbf",
+    "contracts-preserved/test_fp16_skipped_update_and_e0/resumed/step_000004.pt": "28e702e84d9c6c25af3d2990e0665ae91d7dc91398b28696327f3ec0b6f29534",
+    "contracts-preserved/test_gpu_qualification0/checkpoint-progress.json": "5f3a535f5fed2e5e618bf136e85a9b69f8a63e7195fb7b580349158178554b3f",
+    "contracts-preserved/test_gpu_qualification0/first/best.pt": "33e87f2f081ed421e4fbac5b3acc69b5bab5e694adcbf69f469cccaa38eaa778",
+    "contracts-preserved/test_gpu_qualification0/first/latest.pt": "d5977d9541c00941135d0adad61b7c282b9bf61fe18c2a4247d9022ed3f888a2",
+    "contracts-preserved/test_gpu_qualification0/first/manifest.json": "733ddeefdf670bcb573b123d06317cac8f6ae6963500b450ec432c48fd8501db",
+    "contracts-preserved/test_gpu_qualification0/first/metrics.jsonl": "fe69cd6dfe3980733ae52e40f2c351b94946eba579f8aef142ae637e82e055c3",
+    "contracts-preserved/test_gpu_qualification0/first/step_000002.pt": "3ce0165aec5bf28c8029846d4f94e4b70f7eea8eb4291d75623b68a7f1d9153a",
+    "contracts-preserved/test_gpu_qualification0/first.log": "4eee4e3023fd9905b5c0b7b5e1de6c99a12de209679baed68b7446ceaf218b6b",
+    "contracts-preserved/test_gpu_qualification0/qualification.json": "e416ea005bf0b69670aa12fe2b6e72b82a276ed5f605a0f3f17136801f7de608",
+    "contracts-preserved/test_gpu_qualification0/resumed/best.pt": "bdcd85886786898978af97fbe7d9a1ff2b5e90fada26579c7333cbba68f02cf6",
+    "contracts-preserved/test_gpu_qualification0/resumed/latest.pt": "485854e32bc332d4a8c9461adf2caae7048d712b87f8bb4cd98003de00fab8c1",
+    "contracts-preserved/test_gpu_qualification0/resumed/manifest.json": "c5b28df489fede0310802d99f6279e1e8bfbf45d3c7edab3b7f844e61353dbaf",
+    "contracts-preserved/test_gpu_qualification0/resumed/metrics.jsonl": "4869ea565df8523a6815535b1b0d68e405136af21858431d09a2d92d19219760",
+    "contracts-preserved/test_gpu_qualification0/resumed/step_000004.pt": "7707649418b1cf7338f73a2dd4cfc0ce57e2b1069002f7aeee1026421787661c",
+    "contracts-preserved/test_gpu_qualification0/resumed.log": "6d4111a22e235efcbe8d5060ced5da5169db81b0d8a78841c8431d368d37974a",
+    "contracts-preserved/test_gpu_qualification0/runtime.json": "56da2c98a4c16311cb358b9411697ce6d51042cb6a5cc2ba81fc01e810b388fd",
+    "contracts-preserved/test_prepare_kaggle_payload0/code/amg-code.zip": "2c4b6702ccd05986fb84c227bda77cb9efb1ba849f0abd91754ff143ee5d0801",
+    "contracts-preserved/test_prepare_kaggle_payload0/code/dataset-metadata.json": "d2704aa35661dd13255ba74acb057642e3f0fda12b8ad343ca0108cb5ae81bdc",
+    "contracts-preserved/test_prepare_kaggle_payload0/job/__pycache__/launch.cpython-313.pyc": "59d13fb3fae9bc97328c16ab1b67f3243e02d23125a1dd82f3922524832e9734",
+    "contracts-preserved/test_prepare_kaggle_payload0/job/kernel-metadata.json": "4b91177cc4bd998c6543ef7c1087f0aa20efa01652eb1ca2b5a2b02a0f5d925f",
+    "contracts-preserved/test_prepare_kaggle_payload0/job/launch.py": "13b7a95d305bda2a610d5d2821f7e9b11554abb131bb2ba347734b4f9a06a07a",
+    "contracts-preserved/test_qualification_cli_resume_0/checkpoint-progress.json": "bc939ba4fea280a496660146d734c5a0da909d987e43c9a0e482539d9182eabf",
+    "contracts-preserved/test_qualification_cli_resume_0/first/best.pt": "c043c3e848df2da70b93f2f3a6de00e0fc11dfc18bab880001c982328ae8c82a",
+    "contracts-preserved/test_qualification_cli_resume_0/first/latest.pt": "a91c39647b1167b891cc2aa57190cb5cb38e8252d79b87e7f5adf96edd73d6f7",
+    "contracts-preserved/test_qualification_cli_resume_0/first/manifest.json": "e19335173b0cd8281e08786dca86c319b548e27daea19a9890b6c734743b412f",
+    "contracts-preserved/test_qualification_cli_resume_0/first/metrics.jsonl": "1b7b742dd2b872f4a425575f6d85f32c5bd2bdf777b9d6efd8198ca534cb25a6",
+    "contracts-preserved/test_qualification_cli_resume_0/first/step_000002.pt": "645ac2e69f14d44f4c30d2594bfd29877c55cb1b7af8615f4c32674e61e565da",
+    "contracts-preserved/test_qualification_cli_resume_0/first.log": "94c6a8372c68aab9cf8d67a0ab9ef52de8af4235bb47faac00bf0b9181e5747c",
+    "contracts-preserved/test_qualification_cli_resume_0/resumed/best.pt": "d711a693eb5847da1f4d86e1337014d620367ea92bfb3418dc517b74aa58e33c",
+    "contracts-preserved/test_qualification_cli_resume_0/resumed/latest.pt": "3230ba713f7bf575340f343b781137ff9daa4bde47db9cc83e14b1de77f0da1b",
+    "contracts-preserved/test_qualification_cli_resume_0/resumed/manifest.json": "0b984998c19e02d3833559058cb647ec6178dc2e33c1e9be8f2b487f0c881250",
+    "contracts-preserved/test_qualification_cli_resume_0/resumed/metrics.jsonl": "d16e3b534ccf361cb6f3b3d8c04ea4e1e9c92b0472cdce502483fe1951d355b5",
+    "contracts-preserved/test_qualification_cli_resume_0/resumed/step_000004.pt": "ac0889079d70a545264d44c7861b6d02ba89239873312e72d83b8c1c27ce3fb7",
+    "contracts-preserved/test_qualification_cli_resume_0/resumed.log": "f540aee8e3499778286ef68fb29f30127cc41f9ca3b617311d4f7932d42ba127",
+    "contracts.log": "8135d623ecfb04e78741e91a05f286cd59b8928da393acdd24dc65aaed47f05b",
+    "contracts.xml": "8e419f859b1165c45e019404f770a06b86b5e113fb06c8e2148eea83a1285098",
+    "execution.json": "08f5a51f48ba8e88feecd2029a221eb989b9a2a5c5d43a8fb05b18e02b7ac055",
+    "full-suite.log": "9f80d800a0c91d4a1f2f3fdfded0f66a91626e4bb87831b6bcdfd6554808a842",
+    "full-suite.xml": "b54a54e475a60b140b30517a7a72014161f67b3405fa238c2250318f71f71c65",
+    "seed42/first/best.pt": "a9de11926445e853cdbe7d6fb22388fe47920062d6dea39b01d26d3d026ee228",
+    "seed42/first/latest.pt": "fdeb730fb6d88441ddb51b9de812e43667e863f45856f5d21d9441a6a7343cbc",
+    "seed42/first/manifest.json": "88c124602560e1edcf9ec3b27ef62a256262c870990ff31d667f7983d72c0a3b",
+    "seed42/first/metrics.jsonl": "bf9fcbae591a4ab11b3b5f234756eb0dace3682e9f7b103ad386a9edc5ffe47b",
+    "seed42/first/step_000002.pt": "8c36b5ce883e4c53cb544b1306d100bebd139d650ce031c84bb45f964b5fb52a",
+    "seed42/first/trace.jsonl": "afab52e613ff7d21c4a048337221594cd1c3190fdb86e73223eb72c5c9edb4a4",
+    "seed42/resumed/best.pt": "c011f70bdafc7e2f7420ed6faa8c7d5568e3456cd58d1ee59987faa0812a4e87",
+    "seed42/resumed/latest.pt": "0827018167a2d085eafcdc00c8d33072b082136860b3b78628eb598fbf0e523a",
+    "seed42/resumed/manifest.json": "ecd9afe26507356487c3e9b1927194fa4a67b3c60f9cdb353cbc1c8de0e093a4",
+    "seed42/resumed/metrics.jsonl": "b8163fb6a30ce130d02cb11fa752e2d0112bd39f576e357a9688d5caf721d588",
+    "seed42/resumed/step_000004.pt": "900714d3d6b73dc8bac6f8e156d31612fa874c6f4edfbab6e66321d121c9b7b8",
+    "seed42/resumed/trace.jsonl": "c0c5652012c72a624a04ac82f163686ef467b897c3308868f80084c2ed40ebbe",
+    "seed42-first.log": "351853740340dde6389be28baf79fcd2588fcd2174929f3a0e2d0d3a7f5d4959",
+    "seed42-forced/first/best.pt": "09e160da47c02cfceebba22c651b2e47210097b2a2fe3417c7cd8cbf6a410002",
+    "seed42-forced/first/latest.pt": "bb68cce99b4e7a2b8c898add337f7f0d3b0d10b3884dc96136eb1a0d046b21de",
+    "seed42-forced/first/manifest.json": "eabeec95c3c3d477f6b829e050272aab600df9be782f3d622ff7893550dae8b2",
+    "seed42-forced/first/metrics.jsonl": "766ab993bd0d2ed619e739f1aab39bade371cee27bcbd3e9b443bc5137116a55",
+    "seed42-forced/first/step_000002.pt": "93aaf971981e7dc7cdef819147727036067c36d4de1e0fde0d68e4f21d78e4bf",
+    "seed42-forced/first/trace.jsonl": "8181d53b8d619ebbfcad0f47a3236c3f51d6058daeb4b6ae356013b83dd6c1aa",
+    "seed42-forced/resumed/best.pt": "7d8bb4fb5dc0bd3f11ddbcc6b725043b7e3701fd93440a68430e5dd83252ad52",
+    "seed42-forced/resumed/latest.pt": "39a3936767dda2d6497a67329cfc490efa43bd4bb9f35e24f74bd53f556d281f",
+    "seed42-forced/resumed/manifest.json": "872da1fea7123f790effbeaa6343acd517dd15394cdeb5fabd709c9c65ed9ef3",
+    "seed42-forced/resumed/metrics.jsonl": "cfe94606f670487e7d38e66f0d56531e9651dee96a91d74d8a9643f578c1d367",
+    "seed42-forced/resumed/step_000004.pt": "ec9ac7bdead99c7fe2b40d0680c788904a46d18cdfa44739d1f81937d4c8aed8",
+    "seed42-forced/resumed/trace.jsonl": "63a1247edf9d90863c8e0d6525f12426c8b83dc0dc34195304a10a1f91279598",
+    "seed42-forced-first.log": "f64c0e360dbd451fc997e3a310ef49851a3b6c7f417b3d1a7ec5a2fdf711dcce",
+    "seed42-forced-resumed.log": "b3d6bd526cb0450fd633a71bea04742e2157a7445710d50dbddd3921ed4737ea",
+    "seed42-resumed.log": "bdc2b2d1db26344d867c42445fdae7c00f87d6c0577a6cefbe6f7ad8b74fe481",
+    "seed43/first/best.pt": "3d4e8d1fe910e9f6ae873789ed31400b957166b1fef66e35b09846b44986c43c",
+    "seed43/first/latest.pt": "1251891af00c3dcb583c8b300018fec70f7675877317a61706ea3fa57298368a",
+    "seed43/first/manifest.json": "05cd26219bcfe0d3acdbd5f441a9e21dbfef054c04c86a5628089dea874ff10d",
+    "seed43/first/metrics.jsonl": "8e024317c0b2784fcb5ab028c5e5ba0071c800d2b03b167aa44385f20ea65100",
+    "seed43/first/step_000002.pt": "c160b8f057cfbf9eaf2750ec6bde0c69955dfac7a90f06b72ff7f780de2e62f3",
+    "seed43/first/trace.jsonl": "419d2cbda02fb3ba4bfca2820de251c434b94279ed57d7912da7c384385fbf1f",
+    "seed43/resumed/best.pt": "950678a8b2fd4df314307d95a3102f3ebaf7588c60ef5d933618fb9ba965a988",
+    "seed43/resumed/latest.pt": "22c90cab26b70ffee16fefb2f0b55fd932f3d6cf984744a58c2e456d8bc54a6a",
+    "seed43/resumed/manifest.json": "66721d897803f9dfcee9f42535fd2b5df49033633b517ea5c56e1aa26e7085ee",
+    "seed43/resumed/metrics.jsonl": "7a9fb833bdf624e5831b0d9e8a9488fb4c9b23e22505b597a3ade5b71150d007",
+    "seed43/resumed/step_000004.pt": "92bec4bf73c670c435520bc09bce788cb5814e39d3150788ec8eb9601e73e718",
+    "seed43/resumed/trace.jsonl": "432929861b8419a1a3331bb97ab379e68e7d9a5fa328c4d88af51f8b99a2d231",
+    "seed43-first.log": "cfccdb954f090a9f196d6eef445e2575b9726831f7ae461e4543a9a22dc6ca8d",
+    "seed43-resumed.log": "b1f2717fa0164af6823ba84976a19a82bc324e8b515c8958fff49d42d1d00940"
+  },
+  "verdict": "ENGINEERING_PASS within tested FP16 owner/CLI scope; no learning qualification"
+}

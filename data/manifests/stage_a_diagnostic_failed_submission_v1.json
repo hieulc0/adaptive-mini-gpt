@@ -1,0 +1,35 @@
+{
+  "kernel": "sparklinghydraulics0/amg-stage-a-diagnostic",
+  "version": 1,
+  "status": "ERROR",
+  "reason": "Kaggle rejected ERROR-status parent kernel input; missing-parent guard stopped development training",
+  "execution": {
+    "sha": "17d8c6f3aba083b43abc9251e0a27108e511b6d9",
+    "gpu": "Tesla T4",
+    "phases": {
+      "install": {
+        "exit_code": 0
+      },
+      "contracts": {
+        "exit_code": 0
+      }
+    }
+  },
+  "contracts": {
+    "name": "pytest",
+    "errors": "0",
+    "failures": "0",
+    "skipped": "0",
+    "tests": "26",
+    "time": "18.926",
+    "timestamp": "2026-10-27T01:51:06.424922+00:00",
+    "hostname": "00ae9b30db01"
+  },
+  "development_training": "NOT_RUN",
+  "sha256": {
+    "contracts.log": "d0068e1eb94ce9b513e49d0e4fe4986c4a282da0fdffd88af8ef59385fe0d14a",
+    "install.log": "3e0639490329715b458af81bce074ddca380eb8c3bdae4fbe7400bcb2bc63f2d",
+    "execution.json": "47afa100348e68eee6d4d7b092bdfcf33d3f2841118e2baa3343f619efe6ef49",
+    "contracts.xml": "009b78bd1499455d6c8b95adec807e36269b6d2aac0f63e165151f6a79feca4e"
+  }
+}

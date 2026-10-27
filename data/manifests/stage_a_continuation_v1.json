@@ -1,0 +1,19 @@
+{
+  "purpose": "private checkpoint resume, not a training-data package",
+  "file": "continuing_selective_two.pt",
+  "sha256": "9b4d8a937e553c9d27befbd218612724e5fb43909f632f8ebbb988ed224c4f3e",
+  "source_kernel": "sparklinghydraulics0/amg-attribute-learning/1",
+  "source_revision": "216c3d5059b6e6e5bbb199f7c4ffbab4234488ba",
+  "source_status": "ERROR; individual study exited0",
+  "steps": 400,
+  "promoted": false,
+  "private_dataset": "sparklinghydraulics0/amg-stage-a-continuation",
+  "version": 1,
+  "status": "ready",
+  "allowlist": [
+    "continuing_selective_two.pt",
+    "checkpoint-manifest.json",
+    "dataset-metadata.json"
+  ],
+  "workflow": "docs/06-kaggle.md private checkpoint resume; isolated from corpus dataset packaging"
+}
