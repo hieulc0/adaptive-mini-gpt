@@ -45,3 +45,5 @@ Final provenance-only source `cbf2f82` is separately verified: **793remote tests
 
 
 Stage A.3 is a bounded tiny-acquisition study using the same continuing student, balanced frames and optional parameter-free paired consistency. Protocol, admission gates and actual status: [STAGE_A3](docs/STAGE_A3.md). No new milestone, neural module, capacity increase or autonomous reset; sealed qualification remains gated on stable acquisition and prior-frame retention. LOCAL static/mock checks only; all neural/full-suite work remotely on Kaggle CUDA.
+
+Stage A.3 completed: **PARTIAL**, engineering808remote passes/16focused contracts at `4e1cc9f`. Balanced BCE reaches100%on all156tiny training targets at1000/1100/1200updates, but old-frame observations fall to66.67%/71.43%. Paired consistency ends100%but dips to92.31%and fails stability. Default-backward numerical divergence is reproduced and an explicit checkpoint-declared deterministic policy repairs the matched no-op invariant and fresh-process continuation. No sealed cases, reset policy, promotion, capacity growth or milestone advance. [Exact evidence and commands](docs/STAGE_A3.md).

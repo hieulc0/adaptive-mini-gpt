@@ -43,3 +43,13 @@ Stage A.2 follow-up (final source `d25a9bf`,792remote passes; [evidence](STAGE_A
 | Attribute learning preserves prior behavior through shared heads | DESIGN LIMITATION | Main old competent familiar frames degrade from100%; historical8-case state TRAINING probe also degrades despite unchanged state-head weights. No independent lifelong-retention/negative-transfer claim from unmatched controls. |
 
 Final `cbf2f82` also separates the fresh diagnostic’s comparison reference from a null weight parent; pure fake-state regression reproduces the missing contract before repair. Final remote793passes/13focused contracts and six exact metadata-copy continuations pass. Producer attribution repair does not change the failed learning outcome.
+
+Stage A.3 (final code4e1cc9f,808remote regressions; [evidence](STAGE_A3.md)):
+
+| Finding | Classification | State / evidence |
+| --- | --- | --- |
+| Identical seeded learning controls diverge under default CUDA backward | SCIENTIFIC VALIDITY ISSUE | First observed difference at update11in WTE gradient7.45e-9, with exact forward/input/group/RNG matching. Explicit deterministic policy repeats100probe steps and repairs1200-update no-op end-weight equality. Checkpoint-declared policy guard prevents silent incompatible resumed updates. Individual kernel attribution remains unresolved. Failed e2f6927study and804passes retained. |
+| Existing architecture cannot acquire any multi-frame tiny support | UNVERIFIED HYPOTHESIS rejected within tested scope | Inherited optimizer plus balanced BCE fits all156targets/three frames at1000/1100/1200updates, without capacity/pooling change. No independent grammar qualification follows. |
+| Cosine consistency ensures stable concepts | UNVERIFIED HYPOTHESIS unsupported | Higher within-status similarity accompanies a92.31%target dip at1100; final100%does not pass the stability gate. Optional objective is not adopted as default. |
+| New attribute fitting retains prior frame behavior | DESIGN LIMITATION | All arms degrade the previous100%old-frame observations; none reach95%retention admission. No replay used; state/head tensors alone do not guarantee behavior. No reset policy or negative-forward-transfer claim. |
+| Last-observation pooling repairs this task | UNVERIFIED HYPOTHESIS unsupported | Initial diagnostic fit78.21%versus pooled87.18%; after augmentation last-observation76.92%versus pooled/concept100%. First-three-procedure failure condition is not met; no pooling change added. |
