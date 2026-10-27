@@ -1,0 +1,16 @@
+{
+ "id":"rehearsal-a5-v1",
+ "scope":"Stage A.5 phase2 development-only, joint acquisition prerequisite passed",
+ "parent_checkpoint_sha256":"3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+ "reference_source":"a79c74471f812067d45e6079c4e5d3e544ccd53c",
+ "primary":"synthetic_6",
+ "arms":["none","historical_6","synthetic_6","balanced_9"],
+ "synthetic_names":["N","P","Q","R"],
+ "seed":42,"updates":1200,"batch":18,"learning_rate":0.002,"weight_decay":0,"clip_norm":1,
+ "new_presentations":[21600,14400,14400,10800],"old_presentations":[0,7200,7200,10800],
+ "stable_updates":[1000,1100,1200],"training_exact":0.99,"training_each_family":0.99,"training_each_status":0.98,
+ "old_each_cell_each_late_checkpoint":0.95,
+ "development_final":{"exact":0.9,"each_family":0.85,"each_status":0.95},
+ "optimizer":"inherited unchanged; no resets", "supervision":"two observed labels BCE, no new objective",
+ "sealed_generated":false,"promoted":false
+}
