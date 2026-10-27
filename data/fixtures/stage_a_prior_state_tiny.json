@@ -1,0 +1,163 @@
+{
+  "source": "concept-binding-v1 original training subset, not heldout",
+  "cases": [
+    {
+      "case_id": "train:42:226:0",
+      "pair_id": "train:42:226",
+      "family": "absent",
+      "question": "A has no listed traits; B has flammable, conductive. Initially off. Do fire. Query A.",
+      "rules": "Absent=false. Actions target query. fire toggles light iff conductive; spark iff flammable.",
+      "tags": [],
+      "action_id": 0,
+      "state": 0,
+      "structured_diagnostic": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "case_id": "train:42:226:1",
+      "pair_id": "train:42:226",
+      "family": "absent",
+      "question": "A has flammable, conductive; B has no listed traits. Initially off. Do fire. Query A.",
+      "rules": "Absent=false. Actions target query. fire toggles light iff conductive; spark iff flammable.",
+      "tags": [
+        "flammable",
+        "conductive"
+      ],
+      "action_id": 0,
+      "state": 1,
+      "structured_diagnostic": [
+        1,
+        1,
+        0,
+        1,
+        1,
+        0
+      ]
+    },
+    {
+      "case_id": "train:42:166:0",
+      "pair_id": "train:42:166",
+      "family": "chain",
+      "question": "A has no listed traits; B has flammable. Initially off. Do spark then fire. Query first.",
+      "rules": "Absent=false. Actions target query. fire toggles light iff conductive; spark iff flammable.",
+      "tags": [],
+      "action_id": 0,
+      "state": 0,
+      "structured_diagnostic": [
+        0,
+        0,
+        0,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "case_id": "train:42:166:1",
+      "pair_id": "train:42:166",
+      "family": "chain",
+      "question": "A has flammable; B has no listed traits. Initially off. Do spark then fire. Query first.",
+      "rules": "Absent=false. Actions target query. fire toggles light iff conductive; spark iff flammable.",
+      "tags": [
+        "flammable"
+      ],
+      "action_id": 0,
+      "state": 1,
+      "structured_diagnostic": [
+        1,
+        0,
+        0,
+        1,
+        1,
+        1
+      ]
+    },
+    {
+      "case_id": "train:42:259:0",
+      "pair_id": "train:42:259",
+      "family": "negation",
+      "question": "A has without flammable, conductive; B has flammable, without conductive. Initially off. Do fire. Query B.",
+      "rules": "Absent=false. Actions target query. fire toggles light iff flammable; spark iff conductive.",
+      "tags": [
+        "flammable"
+      ],
+      "action_id": 0,
+      "state": 1,
+      "structured_diagnostic": [
+        1,
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "case_id": "train:42:259:1",
+      "pair_id": "train:42:259",
+      "family": "negation",
+      "question": "A has flammable, without conductive; B has without flammable, conductive. Initially off. Do fire. Query B.",
+      "rules": "Absent=false. Actions target query. fire toggles light iff flammable; spark iff conductive.",
+      "tags": [
+        "conductive"
+      ],
+      "action_id": 0,
+      "state": 0,
+      "structured_diagnostic": [
+        0,
+        1,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "case_id": "train:42:335:0",
+      "pair_id": "train:42:335",
+      "family": "chain",
+      "question": "A has without flammable, conductive; B has flammable, conductive. Initially off. Do fire then spark. Query second.",
+      "rules": "Absent=false. Actions target query. fire toggles light iff flammable; spark iff conductive.",
+      "tags": [
+        "flammable",
+        "conductive"
+      ],
+      "action_id": 2,
+      "state": 0,
+      "structured_diagnostic": [
+        1,
+        1,
+        0,
+        0,
+        1,
+        1
+      ]
+    },
+    {
+      "case_id": "train:42:335:1",
+      "pair_id": "train:42:335",
+      "family": "chain",
+      "question": "A has flammable, conductive; B has without flammable, conductive. Initially off. Do fire then spark. Query second.",
+      "rules": "Absent=false. Actions target query. fire toggles light iff flammable; spark iff conductive.",
+      "tags": [
+        "conductive"
+      ],
+      "action_id": 2,
+      "state": 1,
+      "structured_diagnostic": [
+        0,
+        1,
+        0,
+        0,
+        1,
+        1
+      ]
+    }
+  ]
+}
