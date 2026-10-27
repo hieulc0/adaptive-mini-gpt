@@ -66,3 +66,26 @@ def test_canonical_attribute_update_does_not_train_transition_branch():
     assert any("attribute_head" in n for n in changed)
     assert any("wte" in n for n in changed)
     assert owner.metadata["steps"] == 1
+
+
+def test_diagnostic_loss_scaling_uses_same_owner_and_gradients():
+    require_remote_cuda()
+    from unittest.mock import patch
+
+    from test_foundation_structure import make_owner
+
+    owner, batch = make_owner()
+    initial = owner.snapshot()
+    with patch("torch.nn.utils.clip_grad_norm_"):
+        full = owner.step(*batch[:3], attribute_ids=(10, 15))
+        grads = {n: p.grad.clone() for n, p in owner.model.named_parameters() if p.grad is not None}
+        owner.restore(initial)
+        scaled = owner.step(*batch[:3], attribute_ids=(10, 15), loss_scale=1 / 13)
+        assert abs(scaled - full / 13) < 1e-6
+        for name, p in owner.model.named_parameters():
+            if name in grads:
+                assert p.grad is not None
+                assert torch.allclose(p.grad, grads[name] / 13, atol=1e-6, rtol=1e-4)
+    for scale in (0, -1, float("nan")):
+        with pytest.raises(ValueError, match="Loss scale"):
+            owner.step(*batch[:3], attribute_ids=(10, 15), loss_scale=scale)

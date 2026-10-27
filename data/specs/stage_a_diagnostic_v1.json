@@ -1,0 +1,22 @@
+{
+ "id":"stage-a-diagnostic-v1",
+ "scope":"development-only, not sealed qualification; no promotion",
+ "seed":42,
+ "steps":{"tiny":200,"main":800},
+ "batch_max":16,
+ "learning_rate":0.002,
+ "weight_decay":0,
+ "clip_norm":1,
+ "factorial":{"names":{"familiar":["J","K"],"novel":["Y","Z"]},"templates":{"familiar":["{name} has properties: {content}.","Description of {name}: {content}."],"novel":["properties for {name} include {content}.","regarding {name}: its listed properties are {content}."]},"matched":"same content/order/negation/labels across4cells, deduplicated jointly; unfamiliar templates use only previously observed byte IDs; new names may introduce new byte IDs"},
+ "primary":"inherited_weights_inherited_moments",
+ "parent_latest_sha256":"9b4d8a937e553c9d27befbd218612724e5fb43909f632f8ebbb988ed224c4f3e",
+ "history_controls":"2x2 inherited/fresh weights versus inherited/fresh Adam moments; same new observations, not matched lifetime histories or transfer claims",
+ "loss_controls":["active2","active2_div13","all26","all26_times13"],
+ "loss_control_steps":200,
+ "historical_training_replication":{"parent_updates":200,"new_updates":200,"examples":"original9 training cases, never prior heldout"},
+ "diagnostics":["complete tokens","per-label logits/losses/predictions","active/inactive shared gradients","optimizer registration","pooled/concept shifts","validated last-layer attention inspection","observed-content-span pooling ablation (diagnostic only)"],
+ "baseline":"word1–3-gram linear; training-only vocabulary; same new-stage1000updates/14600examples",
+ "rule":"Only affirmed properties hold. Omitted or negated properties do not hold.",
+ "decision":"No tuning or selection from old heldout. New final qualification requires separate independent sealed cases, reproducible acquisition and wording generalization. Stop if unresolved. No Stage B or architecture growth.",
+ "runtime_max_seconds":600
+}

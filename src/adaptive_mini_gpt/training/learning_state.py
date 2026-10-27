@@ -8,6 +8,7 @@ through the owner after restore; external child/parameter references are invalid
 from __future__ import annotations
 
 import copy
+import math
 import os
 import random
 import tempfile
@@ -179,8 +180,10 @@ class LearningState:
         self.model._configure_plasticity()
         migrate_adamw(self.model, self.optimizer)
 
-    def step(self, tokens, actions, tags, states=None, *, attribute_ids=None):
+    def step(self, tokens, actions, tags, states=None, *, attribute_ids=None, loss_scale=1.0):
         require_remote_cuda(str(tokens.device))
+        if not math.isfinite(loss_scale) or loss_scale <= 0:
+            raise ValueError("Loss scale must be finite and positive")
         if any(optimizer_membership(self.model, self.optimizer).values()):
             raise RuntimeError("Optimizer ownership violation")
         self.model.train()
@@ -189,6 +192,8 @@ class LearningState:
         loss = concept_supervision_loss(
             state_logits, tag_logits, tags, states, attribute_ids=attribute_ids
         )
+        if loss_scale != 1.0:
+            loss = loss * loss_scale
         if not torch.isfinite(loss):
             raise ValueError("Nonfinite loss")
         loss.backward()

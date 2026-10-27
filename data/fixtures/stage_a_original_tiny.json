@@ -1,0 +1,122 @@
+{
+  "source": "216c3d5 Stage A training subset only",
+  "cases": [
+    {
+      "case_id": "train-40",
+      "question": "Object A: present.",
+      "statuses": [
+        "absent",
+        "absent"
+      ],
+      "labels": [
+        0,
+        0
+      ],
+      "family": "absent+absent"
+    },
+    {
+      "case_id": "train-36",
+      "question": "Object A: not conductive.",
+      "statuses": [
+        "absent",
+        "negated"
+      ],
+      "labels": [
+        0,
+        0
+      ],
+      "family": "absent+negated"
+    },
+    {
+      "case_id": "train-34",
+      "question": "Object A: conductive.",
+      "statuses": [
+        "absent",
+        "positive"
+      ],
+      "labels": [
+        0,
+        1
+      ],
+      "family": "absent+positive"
+    },
+    {
+      "case_id": "train-30",
+      "question": "Object A: not flammable.",
+      "statuses": [
+        "negated",
+        "absent"
+      ],
+      "labels": [
+        0,
+        0
+      ],
+      "family": "negated+absent"
+    },
+    {
+      "case_id": "train-22",
+      "question": "Object A: not flammable; not conductive.",
+      "statuses": [
+        "negated",
+        "negated"
+      ],
+      "labels": [
+        0,
+        0
+      ],
+      "family": "negated+negated"
+    },
+    {
+      "case_id": "train-14",
+      "question": "Object A: not flammable; conductive.",
+      "statuses": [
+        "negated",
+        "positive"
+      ],
+      "labels": [
+        0,
+        1
+      ],
+      "family": "negated+positive"
+    },
+    {
+      "case_id": "train-12",
+      "question": "Object A: flammable.",
+      "statuses": [
+        "positive",
+        "absent"
+      ],
+      "labels": [
+        1,
+        0
+      ],
+      "family": "positive+absent"
+    },
+    {
+      "case_id": "train-4",
+      "question": "Object A: flammable; not conductive.",
+      "statuses": [
+        "positive",
+        "negated"
+      ],
+      "labels": [
+        1,
+        0
+      ],
+      "family": "positive+negated"
+    },
+    {
+      "case_id": "train-0",
+      "question": "Object A: flammable; conductive.",
+      "statuses": [
+        "positive",
+        "positive"
+      ],
+      "labels": [
+        1,
+        1
+      ],
+      "family": "positive+positive"
+    }
+  ]
+}
