@@ -4624,5 +4624,37 @@
       "hostname": "e782ed44ed4f"
     }
   ],
-  "verified_complete_sequences": 1389
+  "verified_complete_sequences": 1389,
+  "offline_derived_position_changes": {
+    "parent": {
+      "8": {
+        "changed": 153,
+        "total": 756
+      },
+      "24": {
+        "changed": 293,
+        "total": 756
+      }
+    },
+    "none": {
+      "8": {
+        "changed": 208,
+        "total": 756
+      },
+      "24": {
+        "changed": 156,
+        "total": 756
+      }
+    },
+    "synthetic_6": {
+      "8": {
+        "changed": 311,
+        "total": 756
+      },
+      "24": {
+        "changed": 347,
+        "total": 756
+      }
+    }
+  }
 }
