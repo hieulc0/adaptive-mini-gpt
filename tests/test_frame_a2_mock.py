@@ -64,3 +64,30 @@ def test_rebase_preserves_effective_adam_age_and_rejects_undefined_scheduler():
     owner.scheduler = object()
     with pytest.raises(ValueError, match="scheduler"):
         m.intervene_backbone(owner, "age")
+
+
+def test_optimizer_hash_handles_nested_groups_without_assuming_tensor_values():
+    m = module()
+    a = {"state": {0: {"step": 200}}, "param_groups": [{"lr": 0.002, "params": [0]}]}
+    b = {"param_groups": [{"params": [0], "lr": 0.002}], "state": {0: {"step": 200}}}
+    assert m.state_digest(a) == m.state_digest(b)
+    b["state"][0]["step"] = 201
+    assert m.state_digest(a) != m.state_digest(b)
+
+
+def test_checkpoint_provenance_preserves_parent_and_global_progress():
+    m = module()
+    owner = SimpleNamespace(
+        metadata={"git_sha": "old", "data_hash": "old-data", "stage": "prior", "steps": 1400}
+    )
+    m.record_stage_provenance(
+        owner,
+        training_sha="new",
+        publication_sha="publisher",
+        parent_hash="parent-file",
+        data_hash="new-data",
+        stage="A.2",
+    )
+    assert owner.metadata["git_sha"] == "new" and owner.metadata["data_hash"] == "new-data"
+    assert owner.metadata["frame_a2_parent_provenance"]["git_sha"] == "old"
+    assert owner.metadata["steps"] == 1400 and not owner.metadata["promoted"]

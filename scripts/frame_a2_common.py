@@ -45,3 +45,53 @@ def fork_owner(parent, seed):
     owner.external["frame_a2_sampler"] = random.Random(seed)
     seed_all(seed)
     return owner
+
+
+def state_digest(value):
+    """Typed nested research-state hash; not a serializer for arbitrary object graphs."""
+    import hashlib
+
+    import numpy as np
+    import torch
+
+    h = hashlib.sha256()
+
+    def visit(v):
+        h.update(type(v).__name__.encode() + b":")
+        if isinstance(v, torch.Tensor):
+            h.update(str((str(v.dtype), tuple(v.shape))).encode())
+            h.update(v.detach().cpu().contiguous().reshape(-1).view(torch.uint8).numpy().tobytes())
+        elif isinstance(v, np.ndarray):
+            h.update(str((str(v.dtype), v.shape)).encode())
+            h.update(v.tobytes())
+        elif isinstance(v, dict):
+            for k in sorted(v, key=lambda k: (type(k).__name__, repr(k))):
+                visit(k)
+                visit(v[k])
+        elif isinstance(v, (list, tuple)):
+            for item in v:
+                visit(item)
+        elif isinstance(v, random.Random):
+            visit(v.getstate())
+        elif v is None or isinstance(v, (str, int, float, bool, bytes)):
+            h.update(repr(v).encode())
+        else:
+            raise TypeError(f"Unsupported diagnostic hash type: {type(v).__name__}")
+        h.update(b";")
+
+    visit(value)
+    return h.hexdigest()
+
+
+def record_stage_provenance(owner, *, training_sha, publication_sha, parent_hash, data_hash, stage):
+    """Preserve ancestor attribution; never mistake inherited metadata for producer."""
+    previous = {k: owner.metadata.get(k) for k in ("git_sha", "data_hash", "stage", "steps")}
+    owner.metadata.update(
+        frame_a2_parent_provenance=previous,
+        git_sha=training_sha,
+        checkpoint_publication_sha=publication_sha,
+        parent_checkpoint_sha256=parent_hash,
+        data_hash=data_hash,
+        stage=stage,
+        promoted=False,
+    )

@@ -19,6 +19,7 @@ from frame_a2_common import (
     ROOT_TENSOR_HASH,
     fork_owner,
     intervene_backbone,
+    record_stage_provenance,
 )
 from run_attribute_learning import encode, evaluate, file_hash, scores
 from run_concept_binding import encode as encode_state
@@ -172,7 +173,20 @@ def run(out, root_path, original_path):
         else:
             owner = fork_owner(parent, 42)
         affected = [] if strategy == "fresh" else intervene_backbone(owner, strategy)
+        record_stage_provenance(
+            owner,
+            training_sha=result["provenance"]["git_sha"],
+            publication_sha=result["provenance"]["git_sha"],
+            parent_hash=ORIGINAL,
+            data_hash=file_hash("data/fixtures/stage_a_original_tiny.json"),
+            stage="A.2_optimizer_diagnostic",
+        )
         owner.metadata.update(
+            supervision_schema={
+                "attribute_ids": (10, 15),
+                "state_targets": None,
+                "loss_scale": 1.0,
+            },
             a2_strategy=strategy,
             optimizer_policy="constant LR, global update clock retained; warm-moment age reset explicitly changes bias correction",
             parent_sha256=ORIGINAL,

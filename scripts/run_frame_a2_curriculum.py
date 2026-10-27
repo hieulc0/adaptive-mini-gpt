@@ -15,7 +15,13 @@ from pathlib import Path
 
 import torch
 import torch.nn.functional as F
-from frame_a2_common import ROOT_HASH, ROOT_TENSOR_HASH, fork_owner
+from frame_a2_common import (
+    ROOT_HASH,
+    ROOT_TENSOR_HASH,
+    fork_owner,
+    record_stage_provenance,
+    state_digest,
+)
 from run_attribute_learning import encode, evaluate, file_hash, words
 from run_foundational_audit import digest
 from run_stage_a_diagnostic import gradient_audit
@@ -123,6 +129,26 @@ def run(out, root_path):
         for arm in ARMS:
             name = f"{arm}_{seed}"
             owner = fork_owner(root, seed)
+            training_id = hashlib.sha256(
+                json.dumps(
+                    {
+                        "spec_sha256": file_hash("data/specs/frame_a2_v1.json"),
+                        "source": result["provenance"]["git_sha"],
+                        "seed": seed,
+                        "arm": arm,
+                        "stream": stream,
+                    },
+                    sort_keys=True,
+                ).encode()
+            ).hexdigest()
+            record_stage_provenance(
+                owner,
+                training_sha=result["provenance"]["git_sha"],
+                publication_sha=result["provenance"]["git_sha"],
+                parent_hash=ROOT_HASH,
+                data_hash=training_id,
+                stage="A.2",
+            )
             owner.metadata.update(
                 stage="A.2",
                 parent_sha256=ROOT_HASH,
@@ -137,7 +163,7 @@ def run(out, root_path):
             probe, _ = encode(training_rows, tokenizer, context)
             a = {
                 "initial_hash": digest(owner.model.state_dict()),
-                "initial_optimizer_hash": digest(owner.optimizer.state_dict()),
+                "initial_optimizer_hash": state_digest(owner.optimizer.state_dict()),
                 "stored_parameters": sum(p.numel() for p in owner.model.parameters()),
                 "trainable_parameters": sum(
                     p.numel() for p in owner.model.parameters() if p.requires_grad
@@ -204,6 +230,10 @@ def run(out, root_path):
             a["gradient_training"] = gradient_audit(owner, [v[:16] for v in probe])
             a["prompt_stream_sha256"] = prompt_hash.hexdigest()
             a["semantic_stream_sha256"] = semantic_hash.hexdigest()
+            owner.metadata.update(
+                prompt_stream_sha256=prompt_hash.hexdigest(),
+                semantic_stream_sha256=semantic_hash.hexdigest(),
+            )
             a["development_admission"] = admitted(a)
             torch.cuda.synchronize()
             a["gpu_wall_seconds"] = time.perf_counter() - start

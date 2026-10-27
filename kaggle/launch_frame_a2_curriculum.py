@@ -77,6 +77,22 @@ def main():
         roots = list(Path("/kaggle/input").rglob("inherited_weights_inherited_moments.pt"))
         if len(roots) != 1:
             raise RuntimeError("Missing exact persistent parent")
+        diagnostics = list(Path("/kaggle/input").rglob("optimizer_inherit.pt"))
+        if len(diagnostics) != 1:
+            raise RuntimeError("Missing diagnostic provenance input")
+        if not run(
+            [
+                sys.executable,
+                "scripts/annotate_frame_a2_diagnostics.py",
+                "--input-dir",
+                str(diagnostics[0].parent),
+                "--output-dir",
+                str(OUT / "annotated-diagnostics"),
+            ],
+            "provenance",
+            180,
+        ):
+            raise RuntimeError("Provenance verification failed; preserve raw inputs")
         run(
             [
                 sys.executable,
