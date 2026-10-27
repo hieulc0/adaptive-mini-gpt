@@ -22,6 +22,30 @@ from adaptive_mini_gpt.training.optimizer_contract import adamw_groups, optimize
 from adaptive_mini_gpt.training.remote_runtime import require_remote_cuda
 
 
+def validate_consistency_pairs(pairs, batch_size):
+    """Explicit disjoint training pairs; never infer equivalence from labels alone."""
+    pairs = tuple(tuple(p) for p in pairs)
+    used = set()
+    if not pairs:
+        raise ValueError("Consistency pairs must be nonempty")
+    for pair in pairs:
+        if len(pair) != 2 or any(
+            not isinstance(i, int) or isinstance(i, bool) or i < 0 or i >= batch_size for i in pair
+        ):
+            raise ValueError("Invalid consistency pair indices")
+        if pair[0] == pair[1] or any(i in used for i in pair):
+            raise ValueError("Consistency pairs must be disjoint and non-self")
+        used.update(pair)
+    return pairs
+
+
+def paired_concept_loss(concepts, pairs):
+    """Symmetric parameter-free alignment of existing concept vectors."""
+    pairs = validate_consistency_pairs(pairs, concepts.shape[0])
+    left, right = zip(*pairs, strict=True)
+    return (1 - F.cosine_similarity(concepts[list(left)], concepts[list(right)], dim=-1)).mean()
+
+
 def concept_supervision_loss(state_logits, tag_logits, tags, states=None, *, attribute_ids=None):
     """Explicit supervision: no invented state labels or absent-label negatives.
 
@@ -180,18 +204,43 @@ class LearningState:
         self.model._configure_plasticity()
         migrate_adamw(self.model, self.optimizer)
 
-    def step(self, tokens, actions, tags, states=None, *, attribute_ids=None, loss_scale=1.0):
+    def step(
+        self,
+        tokens,
+        actions,
+        tags,
+        states=None,
+        *,
+        attribute_ids=None,
+        loss_scale=1.0,
+        consistency_pairs=None,
+        consistency_weight=0.0,
+    ):
         require_remote_cuda(str(tokens.device))
         if not math.isfinite(loss_scale) or loss_scale <= 0:
             raise ValueError("Loss scale must be finite and positive")
+        if not math.isfinite(consistency_weight) or consistency_weight < 0:
+            raise ValueError("Consistency weight must be finite and nonnegative")
+        if (consistency_pairs is None) != (consistency_weight == 0):
+            raise ValueError("Positive consistency weight requires explicit pairs and vice versa")
+        if consistency_pairs is not None:
+            consistency_pairs = validate_consistency_pairs(consistency_pairs, tokens.shape[0])
+            ids = tuple(attribute_ids) if attribute_ids is not None else tuple(range(tags.shape[1]))
+            for left, right in consistency_pairs:
+                if not torch.equal(tags[left, ids], tags[right, ids]) or (
+                    states is not None and not torch.equal(states[left], states[right])
+                ):
+                    raise ValueError("Consistency pairs require matching observed targets")
         if any(optimizer_membership(self.model, self.optimizer).values()):
             raise RuntimeError("Optimizer ownership violation")
         self.model.train()
         self.optimizer.zero_grad(set_to_none=True)
-        state_logits, tag_logits, _, _ = self.model(tokens, actions)
+        state_logits, tag_logits, concepts, _ = self.model(tokens, actions)
         loss = concept_supervision_loss(
             state_logits, tag_logits, tags, states, attribute_ids=attribute_ids
         )
+        if consistency_pairs is not None:
+            loss = loss + consistency_weight * paired_concept_loss(concepts, consistency_pairs)
         if loss_scale != 1.0:
             loss = loss * loss_scale
         if not torch.isfinite(loss):
