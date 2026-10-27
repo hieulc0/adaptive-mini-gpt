@@ -12,3 +12,30 @@ LOCAL: lint/type/syntax/mock-only. REMOTE: Kaggle CUDA inference, training, rest
 4. **Qualification remains sealed.** Only after the fixed primary has stable new-support acquisition AND >=95% in both old development cells may a separately frozen protocol generate new names/grammar/attribute combinations and run multiple learning streams with strong lexical and neural controls. All current cells were previously viewed; they are developmental, not sealed tests. No held-out data drives training or checkpoint selection. Passing a lexical task is not causal or general conceptual understanding.
 
 All runs use explicit deterministic CUDA numerical policy and exact same-code/runtime checkpoint contracts; source, seed, manifests, checkpoint hashes and actual costs are recorded. Baseline budget is finite: 300 s inference, 900 s replay, 1200 s full regression, plus focused checks. Rollback is the untouched parent, isolated diagnostic/candidate copies and scoped Git reversion. No training has been submitted at preregistration.
+
+## Phase 1 result — completed before any A.4 training
+
+Kaggle `sparklinghydraulics0/amg-stage-a4-localization/1` COMPLETE at `6f3c2046d0ec26c1aac7296942f4440d79789945`. Same Tesla T4 / Python3.13.15 / PyTorch2.11.0+cu128 / CUDA12.8; synchronized inference/inspection wall 5.277 s. Zero optimizer steps, gradients or training. Input file SHA256 values and model tensor hashes remain unchanged; compatible topology/dtype and tied embedding alias verified. Artifacts: `runs/kaggle-stage-a4-localization/output-v1/a4-localization/`; compact hashes/metrics: `data/manifests/a4_localization_v1.json`.
+
+| Isolated inference model | Old known | Old renamed | New training support |
+| --- | --- | --- | --- |
+| Pre-A.3 parent |100%|100%|28.21%|
+| Post-A.3 balanced BCE |66.67%|71.43%|100%|
+| Post model with entire pre backbone |100%|100%|21.79%|
+| Pre model with entire post backbone |52.38%|50.00%|73.72%|
+| Post model with pre token embeddings |42.86%|42.86%|76.92%|
+| Post model with pre top block |54.76%|50.00%|24.36%|
+| Post model with pre concept projection |54.76%|52.38%|76.92%|
+| Post model with pre attribute head |69.05%|69.05%|100%|
+
+Restoring the entire earlier backbone recovers both old-frame cells in the post model, but loses the new support; inserting the post backbone into the pre model substantially harms the old cells. The pre model with the post attribute head retains100%/98.81% old accuracy, so head changes alone do not explain the degradation in that pre-backbone context. These results **implicate changes to the shared backbone and its interactions with the learned projection/head**, without assigning a unique causal component. Swapping token embeddings, top block or concept projection alone often worsens both tasks, consistent with cross-version feature incompatibility; hybrids are diagnostic, never candidates for promotion.
+
+Position-embedding and frozen-lower-block weights have exactly zero measured drift; replacing either is a no-op for measured outputs. WTE/top block/final norm/concept projection/head weight differences are nonzero and recorded by tensor. Full input token sequences, embedding and position-summed pooled vectors, Transformer outputs, concept vectors, per-property confusion counts and actual logits/predictions are preserved. This is correlation under surgical intervention, not proof that a particular CUDA operation or one weight tensor uniquely caused forgetting.
+
+The original nine `Object A` descriptions are documented actual old TRAINING data, separate from the previously viewed J/K/Y/Z retention descriptions and the prior state-probe fixture. Replay must fail closed unless runtime verifies exact text/label isolation from all known retention/probe and new-support strings; these nine are not used as retention evaluation. The old known-name retention cell itself was historically training support; the renamed cell is a paired familiar-grammar probe, not an independent-world certificate. Phase 2 is now authorized by the completed inspection.
+
+Phase 2 adds three disjoint **development** grammar families on familiar names (never sealed) to diagnose generalization; none enters optimizer batches or replay. Qualification admission also preserves the existing A.2 development requirements: exact >=90%, each family >=85%, and each positive/negated/absent stratum >=95%, alongside the unchanged A.3 stable-support and old-frame >=95% requirements. This adds no weaker threshold and does not make developmental results sealed evidence. The moderate-replay arm is the sole fixed primary. Raw historical fixture SHA256 is `130dc05e42ed9ee0c1122dd95532a16562fc67f5ffa95422f099eff48643f1e5`.
+
+Phase 2 implementation: the exact source fixture is verified, then compared against all four historical factorial cells, the A.2 development sets, A.3 minimal/training examples, earlier attribute holdouts, and the prior state-retention fixture; any normalized exact-text overlap aborts before updating. Historical `tiny` remains a training subset and is not misclassified as a heldout probe. The additional development templates are also checked for exact-text overlap with previous probes and both training supports. Every replaced replay slot preserves its original independently annotated status pair, so label composition is matched, while actual new/replay examples and token counts remain separately recorded. The replay stream and curated historical examples are owned by the continuing `LearningState`; no model receives hidden status metadata at inference. The launcher refuses any training unless the completed inference-only inspection is recorded. The frozen-backbone and legacy domain-adapter paths remain for a conditional phase 3 decision after results.
+
+LOCAL inspection: 12 tiny fake/string cases pass across the new replay mocks and existing stable-objective mocks. Scoped Ruff/type/syntax checks cover the new driver, data module, launcher and tests. Real model operations and full regression are REMOTE only; no phase-2 result exists yet.
