@@ -1,0 +1,15 @@
+{
+  "id": "generalization-a6-diagnostic-v1",
+  "phase": "inference-only development; no optimization",
+  "seed": 42,
+  "names": ["N", "Tuv"],
+  "prefixes": ["", "A record. ", "A record. A record. "],
+  "position_offsets": [0, 8, 24],
+  "checkpoints": ["parent", "none", "synthetic_6"],
+  "hybrid_components": ["backbone", "concept_proj", "attribute_head"],
+  "parent_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+  "a5_source": "63d8acf27b0c2e373d119c75bce2f9f846cd1409",
+  "sealed_generated": false,
+  "optimizer_updates": 0,
+  "promoted": false
+}
