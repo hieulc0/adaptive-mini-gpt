@@ -147,3 +147,16 @@ Stage A.10 empirical findings (`6bc8f10`, 842 full GPU regressions / 18 focused 
   - While distillation bridging (`MIG_2`) cushioned initial $t_0$ attribute loss to 72.62% and recovered 100% attribute retention post-retraining, downstream causal state-transition performance on `stage_a_prior_state_tiny.json` collapsed from **50.00% (4/8) to 25.00% (2/8)**.
   - Latent bottleneck alignment on rehearsal data alone fails to preserve frozen downstream head representations (`transition_net`, `state_head`). True foundation migration requires joint multi-task rehearsal spanning all historical tasks.
 - **BINDING GATE VERDICT**: Gate 1 PASS, Gate 2 PASS, Gate 3 FAIL, Gate 4 FAIL, Gate 5 PASS. Overall Verdict: **`FAIL`**. In accordance with non-negotiable integrity rules, no checkpoint is promoted.
+
+Stage A.11 empirical findings (`1a22fd6` / `0620a22`, 848 full GPU regressions / 6 focused contracts pass; [report](STAGE_A11.md)):
+
+- **DOCUMENTATION RECONCILIATION — Parent Checkpoint Digest & Seed-42 Trajectory Reconciled**:
+  - Direct Kaggle GPU verification (`reconciliation_a9_a10_v1.json`) proved that canonical parent raw file SHA-256 is `3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262` and PyTorch typed state dict digest is `aed7480606a1a60e38ee7a95d22b5bcf14141f034f76cb45fb59680de277a33e` with 0 code or manifest discrepancy. The string `d404f2f...` was isolated to an intermediate markdown documentation transcription typo in A.8/A.9 docs.
+  - Seed-42 trajectory variations between A.9 (84.92% / 90.48%) and A.10 (88.89% / 87.30%) were traced to execution sequence (8th run in shared process vs 1st run in clean process) and optimizer grouping of `state_head` (lr 0.0005 vs 0.0015), both reproducing deterministically under their exact setups.
+- **CONFIRMED DEFECT / DESIGN LIMITATION FDR-009 (End-to-End Counterfactual Minimal Pair Failure Despite Linearly Separable Backbone Representations)**:
+  - On counterfactual semantic minimal pairs sharing 100% Bag-of-Words multiset (MP-1 negation transfer, MP-2 entity clause binding, MP-3 long-range negation), end-to-end trained models achieved only **1.04%** pair exact flip rate in ARM 4 and **0.00%** in ARM 3, failing Gate 3 ($\ge 80.0\%$), while training acquisition dropped to **94.27%** (failing Gate 1 $\ge 99.0\%$).
+  - Detached linear probe forensics on frozen backbone representations (`h_mean_pool`) revealed **63.19%–63.54%** pair exact flip rate in ARMs 3 and 4 (vs 10.76% in ARM 1 and 16.32% in ARM 2), proving that supervised relational pairs force self-attention layers to encode linearly separable relational distinctions.
+  - However, uniform mean pooling in the end-to-end joint loss causes destructive gradient interference between majority single-clause declarative sentences and 100% Bag-of-Words identical counterfactual pairs.
+- **STRICT PROTOCOL ADHERENCE & SEALED SUITE PRESERVATION**:
+  - In strict compliance with the preregistered protocol, because Gates 1 and 3 failed on development minimal pairs, **`sealed_a11_v1` was NOT evaluated**, completely preventing test contamination.
+  - Overall Verdict: **`FAIL`**. No checkpoint is promoted.
