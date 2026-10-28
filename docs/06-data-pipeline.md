@@ -625,3 +625,6 @@ Stage A.5: **Engineering PASS, learning PARTIAL; continual-learning qualificatio
 
 
 Stage A.6: Engineering PASS / learning intervention FAIL, STOP. `4ee7690` passes825 remote regressions/9 focused contracts. Frozen inference localizes frame/position sensitivity; the unchanged A5 reference reproduces exactly. Broader matched-budget coverage reaches79.76% training,73.81%/67.86% old behavior and33.33%/30.16% new development grammar, versus100% n-gram/structured controls. No sealed qualification or checkpoint promotion. No neural capacity or production learning-path change. Protocol and execution boundary: [Stage A.6](STAGE_A6.md). A.5 evidence and failed qualification remain unchanged.
+
+
+Stage A.7: exposure/representation diagnosis is preregistered and locally mock/static checked; remote results pending. Same continuing student, no new modules/capacity or optimizer reset. Original A6 failure remains immutable. [Protocol](STAGE_A7.md).

@@ -1,0 +1,20 @@
+{
+  "id": "exposure-a7-v1",
+  "source_a6": "4ee769092487a8678087b6eaefb86beb6ce1a4e1",
+  "parent_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+  "seed": 42,
+  "primary": "coverage",
+  "arms": {"reference": 7200, "coverage": 7200, "factor_small": 1200},
+  "block_updates": 1200,
+  "batch": 18,
+  "old_per_batch": 6,
+  "new_per_batch": 12,
+  "learning_rate": 0.002,
+  "weight_decay": 0,
+  "clip_norm": 1,
+  "snapshot_updates": [1000, 1100, 1200, 2200, 2300, 2400, 7000, 7100, 7200],
+  "thresholds": {"training_exact": 0.99, "each_family": 0.99, "each_status": 0.98, "old_each_cell": 0.95},
+  "probe": {"training_cases": 162, "ridge_lambda": 1.0, "dtype": "float64", "backprop_to_student": false},
+  "sealed_generated": false,
+  "promoted": false
+}
