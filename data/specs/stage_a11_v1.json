@@ -1,0 +1,73 @@
+{
+  "id": "stage-a11-v1",
+  "scope": "Milestone Stage A.11 Provenance Reconciliation & Clause-Sensitive Relational Learning",
+  "parent_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+  "parent_tensor_digest": "aed7480606a1a60e38ee7a95d22b5bcf14141f034f76cb45fb59680de277a33e",
+  "provenance_reconciliation": {
+    "manifest_path": "data/manifests/reconciliation_a9_a10_v1.json",
+    "verified": true
+  },
+  "seeds": [42, 43, 44],
+  "pretrain_steps": 1500,
+  "supervised_steps": 7200,
+  "checkpoint_snapshots": [6800, 7000, 7200],
+  "learning_rates": {
+    "backbone": 0.0005,
+    "readout_start": 0.0015,
+    "readout_min": 0.00015
+  },
+  "optimizer": {
+    "betas": [0.9, 0.999],
+    "eps": 1e-08,
+    "weight_decay": 0.0,
+    "backbone_clip": 0.5,
+    "readout_clip": 1.0
+  },
+  "arms": [
+    {
+      "id": "ARM_1_A10_BASELINE",
+      "pretrain_corpus": "syntactic_single_clause_a9",
+      "pretrain_steps": 1500,
+      "supervised_data": "coverage_single_clause_a10",
+      "supervised_steps": 7200
+    },
+    {
+      "id": "ARM_2_CLAUSE_PRETRAIN_ONLY",
+      "pretrain_corpus": "relational_multi_clause_a11",
+      "pretrain_steps": 1500,
+      "supervised_data": "coverage_single_clause_a10",
+      "supervised_steps": 7200
+    },
+    {
+      "id": "ARM_3_SINGLE_PRETRAIN_RELATIONAL_SUP",
+      "pretrain_corpus": "syntactic_single_clause_a9",
+      "pretrain_steps": 1500,
+      "supervised_data": "relational_augmented_a11",
+      "supervised_steps": 7200
+    },
+    {
+      "id": "ARM_4_CLAUSE_PRETRAIN_RELATIONAL_SUP",
+      "pretrain_corpus": "relational_multi_clause_a11",
+      "pretrain_steps": 1500,
+      "supervised_data": "relational_augmented_a11",
+      "supervised_steps": 7200
+    }
+  ],
+  "diagnostic_readout": {
+    "probes": ["h_last_question_token", "h_mean_pool"],
+    "regularization": 1.0
+  },
+  "development_admission_gates": {
+    "gate_1_train_acquisition": "Mean >= 99.0% across seeds 42-44 at updates [6800, 7000, 7200]",
+    "gate_2_old_frame_preservation": "Mean >= 95.0% on both old_known and old_renamed across seeds 42-44",
+    "gate_3_unfamiliar_grammar_and_minimal_pair": "Dev familiar & novel single-clause grammar mean >= 85.0% (no seed < 80.0%), and multi-clause dev minimal-pair exact accuracy >= 85.0% and pair_exact_flip_rate >= 80.0% (beating BoW and n-gram by >= 15 pp)"
+  },
+  "conditional_sealed_qualification": {
+    "spec_path": "data/specs/sealed_a11_v1.json",
+    "total_cases": 360,
+    "condition": "Execute only if Gates 1-3 pass across full 3-seed cohort",
+    "pass_threshold_exact": 0.80,
+    "counterfactual_pair_exact": 0.80,
+    "baselines": ["bow_linear", "ngram_linear", "clause_window_lexical"]
+  }
+}

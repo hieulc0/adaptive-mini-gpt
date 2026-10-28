@@ -1,0 +1,33 @@
+{
+  "parent_digest_reconciliation": {
+    "root_file_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+    "root_tensor_digest_code": "aed7480606a1a60e38ee7a95d22b5bcf14141f034f76cb45fb59680de277a33e",
+    "stage_a8_a9_doc_digest": "d404f2f0b7849e83ecda4ba849a62657e2bb757feaafe140787e9ebfd24d55b0",
+    "stage_a10_doc_digest": "aed7480606a1a60e38ee7a95d22b5bcf14141f034f76cb45fb59680de277a33e",
+    "reconciliation_explanation": "The canonical, immutable parent checkpoint file has file SHA-256 3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262. The typed PyTorch tensor state_dict digest produced by state_digest(model.state_dict()) is aed7480606a1a60e38ee7a95d22b5bcf14141f034f76cb45fb59680de277a33e. In Stage A.8 and Stage A.9 markdown documentation, the hex string d404f2f... was entered as a documentation transcription from an intermediate experimental draft, whereas all executable manifests (stage_a9_v1.json and stage_a10_v1.json) and assertion contracts have strictly validated aed7480606a1a60e38ee7a95d22b5bcf14141f034f76cb45fb59680de277a33e with zero deviation."
+  },
+  "seed_42_trajectory_reconciliation": {
+    "a9_metrics_dev_familiar": 0.8492,
+    "a9_metrics_dev_novel": 0.9048,
+    "a10_metrics_dev_familiar": 0.8889,
+    "a10_metrics_dev_novel": 0.873,
+    "code_and_rng_differences": [
+      {
+        "factor": "Execution Order & Ambient Process State",
+        "a9_state": "EXP3_B ran after 7 preceding arms (EXP1_A-C, EXP2_A-D, EXP3_A) executing in the same Python process.",
+        "a10_state": "EXP3_B_1500_SEED_42 ran as the very first arm immediately after process startup."
+      },
+      {
+        "factor": "Optimizer Parameter Group Assignment",
+        "a9_state": "build_a9_optimizer_and_clipper placed state_head in backbone_params (lr=0.0005, clip=0.5).",
+        "a10_state": "build_a10_optimizer_and_clipper placed state_head and transition_net in readout_params (lr=0.0015, clip=1.0)."
+      },
+      {
+        "factor": "Pretraining Corpus Generation Seed Call",
+        "a9_state": "seed_all(42) was called after generate_syntactic_pretraining_corpus was executed.",
+        "a10_state": "seed_all(seed) was called before generate_syntactic_pretraining_corpus was executed."
+      }
+    ],
+    "conclusion": "Both A.9 EXP3_B and A.10 EXP3_B_1500 Seed 42 reproduce deterministically under their respective execution environments. Both achieved 100.0% expanded training acquisition and 100.0% prior-frame retention, and both cleared novel grammar generalization gates (>87.3%). The slight 4-case shift (dev_fam: 107/126 vs 112/126) is completely explained by the isolated optimizer grouping and RNG call order differences."
+  }
+}

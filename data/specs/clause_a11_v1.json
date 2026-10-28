@@ -1,0 +1,35 @@
+{
+  "protocol": "clause_minimal_pairs_v1",
+  "families": {
+    "MP-1": {
+      "name": "negation_clause_transfer",
+      "description": "Moves negation between distractor clause and target property while maintaining 100% Bag-of-Words multiset equality.",
+      "num_pairs_per_split": 32,
+      "num_cases_per_split": 64
+    },
+    "MP-2": {
+      "name": "multi_entity_clause_binding",
+      "description": "Two entities described with contrasting properties, queried at the end while maintaining 100% Bag-of-Words multiset equality.",
+      "num_pairs_per_split": 32,
+      "num_cases_per_split": 64
+    },
+    "MP-3": {
+      "name": "long_range_negation_scope",
+      "description": "Negation separated from target property by 3-5 modifier words with distractor clauses while maintaining 100% Bag-of-Words multiset equality.",
+      "num_pairs_per_split": 32,
+      "num_cases_per_split": 64
+    }
+  },
+  "total_pairs_train": 96,
+  "total_cases_train": 192,
+  "total_pairs_dev": 96,
+  "total_cases_dev": 192,
+  "metrics": [
+    "exact_match",
+    "pair_exact_accuracy",
+    "pair_exact_flip_rate",
+    "positive_recall",
+    "negated_recall",
+    "absent_recall"
+  ]
+}

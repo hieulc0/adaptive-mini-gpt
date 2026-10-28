@@ -1,0 +1,27 @@
+{
+  "id": "sealed-a11-v1",
+  "scope": "Milestone Stage A.11 Independent Sealed Language Qualification",
+  "total_cases": 360,
+  "cases_per_seed": 120,
+  "seeds": [42, 43, 44],
+  "names": ["Drav", "Sorn", "Kael", "Vond", "Lira", "Meko"],
+  "families": [
+    "fam0_subordination_distractor",
+    "fam1_swapped_minimal_pairs",
+    "fam2_three_clause_distractor",
+    "fam3_multi_entity_binding"
+  ],
+  "counterfactual_pair_families": [
+    "fam1_swapped_minimal_pairs",
+    "fam3_multi_entity_binding"
+  ],
+  "sealed_suite_sha256": "21e6ff6cd6c39289d70962c4f436e49626554d0ad32c4c732ec26ccd3b1e031b",
+  "retired_sealed_a10_sha256": "64daf317c659417327713357449967a9d24c16a3cfe618dd714556c687c14403",
+  "isolation_verified": true,
+  "baselines": [
+    "bow_linear",
+    "ngram_linear",
+    "clause_window_lexical",
+    "majority"
+  ]
+}
