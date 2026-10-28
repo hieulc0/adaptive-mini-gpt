@@ -35,6 +35,7 @@ class CausalSelfAttention(nn.Module):
         self.context_length = config.context_length
         self.dropout_p = config.dropout
         self.pos_encoding = getattr(config, "pos_encoding", "absolute")
+        self.position_offset: int = 0
 
         # Combined projection for query, key, value
         self.c_attn = nn.Linear(config.d_model, 3 * config.d_model, bias=config.bias)
@@ -81,7 +82,8 @@ class CausalSelfAttention(nn.Module):
         v = v.view(b, t, self.n_heads, self.head_dim).transpose(1, 2)
 
         if self.pos_encoding == "rope":
-            t_pos = torch.arange(t, device=x.device, dtype=torch.float32)
+            assert isinstance(self.inv_freq, torch.Tensor)
+            t_pos = torch.arange(t, device=x.device, dtype=torch.float32) + getattr(self, "position_offset", 0)
             freqs = torch.outer(t_pos, self.inv_freq.to(device=x.device))
             cos = torch.cat([torch.cos(freqs), torch.cos(freqs)], dim=-1).view(1, 1, t, self.head_dim).to(dtype=q.dtype)
             sin = torch.cat([torch.sin(freqs), torch.sin(freqs)], dim=-1).view(1, 1, t, self.head_dim).to(dtype=q.dtype)
@@ -89,6 +91,7 @@ class CausalSelfAttention(nn.Module):
             k = apply_rotary_emb(k, cos, sin)
 
         if self.pos_encoding == "alibi":
+            assert isinstance(self.alibi_slopes, torch.Tensor)
             pos = torch.arange(t, device=x.device)
             dist = (pos.view(1, 1, 1, t) - pos.view(1, 1, t, 1)).to(dtype=q.dtype)
             alibi_bias = dist * self.alibi_slopes.to(device=x.device, dtype=q.dtype)

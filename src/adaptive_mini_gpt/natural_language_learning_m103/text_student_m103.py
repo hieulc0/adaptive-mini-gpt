@@ -45,6 +45,7 @@ class TextStudentM103(nn.Module):
         device: torch.device | None = None,
         enable_persistent_growth: bool = True,
         prune_orphaned_lm_head: bool = False,
+        pos_encoding: str = "absolute",
     ) -> None:
         super().__init__()
         self.tier = tier
@@ -60,7 +61,7 @@ class TextStudentM103(nn.Module):
             n_heads=4,
             n_layers=4,
             d_ff=512,
-            pos_encoding="absolute",
+            pos_encoding=pos_encoding,
             dropout=0.0,
             bias=True,
         )

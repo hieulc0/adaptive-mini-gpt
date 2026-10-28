@@ -1,0 +1,95 @@
+{
+  "protocol": "stage-a9-v1",
+  "parent_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+  "parent_tensor_digest": "aed7480606a1a60e38ee7a95d22b5bcf14141f034f76cb45fb59680de277a33e",
+  "seed": 42,
+  "steps": 7200,
+  "batch_size": 2,
+  "experiment_1_plasticity": {
+    "arms": {
+      "EXP1_A_TOP2_REPRO": {
+        "mode": "selective_top2_blocks",
+        "backbone_lr": 0.0005,
+        "readout_lr_start": 0.0015,
+        "readout_lr_min": 0.00015,
+        "backbone_clip": 0.5,
+        "readout_clip": 1.0
+      },
+      "EXP1_B_FULL_BACKBONE_UNIFORM": {
+        "mode": "trainable_backbone",
+        "backbone_lr": 0.0005,
+        "readout_lr_start": 0.0015,
+        "readout_lr_min": 0.00015,
+        "backbone_clip": 0.5,
+        "readout_clip": 1.0
+      },
+      "EXP1_C_FULL_BACKBONE_LAYERWISE": {
+        "mode": "trainable_backbone",
+        "lower_lr": 0.00025,
+        "upper_lr": 0.0005,
+        "readout_lr_start": 0.0015,
+        "readout_lr_min": 0.00015,
+        "lower_clip": 0.5,
+        "upper_clip": 0.5,
+        "readout_clip": 1.0
+      }
+    }
+  },
+  "experiment_2_position_encoding": {
+    "arms": {
+      "EXP2_A_FRESH_ABS_TOP2": {
+        "init": "fresh",
+        "pos_encoding": "absolute",
+        "mode": "selective_top2_blocks",
+        "backbone_lr": 0.0005,
+        "readout_lr_start": 0.0015,
+        "readout_lr_min": 0.00015
+      },
+      "EXP2_B_FRESH_ABS_FULL": {
+        "init": "fresh",
+        "pos_encoding": "absolute",
+        "mode": "trainable_backbone",
+        "backbone_lr": 0.0005,
+        "readout_lr_start": 0.0015,
+        "readout_lr_min": 0.00015
+      },
+      "EXP2_C_FRESH_ROPE_FULL": {
+        "init": "fresh",
+        "pos_encoding": "rope",
+        "mode": "trainable_backbone",
+        "backbone_lr": 0.0005,
+        "readout_lr_start": 0.0015,
+        "readout_lr_min": 0.00015
+      },
+      "EXP2_D_CONTINUING_ROPE_MIGRATION": {
+        "init": "parent_migration",
+        "pos_encoding": "rope",
+        "mode": "trainable_backbone",
+        "backbone_lr": 0.0005,
+        "readout_lr_start": 0.0015,
+        "readout_lr_min": 0.00015
+      }
+    },
+    "offsets": [
+      8,
+      24
+    ]
+  },
+  "experiment_3_language_pretraining": {
+    "spec_file": "data/specs/a9_language_pretrain_v1.json",
+    "pretrain_steps": 1500,
+    "supervised_steps": 7200
+  },
+  "qualification_gates": {
+    "gate_1_expanded_acquisition_threshold": 0.99,
+    "gate_2_prior_frame_retention_threshold": 0.95,
+    "gate_3_unfamiliar_grammar_threshold": 0.85,
+    "gate_3_recall_threshold": 0.8
+  },
+  "hypotheses": [
+    "H1_FULL_PLASTICITY_SUFFICIENT",
+    "H2_POSITION_ENCODING_MATERIAL",
+    "H3_LANGUAGE_PRETRAINING_REQUIRED",
+    "H4_NONE_ESTABLISHED_POOLING_OR_TOKEN_BOTTLENECK"
+  ]
+}

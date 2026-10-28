@@ -1,0 +1,11 @@
+{
+  "protocol": "a9_language_pretrain_v1",
+  "num_sentences": 2000,
+  "pretrain_steps": 1500,
+  "batch_size": 2,
+  "lr": 0.0005,
+  "weight_decay": 0.01,
+  "seed": 42,
+  "corpus_sha256": "910ed1c72aad98a1b8c66fb4f17b3e01396bd7b72b4feffec9db72158b933273",
+  "isolation_verified": true
+}
