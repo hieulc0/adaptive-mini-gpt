@@ -1,0 +1,22 @@
+{
+  "id": "sealed-a10-v1",
+  "scope": "Milestone Stage A.10 Independent Sealed Language Qualification",
+  "total_cases": 324,
+  "cases_per_seed": 108,
+  "seeds": [42, 43, 44],
+  "names": ["Zor", "Kex", "Plin", "Vex", "Taro", "Nul"],
+  "families": [
+    "sealed_family_0",
+    "sealed_family_1",
+    "sealed_family_2",
+    "sealed_family_3"
+  ],
+  "relationship_sensitive_family": "sealed_family_3",
+  "sealed_suite_sha256": "64daf317c659417327713357449967a9d24c16a3cfe618dd714556c687c14403",
+  "isolation_verified": true,
+  "baselines": [
+    "bow_linear",
+    "ngram_linear",
+    "majority"
+  ]
+}

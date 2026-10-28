@@ -1,0 +1,84 @@
+{
+  "id": "stage-a10-v1",
+  "scope": "Milestone Stage A.10 Independent Foundation Qualification (Multi-Seed Replication, 2x2 Factorial Control, Persistent Migration & Sealed Evaluation)",
+  "parent_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+  "parent_tensor_digest": "aed7480606a1a60e38ee7a95d22b5bcf14141f034f76cb45fb59680de277a33e",
+  "seeds": [42, 43, 44],
+  "supervised_steps": 7200,
+  "checkpoint_snapshots": [6800, 7000, 7200],
+  "learning_rates": {
+    "backbone": 0.0005,
+    "readout_start": 0.0015,
+    "readout_min": 0.00015
+  },
+  "optimizer": {
+    "betas": [0.9, 0.999],
+    "eps": 1e-08,
+    "weight_decay": 0.0,
+    "backbone_clip": 0.5,
+    "readout_clip": 1.0
+  },
+  "phase_1_replication": {
+    "architecture": "TextStudentM103(pos_encoding='rope', mode='trainable_backbone')",
+    "seeds": [42, 43, 44],
+    "pretrain_steps": 1500,
+    "calibrated_pretrain_steps": 2500,
+    "supervised_steps": 7200
+  },
+  "phase_2_factorial": {
+    "cells": [
+      {
+        "name": "CELL_1_ABS_NO_PRETRAIN",
+        "pos_encoding": "absolute",
+        "pretrain_steps": 0
+      },
+      {
+        "name": "CELL_2_ABS_SYNTAX_PRETRAIN",
+        "pos_encoding": "absolute",
+        "pretrain_steps": 1500
+      },
+      {
+        "name": "CELL_3_ROPE_NO_PRETRAIN",
+        "pos_encoding": "rope",
+        "pretrain_steps": 0
+      },
+      {
+        "name": "CELL_4_ROPE_SYNTAX_PRETRAIN",
+        "pos_encoding": "rope",
+        "pretrain_steps": 1500
+      }
+    ],
+    "seeds": [42, 43, 44]
+  },
+  "phase_3_migration": {
+    "parent_checkpoint": "inherited_weights_inherited_moments.pt",
+    "prior_fixtures": [
+      "stage_a_prior_state_tiny.json"
+    ],
+    "distillation_steps": 500,
+    "distillation_lr": 0.0005,
+    "arms": [
+      "MIG_0_HISTORICAL_ABS_BASELINE",
+      "MIG_1_RAW_ROPE_SWAP",
+      "MIG_2_DISTILLED_BRIDGE_CONTINUATION"
+    ]
+  },
+  "phase_4_sealed": {
+    "spec_path": "data/specs/sealed_a10_v1.json",
+    "admission_thresholds": {
+      "training_exact": 0.99,
+      "old_known_exact": 0.95,
+      "old_renamed_exact": 0.95,
+      "dev_familiar_exact": 0.85,
+      "dev_novel_exact": 0.85,
+      "per_status_recall": 0.80
+    }
+  },
+  "qualification_gates": {
+    "gate_1_stable_expanded_acquisition": ">= 99.0% at updates 6800, 7000, 7200 across all 3 seeds",
+    "gate_2_prior_frame_retention": ">= 95.0% on old known & old renamed at updates 6800, 7000, 7200 across all 3 seeds",
+    "gate_3_unfamiliar_grammar_generalization": ">= 85.0% on both familiar & novel development splits, and all status recalls >= 80.0% across all 3 seeds",
+    "gate_4_continuation_and_integrity": "max_logit_diff == 0.00e+00, 0 parameter discrepancy, all remote GPU regression tests pass",
+    "gate_5_sealed_generalization": ">= 80.0% exact match on sealed suite, strictly outperforming Word 1-3-gram and BoW controls on relationship-sensitive splits"
+  }
+}
