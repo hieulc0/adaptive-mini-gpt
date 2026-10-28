@@ -13,6 +13,7 @@ import os
 import random
 import tempfile
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import torch
@@ -162,6 +163,52 @@ def migrate_adamw(model, optimizer, replacements=()):
             p.grad = None
     if any(optimizer_membership(model, optimizer).values()):
         raise RuntimeError("Invalid optimizer ownership after migration")
+
+
+class TwoTimescaleScheduler:
+    """Cosine scheduler for readout group while keeping backbone group at fixed lr."""
+
+    def __init__(
+        self,
+        optimizer: torch.optim.Optimizer,
+        total_steps: int,
+        backbone_lr: float = 0.0005,
+        readout_lr_start: float = 0.0015,
+        readout_lr_min: float = 0.00015,
+    ) -> None:
+        self.optimizer = optimizer
+        self.total_steps = total_steps
+        self.backbone_lr = backbone_lr
+        self.readout_lr_start = readout_lr_start
+        self.readout_lr_min = readout_lr_min
+        self.step_num = 0
+
+    def step(self) -> None:
+        self.step_num += 1
+        ratio = self.readout_lr_min / self.readout_lr_start
+        factor = ratio + 0.5 * (1.0 - ratio) * (
+            1.0 + math.cos(math.pi * min(self.step_num, self.total_steps) / self.total_steps)
+        )
+        if len(self.optimizer.param_groups) > 0:
+            self.optimizer.param_groups[0]["lr"] = self.backbone_lr
+        if len(self.optimizer.param_groups) > 1:
+            self.optimizer.param_groups[1]["lr"] = self.readout_lr_start * factor
+
+    def state_dict(self) -> dict[str, Any]:
+        return {
+            "total_steps": self.total_steps,
+            "backbone_lr": self.backbone_lr,
+            "readout_lr_start": self.readout_lr_start,
+            "readout_lr_min": self.readout_lr_min,
+            "step_num": self.step_num,
+        }
+
+    def load_state_dict(self, state: dict[str, Any]) -> None:
+        self.total_steps = state["total_steps"]
+        self.backbone_lr = state["backbone_lr"]
+        self.readout_lr_start = state["readout_lr_start"]
+        self.readout_lr_min = state["readout_lr_min"]
+        self.step_num = state["step_num"]
 
 
 class LearningState:

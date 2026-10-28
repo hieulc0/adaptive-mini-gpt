@@ -189,6 +189,13 @@ def test_optimizer_parameter_groups_separation():
     assert opt_2.param_groups[0]["lr"] == 0.0005
     assert opt_2.param_groups[1]["lr"] < 0.0015
 
+    # Verify pickle serializability
+    import pickle
+    dumped = pickle.dumps(sched_2)
+    loaded = pickle.loads(dumped)
+    assert loaded.step_num == sched_2.step_num
+    assert loaded.backbone_lr == 0.0005
+
 
 def test_checkpoint_immutability_hashes():
     """Verifies that parent and comparison hashes are immutable hex digests."""

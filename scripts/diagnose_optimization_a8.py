@@ -13,7 +13,6 @@ Saves coverage_5800.pt during OPT_0_BASELINE for Stage 1 evaluation.
 from __future__ import annotations
 
 import json
-import math
 from pathlib import Path
 from typing import Any
 
@@ -24,7 +23,7 @@ from run_attribute_learning import evaluate, file_hash
 from run_stable_attributes import compact, enrich
 
 from adaptive_mini_gpt.data.attribute_learning import TAG_IDS
-from adaptive_mini_gpt.training.learning_state import LearningState
+from adaptive_mini_gpt.training.learning_state import LearningState, TwoTimescaleScheduler
 from adaptive_mini_gpt.training.remote_runtime import require_remote_cuda
 
 SPEC_PATH = Path("data/specs/optimization_a8_v1.json")
@@ -255,26 +254,13 @@ def build_optimizer_and_clipper(
             weight_decay=0.0,
         )
 
-        def lr_lambda(step: int) -> list[float]:
-            total = spec["steps"]
-            ratio = arm_cfg["readout_lr_min"] / arm_cfg["readout_lr_start"]
-            readout_factor = ratio + 0.5 * (1.0 - ratio) * (
-                1.0 + math.cos(math.pi * min(step, total) / total)
-            )
-            return [1.0, readout_factor]
-
-        class TwoTimescaleScheduler:
-            def __init__(self, opt: torch.optim.Optimizer) -> None:
-                self.opt = opt
-                self.step_num = 0
-
-            def step(self) -> None:
-                self.step_num += 1
-                factors = lr_lambda(self.step_num)
-                self.opt.param_groups[0]["lr"] = arm_cfg["backbone_lr"] * factors[0]
-                self.opt.param_groups[1]["lr"] = arm_cfg["readout_lr_start"] * factors[1]
-
-        scheduler = TwoTimescaleScheduler(optimizer)
+        scheduler = TwoTimescaleScheduler(
+            optimizer,
+            total_steps=spec["steps"],
+            backbone_lr=arm_cfg["backbone_lr"],
+            readout_lr_start=arm_cfg["readout_lr_start"],
+            readout_lr_min=arm_cfg["readout_lr_min"],
+        )
 
         def decoupled_clipper(m: nn.Module, opt: torch.optim.Optimizer) -> None:
             torch.nn.utils.clip_grad_norm_(backbone_params, arm_cfg["backbone_clip"])
