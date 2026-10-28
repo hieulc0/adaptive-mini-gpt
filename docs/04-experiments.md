@@ -713,6 +713,11 @@ Stage A.7: Engineering PASS / Learning FAIL at`be8e289`(829remote tests/10focuse
 ## 20. Stage A.8: Neural Learning Mechanism Investigation & Foundation Repair for Learning-to-Learn
 
 **Title:** Neural Learning Mechanism Investigation: Coverage-Matched Representation Probes, Optimization Forensics & Reusable Concept Foundation Repair  
-**Status:** **PREREGISTERED** (Pending Kaggle Tesla T4 GPU Execution).  
-**Protocol Specification:** [docs/STAGE_A8.md](STAGE_A8.md), [data/specs/probe_a8_v1.json](../data/specs/probe_a8_v1.json), [data/specs/optimization_a8_v1.json](../data/specs/optimization_a8_v1.json).  
-**Pre-Submission Checks:** Mock/fixture unit contracts pass (4/4 contracts, 22/22 cumulative tests), compileall passes, ruff passes, scoped pyright 0 errors. ZERO neural forward/backward passes on host.
+**Status:** **COMPLETED — VERDICT: ARCHITECTURAL REDESIGN REQUIRED** (`46cf2ab`, Kaggle Tesla T4 GPU, `sparklinghydraulics0/amg-stage-a8`).  
+**Protocol Specification & Full Report:** [docs/STAGE_A8.md](STAGE_A8.md), [data/manifests/stage_a8_v1.json](../data/manifests/stage_a8_v1.json).  
+**Execution Summary:**  
+1. **Task 1 (Probe Diagnosis)**: Factorial 378-case coverage-matched lexical control (word 1–3-gram) achieves 100.0% on unfamiliar grammar development set, proving that training instances contain sufficient lexical/compositional information. Yet, Transformer representations fail (frozen $h_{\\text{pool}}$: 28.57%, $z_{\\text{concept}}$: 30.95%, nonlinear MLP: 23.81%).  
+2. **Task 2 (Optimization Contrast)**: Forensics identify that constant $lr=0.002$ triggers 81.2% clipping rate and oscillating Adam updates (0.0033). Cosine floor (`OPT_1_COSINE_FLOOR`: $0.002 \\to 0.0001$, $\\beta_2=0.98$, $\\epsilon=10^{-6}$) eliminates degradation, achieving 100.00% training exact match with 38.2% clipping rate.  
+3. **Task 3 (Evidence-Driven Repair)**: `BRANCH_B` triggered with `B2_SELECTIVE_TOP2_BLOCKS` (`blocks.3..blocks.4`, `wte`) and decoupled two-timescale optimizer.  
+4. **Task 4 (Qualification Gates)**: Gate 1 PASS (100.0% training), Gate 2 PASS (100.0% retention), Gate 4 PASS (deterministic continuation $\\Delta=0.0$, 829+ tests pass). **Gate 3 FAILED** (35.71% novel grammar exact vs 85.00% threshold).  
+5. **Architectural Redesign Decision**: In accordance with preregistration, sealed qualification was aborted and no checkpoint was promoted. Stage A.9 must pretrain all 5 Transformer blocks with Rotary Position Embeddings (RoPE) on the synthetic language substrate to overcome absolute learned position embedding (`wpe`) distortion.

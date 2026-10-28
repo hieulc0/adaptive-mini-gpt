@@ -96,3 +96,17 @@ Stage A.8 (`launch_stage_a8.py`, [report](STAGE_A8.md)):
 - **SCIENTIFIC VALIDITY ISSUE — repaired in protocol:** Stage A.7's 162-case probe lacked alternative negator (`without`) and property order coverage, causing lexical controls to fail. Stage A.8 constructs a 378-cell coverage-matched diagnostic train split crossing all negators, orders, frames, prefixes, and status pairs, testing linear ridge (with CV lambda), bounded nonlinear MLP, and lexical controls over `h_pool`, `z_concept`, and `h_tokens_stat`.
 - **UNRESOLVED HYPOTHESIS — preregistered contrast:** Late-horizon optimization instability (98.81% at 5800 -> 78.70% at 7200) investigated via 4-arm contrast (`OPT_0_BASELINE`, `OPT_1_COSINE_FLOOR`, `OPT_2_DECOUPLED_TIMESCALE`, `OPT_3_LOGIT_BOUNDED_BCE`) with trajectory telemetry (per-module gradient norms, update ratios, Adam second moments, and clipping activation rates).
 - **CONDITIONAL INTERVENTION & QUALIFICATION BOUNDARY:** Single evidence-driven correction (Branch A vs Branch B; Option B1 `span_relative_max_mean_pooling` vs Option B2 `selective_top2_blocks`) evaluated against matched controls at updates 6800, 7000, 7200 under strict binding acceptance gates.
+
+Stage A.8 empirical findings (`46cf2ab`, 829 full GPU regressions / 4 focused contracts pass; [report](STAGE_A8.md)):
+
+- **CONFIRMED DESIGN LIMITATION / ARCHITECTURAL DEFECT (Absolute Positional Distortion in Frozen Blocks)**:
+  - Factorial 378-case coverage-matched lexical control (word 1–3-gram) achieves **100.0%** on novel grammar development sets, proving that training instances contain complete information for compositional negation and property binding.
+  - Frozen neural representations achieve only **28.57%** ($h_{\text{pool}}$) and **30.95%** ($z_{\text{concept}}$); max/mean pooling ($h_{\text{tokens\_stat}}$: 22.22%) and nonlinear MLP readouts (23.81%) cannot recover the concepts.
+  - The root cause is anatomical: the Mini-GPT base model uses absolute learned position embeddings (`wpe`). When lower blocks (`blocks.0..blocks.2`) are frozen, token representations are bound to fixed prompt-offset coordinates. Grammar variations, prefix shifts, and property order inversions produce shifted coordinate outputs that subsequent blocks cannot invert.
+- **OPTIMIZATION INSTABILITY RESOLVED (`OPT_1_COSINE_FLOOR`)**:
+  - Trajectory telemetry shows that under constant $lr=0.002$, gradient clipping activates on **81.2%** of steps with high Adam update ratios (0.0033), causing late-horizon oscillation.
+  - Cosine learning rate decay ($0.002 \to 0.0001$, $\beta_2=0.98$, $\epsilon=10^{-6}$) reduces clipping activation to **38.2%**, cuts mean gradient norm to 1.88, and achieves **100.00%** training exact match without late-phase degradation.
+- **GATE VERDICT & FORMAL ARCHITECTURAL REDESIGN DECISION**:
+  - Unfreezing top-2 blocks (`blocks.3..blocks.4`, `wte`) under two-timescale optimizer achieves Gate 1 (100.00% expanded acquisition), Gate 2 (100.00% prior-frame retention), and Gate 4 (deterministic continuation $\Delta=0.0$, 829+ tests pass).
+  - **Gate 3 FAILED** (35.71% novel grammar exact vs 85.00% gate threshold).
+  - In accordance with preregistered protocol: sealed evaluation was NOT run, no checkpoint was promoted, and the formal Architectural Redesign Decision was adopted: Stage A.9 must pretrain all 5 Transformer blocks with Rotary Position Embeddings (RoPE) on the synthetic language substrate before concept specialization.
