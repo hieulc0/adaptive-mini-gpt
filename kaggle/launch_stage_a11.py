@@ -12,7 +12,7 @@ from typing import Any
 
 import torch
 
-PINNED_SHA = "6bba03d3d45a55db2d714cea5d24c217123e497b"
+PINNED_SHA = "1a22fd630340ce4b996a0320d7e06aa87ce31a1a"
 REPO = Path("/tmp/amg-stage-a11")
 OUT = Path("/kaggle/working/stage-a11")
 
@@ -117,7 +117,7 @@ def main():
 
         # Phase 3: Stage A.11 Runner
         if ok_recon:
-            ok_a11 = run(
+            run(
                 [
                     "scripts/run_stage_a11.py",
                     "--phase",
@@ -129,13 +129,13 @@ def main():
                 7200,
             )
 
-            # Copy manifests to OUT
-            if ok_a11:
-                for manifest_name in ("stage_a11_v1.json", "reconciliation_a9_a10_v1.json"):
-                    src_m = REPO / "data/manifests" / manifest_name
+            # Copy manifests to OUT and /kaggle/working
+            for manifest_name in ("stage_a11_v1.json", "reconciliation_a9_a10_v1.json"):
+                for src_m in (OUT / manifest_name, REPO / "data/manifests" / manifest_name):
                     if src_m.exists():
                         (OUT / manifest_name).write_text(src_m.read_text())
                         (Path("/kaggle/working") / manifest_name).write_text(src_m.read_text())
+                        break
 
     # Phase 4: Full GPU Regression Suite
     run(
