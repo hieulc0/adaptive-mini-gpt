@@ -82,6 +82,9 @@ class CausalSelfAttention(nn.Module):
         v = v.view(b, t, self.n_heads, self.head_dim).transpose(1, 2)
 
         if self.pos_encoding == "rope":
+            if not hasattr(self, "inv_freq"):
+                inv_f = 1.0 / (10000.0 ** (torch.arange(0, self.head_dim, 2).float() / self.head_dim))
+                self.register_buffer("inv_freq", inv_f.to(device=x.device), persistent=False)
             assert isinstance(self.inv_freq, torch.Tensor)
             t_pos = torch.arange(t, device=x.device, dtype=torch.float32) + getattr(self, "position_offset", 0)
             freqs = torch.outer(t_pos, self.inv_freq.to(device=x.device))

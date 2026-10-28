@@ -536,6 +536,9 @@ def run_stage_a10(root_path: Path, out_dir: Path, phase: str = "all") -> dict[st
         for block in mig1_owner.model.student.base_model.blocks:
             block.attn.pos_encoding = "rope"
             block.attn.position_offset = 0
+            if not hasattr(block.attn, "inv_freq"):
+                inv_f = 1.0 / (10000.0 ** (torch.arange(0, block.attn.head_dim, 2).float() / block.attn.head_dim))
+                block.attn.register_buffer("inv_freq", inv_f.to(mig1_owner.model.student.device), persistent=False)
 
         # Measure immediate t0 collapse
         t0_mig1_k = evaluate(mig1_owner.model, eval_batches["old_known"], eval_sets["old_known"])["exact"]
