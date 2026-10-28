@@ -700,13 +700,14 @@ def main() -> None:
 
     manifest_path = Path("data/manifests/stage_a11_v1.json")
     manifest_path.write_text(json.dumps(results, indent=2))
-    print(f"\nFinal Stage A.11 manifest written to {manifest_path}")
+    (args.out_dir / "stage_a11_v1.json").write_text(json.dumps(results, indent=2))
+    print(f"\nFinal Stage A.11 manifest written to {manifest_path} and {args.out_dir / 'stage_a11_v1.json'}")
 
     print("\n--- Running Fresh-Process Continuation Check ---")
     chk_path = args.out_dir / "arm_4_clause_pretrain_relational_sup_seed_42_7200.pt"
     if chk_path.exists():
-        loaded_model = IntegratedStudentM104_E(TextStudentM103(pos_encoding="rope"), mode="trainable_backbone").cuda()
-        loaded_model.load_state_dict(torch.load(chk_path, map_location="cuda"))
+        loaded_owner = LearningState.load(chk_path)
+        loaded_model = loaded_owner.model.cuda()
         loaded_model.eval()
         orig_model = trained_cohorts["ARM_4_CLAUSE_PRETRAIN_RELATIONAL_SUP"][42]
         orig_model.eval()
