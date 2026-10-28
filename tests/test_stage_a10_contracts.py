@@ -24,7 +24,7 @@ SCRIPTS_DIR = Path(__file__).parents[1] / "scripts"
 if str(SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPTS_DIR))
 
-from frame_a2_common import ROOT_HASH, ROOT_TENSOR_HASH  # noqa: E402
+from frame_a2_common import ROOT_HASH, ROOT_TENSOR_HASH  # noqa: E402  # pyright: ignore[reportMissingImports]
 
 from adaptive_mini_gpt.data.pretraining_a9 import (  # noqa: E402
     FORBIDDEN_WORDS,

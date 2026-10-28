@@ -128,3 +128,22 @@ Stage A.9 empirical findings (`bac611e`, 837 full GPU regressions / 4 focused co
   - Gate 3: Novel-grammar generalization passes at **90.48%** (with pos=94.0%, neg=98.3%, abs=89.6%, all $\ge 80.0\%$); familiar-grammar development split reached 84.92% (107/126 cases, 1 case shy of 85.0%).
   - Gate 4 PASS (deterministic continuation $\Delta=0.0$, 0 parameter discrepancies, 837 GPU tests pass).
   - In accordance with protocol, multi-seed replication and sealed evaluation were deferred, and no candidate was promoted. Stage A.10 / Milestone M105 will adopt `EXP3_B` (RoPE + 5 trainable blocks + syntactic pretraining) as canonical foundation architecture.
+
+Stage A.10 empirical findings (`6bc8f10`, 842 full GPU regressions / 18 focused contracts pass; [report](STAGE_A10.md)):
+
+- **CONFIRMED MECHANISM — 2×2 Factorial Interaction Between RoPE and Syntactic Pretraining**:
+  - The missing control (`CELL_2_ABS_SYNTAX_PRETRAIN`) scored **49.47%** on novel grammar development (barely +1.32% over `CELL_1_ABS_NO_PRETRAIN` at 48.15%), proving that causal language pretraining ALONE cannot overcome absolute positional coordinate binding.
+  - Factorial decomposition yields: Main effect of RoPE = **+28.31%**, Main effect of Syntactic Pretraining = **+16.14%**, and Interaction Term = **+29.63%**.
+  - Relative position encoding (RoPE) and causal syntactic pretraining act as mutually necessary, super-additive partners: RoPE provides coordinate-free translation invariance (0.00% positional shift flip rate), while syntactic pretraining instills grammatical priors for compositional binding.
+- **DEVELOPMENT REPLICATION CONFIRMED (EXP3_B_1500 across Seeds 42, 43, 44)**:
+  - All three seeds passed 100% expanded acquisition, 100% prior-frame retention, and cleared the 85.0% development gates (Seed 42: dev_fam=88.89%, dev_nov=87.30%; Seed 43: dev_fam=100.0%, dev_nov=100.0%; Seed 44: dev_fam=88.89%, dev_nov=90.48%).
+  - Error forensics revealed that in Seeds 42 and 44, errors clustered exclusively in `development_0` on Property 2 due to semicolon punctuation attenuation (`";"`), but still cleared the threshold.
+- **CONFIRMED DEFECT / DESIGN LIMITATION FDR-007 (Sealed Distractor Clause & Long-Range Negation Scope Failure)**:
+  - On the independent 324-case sealed language suite (Digest `64daf317...`), all neural candidates failed the 85.0% gate, scoring **47.84%–53.09%**.
+  - Bag-of-Words linear control outperformed all neural models at **65.74%**.
+  - On the `relationship_sensitive` split (where negation occurs in an introductory distractor clause, e.g., `"Although the outer casing is not heavy..."`), the best neural candidate collapsed to **44.44%** (chance level), while the Word 1–3-gram linear control achieved **66.67%**.
+  - Diagnosis: The 1,500-step pretraining corpus contained only simple declarative sentences. Without multi-clause subordination and distractor negation exposure, the Transformer's self-attention acts as an unconstrained bag-of-words token matcher that bleeds negation scope across clause boundaries.
+- **CONFIRMED DEFECT / DESIGN LIMITATION FDR-008 (Persistent-Student State-Transition Catastrophic Forgetting during RoPE Migration)**:
+  - While distillation bridging (`MIG_2`) cushioned initial $t_0$ attribute loss to 72.62% and recovered 100% attribute retention post-retraining, downstream causal state-transition performance on `stage_a_prior_state_tiny.json` collapsed from **50.00% (4/8) to 25.00% (2/8)**.
+  - Latent bottleneck alignment on rehearsal data alone fails to preserve frozen downstream head representations (`transition_net`, `state_head`). True foundation migration requires joint multi-task rehearsal spanning all historical tasks.
+- **BINDING GATE VERDICT**: Gate 1 PASS, Gate 2 PASS, Gate 3 FAIL, Gate 4 FAIL, Gate 5 PASS. Overall Verdict: **`FAIL`**. In accordance with non-negotiable integrity rules, no checkpoint is promoted.
