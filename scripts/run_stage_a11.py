@@ -456,7 +456,7 @@ def main() -> None:
     # Data Setup
     print("\n--- Preparing Datasets & Training Batches ---")
     training, _newcounts, blocks, shared, _ = a6_prepare()
-    context = 128
+    context = 256
     tokenizer = ByteTextTokenizerM103()
 
     broad_cases = training["coverage"][:756]
