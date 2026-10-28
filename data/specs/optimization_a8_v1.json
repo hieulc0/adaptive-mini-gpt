@@ -1,0 +1,54 @@
+{
+  "id": "optimization-a8-v1",
+  "parent_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+  "seed": 42,
+  "steps": 7200,
+  "arms": {
+    "OPT_0_BASELINE": {
+      "lr": 0.002,
+      "betas": [0.9, 0.999],
+      "eps": 1e-8,
+      "clip": 1.0
+    },
+    "OPT_1_COSINE_FLOOR": {
+      "lr_start": 0.002,
+      "lr_min": 0.0001,
+      "betas": [0.9, 0.98],
+      "eps": 1e-6,
+      "clip": 1.0
+    },
+    "OPT_2_DECOUPLED_TIMESCALE": {
+      "backbone_lr": 0.0005,
+      "backbone_clip": 0.5,
+      "readout_lr_start": 0.0015,
+      "readout_lr_min": 0.00015,
+      "readout_clip": 1.0
+    },
+    "OPT_3_LOGIT_BOUNDED_BCE": {
+      "backbone_lr": 0.0005,
+      "backbone_clip": 0.5,
+      "readout_lr_start": 0.0015,
+      "readout_lr_min": 0.00015,
+      "readout_clip": 1.0,
+      "logit_penalty": 0.0001,
+      "balanced_weights": {
+        "positive": 1.0,
+        "negated": 1.0,
+        "absent": 1.0
+      }
+    }
+  },
+  "forensics": {
+    "sample_interval": 100,
+    "dense_interval": 20,
+    "dense_start": 5400,
+    "dense_end": 7200
+  },
+  "acceptance_gates": {
+    "gate_1_training_exact": 0.99,
+    "gate_2_prior_frame_exact": 0.95,
+    "gate_3_unfamiliar_grammar_exact": 0.85,
+    "gate_3_per_state_recall": 0.80,
+    "gate_4_continuation_diff": 0.0
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "protocol": {
+    "id": "stage-a8-v1",
+    "parent_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+    "seed": 42,
+    "stages": {
+      "task_1_probe_diagnosis": "data/specs/probe_a8_v1.json",
+      "task_2_optimization_forensics": "data/specs/optimization_a8_v1.json"
+    },
+    "status": "PREREGISTERED_PENDING_KAGGLE_EXECUTION"
+  }
+}

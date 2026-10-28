@@ -1,0 +1,19 @@
+{
+  "id": "probe-a8-v1",
+  "source_parent_sha256": "3e93d7238bfdb706ddfd49ee9903fed8b1e6f577529537f1e21cae12e905b262",
+  "seed": 42,
+  "probe_train_cases": 378,
+  "familiar_val_cases": 378,
+  "models": ["parent", "coverage_1200", "coverage_5800", "coverage_7200"],
+  "ridge_lambdas": [0.001, 0.01, 0.1, 1.0, 10.0],
+  "mlp": {
+    "d_hidden": 64,
+    "steps": 300,
+    "lr": 0.001,
+    "weight_decay": 0.01
+  },
+  "representations": ["h_pool", "z_concept", "h_tokens_stat"],
+  "lexical_controls": ["bow_linear", "ngram_linear"],
+  "unfamiliar_grammar_admission_threshold": 0.85,
+  "unfamiliar_grammar_failure_threshold": 0.65
+}

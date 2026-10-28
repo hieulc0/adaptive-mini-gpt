@@ -116,16 +116,23 @@ class IntegratedStudentM104_E(nn.Module):
         num_actions: int = 8,
         num_states: int = 16,
         num_tags: int = 26,
-        mode: str = "selective_plasticity",  # "selective_plasticity", "frozen_backbone", "trainable_backbone", "no_adapter"
+        mode: str = "selective_plasticity",  # "selective_plasticity", "selective_top2_blocks", "frozen_backbone", "trainable_backbone", "no_adapter"
         default_strategy: str = "entity_conditioned_attention",  # "question_only", "full_context", "entity_conditioned_attention"
+        pooling_mode: str = "mean",  # "mean", "span_relative_max_mean", "max_mean"
     ) -> None:
         super().__init__()
         self.student = student
         self.mode = mode
         self.default_strategy = default_strategy
+        self.pooling_mode = pooling_mode
         d_model = student.base_model.config.d_model
 
-        if mode in ("selective_plasticity", "frozen_backbone", "trainable_backbone"):
+        if mode in (
+            "selective_plasticity",
+            "selective_top2_blocks",
+            "frozen_backbone",
+            "trainable_backbone",
+        ):
             self.bottleneck = SemanticBottleneckM104_E(
                 d_model=d_model,
                 bottleneck_dim=32,
@@ -179,12 +186,51 @@ class IntegratedStudentM104_E(nn.Module):
                     p.requires_grad = True
 
             # Unfreeze top Transformer block (Block 4) and final LayerNorm
-            if hasattr(self.student.base_model, "blocks") and len(self.student.base_model.blocks) > 0:
+            if (
+                hasattr(self.student.base_model, "blocks")
+                and len(self.student.base_model.blocks) > 0
+            ):
                 top_block = self.student.base_model.blocks[-1]
                 for p in top_block.parameters():
                     p.requires_grad = True
 
-            if hasattr(self.student.base_model, "ln_f") and self.student.base_model.ln_f is not None:
+            if (
+                hasattr(self.student.base_model, "ln_f")
+                and self.student.base_model.ln_f is not None
+            ):
+                for p in self.student.base_model.ln_f.parameters():
+                    p.requires_grad = True
+
+            if self.bottleneck is not None:
+                for p in self.bottleneck.parameters():
+                    p.requires_grad = True
+            if self.eca_extractor is not None:
+                for p in self.eca_extractor.parameters():
+                    p.requires_grad = True
+
+        elif self.mode == "selective_top2_blocks":
+            # Freeze lower blocks (Blocks 0-2) and wpe
+            for p in self.student.parameters():
+                p.requires_grad = False
+
+            # Selectively unfreeze Word Token Embeddings (wte) to allow lexical grounding
+            if hasattr(self.student.base_model, "wte") and self.student.base_model.wte is not None:
+                for p in self.student.base_model.wte.parameters():
+                    p.requires_grad = True
+
+            # Unfreeze top 2 Transformer blocks (Block 3 and Block 4) and final LayerNorm
+            if (
+                hasattr(self.student.base_model, "blocks")
+                and len(self.student.base_model.blocks) > 1
+            ):
+                for top_block in self.student.base_model.blocks[-2:]:
+                    for p in top_block.parameters():
+                        p.requires_grad = True
+
+            if (
+                hasattr(self.student.base_model, "ln_f")
+                and self.student.base_model.ln_f is not None
+            ):
                 for p in self.student.base_model.ln_f.parameters():
                     p.requires_grad = True
 
@@ -253,7 +299,14 @@ class IntegratedStudentM104_E(nn.Module):
                 entity_mask[b, half:] = True
 
         entity_mask_f = (entity_mask & global_mask).float().unsqueeze(-1)
-        entity_repr = (h_seq * entity_mask_f).sum(dim=1) / entity_mask_f.sum(dim=1).clamp(min=1.0)
+        mean_repr = (h_seq * entity_mask_f).sum(dim=1) / entity_mask_f.sum(dim=1).clamp(min=1.0)
+
+        if getattr(self, "pooling_mode", "mean") in ("max_mean", "span_relative_max_mean"):
+            h_masked = h_seq.masked_fill(~(entity_mask & global_mask).unsqueeze(-1), -1e4)
+            max_repr = h_masked.max(dim=1)[0]
+            entity_repr = 0.5 * (mean_repr + max_repr)
+        else:
+            entity_repr = mean_repr
 
         return entity_repr, global_repr
 
@@ -268,6 +321,7 @@ class IntegratedStudentM104_E(nn.Module):
         q_entity_repr, global_repr = self.pool_representations(h_seq, prompt_tokens)
 
         if self.bottleneck is None:
+            assert self.action_emb is not None and self.linear_head is not None
             a_emb = self.action_emb(action_ids)
             comb = torch.cat([global_repr, a_emb], dim=-1)
             state_logits = self.linear_head(comb)
@@ -279,6 +333,7 @@ class IntegratedStudentM104_E(nn.Module):
         elif strategy == "question_only":
             entity_input = q_entity_repr
         else:  # entity_conditioned_attention (ECA)
+            assert self.eca_extractor is not None
             pad_mask = prompt_tokens == ByteTextTokenizerM103.PAD_ID
             q_query = q_entity_repr.unsqueeze(1)  # (B, 1, d_model)
             attended_repr = self.eca_extractor(

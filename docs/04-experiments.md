@@ -708,3 +708,11 @@ Stage A.6: Engineering PASS / learning intervention FAIL, STOP. `4ee7690` passes
 
 
 Stage A.7: Engineering PASS / Learning FAIL at`be8e289`(829remote tests/10focused). Sixfold exposure fails to stabilize expanded acquisition(78.70%) or old behavior(83.33%/79.76%); narrow reference stabilizes100%but unfamiliar grammar remains12.70%/10.32%. Fixed probes show partial information but no qualified readout correction; probe coverage limits causal attribution. STOP: no student intervention/sealed qualification. Same continuing student, no new modules/capacity or optimizer reset. Original A6 failure remains immutable. [Protocol](STAGE_A7.md).
+
+
+## 20. Stage A.8: Neural Learning Mechanism Investigation & Foundation Repair for Learning-to-Learn
+
+**Title:** Neural Learning Mechanism Investigation: Coverage-Matched Representation Probes, Optimization Forensics & Reusable Concept Foundation Repair  
+**Status:** **PREREGISTERED** (Pending Kaggle Tesla T4 GPU Execution).  
+**Protocol Specification:** [docs/STAGE_A8.md](STAGE_A8.md), [data/specs/probe_a8_v1.json](../data/specs/probe_a8_v1.json), [data/specs/optimization_a8_v1.json](../data/specs/optimization_a8_v1.json).  
+**Pre-Submission Checks:** Mock/fixture unit contracts pass (4/4 contracts, 22/22 cumulative tests), compileall passes, ruff passes, scoped pyright 0 errors. ZERO neural forward/backward passes on host.

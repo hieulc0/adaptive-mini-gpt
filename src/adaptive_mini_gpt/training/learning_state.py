@@ -75,7 +75,9 @@ def paired_concept_loss(concepts, pairs):
     return (1 - F.cosine_similarity(concepts[list(left)], concepts[list(right)], dim=-1)).mean()
 
 
-def concept_supervision_loss(state_logits, tag_logits, tags, states=None, *, attribute_ids=None):
+def concept_supervision_loss(
+    state_logits, tag_logits, tags, states=None, *, attribute_ids=None, state_weights=None
+):
     """Explicit supervision: no invented state labels or absent-label negatives.
 
     Default joint supervision is unchanged. A declared attribute subset selects
@@ -98,7 +100,23 @@ def concept_supervision_loss(state_logits, tag_logits, tags, states=None, *, att
         tag_logits, tags = tag_logits[:, ids], tags[:, ids]
     if not torch.isfinite(tags).all() or not ((tags == 0) | (tags == 1)).all():
         raise ValueError("Observed attribute labels must be finite binary values")
-    loss = F.binary_cross_entropy_with_logits(tag_logits, tags)
+    if state_weights is not None:
+        raw_bce = F.binary_cross_entropy_with_logits(tag_logits, tags, reduction="none")
+        if isinstance(state_weights, dict):
+            pos_w = state_weights.get("positive", 1.0)
+            neg_w = state_weights.get("negated", 1.0)
+            weights = torch.where(
+                tags == 1.0,
+                torch.as_tensor(pos_w, device=tags.device, dtype=raw_bce.dtype),
+                torch.as_tensor(neg_w, device=tags.device, dtype=raw_bce.dtype),
+            )
+            loss = (raw_bce * weights).mean()
+        elif isinstance(state_weights, torch.Tensor):
+            loss = (raw_bce * state_weights).mean()
+        else:
+            loss = raw_bce.mean()
+    else:
+        loss = F.binary_cross_entropy_with_logits(tag_logits, tags)
     if states is not None:
         loss = loss + F.cross_entropy(state_logits, states)
     return loss
@@ -153,7 +171,7 @@ class LearningState:
 
     def __init__(self, model, *, lr=0.002, weight_decay=0.0, external=None, metadata=None):
         self.model = model
-        self.optimizer = torch.optim.AdamW(
+        self.optimizer: torch.optim.Optimizer = torch.optim.AdamW(
             adamw_groups(model, weight_decay, include_frozen=True), lr=lr
         )
         self.scheduler = None
@@ -227,7 +245,12 @@ class LearningState:
             raise RuntimeError("Restored optimizer ownership is invalid")
 
     def set_mode(self, mode):
-        if mode not in ("frozen_backbone", "selective_plasticity", "trainable_backbone"):
+        if mode not in (
+            "frozen_backbone",
+            "selective_plasticity",
+            "selective_top2_blocks",
+            "trainable_backbone",
+        ):
             raise ValueError("Unsupported canonical plasticity mode")
         self.model.mode = mode
         self.model._configure_plasticity()
@@ -244,6 +267,10 @@ class LearningState:
         loss_scale=1.0,
         consistency_pairs=None,
         consistency_weight=0.0,
+        diagnostic_callback=None,
+        clipper=None,
+        logit_penalty=0.0,
+        state_weights=None,
     ):
         require_remote_cuda(str(tokens.device))
         if self.metadata.get("numerical_policy") is not None:
@@ -268,10 +295,18 @@ class LearningState:
         self.optimizer.zero_grad(set_to_none=True)
         state_logits, tag_logits, concepts, _ = self.model(tokens, actions)
         loss = concept_supervision_loss(
-            state_logits, tag_logits, tags, states, attribute_ids=attribute_ids
+            state_logits,
+            tag_logits,
+            tags,
+            states,
+            attribute_ids=attribute_ids,
+            state_weights=state_weights,
         )
         if consistency_pairs is not None:
             loss = loss + consistency_weight * paired_concept_loss(concepts, consistency_pairs)
+        if logit_penalty > 0.0 and tag_logits is not None:
+            active_logits = tag_logits if attribute_ids is None else tag_logits[:, attribute_ids]
+            loss = loss + logit_penalty * (active_logits**2).sum(dim=-1).mean()
         if loss_scale != 1.0:
             loss = loss * loss_scale
         if not torch.isfinite(loss):
@@ -281,8 +316,34 @@ class LearningState:
             p.grad is not None and not torch.isfinite(p.grad).all() for p in self.model.parameters()
         ):
             raise ValueError("Nonfinite gradient")
-        torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+
+        if diagnostic_callback is not None and hasattr(diagnostic_callback, "pre_clip"):
+            diagnostic_callback.pre_clip(
+                self.model,
+                self.optimizer,
+                loss=float(loss.detach()),
+                state_logits=state_logits,
+                tag_logits=tag_logits,
+                tags=tags,
+                attribute_ids=attribute_ids,
+            )
+
+        if clipper is not None:
+            clipper(self.model, self.optimizer)
+        else:
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
+
+        if diagnostic_callback is not None and hasattr(diagnostic_callback, "post_clip"):
+            diagnostic_callback.post_clip(self.model, self.optimizer)
+
+        if diagnostic_callback is not None and hasattr(diagnostic_callback, "pre_step"):
+            diagnostic_callback.pre_step(self.model, self.optimizer)
+
         self.optimizer.step()
+
+        if diagnostic_callback is not None and hasattr(diagnostic_callback, "post_step"):
+            diagnostic_callback.post_step(self.model, self.optimizer, loss=float(loss.detach()))
+
         if self.scheduler is not None:
             self.scheduler.step()
         self.metadata["steps"] += 1
