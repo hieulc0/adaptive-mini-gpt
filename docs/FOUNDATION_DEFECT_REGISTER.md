@@ -110,3 +110,21 @@ Stage A.8 empirical findings (`46cf2ab`, 829 full GPU regressions / 4 focused co
   - Unfreezing top-2 blocks (`blocks.3..blocks.4`, `wte`) under two-timescale optimizer achieves Gate 1 (100.00% expanded acquisition), Gate 2 (100.00% prior-frame retention), and Gate 4 (deterministic continuation $\Delta=0.0$, 829+ tests pass).
   - **Gate 3 FAILED** (35.71% novel grammar exact vs 85.00% gate threshold).
   - In accordance with preregistered protocol: sealed evaluation was NOT run, no checkpoint was promoted, and the formal Architectural Redesign Decision was adopted: Stage A.9 must pretrain all 5 Transformer blocks with Rotary Position Embeddings (RoPE) on the synthetic language substrate before concept specialization.
+
+Stage A.9 empirical findings (`bac611e`, 837 full GPU regressions / 4 focused contracts pass; [report](STAGE_A9.md)):
+
+- **DEFECT RESOLUTION — Absolute Positional Distortion Eradicated by RoPE (H2 Confirmed)**:
+  - Absolute position embeddings (`wpe`) induced a severe **44.05% prediction flip rate** under a $+24$ byte shift.
+  - Replacing `wpe` with half-split Rotary Position Embeddings (RoPE) throughout all 5 blocks achieves a **0.00% prediction flip rate** under both $+8$ and $+24$ byte shifts, providing true translation-invariant self-attention.
+  - Under matched full-backbone training, RoPE lifts novel grammar generalization by **+29.37%** (from 50.79% to 80.16%), lifting negated recall from 73.3% to 92.5%.
+  - Raw migration of an existing absolute-position checkpoint (`EXP2_D`) is empirically proven to be non-function-preserving at $t_0$ (old known frames collapse from 100% to 67.86%), establishing that RoPE requires fresh joint initialization.
+- **DEFECT RESOLUTION — Representation Compositionality Unlocked by Syntactic Language Pretraining (H3 Confirmed)**:
+  - Unfreezing lower layers alone (`H1`) failed (novel grammar collapsed to 16.67%–26.19%), and RoPE alone reached 80.16%, falling short of the 85.0% gate.
+  - 1,500 causal LM steps (27.2 seconds on Tesla T4) on a 2,000-sentence zero-leakage corpus (SHA-256 `910ed1c7...`, zero task tokens/templates) drops perplexity from ~1045 to 1.23.
+  - Pretrained RoPE student (`EXP3_B_SYNTAX_PRETRAINED`) achieves **90.48% novel grammar generalization** (Gate 3 novel threshold $\ge 85.0\%$ passed), with negated recall reaching **98.33%** (59/60 correct) and absent recall reaching **89.58%**.
+- **GATE VERDICT & SCIENTIFIC DECISION MATRIX**:
+  - Gate 1 PASS (100.0% expanded acquisition at 6800, 7000, 7200).
+  - Gate 2 PASS (100.0% retention on old known and old renamed frames at 6800, 7000, 7200).
+  - Gate 3: Novel-grammar generalization passes at **90.48%** (with pos=94.0%, neg=98.3%, abs=89.6%, all $\ge 80.0\%$); familiar-grammar development split reached 84.92% (107/126 cases, 1 case shy of 85.0%).
+  - Gate 4 PASS (deterministic continuation $\Delta=0.0$, 0 parameter discrepancies, 837 GPU tests pass).
+  - In accordance with protocol, multi-seed replication and sealed evaluation were deferred, and no candidate was promoted. Stage A.10 / Milestone M105 will adopt `EXP3_B` (RoPE + 5 trainable blocks + syntactic pretraining) as canonical foundation architecture.
