@@ -167,7 +167,7 @@ def build_relational_augmented_plan(
     rel_plan: list[list[int]] = []
     for b_idx, ix in enumerate(single_coverage_plan):
         syn_items = [i for i in ix if i >= synthetic_offset]
-        reindexed_syn = [len_broad + (2 * num_train_pairs) + (i - len_broad) for i in syn_items]
+        reindexed_syn = [len_broad + (2 * num_train_pairs) + (i - synthetic_offset) for i in syn_items]
 
         new_items = [i for i in ix if i < synthetic_offset]
         selected_single = new_items[:10]
@@ -481,7 +481,7 @@ def main() -> None:
         blocks["coverage"],
         len_broad=756,
         train_pairs=train_pairs,
-        synthetic_offset=len(training["coverage"]),
+        synthetic_offset=756,
         total_steps=spec["supervised_steps"],
     )
 
