@@ -13,6 +13,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -37,6 +38,62 @@ from adaptive_mini_gpt.natural_language_learning_m103.tokenizer_m103 import (
 )
 from adaptive_mini_gpt.training.learning_state import LearningState
 from adaptive_mini_gpt.training.remote_runtime import require_remote_cuda
+
+
+class FullCosineTwoTimescaleScheduler:
+    """Cosine scheduler for both backbone and readout groups."""
+
+    def __init__(
+        self,
+        optimizer: torch.optim.Optimizer,
+        total_steps: int,
+        backbone_lr_start: float = 0.0005,
+        backbone_lr_min: float = 0.00005,
+        readout_lr_start: float = 0.0015,
+        readout_lr_min: float = 0.00015,
+    ) -> None:
+        self.optimizer = optimizer
+        self.total_steps = total_steps
+        self.bb_start = backbone_lr_start
+        self.bb_min = backbone_lr_min
+        self.rd_start = readout_lr_start
+        self.rd_min = readout_lr_min
+        self.step_num = 0
+
+    def step(self) -> None:
+        self.step_num += 1
+        progress = min(self.step_num, self.total_steps) / self.total_steps
+        cos_factor = 0.5 * (1.0 + math.cos(math.pi * progress))
+
+        cur_bb_lr = self.bb_min + (self.bb_start - self.bb_min) * cos_factor
+        cur_rd_lr = self.rd_min + (self.rd_start - self.rd_min) * cos_factor
+
+        if len(self.optimizer.param_groups) > 0:
+            self.optimizer.param_groups[0]["lr"] = cur_bb_lr
+        if len(self.optimizer.param_groups) > 1:
+            self.optimizer.param_groups[1]["lr"] = cur_rd_lr
+
+    def state_dict(self) -> dict[str, Any]:
+        return {
+            "total_steps": self.total_steps,
+            "step_num": self.step_num,
+            "bb_start": self.bb_start,
+            "bb_min": self.bb_min,
+            "rd_start": self.rd_start,
+            "rd_min": self.rd_min,
+        }
+
+    def load_state_dict(self, state: dict[str, Any]) -> None:
+        self.total_steps = state["total_steps"]
+        self.step_num = state["step_num"]
+        self.bb_start = state["bb_start"]
+        self.bb_min = state["bb_min"]
+        self.rd_start = state["rd_start"]
+        self.rd_min = state["rd_min"]
+
+
+setattr(sys.modules["__main__"], "FullCosineTwoTimescaleScheduler", FullCosineTwoTimescaleScheduler)  # noqa: B010
+
 
 
 def compute_query_sensitivity(

@@ -25,6 +25,7 @@ import argparse
 import json
 import math
 import subprocess
+import sys
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -127,6 +128,8 @@ class FullCosineTwoTimescaleScheduler:
         self.bb_min = state["bb_min"]
         self.rd_start = state["rd_start"]
         self.rd_min = state["rd_min"]
+
+setattr(sys.modules["__main__"], "FullCosineTwoTimescaleScheduler", FullCosineTwoTimescaleScheduler)  # noqa: B010
 
 
 def build_a12_optimizer_and_clipper(model: nn.Module, total_steps: int):
