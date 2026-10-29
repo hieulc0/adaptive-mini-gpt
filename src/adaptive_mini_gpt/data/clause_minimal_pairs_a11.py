@@ -9,7 +9,7 @@ on pair exact accuracy.
 from __future__ import annotations
 
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 from typing import Any
 
@@ -373,57 +373,197 @@ def build_semantic_minimal_pairs_suite() -> dict[str, Any]:
     }
 
 
+def compute_paired_metrics(
+    cases: list[Any],
+    predictions: Any,
+) -> dict[str, Any]:
+    """Computes deterministic paired metrics on Semantic Minimal Pairs.
+
+    Metrics computed:
+    - n_cases: integer count of individual examples
+    - n_pairs: integer count of complete (case_a, case_b) pairs
+    - n_label_changing_pairs: pairs where true_a != true_b
+    - per_property_binary_acc: elementwise accuracy across all binary labels
+    - case_exact_acc: fraction of individual cases where all property labels match truth
+    - pair_both_correct_acc: fraction of complete pairs where both members are correct
+    - pair_counterfactual_flip_acc: fraction of label-changing pairs where both are correct and pred_a != pred_b
+    - by_family: metrics breakdown for MP-1, MP-2, MP-3
+    - Hard Invariant Assertion:
+        pair_both_correct_acc + 1e-9 >= max(0.0, 2.0 * case_exact_acc - 1.0) on paired cases.
+    """
+    if len(cases) != len(predictions):
+        raise ValueError(f"Mismatch between cases ({len(cases)}) and predictions ({len(predictions)})")
+
+    if isinstance(predictions, torch.Tensor):
+        if predictions.dtype.is_floating_point:
+            binary_preds = (predictions >= 0).long().tolist()
+        else:
+            binary_preds = predictions.long().tolist()
+    else:
+        binary_preds = [list(p) for p in predictions]
+
+    # Evaluate case-level correctness
+    total_elements = 0
+    correct_elements = 0
+    case_matches: list[bool] = []
+
+    for c, pred in zip(cases, binary_preds, strict=True):
+        true_labels = list(c.labels)
+        pred_labels = [int(v) for v in pred]
+        is_exact = (pred_labels == true_labels)
+        case_matches.append(is_exact)
+        for p_val, t_val in zip(pred_labels, true_labels, strict=True):
+            correct_elements += int(p_val == t_val)
+            total_elements += 1
+
+    # Group into pairs
+    pair_map: dict[str, dict[str, Any]] = defaultdict(dict)
+    for c, pred, is_exact in zip(cases, binary_preds, case_matches, strict=True):
+        pid = getattr(c, "pair_id", None)
+        member = getattr(c, "member", None)
+        if pid and member in ("A", "B"):
+            pair_map[pid][member] = {
+                "case": c,
+                "pred": [int(v) for v in pred],
+                "correct": is_exact,
+                "family": getattr(c, "family", "unknown"),
+            }
+
+    complete_pairs = {pid: m for pid, m in pair_map.items() if "A" in m and "B" in m}
+
+    def _eval_pair_group(p_dict: dict[str, dict[str, Any]]) -> dict[str, Any]:
+        num_p = len(p_dict)
+        if num_p == 0:
+            return {
+                "n_cases": 0,
+                "n_pairs": 0,
+                "n_label_changing_pairs": 0,
+                "per_property_binary_acc": 0.0,
+                "case_exact_acc": 0.0,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0,
+            }
+
+        g_elem_total = 0
+        g_elem_correct = 0
+        g_case_correct = 0
+        g_both_correct = 0
+        g_label_changing = 0
+        g_flip_correct = 0
+
+        for _pid, m in p_dict.items():
+            for mem in ("A", "B"):
+                c_case = m[mem]["case"]
+                c_pred = m[mem]["pred"]
+                c_true = list(c_case.labels)
+                if m[mem]["correct"]:
+                    g_case_correct += 1
+                for p_val, t_val in zip(c_pred, c_true, strict=True):
+                    g_elem_correct += int(p_val == t_val)
+                    g_elem_total += 1
+
+            true_a = list(m["A"]["case"].labels)
+            true_b = list(m["B"]["case"].labels)
+            pred_a = m["A"]["pred"]
+            pred_b = m["B"]["pred"]
+            both_ok = (m["A"]["correct"] and m["B"]["correct"])
+
+            if both_ok:
+                g_both_correct += 1
+
+            if true_a != true_b:
+                g_label_changing += 1
+                if both_ok and (pred_a != pred_b):
+                    g_flip_correct += 1
+
+        n_c = num_p * 2
+        case_acc = g_case_correct / n_c
+        both_acc = g_both_correct / num_p
+        flip_acc = g_flip_correct / g_label_changing if g_label_changing > 0 else 0.0
+        prop_acc = g_elem_correct / g_elem_total if g_elem_total > 0 else 0.0
+
+        # Mathematical bound assertion: Pigeonhole principle
+        pigeonhole_bound = max(0.0, 2.0 * case_acc - 1.0)
+        assert both_acc + 1e-9 >= pigeonhole_bound, (
+            f"Pigeonhole violation: pair_both_correct_acc={both_acc:.4f} < {pigeonhole_bound:.4f} "
+            f"(case_acc={case_acc:.4f})"
+        )
+
+        return {
+            "n_cases": n_c,
+            "n_pairs": num_p,
+            "n_label_changing_pairs": g_label_changing,
+            "per_property_binary_acc": prop_acc,
+            "case_exact_acc": case_acc,
+            "pair_both_correct_acc": both_acc,
+            "pair_counterfactual_flip_acc": flip_acc,
+        }
+
+    overall_paired = _eval_pair_group(complete_pairs)
+    total_cases = len(cases)
+    overall_case_acc = sum(case_matches) / total_cases if total_cases > 0 else 0.0
+    overall_prop_acc = correct_elements / total_elements if total_elements > 0 else 0.0
+
+    families = ("MP-1", "MP-2", "MP-3")
+    by_family: dict[str, dict[str, Any]] = {}
+    for fam in families:
+        fam_pairs = {
+            pid: m for pid, m in complete_pairs.items()
+            if m["A"]["family"] == fam or m["B"]["family"] == fam
+        }
+        by_family[fam] = _eval_pair_group(fam_pairs)
+
+    return {
+        "n_cases": total_cases,
+        "n_pairs": len(complete_pairs),
+        "n_label_changing_pairs": overall_paired["n_label_changing_pairs"],
+        "per_property_binary_acc": overall_prop_acc,
+        "case_exact_acc": overall_case_acc,
+        "pair_both_correct_acc": overall_paired["pair_both_correct_acc"],
+        "pair_counterfactual_flip_acc": overall_paired["pair_counterfactual_flip_acc"],
+        "by_family": by_family,
+    }
+
+
 def evaluate_pair_exact_accuracy(
     predictions: Any,
     eval_batch: Any,
     cases: list[Any],
-) -> dict[str, float]:
-    """Computes pair_exact_accuracy: 1.0 iff BOTH members of the pair are correct."""
+) -> dict[str, Any]:
+    """Computes pair metrics on Semantic Minimal Pairs using compute_paired_metrics."""
     # Support both model + eval_batch or direct prediction list
     if hasattr(predictions, "forward_with_strategy"):
         model = predictions
         tokens, actions, _targets = eval_batch
         with torch.no_grad():
-            out, _, _, _ = model.forward_with_strategy(tokens, actions)
+            _, tag_logits, _, _ = model.forward_with_strategy(tokens, actions)
             # Evaluate attribute head predictions on TAG_IDS
             from adaptive_mini_gpt.data.attribute_learning import TAG_IDS
-            binary_preds = (out[:, TAG_IDS] >= 0).long().tolist()
+            binary_preds = (tag_logits[:, TAG_IDS] >= 0).long().tolist()
+    elif isinstance(predictions, torch.Tensor):
+        if predictions.dtype.is_floating_point:
+            binary_preds = (predictions >= 0).long().tolist()
+        else:
+            binary_preds = predictions.long().tolist()
     else:
         binary_preds = [list(p) for p in predictions]
 
-    pair_map: dict[str, dict[str, Any]] = {}
-    for c, pred in zip(cases, binary_preds, strict=True):
-        pid = getattr(c, "pair_id", None)
-        member = getattr(c, "member", None)
-        if not pid or not member:
-            continue
-        if pid not in pair_map:
-            pair_map[pid] = {}
-        is_correct = (list(pred) == list(c.labels))
-        pair_map[pid][member] = {
-            "correct": is_correct,
-            "family": getattr(c, "family", "unknown"),
-        }
+    metrics = compute_paired_metrics(cases, binary_preds)
 
-    total_pairs = len(pair_map)
-    pair_correct_count = 0
-    fam_counts: dict[str, int] = {}
-    fam_correct: dict[str, int] = {}
-
-    for _pid, members in pair_map.items():
-        fam = members.get("A", {}).get("family", "unknown")
-        fam_counts[fam] = fam_counts.get(fam, 0) + 1
-        both_ok = members.get("A", {}).get("correct", False) and members.get("B", {}).get("correct", False)
-        if both_ok:
-            pair_correct_count += 1
-            fam_correct[fam] = fam_correct.get(fam, 0) + 1
-
-    overall_pair_acc = pair_correct_count / total_pairs if total_pairs > 0 else 0.0
-    results: dict[str, float] = {
-        "pair_exact_accuracy": overall_pair_acc,
-        "pair_exact_flip_rate": overall_pair_acc,
+    res: dict[str, Any] = {
+        "exact": metrics["case_exact_acc"],
+        "pair_exact_accuracy": metrics["pair_both_correct_acc"],
+        "pair_exact_flip_rate": metrics["pair_counterfactual_flip_acc"],
+        "pair_both_correct_acc": metrics["pair_both_correct_acc"],
+        "pair_counterfactual_flip_acc": metrics["pair_counterfactual_flip_acc"],
+        "per_property_binary_acc": metrics["per_property_binary_acc"],
+        "n_cases": metrics["n_cases"],
+        "n_pairs": metrics["n_pairs"],
+        "n_label_changing_pairs": metrics["n_label_changing_pairs"],
+        "by_family": metrics["by_family"],
     }
-    for fam, cnt in fam_counts.items():
-        results[f"pair_exact_{fam.lower()}"] = fam_correct.get(fam, 0) / cnt if cnt > 0 else 0.0
+    for fam, fmetrics in metrics["by_family"].items():
+        res[f"pair_exact_{fam.lower()}"] = fmetrics["pair_both_correct_acc"]
+        res[f"pair_flip_{fam.lower()}"] = fmetrics["pair_counterfactual_flip_acc"]
 
-    return results
+    return res

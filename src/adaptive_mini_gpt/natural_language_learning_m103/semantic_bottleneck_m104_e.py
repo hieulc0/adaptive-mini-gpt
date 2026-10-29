@@ -18,8 +18,11 @@ Key Architectural Features:
 
 from __future__ import annotations
 
+import math
+
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from adaptive_mini_gpt.natural_language_learning_m103.grounded_extractor_m104_e import (
     EntityConditionedAttentionExtractorM104_E,
@@ -310,6 +313,60 @@ class IntegratedStudentM104_E(nn.Module):
 
         return entity_repr, global_repr
 
+    def extract_tapped_representations(
+        self,
+        h_seq: torch.Tensor,
+        tokens: torch.Tensor,
+    ) -> dict[str, torch.Tensor]:
+        """Extracts representation taps: h_mean_pool, h_last_question_token, h_query_attn_pool."""
+        B, L, D = h_seq.size()
+        global_mask = tokens != ByteTextTokenizerM103.PAD_ID
+        q_id = ByteTextTokenizerM103.QUESTION_ID
+        a_id = ByteTextTokenizerM103.ANSWER_ID
+
+        entity_mask = torch.zeros((B, L), dtype=torch.bool, device=tokens.device)
+        last_indices = torch.zeros(B, dtype=torch.long, device=tokens.device)
+
+        for b in range(B):
+            row = tokens[b]
+            q_locs = (row == q_id).nonzero(as_tuple=True)[0]
+            a_locs = (row == a_id).nonzero(as_tuple=True)[0]
+
+            if len(q_locs) > 0 and len(a_locs) > 0 and a_locs[0] > q_locs[0]:
+                entity_mask[b, q_locs[0] : a_locs[0]] = True
+                last_indices[b] = a_locs[0] - 1
+            elif len(q_locs) > 0:
+                entity_mask[b, q_locs[0] :] = True
+                valid = global_mask[b].nonzero(as_tuple=True)[0]
+                last_indices[b] = valid[-1] if len(valid) > 0 else (L - 1)
+            else:
+                half = L // 2
+                entity_mask[b, half:] = True
+                last_indices[b] = L - 1
+
+        active_mask = entity_mask & global_mask
+        active_mask_f = active_mask.float().unsqueeze(-1)
+        h_mean_pool = (h_seq * active_mask_f).sum(dim=1) / active_mask_f.sum(dim=1).clamp(min=1.0)
+
+        batch_idx = torch.arange(B, device=tokens.device)
+        h_last_token = h_seq[batch_idx, last_indices]
+
+        # Parameter-free dot-product attention pooling:
+        # alpha_t = softmax_{t in Q}(h_t^T h_{last} / sqrt(D))
+        # h_query_pool = sum_{t in Q} alpha_t h_t
+        q_vec = h_last_token.unsqueeze(1)  # (B, 1, D)
+        scores = torch.bmm(h_seq, q_vec.transpose(1, 2)).squeeze(-1) / math.sqrt(D)  # (B, L)
+        scores = scores.masked_fill(~active_mask, float("-inf"))
+        alpha = F.softmax(scores, dim=-1)
+        alpha = torch.nan_to_num(alpha, nan=0.0)
+        h_query_attn_pool = torch.bmm(alpha.unsqueeze(1), h_seq).squeeze(1)  # (B, D)
+
+        return {
+            "h_mean_pool": h_mean_pool,
+            "h_last_question_token": h_last_token,
+            "h_query_attn_pool": h_query_attn_pool,
+        }
+
     def forward_with_strategy(
         self,
         prompt_tokens: torch.Tensor,
@@ -330,8 +387,14 @@ class IntegratedStudentM104_E(nn.Module):
         # Determine entity representation based on requested strategy
         if strategy == "full_context":
             entity_input = global_repr
-        elif strategy == "question_only":
+        elif strategy in ("question_only", "mean_pool"):
             entity_input = q_entity_repr
+        elif strategy == "last_question_token":
+            taps = self.extract_tapped_representations(h_seq, prompt_tokens)
+            entity_input = taps["h_last_question_token"]
+        elif strategy == "query_attn_pool":
+            taps = self.extract_tapped_representations(h_seq, prompt_tokens)
+            entity_input = taps["h_query_attn_pool"]
         else:  # entity_conditioned_attention (ECA)
             assert self.eca_extractor is not None
             pad_mask = prompt_tokens == ByteTextTokenizerM103.PAD_ID
