@@ -110,6 +110,74 @@ class SemanticBottleneckM104_E(nn.Module):
         return state_logits, aux_tag_logits, z_concept, z_next
 
 
+def compute_query_cross_prefix_mask(
+    prompt_tokens: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Computes key_padding_mask and query_indices for learned query-prefix cross-attention.
+
+    Ensures query tokens attend strictly to descriptive clause prefix <question> tokens
+    and never leak <answer>, padding, or rule text.
+
+    Args:
+        prompt_tokens: (B, L) input token IDs.
+
+    Returns:
+        key_padding_mask: (B, L) boolean tensor where True means MASKED (ignored by attention).
+        query_indices: (B,) long tensor giving the token position of the query representation.
+    """
+    B, L = prompt_tokens.size()
+    q_id = ByteTextTokenizerM103.QUESTION_ID
+    a_id = ByteTextTokenizerM103.ANSWER_ID
+
+    key_padding_mask = torch.ones((B, L), dtype=torch.bool, device=prompt_tokens.device)
+    query_indices = torch.zeros(B, dtype=torch.long, device=prompt_tokens.device)
+
+    query_marker_bytes = [
+        b"Query target",
+        b"Target is",
+        b"Analysis focuses on",
+        b"The evaluated target",
+        b"Focus on",
+    ]
+
+    for b in range(B):
+        row = prompt_tokens[b].tolist()
+        q_locs = [i for i, tok in enumerate(row) if tok == q_id]
+        a_locs = [i for i, tok in enumerate(row) if tok == a_id]
+
+        if q_locs and a_locs and a_locs[0] > q_locs[0]:
+            q_start = q_locs[0] + 1
+            q_end = a_locs[0]
+            query_indices[b] = q_end - 1  # Last question token before answer
+            q_slice = bytes([t for t in row[q_start:q_end] if 0 <= t < 256])
+            earliest_pos = None
+            for marker in query_marker_bytes:
+                pos = q_slice.find(marker)
+                if pos != -1:
+                    if earliest_pos is None or pos < earliest_pos:
+                        earliest_pos = pos
+            if earliest_pos is not None and earliest_pos > 0:
+                prefix_end = q_start + earliest_pos
+            else:
+                prefix_end = q_end
+            key_padding_mask[b, q_start:prefix_end] = False
+        elif q_locs:
+            q_start = q_locs[0] + 1
+            valid = [i for i, tok in enumerate(row) if tok != ByteTextTokenizerM103.PAD_ID]
+            last_tok = valid[-1] if valid else (L - 1)
+            query_indices[b] = last_tok
+            key_padding_mask[b, q_start : last_tok + 1] = False
+        else:
+            query_indices[b] = L - 1
+            key_padding_mask[b, :] = False
+
+        # Guard against all-True rows to prevent NaNs in softmax
+        if key_padding_mask[b].all():
+            key_padding_mask[b, query_indices[b]] = False
+
+    return key_padding_mask, query_indices
+
+
 class IntegratedStudentM104_E(nn.Module):
     """Integrates TextStudentM103 with SemanticBottleneckM104_E and Entity-Conditioned Cross-Attention."""
 
@@ -449,16 +517,23 @@ class IntegratedStudentM104_E(nn.Module):
         elif strategy in ("query_span_cross_readout", "query_cross"):
             taps = self.extract_tapped_representations(h_seq, prompt_tokens)
             entity_input = taps["h_query_span_cross_readout"]
-        else:  # entity_conditioned_attention (ECA)
+        elif strategy in (
+            "entity_conditioned_attention",
+            "learned_entity_cross_attention",
+            "eca",
+        ):
             assert self.eca_extractor is not None
-            pad_mask = prompt_tokens == ByteTextTokenizerM103.PAD_ID
-            q_query = q_entity_repr.unsqueeze(1)  # (B, 1, d_model)
+            key_pad_mask, q_indices = compute_query_cross_prefix_mask(prompt_tokens)
+            batch_idx = torch.arange(prompt_tokens.size(0), device=prompt_tokens.device)
+            q_query = h_seq[batch_idx, q_indices].unsqueeze(1)  # (B, 1, d_model)
             attended_repr = self.eca_extractor(
                 query_repr=q_query,
                 seq_hidden_states=h_seq,
-                key_padding_mask=pad_mask,
+                key_padding_mask=key_pad_mask,
             )
             entity_input = attended_repr
+        else:
+            raise ValueError(f"Unknown readout extraction strategy: {strategy}")
 
         # Transition dynamics
         state_logits, tag_logits, z_concept, z_next = self.bottleneck(
