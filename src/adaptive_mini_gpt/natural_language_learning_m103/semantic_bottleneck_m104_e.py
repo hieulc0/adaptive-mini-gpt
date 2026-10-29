@@ -356,7 +356,7 @@ class IntegratedStudentM104_E(nn.Module):
         # h_query_pool = sum_{t in Q} alpha_t h_t
         q_vec = h_last_token.unsqueeze(1)  # (B, 1, D)
         scores = torch.bmm(h_seq, q_vec.transpose(1, 2)).squeeze(-1) / math.sqrt(D)  # (B, L)
-        scores = scores.masked_fill(~active_mask, float("-inf"))
+        scores = scores.masked_fill(~active_mask, -1e4)
         alpha = F.softmax(scores, dim=-1)
         alpha = torch.nan_to_num(alpha, nan=0.0)
         h_query_attn_pool = torch.bmm(alpha.unsqueeze(1), h_seq).squeeze(1)  # (B, D)

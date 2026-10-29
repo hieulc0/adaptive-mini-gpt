@@ -16,6 +16,7 @@ import torch
 from adaptive_mini_gpt.data.attribute_learning import TAG_IDS
 from adaptive_mini_gpt.data.clause_minimal_pairs_a11 import (
     MinimalPairCase,
+    build_balanced_relational_plan,
     build_semantic_minimal_pairs_suite,
     compute_paired_metrics,
 )
@@ -221,34 +222,18 @@ def test_readout_strategies_zero_capacity_growth():
 
 def test_balanced_batch_planning():
     """Verifies balanced relational batch construction (18 items: 6 single, 6 minimal pairs, 6 rehearsal)."""
-    len_broad = 756
-    num_train_pairs = 96
-
-    # Balanced plan: 6 single-clause, 6 minimal-pair (3 pairs), 6 rehearsal
-    rel_plan = []
-    relational_offset = len_broad
-
-    for b_idx in range(50):
-        # 6 single-clause items
-        single_items = list(range((b_idx * 6) % len_broad, (b_idx * 6) % len_broad + 6))
-        # 3 minimal pairs = 6 items
-        p1 = (b_idx * 3) % num_train_pairs
-        p2 = (b_idx * 3 + 1) % num_train_pairs
-        p3 = (b_idx * 3 + 2) % num_train_pairs
-        pair_items = [
-            relational_offset + 2 * p1, relational_offset + 2 * p1 + 1,
-            relational_offset + 2 * p2, relational_offset + 2 * p2 + 1,
-            relational_offset + 2 * p3, relational_offset + 2 * p3 + 1,
-        ]
-        # 6 rehearsal items
-        syn_offset = len_broad + (2 * num_train_pairs)
-        syn_items = list(range(syn_offset + (b_idx * 6) % 84, syn_offset + (b_idx * 6) % 84 + 6))
-
-        batch = single_items + pair_items + syn_items
+    single_coverage_plan = [list(range(12)) + list(range(756, 762)) for _ in range(50)]
+    mock_pairs = [(i, i + 1) for i in range(24)]
+    plan, total_cases = build_balanced_relational_plan(
+        single_coverage_plan,
+        len_broad=756,
+        train_pairs=mock_pairs,
+        synthetic_offset=756,
+        total_steps=100,
+    )
+    assert len(plan) == 100
+    for batch in plan:
         assert len(batch) == 18
-        rel_plan.append(batch)
-
-    assert len(rel_plan) == 50
 
 
 def test_sealed_a11_isolation_contract():

@@ -567,3 +567,43 @@ def evaluate_pair_exact_accuracy(
         res[f"pair_flip_{fam.lower()}"] = fmetrics["pair_counterfactual_flip_acc"]
 
     return res
+
+
+def build_balanced_relational_plan(
+    single_coverage_plan: list[list[int]],
+    len_broad: int,
+    train_pairs: list[Any],
+    synthetic_offset: int,
+    total_steps: int = 7200,
+) -> tuple[list[list[int]], int]:
+    """Constructs balanced 18-case batches: 6 single-clause, 6 minimal-pair (3 pairs), 6 rehearsal."""
+    from adaptive_mini_gpt.data.exposure_a7 import repeated_plan
+
+    relational_offset = len_broad
+    num_train_pairs = len(train_pairs)
+
+    rel_plan: list[list[int]] = []
+    for b_idx, ix in enumerate(single_coverage_plan):
+        syn_items = [i for i in ix if i >= synthetic_offset]
+        reindexed_syn = [len_broad + (2 * num_train_pairs) + (i - synthetic_offset) for i in syn_items]
+
+        new_items = [i for i in ix if i < synthetic_offset]
+        selected_single = new_items[:6]
+
+        p1 = (b_idx * 3) % num_train_pairs
+        p2 = (b_idx * 3 + 1) % num_train_pairs
+        p3 = (b_idx * 3 + 2) % num_train_pairs
+        pair_items = [
+            relational_offset + (2 * p1),
+            relational_offset + (2 * p1 + 1),
+            relational_offset + (2 * p2),
+            relational_offset + (2 * p2 + 1),
+            relational_offset + (2 * p3),
+            relational_offset + (2 * p3 + 1),
+        ]
+
+        batch = selected_single + pair_items + reindexed_syn
+        assert len(batch) == 18, f"Batch size mismatch: {len(batch)} != 18"
+        rel_plan.append(batch)
+
+    return repeated_plan(rel_plan, total_steps), len_broad + (2 * num_train_pairs)

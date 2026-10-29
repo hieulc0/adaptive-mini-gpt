@@ -44,12 +44,20 @@ from adaptive_mini_gpt.training.learning_state import LearningState
 
 def find_checkpoint(arm_name: str, seed: int, step: int = 7200) -> Path | None:
     """Finds checkpoint file across standard search directories."""
+    filename = f"{arm_name.lower()}_seed_{seed}_{step}.pt"
+    if Path("/kaggle/input").exists():
+        matches = list(Path("/kaggle/input").rglob(filename))
+        if matches:
+            return matches[0]
+
     candidates = [
-        Path(f"/kaggle/input/amg-stage-a11/stage-a11/{arm_name.lower()}_seed_{seed}_{step}.pt"),
-        Path(f"/kaggle/input/amg-stage-a11/{arm_name.lower()}_seed_{seed}_{step}.pt"),
-        Path(f"runs/kaggle-stage-a11/output/stage-a11/{arm_name.lower()}_seed_{seed}_{step}.pt"),
-        Path(f"/tmp/amg-stage-a11/runs/stage-a11/{arm_name.lower()}_seed_{seed}_{step}.pt"),
-        Path(f"/kaggle/working/stage-a11/{arm_name.lower()}_seed_{seed}_{step}.pt"),
+        Path(f"runs/kaggle-stage-a11/output/stage-a11/{filename}"),
+        Path(f"/kaggle/input/amg-stage-a11/stage-a11/{filename}"),
+        Path(f"/kaggle/input/amg-stage-a11/{filename}"),
+        Path(f"/tmp/amg-stage-a11/runs/stage-a11/{filename}"),
+        Path(f"/kaggle/working/stage-a11/{filename}"),
+        Path(f"/kaggle/working/stage-a11r/{filename}"),
+        Path(f"runs/stage-a11/{filename}"),
     ]
     for c in candidates:
         if c.exists():

@@ -35,10 +35,10 @@ from run_stage_a11 import (
 
 from adaptive_mini_gpt.data.attribute_learning import TAG_IDS
 from adaptive_mini_gpt.data.clause_minimal_pairs_a11 import (
+    build_balanced_relational_plan,
     build_semantic_minimal_pairs_suite,
     compute_paired_metrics,
 )
-from adaptive_mini_gpt.data.exposure_a7 import repeated_plan
 from adaptive_mini_gpt.data.pretraining_a11 import (
     generate_multi_clause_pretraining_corpus,
     verify_multi_clause_pretraining_corpus_isolation,
@@ -61,44 +61,6 @@ from adaptive_mini_gpt.training.learning_state import (
 )
 from adaptive_mini_gpt.training.remote_runtime import require_remote_cuda
 from adaptive_mini_gpt.training.reproducibility import seed_all
-
-
-def build_balanced_relational_plan(
-    len_broad: int,
-    num_train_pairs: int,
-    synthetic_offset: int,
-    total_steps: int = 7200,
-) -> list[list[int]]:
-    """Constructs balanced 18-case batches: 6 single, 6 minimal-pair (3 pairs), 6 rehearsal."""
-    relational_offset = len_broad
-    syn_offset = len_broad + (2 * num_train_pairs)
-    num_syn = 84
-
-    plan: list[list[int]] = []
-    num_blocks = 50  # Matches canonical cycle
-    for b_idx in range(num_blocks):
-        single_items = [
-            ((b_idx * 6) + i) % len_broad for i in range(6)
-        ]
-        p1 = (b_idx * 3) % num_train_pairs
-        p2 = (b_idx * 3 + 1) % num_train_pairs
-        p3 = (b_idx * 3 + 2) % num_train_pairs
-        pair_items = [
-            relational_offset + (2 * p1),
-            relational_offset + (2 * p1 + 1),
-            relational_offset + (2 * p2),
-            relational_offset + (2 * p2 + 1),
-            relational_offset + (2 * p3),
-            relational_offset + (2 * p3 + 1),
-        ]
-        syn_items = [
-            syn_offset + (((b_idx * 6) + i) % num_syn) for i in range(6)
-        ]
-        batch = single_items + pair_items + syn_items
-        assert len(batch) == 18, f"Batch size mismatch: {len(batch)} != 18"
-        plan.append(batch)
-
-    return repeated_plan(plan, total_steps)
 
 
 def evaluate_with_paired_metrics(
@@ -224,17 +186,22 @@ def check_a11r_development_gates(
 def verify_checkpoint_continuation(
     chk_path: Path,
     eval_batch: tuple[torch.Tensor, ...],
+    strategy: str = "question_only",
 ) -> float:
     """Verifies fresh-process deterministic checkpoint reload with delta logit = 0.00e+00."""
     loaded_state = LearningState.load(chk_path)
     loaded_state.model.eval()
 
     with torch.no_grad():
-        _, orig_logits, _, _ = loaded_state.model.forward_with_strategy(eval_batch[0], eval_batch[1])
+        _, orig_logits, _, _ = loaded_state.model.forward_with_strategy(
+            eval_batch[0], eval_batch[1], strategy=strategy
+        )
 
     # Re-instantiate and load weights freshly
     student = TextStudentM103(prune_orphaned_lm_head=True, pos_encoding="rope")
-    fresh_model = IntegratedStudentM104_E(student, mode="trainable_backbone")
+    fresh_model = IntegratedStudentM104_E(
+        student, mode="trainable_backbone", default_strategy=strategy
+    )
     state_dict = torch.load(chk_path, map_location="cpu", weights_only=False)
     if "model_state" in state_dict:
         fresh_model.load_state_dict(state_dict["model_state"])
@@ -245,7 +212,9 @@ def verify_checkpoint_continuation(
     fresh_model.eval()
 
     with torch.no_grad():
-        _, fresh_logits, _, _ = fresh_model.forward_with_strategy(eval_batch[0], eval_batch[1])
+        _, fresh_logits, _, _ = fresh_model.forward_with_strategy(
+            eval_batch[0], eval_batch[1], strategy=strategy
+        )
 
     assert orig_logits is not None and fresh_logits is not None
     diff = (orig_logits - fresh_logits).abs().max().item()
@@ -320,9 +289,10 @@ def main() -> None:
         synthetic_offset=756,
         total_steps=7200,
     )
-    balanced_rel_plan = build_balanced_relational_plan(
+    balanced_rel_plan, _ = build_balanced_relational_plan(
+        blocks["coverage"],
         len_broad=756,
-        num_train_pairs=len(train_pairs),
+        train_pairs=train_pairs,
         synthetic_offset=756,
         total_steps=7200,
     )
@@ -407,10 +377,10 @@ def main() -> None:
 
     # Checkpoint Continuation Verification for Seed 42
     print("\n--- Verifying Checkpoint Continuation Invariant ---")
-    for arm_id in results["arms"]:
+    for arm_id, arm_data in results["arms"].items():
         chk = args.out_dir / f"{arm_id.lower()}_seed_42_7200.pt"
         if chk.exists():
-            delta = verify_checkpoint_continuation(chk, cur_eval_batches["training"])
+            delta = verify_checkpoint_continuation(chk, cur_eval_batches["training"], strategy=arm_data["strategy"])
             results["checkpoint_continuation"][arm_id] = delta
             print(f"{arm_id} Seed 42 continuation delta logit: {delta:.2e}")
             assert delta < 1e-6, f"Checkpoint continuation failed for {arm_id}: {delta}"
