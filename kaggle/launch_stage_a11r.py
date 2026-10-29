@@ -116,7 +116,7 @@ def main():
 
         # Phase 3: Task 3 Minimal Readout Experiment
         if ok_audit:
-            ok_exp = run(
+            _ = run(
                 [
                     "scripts/run_stage_a11r.py",
                     "--out_dir",

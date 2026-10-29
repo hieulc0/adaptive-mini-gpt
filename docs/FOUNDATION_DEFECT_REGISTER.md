@@ -141,7 +141,7 @@ Stage A.10 empirical findings (`6bc8f10`, 842 full GPU regressions / 18 focused 
 - **CONFIRMED DEFECT / DESIGN LIMITATION FDR-007 (Sealed Distractor Clause & Long-Range Negation Scope Failure)**:
   - On the independent 324-case sealed language suite (Digest `64daf317...`), all neural candidates failed the 85.0% gate, scoring **47.84%–53.09%**.
   - Bag-of-Words linear control outperformed all neural models at **65.74%**.
-  - On the `relationship_sensitive` split (where negation occurs in an introductory distractor clause, e.g., `"Although the outer casing is not heavy..."`), the best neural candidate collapsed to **44.44%** (chance level), while the Word 1–3-gram linear control achieved **66.67%**.
+  - On the `relationship_sensitive` split (where negation occurs in an introductory distractor clause, e.g., `\"Although the outer casing is not heavy...\"`), the best neural candidate collapsed to **44.44%** (chance level), while the Word 1–3-gram linear control achieved **66.67%**.
   - Diagnosis: The 1,500-step pretraining corpus contained only simple declarative sentences. Without multi-clause subordination and distractor negation exposure, the Transformer's self-attention acts as an unconstrained bag-of-words token matcher that bleeds negation scope across clause boundaries.
 - **CONFIRMED DEFECT / DESIGN LIMITATION FDR-008 (Persistent-Student State-Transition Catastrophic Forgetting during RoPE Migration)**:
   - While distillation bridging (`MIG_2`) cushioned initial $t_0$ attribute loss to 72.62% and recovered 100% attribute retention post-retraining, downstream causal state-transition performance on `stage_a_prior_state_tiny.json` collapsed from **50.00% (4/8) to 25.00% (2/8)**.
@@ -159,4 +159,18 @@ Stage A.11 empirical findings (`1a22fd6` / `0620a22`, 848 full GPU regressions /
   - However, uniform mean pooling in the end-to-end joint loss causes destructive gradient interference between majority single-clause declarative sentences and 100% Bag-of-Words identical counterfactual pairs.
 - **STRICT PROTOCOL ADHERENCE & SEALED SUITE PRESERVATION**:
   - In strict compliance with the preregistered protocol, because Gates 1 and 3 failed on development minimal pairs, **`sealed_a11_v1` was NOT evaluated**, completely preventing test contamination.
+  - Overall Verdict: **`FAIL`**. No checkpoint is promoted.
+
+Stage A.11-R empirical findings (`77a7c3d`, 854 full GPU regressions / 6 focused contracts pass; [report](STAGE_A11R.md)):
+
+- **CONFIRMED IMPLEMENTATION DEFECT RESOLUTION FDR-010 / DEFECT-018 (Metric Extraction Head-Unpacking Discrepancy)**:
+  - In Stage A.11 (`1a22fd6`), ARM 4 reported 70.49% case accuracy but 1.04% pair flip rate, violating the Pigeonhole principle lower bound $P_{\text{both}} \ge \max(0, 2A - 1) = 40.98\%$.
+  - Forensic inspection proved that `evaluate_pair_exact_accuracy` unpacked index 0 (`state_logits`, an 8-class discrete transition net) instead of index 1 (`tag_logits`, the 26 attribute logits), evaluating random noise against property tags.
+  - Re-evaluating on `tag_logits` resolves the anomaly completely: ARM 4 actually scored **70.48%** case exact, **57.64%** pair both correct, and **57.64%** pair flip rate across Seeds 42–44, strictly satisfying the theoretical bound ($57.64\% \ge 40.96\%$) and harmonizing with the detached linear probe score (**63.54%**).
+- **CONFIRMED DESIGN LIMITATION / ARCHITECTURAL BOTTLENECK FDR-011 / DEFECT-019 (Causal Readout Disconnect on Multi-Entity Clause Binding)**:
+  - Last-token readout (`R_ARM_2`) achieves 100.0% unfamiliar single-clause generalization, but collapses to **0.00%** on multi-clause minimal pairs.
+  - Across all architectures and linear probes, Family MP-2 (`multi_entity_clause_binding`) scores **0.00%** pair exact accuracy: in a 5-layer causal Transformer without specialized cross-clause routing, the final question query token cannot isolate the queried entity's attributes from preceding distractor entities.
+  - Uniform question mean pooling (`R_ARM_1`) remains decisively superior to last-token readout for multi-clause discrimination (**64.24%** vs 0.00% pair flip rate), but joint training with single-clause frames saturates at 94.9% training accuracy, failing Gate 1 ($\ge 99.0\%$).
+- **PREREGISTERED SEALED ISOLATION PRESERVED**:
+  - Because Gates 1 and 3 failed on development, `sealed_a11_v1` was not evaluated and zero sealed predictions or labels were computed or viewed.
   - Overall Verdict: **`FAIL`**. No checkpoint is promoted.

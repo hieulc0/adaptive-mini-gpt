@@ -1,0 +1,2434 @@
+{
+  "stage": "Stage A.11-R Scientific Metric Audit & Readout Diagnosis",
+  "platform": "Kaggle Tesla T4 GPU",
+  "task1_audit": {
+    "bug_forensics": {
+      "discrepancy_explanation": "In Stage A.11 evaluate_pair_exact_accuracy, the code unpacked: 'out, _, _, _ = model.forward_with_strategy(tokens, actions)' which bound out to state_logits (the 1st return value, an 8-class discrete transition head), while evaluate() in run_attribute_learning.py unpacked '_, tags, _, _ = model(...)', which bound tags to tag_logits (the 2nd return value, 26 attribute logits). Consequently, case exact accuracy (70.49%) was evaluated on the attribute head, whereas pair_exact_accuracy / pair_flip_rate (1.04%) was evaluated on the state head. When evaluated on the attribute head, the pigeonhole principle P_both >= max(0, 2A - 1) is strictly satisfied without discrepancy."
+    },
+    "arms_audit": {
+      "ARM_1_A10_BASELINE": {
+        "42": {
+          "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11/stage-a11/arm_1_a10_baseline_seed_42_7200.pt",
+          "corrected_metrics": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6927083333333334,
+            "case_exact_acc": 0.4895833333333333,
+            "pair_both_correct_acc": 0.15625,
+            "pair_counterfactual_flip_acc": 0.15625,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.8359375,
+                "case_exact_acc": 0.671875,
+                "pair_both_correct_acc": 0.40625,
+                "pair_counterfactual_flip_acc": 0.40625
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.296875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.75,
+                "case_exact_acc": 0.5,
+                "pair_both_correct_acc": 0.0625,
+                "pair_counterfactual_flip_acc": 0.0625
+              }
+            }
+          },
+          "buggy_replication": {
+            "buggy_case_exact": 0.3385416666666667,
+            "buggy_pair_both_acc": 0.08333333333333333
+          }
+        },
+        "43": {
+          "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11/stage-a11/arm_1_a10_baseline_seed_43_7200.pt",
+          "corrected_metrics": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.7239583333333334,
+            "case_exact_acc": 0.578125,
+            "pair_both_correct_acc": 0.2708333333333333,
+            "pair_counterfactual_flip_acc": 0.2708333333333333,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.9375,
+                "case_exact_acc": 0.875,
+                "pair_both_correct_acc": 0.78125,
+                "pair_counterfactual_flip_acc": 0.78125
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.34375,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.734375,
+                "case_exact_acc": 0.515625,
+                "pair_both_correct_acc": 0.03125,
+                "pair_counterfactual_flip_acc": 0.03125
+              }
+            }
+          },
+          "buggy_replication": {
+            "buggy_case_exact": 0.15104166666666666,
+            "buggy_pair_both_acc": 0.0
+          }
+        },
+        "44": {
+          "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11/stage-a11/arm_1_a10_baseline_seed_44_7200.pt",
+          "corrected_metrics": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6770833333333334,
+            "case_exact_acc": 0.5,
+            "pair_both_correct_acc": 0.21875,
+            "pair_counterfactual_flip_acc": 0.21875,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.8671875,
+                "case_exact_acc": 0.734375,
+                "pair_both_correct_acc": 0.53125,
+                "pair_counterfactual_flip_acc": 0.53125
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5078125,
+                "case_exact_acc": 0.234375,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.65625,
+                "case_exact_acc": 0.53125,
+                "pair_both_correct_acc": 0.125,
+                "pair_counterfactual_flip_acc": 0.125
+              }
+            }
+          },
+          "buggy_replication": {
+            "buggy_case_exact": 0.2760416666666667,
+            "buggy_pair_both_acc": 0.03125
+          }
+        }
+      },
+      "ARM_2_CLAUSE_PRETRAIN_ONLY": {
+        "42": {
+          "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11/stage-a11/arm_2_clause_pretrain_only_seed_42_7200.pt",
+          "corrected_metrics": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.5729166666666666,
+            "case_exact_acc": 0.3229166666666667,
+            "pair_both_correct_acc": 0.09375,
+            "pair_counterfactual_flip_acc": 0.09375,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.671875,
+                "case_exact_acc": 0.5,
+                "pair_both_correct_acc": 0.21875,
+                "pair_counterfactual_flip_acc": 0.21875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.546875,
+                "case_exact_acc": 0.34375,
+                "pair_both_correct_acc": 0.0625,
+                "pair_counterfactual_flip_acc": 0.0625
+              }
+            }
+          },
+          "buggy_replication": {
+            "buggy_case_exact": 0.2552083333333333,
+            "buggy_pair_both_acc": 0.052083333333333336
+          }
+        },
+        "43": {
+          "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11/stage-a11/arm_2_clause_pretrain_only_seed_43_7200.pt",
+          "corrected_metrics": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.7421875,
+            "case_exact_acc": 0.5729166666666666,
+            "pair_both_correct_acc": 0.3333333333333333,
+            "pair_counterfactual_flip_acc": 0.3333333333333333,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.890625,
+                "case_exact_acc": 0.78125,
+                "pair_both_correct_acc": 0.5625,
+                "pair_counterfactual_flip_acc": 0.5625
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.25,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.8359375,
+                "case_exact_acc": 0.6875,
+                "pair_both_correct_acc": 0.4375,
+                "pair_counterfactual_flip_acc": 0.4375
+              }
+            }
+          },
+          "buggy_replication": {
+            "buggy_case_exact": 0.08333333333333333,
+            "buggy_pair_both_acc": 0.0
+          }
+        },
+        "44": {
+          "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11/stage-a11/arm_2_clause_pretrain_only_seed_44_7200.pt",
+          "corrected_metrics": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.578125,
+            "case_exact_acc": 0.2864583333333333,
+            "pair_both_correct_acc": 0.052083333333333336,
+            "pair_counterfactual_flip_acc": 0.052083333333333336,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.671875,
+                "case_exact_acc": 0.40625,
+                "pair_both_correct_acc": 0.15625,
+                "pair_counterfactual_flip_acc": 0.15625
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5625,
+                "case_exact_acc": 0.328125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              }
+            }
+          },
+          "buggy_replication": {
+            "buggy_case_exact": 0.21354166666666666,
+            "buggy_pair_both_acc": 0.0
+          }
+        }
+      },
+      "ARM_3_SINGLE_PRETRAIN_RELATIONAL_SUP": {
+        "42": {
+          "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11/stage-a11/arm_3_single_pretrain_relational_sup_seed_42_7200.pt",
+          "corrected_metrics": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8307291666666666,
+            "case_exact_acc": 0.7395833333333334,
+            "pair_both_correct_acc": 0.6666666666666666,
+            "pair_counterfactual_flip_acc": 0.6666666666666666,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.21875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              }
+            }
+          },
+          "buggy_replication": {
+            "buggy_case_exact": 0.4427083333333333,
+            "buggy_pair_both_acc": 0.10416666666666667
+          }
+        },
+        "43": {
+          "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11/stage-a11/arm_3_single_pretrain_relational_sup_seed_43_7200.pt",
+          "corrected_metrics": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.7942708333333334,
+            "case_exact_acc": 0.6822916666666666,
+            "pair_both_correct_acc": 0.5208333333333334,
+            "pair_counterfactual_flip_acc": 0.5208333333333334,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.953125,
+                "case_exact_acc": 0.90625,
+                "pair_both_correct_acc": 0.84375,
+                "pair_counterfactual_flip_acc": 0.84375
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.28125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.9296875,
+                "case_exact_acc": 0.859375,
+                "pair_both_correct_acc": 0.71875,
+                "pair_counterfactual_flip_acc": 0.71875
+              }
+            }
+          },
+          "buggy_replication": {
+            "buggy_case_exact": 0.125,
+            "buggy_pair_both_acc": 0.0
+          }
+        },
+        "44": {
+          "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11/stage-a11/arm_3_single_pretrain_relational_sup_seed_44_7200.pt",
+          "corrected_metrics": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8333333333333334,
+            "case_exact_acc": 0.7135416666666666,
+            "pair_both_correct_acc": 0.6666666666666666,
+            "pair_counterfactual_flip_acc": 0.6666666666666666,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.140625,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              }
+            }
+          },
+          "buggy_replication": {
+            "buggy_case_exact": 0.08333333333333333,
+            "buggy_pair_both_acc": 0.0
+          }
+        }
+      },
+      "ARM_4_CLAUSE_PRETRAIN_RELATIONAL_SUP": {
+        "42": {
+          "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11/stage-a11/arm_4_clause_pretrain_relational_sup_seed_42_7200.pt",
+          "corrected_metrics": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8385416666666666,
+            "case_exact_acc": 0.7708333333333334,
+            "pair_both_correct_acc": 0.6666666666666666,
+            "pair_counterfactual_flip_acc": 0.6666666666666666,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.515625,
+                "case_exact_acc": 0.3125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              }
+            }
+          },
+          "buggy_replication": {
+            "buggy_case_exact": 0.671875,
+            "buggy_pair_both_acc": 0.4583333333333333
+          }
+        },
+        "43": {
+          "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11/stage-a11/arm_4_clause_pretrain_relational_sup_seed_43_7200.pt",
+          "corrected_metrics": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8463541666666666,
+            "case_exact_acc": 0.765625,
+            "pair_both_correct_acc": 0.6666666666666666,
+            "pair_counterfactual_flip_acc": 0.6666666666666666,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5390625,
+                "case_exact_acc": 0.296875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              }
+            }
+          },
+          "buggy_replication": {
+            "buggy_case_exact": 0.2708333333333333,
+            "buggy_pair_both_acc": 0.0
+          }
+        },
+        "44": {
+          "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11/stage-a11/arm_4_clause_pretrain_relational_sup_seed_44_7200.pt",
+          "corrected_metrics": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.7604166666666666,
+            "case_exact_acc": 0.578125,
+            "pair_both_correct_acc": 0.3958333333333333,
+            "pair_counterfactual_flip_acc": 0.3958333333333333,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.90625,
+                "case_exact_acc": 0.8125,
+                "pair_both_correct_acc": 0.71875,
+                "pair_counterfactual_flip_acc": 0.71875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.515625,
+                "case_exact_acc": 0.203125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.859375,
+                "case_exact_acc": 0.71875,
+                "pair_both_correct_acc": 0.46875,
+                "pair_counterfactual_flip_acc": 0.46875
+              }
+            }
+          },
+          "buggy_replication": {
+            "buggy_case_exact": 0.2552083333333333,
+            "buggy_pair_both_acc": 0.0
+          }
+        }
+      }
+    },
+    "sealed_suite_provenance": {
+      "isolation_verified": true,
+      "sealed_suite_sha256": "21e6ff6cd6c39289d70962c4f436e49626554d0ad32c4c732ec26ccd3b1e031b",
+      "total_cases": 360,
+      "retired_sealed_a10_sha256": "64daf317c659417327713357449967a9d24c16a3cfe618dd714556c687c14403",
+      "evaluated_in_stage_a11": false,
+      "sealed_data_contamination_audit": "PASS (Zero sealed predictions, losses, or labels were ever evaluated or logged)"
+    }
+  },
+  "task2_audit": {
+    "train_isolation_audit": {
+      "single_train_count": 756,
+      "relational_train_count": 948,
+      "dev_minimal_pair_count": 192,
+      "disjoint_entities_verified": true,
+      "probe_train_overlap": 0
+    },
+    "probe_taps_comparison": {
+      "ARM_1_A10_BASELINE": {
+        "42": {
+          "h_mean_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.5520833333333334,
+            "case_exact_acc": 0.34375,
+            "pair_both_correct_acc": 0.03125,
+            "pair_counterfactual_flip_acc": 0.03125,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.6171875,
+                "case_exact_acc": 0.421875,
+                "pair_both_correct_acc": 0.09375,
+                "pair_counterfactual_flip_acc": 0.09375
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.296875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.546875,
+                "case_exact_acc": 0.3125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              }
+            }
+          },
+          "h_last_question_token": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6380208333333334,
+            "case_exact_acc": 0.4114583333333333,
+            "pair_both_correct_acc": 0.16666666666666666,
+            "pair_counterfactual_flip_acc": 0.16666666666666666,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.6953125,
+                "case_exact_acc": 0.46875,
+                "pair_both_correct_acc": 0.21875,
+                "pair_counterfactual_flip_acc": 0.21875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5078125,
+                "case_exact_acc": 0.25,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.7109375,
+                "case_exact_acc": 0.515625,
+                "pair_both_correct_acc": 0.28125,
+                "pair_counterfactual_flip_acc": 0.28125
+              }
+            }
+          },
+          "h_query_attn_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6067708333333334,
+            "case_exact_acc": 0.390625,
+            "pair_both_correct_acc": 0.10416666666666667,
+            "pair_counterfactual_flip_acc": 0.10416666666666667,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.6953125,
+                "case_exact_acc": 0.453125,
+                "pair_both_correct_acc": 0.1875,
+                "pair_counterfactual_flip_acc": 0.1875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5078125,
+                "case_exact_acc": 0.328125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.6171875,
+                "case_exact_acc": 0.390625,
+                "pair_both_correct_acc": 0.125,
+                "pair_counterfactual_flip_acc": 0.125
+              }
+            }
+          },
+          "deployed_student_head": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6927083333333334,
+            "case_exact_acc": 0.4895833333333333,
+            "pair_both_correct_acc": 0.15625,
+            "pair_counterfactual_flip_acc": 0.15625,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.8359375,
+                "case_exact_acc": 0.671875,
+                "pair_both_correct_acc": 0.40625,
+                "pair_counterfactual_flip_acc": 0.40625
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.296875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.75,
+                "case_exact_acc": 0.5,
+                "pair_both_correct_acc": 0.0625,
+                "pair_counterfactual_flip_acc": 0.0625
+              }
+            }
+          }
+        },
+        "43": {
+          "h_mean_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6041666666666666,
+            "case_exact_acc": 0.40625,
+            "pair_both_correct_acc": 0.14583333333333334,
+            "pair_counterfactual_flip_acc": 0.14583333333333334,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.8125,
+                "case_exact_acc": 0.65625,
+                "pair_both_correct_acc": 0.4375,
+                "pair_counterfactual_flip_acc": 0.4375
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.3125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.25,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              }
+            }
+          },
+          "h_last_question_token": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6119791666666666,
+            "case_exact_acc": 0.4479166666666667,
+            "pair_both_correct_acc": 0.10416666666666667,
+            "pair_counterfactual_flip_acc": 0.10416666666666667,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.7578125,
+                "case_exact_acc": 0.578125,
+                "pair_both_correct_acc": 0.28125,
+                "pair_counterfactual_flip_acc": 0.28125
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.390625,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.578125,
+                "case_exact_acc": 0.375,
+                "pair_both_correct_acc": 0.03125,
+                "pair_counterfactual_flip_acc": 0.03125
+              }
+            }
+          },
+          "h_query_attn_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.609375,
+            "case_exact_acc": 0.4322916666666667,
+            "pair_both_correct_acc": 0.125,
+            "pair_counterfactual_flip_acc": 0.125,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.78125,
+                "case_exact_acc": 0.625,
+                "pair_both_correct_acc": 0.375,
+                "pair_counterfactual_flip_acc": 0.375
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.375,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.546875,
+                "case_exact_acc": 0.296875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              }
+            }
+          },
+          "deployed_student_head": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.7239583333333334,
+            "case_exact_acc": 0.578125,
+            "pair_both_correct_acc": 0.2708333333333333,
+            "pair_counterfactual_flip_acc": 0.2708333333333333,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.9375,
+                "case_exact_acc": 0.875,
+                "pair_both_correct_acc": 0.78125,
+                "pair_counterfactual_flip_acc": 0.78125
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.34375,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.734375,
+                "case_exact_acc": 0.515625,
+                "pair_both_correct_acc": 0.03125,
+                "pair_counterfactual_flip_acc": 0.03125
+              }
+            }
+          }
+        },
+        "44": {
+          "h_mean_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6354166666666666,
+            "case_exact_acc": 0.4375,
+            "pair_both_correct_acc": 0.14583333333333334,
+            "pair_counterfactual_flip_acc": 0.14583333333333334,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.6953125,
+                "case_exact_acc": 0.546875,
+                "pair_both_correct_acc": 0.25,
+                "pair_counterfactual_flip_acc": 0.25
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.28125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.7109375,
+                "case_exact_acc": 0.484375,
+                "pair_both_correct_acc": 0.1875,
+                "pair_counterfactual_flip_acc": 0.1875
+              }
+            }
+          },
+          "h_last_question_token": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.5703125,
+            "case_exact_acc": 0.3489583333333333,
+            "pair_both_correct_acc": 0.0625,
+            "pair_counterfactual_flip_acc": 0.0625,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.640625,
+                "case_exact_acc": 0.4375,
+                "pair_both_correct_acc": 0.1875,
+                "pair_counterfactual_flip_acc": 0.1875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5078125,
+                "case_exact_acc": 0.25,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5625,
+                "case_exact_acc": 0.359375,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              }
+            }
+          },
+          "h_query_attn_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.5911458333333334,
+            "case_exact_acc": 0.3645833333333333,
+            "pair_both_correct_acc": 0.07291666666666667,
+            "pair_counterfactual_flip_acc": 0.07291666666666667,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.6796875,
+                "case_exact_acc": 0.453125,
+                "pair_both_correct_acc": 0.1875,
+                "pair_counterfactual_flip_acc": 0.1875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.484375,
+                "case_exact_acc": 0.265625,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.609375,
+                "case_exact_acc": 0.375,
+                "pair_both_correct_acc": 0.03125,
+                "pair_counterfactual_flip_acc": 0.03125
+              }
+            }
+          },
+          "deployed_student_head": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6770833333333334,
+            "case_exact_acc": 0.5,
+            "pair_both_correct_acc": 0.21875,
+            "pair_counterfactual_flip_acc": 0.21875,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.8671875,
+                "case_exact_acc": 0.734375,
+                "pair_both_correct_acc": 0.53125,
+                "pair_counterfactual_flip_acc": 0.53125
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5078125,
+                "case_exact_acc": 0.234375,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.65625,
+                "case_exact_acc": 0.53125,
+                "pair_both_correct_acc": 0.125,
+                "pair_counterfactual_flip_acc": 0.125
+              }
+            }
+          }
+        }
+      },
+      "ARM_2_CLAUSE_PRETRAIN_ONLY": {
+        "42": {
+          "h_mean_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.5911458333333334,
+            "case_exact_acc": 0.3697916666666667,
+            "pair_both_correct_acc": 0.10416666666666667,
+            "pair_counterfactual_flip_acc": 0.10416666666666667,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.75,
+                "case_exact_acc": 0.625,
+                "pair_both_correct_acc": 0.3125,
+                "pair_counterfactual_flip_acc": 0.3125
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.1875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5234375,
+                "case_exact_acc": 0.296875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              }
+            }
+          },
+          "h_last_question_token": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.5729166666666666,
+            "case_exact_acc": 0.3489583333333333,
+            "pair_both_correct_acc": 0.052083333333333336,
+            "pair_counterfactual_flip_acc": 0.052083333333333336,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.640625,
+                "case_exact_acc": 0.4375,
+                "pair_both_correct_acc": 0.09375,
+                "pair_counterfactual_flip_acc": 0.09375
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.515625,
+                "case_exact_acc": 0.296875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5625,
+                "case_exact_acc": 0.3125,
+                "pair_both_correct_acc": 0.0625,
+                "pair_counterfactual_flip_acc": 0.0625
+              }
+            }
+          },
+          "h_query_attn_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.5755208333333334,
+            "case_exact_acc": 0.3385416666666667,
+            "pair_both_correct_acc": 0.03125,
+            "pair_counterfactual_flip_acc": 0.03125,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.6328125,
+                "case_exact_acc": 0.421875,
+                "pair_both_correct_acc": 0.03125,
+                "pair_counterfactual_flip_acc": 0.03125
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5234375,
+                "case_exact_acc": 0.28125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5703125,
+                "case_exact_acc": 0.3125,
+                "pair_both_correct_acc": 0.0625,
+                "pair_counterfactual_flip_acc": 0.0625
+              }
+            }
+          },
+          "deployed_student_head": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.5729166666666666,
+            "case_exact_acc": 0.3229166666666667,
+            "pair_both_correct_acc": 0.09375,
+            "pair_counterfactual_flip_acc": 0.09375,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.671875,
+                "case_exact_acc": 0.5,
+                "pair_both_correct_acc": 0.21875,
+                "pair_counterfactual_flip_acc": 0.21875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.546875,
+                "case_exact_acc": 0.34375,
+                "pair_both_correct_acc": 0.0625,
+                "pair_counterfactual_flip_acc": 0.0625
+              }
+            }
+          }
+        },
+        "43": {
+          "h_mean_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6588541666666666,
+            "case_exact_acc": 0.4427083333333333,
+            "pair_both_correct_acc": 0.23958333333333334,
+            "pair_counterfactual_flip_acc": 0.23958333333333334,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.7890625,
+                "case_exact_acc": 0.640625,
+                "pair_both_correct_acc": 0.46875,
+                "pair_counterfactual_flip_acc": 0.46875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.234375,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.6953125,
+                "case_exact_acc": 0.453125,
+                "pair_both_correct_acc": 0.25,
+                "pair_counterfactual_flip_acc": 0.25
+              }
+            }
+          },
+          "h_last_question_token": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.5859375,
+            "case_exact_acc": 0.296875,
+            "pair_both_correct_acc": 0.041666666666666664,
+            "pair_counterfactual_flip_acc": 0.041666666666666664,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.6328125,
+                "case_exact_acc": 0.359375,
+                "pair_both_correct_acc": 0.125,
+                "pair_counterfactual_flip_acc": 0.125
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.28125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.625,
+                "case_exact_acc": 0.25,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              }
+            }
+          },
+          "h_query_attn_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.5885416666666666,
+            "case_exact_acc": 0.3645833333333333,
+            "pair_both_correct_acc": 0.0625,
+            "pair_counterfactual_flip_acc": 0.0625,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.640625,
+                "case_exact_acc": 0.484375,
+                "pair_both_correct_acc": 0.15625,
+                "pair_counterfactual_flip_acc": 0.15625
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.515625,
+                "case_exact_acc": 0.234375,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.609375,
+                "case_exact_acc": 0.375,
+                "pair_both_correct_acc": 0.03125,
+                "pair_counterfactual_flip_acc": 0.03125
+              }
+            }
+          },
+          "deployed_student_head": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.7421875,
+            "case_exact_acc": 0.5729166666666666,
+            "pair_both_correct_acc": 0.3333333333333333,
+            "pair_counterfactual_flip_acc": 0.3333333333333333,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.890625,
+                "case_exact_acc": 0.78125,
+                "pair_both_correct_acc": 0.5625,
+                "pair_counterfactual_flip_acc": 0.5625
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.25,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.8359375,
+                "case_exact_acc": 0.6875,
+                "pair_both_correct_acc": 0.4375,
+                "pair_counterfactual_flip_acc": 0.4375
+              }
+            }
+          }
+        },
+        "44": {
+          "h_mean_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.625,
+            "case_exact_acc": 0.375,
+            "pair_both_correct_acc": 0.14583333333333334,
+            "pair_counterfactual_flip_acc": 0.14583333333333334,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.71875,
+                "case_exact_acc": 0.46875,
+                "pair_both_correct_acc": 0.1875,
+                "pair_counterfactual_flip_acc": 0.1875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.234375,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.6640625,
+                "case_exact_acc": 0.421875,
+                "pair_both_correct_acc": 0.25,
+                "pair_counterfactual_flip_acc": 0.25
+              }
+            }
+          },
+          "h_last_question_token": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6067708333333334,
+            "case_exact_acc": 0.40625,
+            "pair_both_correct_acc": 0.11458333333333333,
+            "pair_counterfactual_flip_acc": 0.11458333333333333,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.734375,
+                "case_exact_acc": 0.53125,
+                "pair_both_correct_acc": 0.25,
+                "pair_counterfactual_flip_acc": 0.25
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.34375,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.59375,
+                "case_exact_acc": 0.34375,
+                "pair_both_correct_acc": 0.09375,
+                "pair_counterfactual_flip_acc": 0.09375
+              }
+            }
+          },
+          "h_query_attn_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6015625,
+            "case_exact_acc": 0.375,
+            "pair_both_correct_acc": 0.07291666666666667,
+            "pair_counterfactual_flip_acc": 0.07291666666666667,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.7421875,
+                "case_exact_acc": 0.515625,
+                "pair_both_correct_acc": 0.21875,
+                "pair_counterfactual_flip_acc": 0.21875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.265625,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5703125,
+                "case_exact_acc": 0.34375,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              }
+            }
+          },
+          "deployed_student_head": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.578125,
+            "case_exact_acc": 0.2864583333333333,
+            "pair_both_correct_acc": 0.052083333333333336,
+            "pair_counterfactual_flip_acc": 0.052083333333333336,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.671875,
+                "case_exact_acc": 0.40625,
+                "pair_both_correct_acc": 0.15625,
+                "pair_counterfactual_flip_acc": 0.15625
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5625,
+                "case_exact_acc": 0.328125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              }
+            }
+          }
+        }
+      },
+      "ARM_3_SINGLE_PRETRAIN_RELATIONAL_SUP": {
+        "42": {
+          "h_mean_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.828125,
+            "case_exact_acc": 0.7395833333333334,
+            "pair_both_correct_acc": 0.6666666666666666,
+            "pair_counterfactual_flip_acc": 0.6666666666666666,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.484375,
+                "case_exact_acc": 0.21875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              }
+            }
+          },
+          "h_last_question_token": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6510416666666666,
+            "case_exact_acc": 0.4010416666666667,
+            "pair_both_correct_acc": 0.125,
+            "pair_counterfactual_flip_acc": 0.125,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.6953125,
+                "case_exact_acc": 0.46875,
+                "pair_both_correct_acc": 0.1875,
+                "pair_counterfactual_flip_acc": 0.1875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.203125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.765625,
+                "case_exact_acc": 0.53125,
+                "pair_both_correct_acc": 0.1875,
+                "pair_counterfactual_flip_acc": 0.1875
+              }
+            }
+          },
+          "h_query_attn_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.5651041666666666,
+            "case_exact_acc": 0.3125,
+            "pair_both_correct_acc": 0.03125,
+            "pair_counterfactual_flip_acc": 0.03125,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5078125,
+                "case_exact_acc": 0.265625,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5078125,
+                "case_exact_acc": 0.296875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.6796875,
+                "case_exact_acc": 0.375,
+                "pair_both_correct_acc": 0.09375,
+                "pair_counterfactual_flip_acc": 0.09375
+              }
+            }
+          },
+          "deployed_student_head": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8307291666666666,
+            "case_exact_acc": 0.7395833333333334,
+            "pair_both_correct_acc": 0.6666666666666666,
+            "pair_counterfactual_flip_acc": 0.6666666666666666,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.21875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              }
+            }
+          }
+        },
+        "43": {
+          "h_mean_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8072916666666666,
+            "case_exact_acc": 0.6666666666666666,
+            "pair_both_correct_acc": 0.5833333333333334,
+            "pair_counterfactual_flip_acc": 0.5833333333333334,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.9765625,
+                "case_exact_acc": 0.953125,
+                "pair_both_correct_acc": 0.90625,
+                "pair_counterfactual_flip_acc": 0.90625
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.484375,
+                "case_exact_acc": 0.125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.9609375,
+                "case_exact_acc": 0.921875,
+                "pair_both_correct_acc": 0.84375,
+                "pair_counterfactual_flip_acc": 0.84375
+              }
+            }
+          },
+          "h_last_question_token": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.7916666666666666,
+            "case_exact_acc": 0.6927083333333334,
+            "pair_both_correct_acc": 0.5104166666666666,
+            "pair_counterfactual_flip_acc": 0.5104166666666666,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.9921875,
+                "case_exact_acc": 0.984375,
+                "pair_both_correct_acc": 0.96875,
+                "pair_counterfactual_flip_acc": 0.96875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.3125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.890625,
+                "case_exact_acc": 0.78125,
+                "pair_both_correct_acc": 0.5625,
+                "pair_counterfactual_flip_acc": 0.5625
+              }
+            }
+          },
+          "h_query_attn_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.5859375,
+            "case_exact_acc": 0.3802083333333333,
+            "pair_both_correct_acc": 0.11458333333333333,
+            "pair_counterfactual_flip_acc": 0.11458333333333333,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.7109375,
+                "case_exact_acc": 0.546875,
+                "pair_both_correct_acc": 0.25,
+                "pair_counterfactual_flip_acc": 0.25
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.34375,
+                "pair_both_correct_acc": 0.03125,
+                "pair_counterfactual_flip_acc": 0.03125
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.546875,
+                "case_exact_acc": 0.25,
+                "pair_both_correct_acc": 0.0625,
+                "pair_counterfactual_flip_acc": 0.0625
+              }
+            }
+          },
+          "deployed_student_head": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.7942708333333334,
+            "case_exact_acc": 0.6822916666666666,
+            "pair_both_correct_acc": 0.5208333333333334,
+            "pair_counterfactual_flip_acc": 0.5208333333333334,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.953125,
+                "case_exact_acc": 0.90625,
+                "pair_both_correct_acc": 0.84375,
+                "pair_counterfactual_flip_acc": 0.84375
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.28125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.9296875,
+                "case_exact_acc": 0.859375,
+                "pair_both_correct_acc": 0.71875,
+                "pair_counterfactual_flip_acc": 0.71875
+              }
+            }
+          }
+        },
+        "44": {
+          "h_mean_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8359375,
+            "case_exact_acc": 0.7239583333333334,
+            "pair_both_correct_acc": 0.6458333333333334,
+            "pair_counterfactual_flip_acc": 0.6458333333333334,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5234375,
+                "case_exact_acc": 0.203125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.984375,
+                "case_exact_acc": 0.96875,
+                "pair_both_correct_acc": 0.9375,
+                "pair_counterfactual_flip_acc": 0.9375
+              }
+            }
+          },
+          "h_last_question_token": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.7526041666666666,
+            "case_exact_acc": 0.5885416666666666,
+            "pair_both_correct_acc": 0.3645833333333333,
+            "pair_counterfactual_flip_acc": 0.3645833333333333,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.875,
+                "case_exact_acc": 0.75,
+                "pair_both_correct_acc": 0.53125,
+                "pair_counterfactual_flip_acc": 0.53125
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5078125,
+                "case_exact_acc": 0.265625,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.875,
+                "case_exact_acc": 0.75,
+                "pair_both_correct_acc": 0.5625,
+                "pair_counterfactual_flip_acc": 0.5625
+              }
+            }
+          },
+          "h_query_attn_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.5755208333333334,
+            "case_exact_acc": 0.3072916666666667,
+            "pair_both_correct_acc": 0.08333333333333333,
+            "pair_counterfactual_flip_acc": 0.08333333333333333,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5859375,
+                "case_exact_acc": 0.3125,
+                "pair_both_correct_acc": 0.0625,
+                "pair_counterfactual_flip_acc": 0.0625
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.1875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.6484375,
+                "case_exact_acc": 0.421875,
+                "pair_both_correct_acc": 0.1875,
+                "pair_counterfactual_flip_acc": 0.1875
+              }
+            }
+          },
+          "deployed_student_head": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8333333333333334,
+            "case_exact_acc": 0.7135416666666666,
+            "pair_both_correct_acc": 0.6666666666666666,
+            "pair_counterfactual_flip_acc": 0.6666666666666666,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5,
+                "case_exact_acc": 0.140625,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              }
+            }
+          }
+        }
+      },
+      "ARM_4_CLAUSE_PRETRAIN_RELATIONAL_SUP": {
+        "42": {
+          "h_mean_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8255208333333334,
+            "case_exact_acc": 0.765625,
+            "pair_both_correct_acc": 0.6666666666666666,
+            "pair_counterfactual_flip_acc": 0.6666666666666666,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4765625,
+                "case_exact_acc": 0.296875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              }
+            }
+          },
+          "h_last_question_token": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8229166666666666,
+            "case_exact_acc": 0.6979166666666666,
+            "pair_both_correct_acc": 0.6145833333333334,
+            "pair_counterfactual_flip_acc": 0.6145833333333334,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.984375,
+                "case_exact_acc": 0.96875,
+                "pair_both_correct_acc": 0.9375,
+                "pair_counterfactual_flip_acc": 0.9375
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5078125,
+                "case_exact_acc": 0.171875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.9765625,
+                "case_exact_acc": 0.953125,
+                "pair_both_correct_acc": 0.90625,
+                "pair_counterfactual_flip_acc": 0.90625
+              }
+            }
+          },
+          "h_query_attn_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8359375,
+            "case_exact_acc": 0.75,
+            "pair_both_correct_acc": 0.6458333333333334,
+            "pair_counterfactual_flip_acc": 0.6458333333333334,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5234375,
+                "case_exact_acc": 0.28125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.984375,
+                "case_exact_acc": 0.96875,
+                "pair_both_correct_acc": 0.9375,
+                "pair_counterfactual_flip_acc": 0.9375
+              }
+            }
+          },
+          "deployed_student_head": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8385416666666666,
+            "case_exact_acc": 0.7708333333333334,
+            "pair_both_correct_acc": 0.6666666666666666,
+            "pair_counterfactual_flip_acc": 0.6666666666666666,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.515625,
+                "case_exact_acc": 0.3125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              }
+            }
+          }
+        },
+        "43": {
+          "h_mean_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8307291666666666,
+            "case_exact_acc": 0.734375,
+            "pair_both_correct_acc": 0.6666666666666666,
+            "pair_counterfactual_flip_acc": 0.6666666666666666,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.203125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              }
+            }
+          },
+          "h_last_question_token": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6901041666666666,
+            "case_exact_acc": 0.4895833333333333,
+            "pair_both_correct_acc": 0.20833333333333334,
+            "pair_counterfactual_flip_acc": 0.20833333333333334,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.8125,
+                "case_exact_acc": 0.625,
+                "pair_both_correct_acc": 0.3125,
+                "pair_counterfactual_flip_acc": 0.3125
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.28125,
+                "pair_both_correct_acc": 0.0625,
+                "pair_counterfactual_flip_acc": 0.0625
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.765625,
+                "case_exact_acc": 0.5625,
+                "pair_both_correct_acc": 0.25,
+                "pair_counterfactual_flip_acc": 0.25
+              }
+            }
+          },
+          "h_query_attn_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.7239583333333334,
+            "case_exact_acc": 0.546875,
+            "pair_both_correct_acc": 0.2916666666666667,
+            "pair_counterfactual_flip_acc": 0.2916666666666667,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.8203125,
+                "case_exact_acc": 0.640625,
+                "pair_both_correct_acc": 0.375,
+                "pair_counterfactual_flip_acc": 0.375
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.484375,
+                "case_exact_acc": 0.265625,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.8671875,
+                "case_exact_acc": 0.734375,
+                "pair_both_correct_acc": 0.5,
+                "pair_counterfactual_flip_acc": 0.5
+              }
+            }
+          },
+          "deployed_student_head": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8463541666666666,
+            "case_exact_acc": 0.765625,
+            "pair_both_correct_acc": 0.6666666666666666,
+            "pair_counterfactual_flip_acc": 0.6666666666666666,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.5390625,
+                "case_exact_acc": 0.296875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 1.0,
+                "case_exact_acc": 1.0,
+                "pair_both_correct_acc": 1.0,
+                "pair_counterfactual_flip_acc": 1.0
+              }
+            }
+          }
+        },
+        "44": {
+          "h_mean_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.8098958333333334,
+            "case_exact_acc": 0.7135416666666666,
+            "pair_both_correct_acc": 0.5729166666666666,
+            "pair_counterfactual_flip_acc": 0.5729166666666666,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.9140625,
+                "case_exact_acc": 0.828125,
+                "pair_both_correct_acc": 0.71875,
+                "pair_counterfactual_flip_acc": 0.71875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.53125,
+                "case_exact_acc": 0.34375,
+                "pair_both_correct_acc": 0.0625,
+                "pair_counterfactual_flip_acc": 0.0625
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.984375,
+                "case_exact_acc": 0.96875,
+                "pair_both_correct_acc": 0.9375,
+                "pair_counterfactual_flip_acc": 0.9375
+              }
+            }
+          },
+          "h_last_question_token": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.7786458333333334,
+            "case_exact_acc": 0.6354166666666666,
+            "pair_both_correct_acc": 0.4791666666666667,
+            "pair_counterfactual_flip_acc": 0.4791666666666667,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.921875,
+                "case_exact_acc": 0.84375,
+                "pair_both_correct_acc": 0.71875,
+                "pair_counterfactual_flip_acc": 0.71875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.4921875,
+                "case_exact_acc": 0.21875,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.921875,
+                "case_exact_acc": 0.84375,
+                "pair_both_correct_acc": 0.71875,
+                "pair_counterfactual_flip_acc": 0.71875
+              }
+            }
+          },
+          "h_query_attn_pool": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.6276041666666666,
+            "case_exact_acc": 0.3697916666666667,
+            "pair_both_correct_acc": 0.10416666666666667,
+            "pair_counterfactual_flip_acc": 0.10416666666666667,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.671875,
+                "case_exact_acc": 0.375,
+                "pair_both_correct_acc": 0.09375,
+                "pair_counterfactual_flip_acc": 0.09375
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.515625,
+                "case_exact_acc": 0.28125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.6953125,
+                "case_exact_acc": 0.453125,
+                "pair_both_correct_acc": 0.21875,
+                "pair_counterfactual_flip_acc": 0.21875
+              }
+            }
+          },
+          "deployed_student_head": {
+            "n_cases": 192,
+            "n_pairs": 96,
+            "n_label_changing_pairs": 96,
+            "per_property_binary_acc": 0.7604166666666666,
+            "case_exact_acc": 0.578125,
+            "pair_both_correct_acc": 0.3958333333333333,
+            "pair_counterfactual_flip_acc": 0.3958333333333333,
+            "by_family": {
+              "MP-1": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.90625,
+                "case_exact_acc": 0.8125,
+                "pair_both_correct_acc": 0.71875,
+                "pair_counterfactual_flip_acc": 0.71875
+              },
+              "MP-2": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.515625,
+                "case_exact_acc": 0.203125,
+                "pair_both_correct_acc": 0.0,
+                "pair_counterfactual_flip_acc": 0.0
+              },
+              "MP-3": {
+                "n_cases": 64,
+                "n_pairs": 32,
+                "n_label_changing_pairs": 32,
+                "per_property_binary_acc": 0.859375,
+                "case_exact_acc": 0.71875,
+                "pair_both_correct_acc": 0.46875,
+                "pair_counterfactual_flip_acc": 0.46875
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
