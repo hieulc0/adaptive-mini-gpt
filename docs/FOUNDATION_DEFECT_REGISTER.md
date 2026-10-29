@@ -1,4 +1,4 @@
-# Foundation Model Defect Register (Stages A.1 – A.11-R2)
+# Foundation Model Defect Register (Stages A.1 – A.12)
 
 This register tracks all critical architectural defects, numerical failure modes, and statistical design limits identified during the foundational Stage A line of development.
 
@@ -20,7 +20,8 @@ This register tracks all critical architectural defects, numerical failure modes
 | **FDR-010** | Stage A.11-R | Implementation | Head unpacking mismatch (`state_logits` vs `tag_logits`) | **Resolved** | Stage A.11-R |
 | **FDR-011** | Stage A.11-R | Architecture | Multi-entity binding failure in causal last-token readout | **Resolved** | Stage A.11-R2 |
 | **FDR-012** | Stage A.11-R2 | Implementation | Evaluator secondary forward strategy bypass (`strategy=None` -> ECA) | **Resolved** | Stage A.11-R2 |
-| **FDR-013** | Stage A.11-R2 | Optimization | Single-token causal readout cross-seed variance on multi-entity queries | **Identified** | Stage A.12 |
+| **FDR-013** | Stage A.11-R2 | Optimization | Single-token causal readout cross-seed variance on multi-entity queries | **Characterized** | Stage A.12 |
+| **FDR-014** | Stage A.12 | Architecture | Query blindness & attention shortcut learning in unparameterized cross-readout | **Identified** | Stage A.13 |
 
 ---
 
@@ -57,3 +58,18 @@ Stage A.11-R2 empirical findings (`832326b` / `2e1ed16`, 860 full GPU regression
 - **PREREGISTERED SEALED ISOLATION PRESERVED**:
   - Because Gate 3 failed across the cohort (MP-2 = 54.17% vs $\ge 75.0\%$, EB-1..4 = 34.03% vs $\ge 80.0\%$), **`sealed_a11_v1` WAS NOT EVALUATED**. Strict test hygiene was preserved intact.
   - Checkpoint continuation verified ($\Delta \text{logit} = 0.00\text{e+}00$). 860 GPU regression tests passed.
+
+Stage A.12 empirical findings (`96ffaad` / `9c67ce8`, 867 full GPU regressions pass; [report](STAGE_A12.md)):
+- **FDR-013 CHARACTERIZED (Phase 1 Query Blindness Forensics)**:
+  - Investigated saved immutable A.11-R2 checkpoints with 0 training updates.
+  - Isolated that collapsing Seed 44 suffered from **Complete Query Blindness** (0.0% query sensitivity rate on MP-2 pairs): swapping `Query target: e1` to `Query target: e2` produced identical label predictions on 100% of minimal pairs.
+  - Detached linear ridge probes on $h_{t_{\text{last}}}$ showed 83.33% accuracy in Seed 44 (vs 95.83% in Seed 43), proving target entity information was present in the hidden activations, but downstream readouts fell into static prefix-based local minima.
+- **FDR-014 IDENTIFIED (Curriculum & Cross-Readout Bounds on Entity Binding)**:
+  - Matched 1,500 pretrain + 7,200 supervised comparison across Seeds 42, 43, 44 showed:
+    - Counterfactual paired curriculum (`A12_ARM_2`) maintained 100% training acquisition and 100% old-frame retention, but dispersed attention over the 28-name pool, dropping cohort MP-2 mean to 6.25%.
+    - Query-span cross readout (`A12_ARM_3`) stabilized Seed 44 (MP-2 rose from 0.0% to 43.75%) and Seed 42 (MP-2 = 68.75%), but degraded Seed 43 (down to 9.38%), yielding a cohort mean of 40.62%.
+  - Single-clause generalization (`MP-1` = 91.67%–100.0%, `MP-3` = 100.0%, dev familiar/novel = 98.15%–99.74%) and Gates 1, 2, 3A, and 4 passed cleanly.
+  - Gates 3B, 3C, and 3D failed due to seed variance ($\ge 75.0\%$ MP-2 per-seed requirement).
+- **PREREGISTERED SEALED ISOLATION PRESERVED**:
+  - `sealed_a11_v1` was not evaluated and remains 100% unviewed and pristine.
+  - Overall Verdict: **`FAIL`**. No checkpoint is promoted. Continuation verified ($\Delta \text{logit} = 0.00\text{e+}00$). 867 GPU regression tests passed.

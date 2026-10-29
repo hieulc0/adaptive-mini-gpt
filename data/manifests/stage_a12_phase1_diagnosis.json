@@ -1,0 +1,872 @@
+{
+  "seed_42": {
+    "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11r2/stage-a11r2/r2_arm_2_last_token_seed_42_7200.pt",
+    "mp_metrics": {
+      "overall": {
+        "case_exact_acc": 0.16145833333333334,
+        "pair_both_correct_acc": 0.0,
+        "pair_counterfactual_flip_acc": 0.0
+      },
+      "MP-1": {
+        "n_cases": 64,
+        "n_pairs": 32,
+        "n_label_changing_pairs": 32,
+        "per_property_binary_acc": 0.21875,
+        "case_exact_acc": 0.078125,
+        "pair_both_correct_acc": 0.0,
+        "pair_counterfactual_flip_acc": 0.0,
+        "confusion_matrices": {
+          "flammable": {
+            "TP": 0,
+            "TN": 7,
+            "FP": 25,
+            "FN": 32,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "conductive": {
+            "TP": 13,
+            "TN": 8,
+            "FP": 24,
+            "FN": 19,
+            "precision": 0.35135135135135137,
+            "recall": 0.40625
+          }
+        }
+      },
+      "MP-2": {
+        "n_cases": 64,
+        "n_pairs": 32,
+        "n_label_changing_pairs": 32,
+        "per_property_binary_acc": 0.34375,
+        "case_exact_acc": 0.1875,
+        "pair_both_correct_acc": 0.0,
+        "pair_counterfactual_flip_acc": 0.0,
+        "confusion_matrices": {
+          "flammable": {
+            "TP": 8,
+            "TN": 15,
+            "FP": 17,
+            "FN": 24,
+            "precision": 0.32,
+            "recall": 0.25
+          },
+          "conductive": {
+            "TP": 13,
+            "TN": 8,
+            "FP": 24,
+            "FN": 19,
+            "precision": 0.35135135135135137,
+            "recall": 0.40625
+          }
+        }
+      },
+      "MP-3": {
+        "n_cases": 64,
+        "n_pairs": 32,
+        "n_label_changing_pairs": 32,
+        "per_property_binary_acc": 0.234375,
+        "case_exact_acc": 0.21875,
+        "pair_both_correct_acc": 0.0,
+        "pair_counterfactual_flip_acc": 0.0,
+        "confusion_matrices": {
+          "flammable": {
+            "TP": 0,
+            "TN": 14,
+            "FP": 18,
+            "FN": 32,
+            "precision": 0.0,
+            "recall": 0.0
+          },
+          "conductive": {
+            "TP": 16,
+            "TN": 0,
+            "FP": 32,
+            "FN": 16,
+            "precision": 0.3333333333333333,
+            "recall": 0.5
+          }
+        }
+      }
+    },
+    "eb_metrics": {
+      "overall": {
+        "case_exact_acc": 0.16666666666666666,
+        "pair_both_correct_acc": 0.013888888888888888
+      },
+      "by_family": {
+        "EB-1": {
+          "n_cases": 72,
+          "n_pairs": 36,
+          "n_label_changing_pairs": 36,
+          "per_property_binary_acc": 0.3263888888888889,
+          "case_exact_acc": 0.16666666666666666,
+          "pair_both_correct_acc": 0.0,
+          "pair_counterfactual_flip_acc": 0.0,
+          "confusion_matrices": {
+            "flammable": {
+              "TP": 10,
+              "TN": 13,
+              "FP": 19,
+              "FN": 30,
+              "precision": 0.3448275862068966,
+              "recall": 0.25
+            },
+            "conductive": {
+              "TP": 13,
+              "TN": 11,
+              "FP": 25,
+              "FN": 23,
+              "precision": 0.34210526315789475,
+              "recall": 0.3611111111111111
+            }
+          }
+        },
+        "EB-2": {
+          "n_cases": 72,
+          "n_pairs": 36,
+          "n_label_changing_pairs": 0,
+          "per_property_binary_acc": 0.24305555555555555,
+          "case_exact_acc": 0.18055555555555555,
+          "pair_both_correct_acc": 0.05555555555555555,
+          "pair_counterfactual_flip_acc": 0.0,
+          "confusion_matrices": {
+            "flammable": {
+              "TP": 5,
+              "TN": 10,
+              "FP": 22,
+              "FN": 35,
+              "precision": 0.18518518518518517,
+              "recall": 0.125
+            },
+            "conductive": {
+              "TP": 12,
+              "TN": 8,
+              "FP": 24,
+              "FN": 28,
+              "precision": 0.3333333333333333,
+              "recall": 0.3
+            }
+          }
+        },
+        "EB-3": {
+          "n_cases": 72,
+          "n_pairs": 36,
+          "n_label_changing_pairs": 36,
+          "per_property_binary_acc": 0.25,
+          "case_exact_acc": 0.18055555555555555,
+          "pair_both_correct_acc": 0.0,
+          "pair_counterfactual_flip_acc": 0.0,
+          "confusion_matrices": {
+            "flammable": {
+              "TP": 0,
+              "TN": 17,
+              "FP": 15,
+              "FN": 40,
+              "precision": 0.0,
+              "recall": 0.0
+            },
+            "conductive": {
+              "TP": 15,
+              "TN": 4,
+              "FP": 32,
+              "FN": 21,
+              "precision": 0.3191489361702128,
+              "recall": 0.4166666666666667
+            }
+          }
+        },
+        "EB-4": {
+          "n_cases": 72,
+          "n_pairs": 36,
+          "n_label_changing_pairs": 36,
+          "per_property_binary_acc": 0.3333333333333333,
+          "case_exact_acc": 0.1388888888888889,
+          "pair_both_correct_acc": 0.0,
+          "pair_counterfactual_flip_acc": 0.0,
+          "confusion_matrices": {
+            "flammable": {
+              "TP": 12,
+              "TN": 19,
+              "FP": 8,
+              "FN": 33,
+              "precision": 0.6,
+              "recall": 0.26666666666666666
+            },
+            "conductive": {
+              "TP": 8,
+              "TN": 9,
+              "FP": 27,
+              "FN": 28,
+              "precision": 0.22857142857142856,
+              "recall": 0.2222222222222222
+            }
+          }
+        }
+      }
+    },
+    "query_sensitivity": {
+      "MP-2": {
+        "n_pairs": 32,
+        "query_sensitive_pairs": 20,
+        "query_blind_pairs": 12,
+        "query_sensitivity_rate": 0.625,
+        "query_blind_rate": 0.375
+      },
+      "EB-1": {
+        "n_pairs": 36,
+        "query_sensitive_pairs": 23,
+        "query_blind_pairs": 13,
+        "query_sensitivity_rate": 0.6388888888888888,
+        "query_blind_rate": 0.3611111111111111
+      }
+    },
+    "familiar_vs_unseen_entities": {
+      "familiar_training_entities": {
+        "entities": [
+          "Vim",
+          "Rax"
+        ],
+        "case_exact_acc": 0.1875,
+        "pair_both_correct_acc": 0.0
+      },
+      "unseen_dev_entities": {
+        "entities": [
+          "Tuv",
+          "Wex"
+        ],
+        "case_exact_acc": 0.1875,
+        "pair_both_correct_acc": 0.0
+      },
+      "generalization_gap": 0.0
+    },
+    "attention_margins": {
+      "num_analyzed_cases": 0,
+      "margins_matrix": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "mean_margin_per_layer": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "overall_mean_margin": 0.0
+    },
+    "representation_ridge_probe": {
+      "probe_flammable_test_acc": 0.7708333730697632,
+      "probe_conductive_test_acc": 0.8229166865348816,
+      "probe_mean_test_acc": 0.7968750298023224
+    }
+  },
+  "seed_43": {
+    "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11r2/stage-a11r2/r2_arm_2_last_token_seed_43_7200.pt",
+    "mp_metrics": {
+      "overall": {
+        "case_exact_acc": 0.005208333333333333,
+        "pair_both_correct_acc": 0.0,
+        "pair_counterfactual_flip_acc": 0.0
+      },
+      "MP-1": {
+        "n_cases": 64,
+        "n_pairs": 32,
+        "n_label_changing_pairs": 32,
+        "per_property_binary_acc": 0.25,
+        "case_exact_acc": 0.0,
+        "pair_both_correct_acc": 0.0,
+        "pair_counterfactual_flip_acc": 0.0,
+        "confusion_matrices": {
+          "flammable": {
+            "TP": 16,
+            "TN": 16,
+            "FP": 16,
+            "FN": 16,
+            "precision": 0.5,
+            "recall": 0.5
+          },
+          "conductive": {
+            "TP": 0,
+            "TN": 0,
+            "FP": 32,
+            "FN": 32,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        }
+      },
+      "MP-2": {
+        "n_cases": 64,
+        "n_pairs": 32,
+        "n_label_changing_pairs": 32,
+        "per_property_binary_acc": 0.390625,
+        "case_exact_acc": 0.015625,
+        "pair_both_correct_acc": 0.0,
+        "pair_counterfactual_flip_acc": 0.0,
+        "confusion_matrices": {
+          "flammable": {
+            "TP": 23,
+            "TN": 23,
+            "FP": 9,
+            "FN": 9,
+            "precision": 0.71875,
+            "recall": 0.71875
+          },
+          "conductive": {
+            "TP": 2,
+            "TN": 2,
+            "FP": 30,
+            "FN": 30,
+            "precision": 0.0625,
+            "recall": 0.0625
+          }
+        }
+      },
+      "MP-3": {
+        "n_cases": 64,
+        "n_pairs": 32,
+        "n_label_changing_pairs": 32,
+        "per_property_binary_acc": 0.25,
+        "case_exact_acc": 0.0,
+        "pair_both_correct_acc": 0.0,
+        "pair_counterfactual_flip_acc": 0.0,
+        "confusion_matrices": {
+          "flammable": {
+            "TP": 16,
+            "TN": 16,
+            "FP": 16,
+            "FN": 16,
+            "precision": 0.5,
+            "recall": 0.5
+          },
+          "conductive": {
+            "TP": 0,
+            "TN": 0,
+            "FP": 32,
+            "FN": 32,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        }
+      }
+    },
+    "eb_metrics": {
+      "overall": {
+        "case_exact_acc": 0.2152777777777778,
+        "pair_both_correct_acc": 0.0625
+      },
+      "by_family": {
+        "EB-1": {
+          "n_cases": 72,
+          "n_pairs": 36,
+          "n_label_changing_pairs": 36,
+          "per_property_binary_acc": 0.6041666666666666,
+          "case_exact_acc": 0.2777777777777778,
+          "pair_both_correct_acc": 0.1111111111111111,
+          "pair_counterfactual_flip_acc": 0.1111111111111111,
+          "confusion_matrices": {
+            "flammable": {
+              "TP": 28,
+              "TN": 20,
+              "FP": 12,
+              "FN": 12,
+              "precision": 0.7,
+              "recall": 0.7
+            },
+            "conductive": {
+              "TP": 20,
+              "TN": 19,
+              "FP": 17,
+              "FN": 16,
+              "precision": 0.5405405405405406,
+              "recall": 0.5555555555555556
+            }
+          }
+        },
+        "EB-2": {
+          "n_cases": 72,
+          "n_pairs": 36,
+          "n_label_changing_pairs": 0,
+          "per_property_binary_acc": 0.5902777777777778,
+          "case_exact_acc": 0.25,
+          "pair_both_correct_acc": 0.1388888888888889,
+          "pair_counterfactual_flip_acc": 0.0,
+          "confusion_matrices": {
+            "flammable": {
+              "TP": 16,
+              "TN": 8,
+              "FP": 24,
+              "FN": 24,
+              "precision": 0.4,
+              "recall": 0.4
+            },
+            "conductive": {
+              "TP": 33,
+              "TN": 28,
+              "FP": 4,
+              "FN": 7,
+              "precision": 0.8918918918918919,
+              "recall": 0.825
+            }
+          }
+        },
+        "EB-3": {
+          "n_cases": 72,
+          "n_pairs": 36,
+          "n_label_changing_pairs": 36,
+          "per_property_binary_acc": 0.5208333333333334,
+          "case_exact_acc": 0.2361111111111111,
+          "pair_both_correct_acc": 0.0,
+          "pair_counterfactual_flip_acc": 0.0,
+          "confusion_matrices": {
+            "flammable": {
+              "TP": 10,
+              "TN": 17,
+              "FP": 15,
+              "FN": 30,
+              "precision": 0.4,
+              "recall": 0.25
+            },
+            "conductive": {
+              "TP": 16,
+              "TN": 32,
+              "FP": 4,
+              "FN": 20,
+              "precision": 0.8,
+              "recall": 0.4444444444444444
+            }
+          }
+        },
+        "EB-4": {
+          "n_cases": 72,
+          "n_pairs": 36,
+          "n_label_changing_pairs": 36,
+          "per_property_binary_acc": 0.5486111111111112,
+          "case_exact_acc": 0.09722222222222222,
+          "pair_both_correct_acc": 0.0,
+          "pair_counterfactual_flip_acc": 0.0,
+          "confusion_matrices": {
+            "flammable": {
+              "TP": 32,
+              "TN": 23,
+              "FP": 4,
+              "FN": 13,
+              "precision": 0.8888888888888888,
+              "recall": 0.7111111111111111
+            },
+            "conductive": {
+              "TP": 9,
+              "TN": 15,
+              "FP": 21,
+              "FN": 27,
+              "precision": 0.3,
+              "recall": 0.25
+            }
+          }
+        }
+      }
+    },
+    "query_sensitivity": {
+      "MP-2": {
+        "n_pairs": 32,
+        "query_sensitive_pairs": 28,
+        "query_blind_pairs": 4,
+        "query_sensitivity_rate": 0.875,
+        "query_blind_rate": 0.125
+      },
+      "EB-1": {
+        "n_pairs": 36,
+        "query_sensitive_pairs": 22,
+        "query_blind_pairs": 14,
+        "query_sensitivity_rate": 0.6111111111111112,
+        "query_blind_rate": 0.3888888888888889
+      }
+    },
+    "familiar_vs_unseen_entities": {
+      "familiar_training_entities": {
+        "entities": [
+          "Vim",
+          "Rax"
+        ],
+        "case_exact_acc": 0.0,
+        "pair_both_correct_acc": 0.0
+      },
+      "unseen_dev_entities": {
+        "entities": [
+          "Bax",
+          "Cip"
+        ],
+        "case_exact_acc": 0.0625,
+        "pair_both_correct_acc": 0.0
+      },
+      "generalization_gap": 0.0
+    },
+    "attention_margins": {
+      "num_analyzed_cases": 0,
+      "margins_matrix": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "mean_margin_per_layer": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "overall_mean_margin": 0.0
+    },
+    "representation_ridge_probe": {
+      "probe_flammable_test_acc": 0.9895833730697632,
+      "probe_conductive_test_acc": 0.9270833730697632,
+      "probe_mean_test_acc": 0.9583333730697632
+    }
+  },
+  "seed_44": {
+    "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11r2/stage-a11r2/r2_arm_2_last_token_seed_44_7200.pt",
+    "mp_metrics": {
+      "overall": {
+        "case_exact_acc": 0.13020833333333334,
+        "pair_both_correct_acc": 0.0,
+        "pair_counterfactual_flip_acc": 0.0
+      },
+      "MP-1": {
+        "n_cases": 64,
+        "n_pairs": 32,
+        "n_label_changing_pairs": 32,
+        "per_property_binary_acc": 0.25,
+        "case_exact_acc": 0.0,
+        "pair_both_correct_acc": 0.0,
+        "pair_counterfactual_flip_acc": 0.0,
+        "confusion_matrices": {
+          "flammable": {
+            "TP": 16,
+            "TN": 16,
+            "FP": 16,
+            "FN": 16,
+            "precision": 0.5,
+            "recall": 0.5
+          },
+          "conductive": {
+            "TP": 0,
+            "TN": 0,
+            "FP": 32,
+            "FN": 32,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        }
+      },
+      "MP-2": {
+        "n_cases": 64,
+        "n_pairs": 32,
+        "n_label_changing_pairs": 32,
+        "per_property_binary_acc": 0.5,
+        "case_exact_acc": 0.390625,
+        "pair_both_correct_acc": 0.0,
+        "pair_counterfactual_flip_acc": 0.0,
+        "confusion_matrices": {
+          "flammable": {
+            "TP": 14,
+            "TN": 18,
+            "FP": 14,
+            "FN": 18,
+            "precision": 0.5,
+            "recall": 0.4375
+          },
+          "conductive": {
+            "TP": 19,
+            "TN": 13,
+            "FP": 19,
+            "FN": 13,
+            "precision": 0.5,
+            "recall": 0.59375
+          }
+        }
+      },
+      "MP-3": {
+        "n_cases": 64,
+        "n_pairs": 32,
+        "n_label_changing_pairs": 32,
+        "per_property_binary_acc": 0.25,
+        "case_exact_acc": 0.0,
+        "pair_both_correct_acc": 0.0,
+        "pair_counterfactual_flip_acc": 0.0,
+        "confusion_matrices": {
+          "flammable": {
+            "TP": 16,
+            "TN": 16,
+            "FP": 16,
+            "FN": 16,
+            "precision": 0.5,
+            "recall": 0.5
+          },
+          "conductive": {
+            "TP": 0,
+            "TN": 0,
+            "FP": 32,
+            "FN": 32,
+            "precision": 0.0,
+            "recall": 0.0
+          }
+        }
+      }
+    },
+    "eb_metrics": {
+      "overall": {
+        "case_exact_acc": 0.3159722222222222,
+        "pair_both_correct_acc": 0.0763888888888889
+      },
+      "by_family": {
+        "EB-1": {
+          "n_cases": 72,
+          "n_pairs": 36,
+          "n_label_changing_pairs": 36,
+          "per_property_binary_acc": 0.4791666666666667,
+          "case_exact_acc": 0.3055555555555556,
+          "pair_both_correct_acc": 0.0,
+          "pair_counterfactual_flip_acc": 0.0,
+          "confusion_matrices": {
+            "flammable": {
+              "TP": 24,
+              "TN": 9,
+              "FP": 23,
+              "FN": 16,
+              "precision": 0.5106382978723404,
+              "recall": 0.6
+            },
+            "conductive": {
+              "TP": 15,
+              "TN": 21,
+              "FP": 15,
+              "FN": 21,
+              "precision": 0.5,
+              "recall": 0.4166666666666667
+            }
+          }
+        },
+        "EB-2": {
+          "n_cases": 72,
+          "n_pairs": 36,
+          "n_label_changing_pairs": 0,
+          "per_property_binary_acc": 0.5972222222222222,
+          "case_exact_acc": 0.4444444444444444,
+          "pair_both_correct_acc": 0.3055555555555556,
+          "pair_counterfactual_flip_acc": 0.0,
+          "confusion_matrices": {
+            "flammable": {
+              "TP": 32,
+              "TN": 11,
+              "FP": 21,
+              "FN": 8,
+              "precision": 0.6037735849056604,
+              "recall": 0.8
+            },
+            "conductive": {
+              "TP": 15,
+              "TN": 28,
+              "FP": 4,
+              "FN": 25,
+              "precision": 0.7894736842105263,
+              "recall": 0.375
+            }
+          }
+        },
+        "EB-3": {
+          "n_cases": 72,
+          "n_pairs": 36,
+          "n_label_changing_pairs": 36,
+          "per_property_binary_acc": 0.2916666666666667,
+          "case_exact_acc": 0.08333333333333333,
+          "pair_both_correct_acc": 0.0,
+          "pair_counterfactual_flip_acc": 0.0,
+          "confusion_matrices": {
+            "flammable": {
+              "TP": 22,
+              "TN": 6,
+              "FP": 26,
+              "FN": 18,
+              "precision": 0.4583333333333333,
+              "recall": 0.55
+            },
+            "conductive": {
+              "TP": 2,
+              "TN": 12,
+              "FP": 24,
+              "FN": 34,
+              "precision": 0.07692307692307693,
+              "recall": 0.05555555555555555
+            }
+          }
+        },
+        "EB-4": {
+          "n_cases": 72,
+          "n_pairs": 36,
+          "n_label_changing_pairs": 36,
+          "per_property_binary_acc": 0.5625,
+          "case_exact_acc": 0.4305555555555556,
+          "pair_both_correct_acc": 0.0,
+          "pair_counterfactual_flip_acc": 0.0,
+          "confusion_matrices": {
+            "flammable": {
+              "TP": 32,
+              "TN": 13,
+              "FP": 14,
+              "FN": 13,
+              "precision": 0.6956521739130435,
+              "recall": 0.7111111111111111
+            },
+            "conductive": {
+              "TP": 18,
+              "TN": 18,
+              "FP": 18,
+              "FN": 18,
+              "precision": 0.5,
+              "recall": 0.5
+            }
+          }
+        }
+      }
+    },
+    "query_sensitivity": {
+      "MP-2": {
+        "n_pairs": 32,
+        "query_sensitive_pairs": 0,
+        "query_blind_pairs": 32,
+        "query_sensitivity_rate": 0.0,
+        "query_blind_rate": 1.0
+      },
+      "EB-1": {
+        "n_pairs": 36,
+        "query_sensitive_pairs": 1,
+        "query_blind_pairs": 35,
+        "query_sensitivity_rate": 0.027777777777777776,
+        "query_blind_rate": 0.9722222222222222
+      }
+    },
+    "familiar_vs_unseen_entities": {
+      "familiar_training_entities": {
+        "entities": [
+          "Vim",
+          "Rax"
+        ],
+        "case_exact_acc": 0.0,
+        "pair_both_correct_acc": 0.0
+      },
+      "unseen_dev_entities": {
+        "entities": [
+          "Tor",
+          "Lum"
+        ],
+        "case_exact_acc": 0.390625,
+        "pair_both_correct_acc": 0.0
+      },
+      "generalization_gap": 0.0
+    },
+    "attention_margins": {
+      "num_analyzed_cases": 0,
+      "margins_matrix": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ]
+      ],
+      "mean_margin_per_layer": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "overall_mean_margin": 0.0
+    },
+    "representation_ridge_probe": {
+      "probe_flammable_test_acc": 0.8333333730697632,
+      "probe_conductive_test_acc": 0.8333333730697632,
+      "probe_mean_test_acc": 0.8333333730697632
+    }
+  }
+}
