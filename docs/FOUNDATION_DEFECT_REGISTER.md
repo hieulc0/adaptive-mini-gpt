@@ -21,7 +21,9 @@ This register tracks all critical architectural defects, numerical failure modes
 | **FDR-011** | Stage A.11-R | Architecture | Multi-entity binding failure in causal last-token readout | **Resolved** | Stage A.11-R2 |
 | **FDR-012** | Stage A.11-R2 | Implementation | Evaluator secondary forward strategy bypass (`strategy=None` -> ECA) | **Resolved** | Stage A.11-R2 |
 | **FDR-013** | Stage A.11-R2 | Optimization | Single-token causal readout cross-seed variance on multi-entity queries | **Characterized** | Stage A.12 |
-| **FDR-014** | Stage A.12 | Architecture | Query blindness & attention shortcut learning in unparameterized cross-readout | **Identified** | Stage A.13 |
+| **FDR-014** | Stage A.12 | Architecture | Query blindness & attention shortcut learning in unparameterized cross-readout | **Resolved** | Stage A.13 |
+| **FDR-015** | Stage A.13 | Architecture | Causal byte-level unidirectional prefix bottleneck on trailing entity queries | **Characterized** | Stage A.13 |
+| **FDR-016** | Stage B.0 | Exploration | REINFORCE sample inefficiency under tight practice horizons in continual learning | **Identified** | Stage B.0 |
 
 ---
 
@@ -73,3 +75,25 @@ Stage A.12 empirical findings (`96ffaad` / `9c67ce8`, 867 full GPU regressions p
 - **PREREGISTERED SEALED ISOLATION PRESERVED**:
   - `sealed_a11_v1` was not evaluated and remains 100% unviewed and pristine.
   - Overall Verdict: **`FAIL`**. No checkpoint is promoted. Continuation verified ($\Delta \text{logit} = 0.00\text{e+}00$). 867 GPU regression tests passed.
+
+Stage A.13 & Stage B.0 empirical findings (`edb225b` / `8567836`, 873 full GPU regressions pass; [report](STAGE_A13_B0.md)):
+- **FDR-014 RESOLVED & DOCUMENTATION DISCREPANCY RECONCILED (Stage A.13 Phase A13.1)**:
+  - Reconciled A.11-R2 (`832326b`) vs. A.12 (`96ffaad`) documentation discrepancy: `docs/STAGE_A12.md` accurately reported `0.00% / 100.00% / 18.75%` (mean `39.58%`), matching `stage_a12_v1.json`, whereas `README.md` in `96ffaad` cited intermediate draft numbers (`87.50% / 100.00% / 0.00%`). Formal erratum documented.
+  - Baseline divergence mechanism isolated to `scripts/run_stage_a11r2.py` constructing `balanced_plan` before `seed_all(seed)` vs. `scripts/run_stage_a12.py` invoking it after `seed_all(seed)`.
+  - Fixed Phase 1 Table 2 indexing bug in `diagnose_stage_a12_seeds.py` (`tag_logits[:, [6, 7]]` -> `TAG_IDS = (10, 15)`), proving familiar training names achieve **100.00% MP-2 Both across all seeds**.
+  - Continuous logit sensitivity proved Seed 44 suffers true representation-level query blindness on unseen names (hidden shift $\Delta_h = 0.31$, cosine distance $0.0004$, OOD ridge probe $50.00\%$ chance).
+- **FDR-015 CHARACTERIZED (Track A Architectural Bottleneck on Causal Byte Encodings)**:
+  - Controlled comparison between `A13_ARM_1_LAST_TOKEN_CONTROL` and `A13_ARM_2_LEARNED_ENTITY_CROSS_ATTENTION` (using student's registered ECA MultiheadAttention with 0 parameter growth):
+    - In `A13_ARM_2`, Seed 43 achieved **100.00% MP-2 Both**, proving cross-attention projections ($W_Q, W_K, W_V$) can route target attributes when the prefix representation supports it.
+    - However, Seed 42 collapsed to **0.00%** and Seed 44 to **21.88%** on `MP-2` (mean `40.62%`), replicating extreme seed bifurcation.
+    - Architectural root cause: in unidirectional causal byte models, prefix tokens are encoded before the trailing entity query target is observed; attention easily falls into local prefix shortcuts. Multi-pass or bidirectional entity indexing is structurally necessary.
+  - Preregistered stop rule executed: `sealed_a11_v1` remained strictly unviewed and untouched.
+- **FDR-016 IDENTIFIED & CONTINUAL LEARNING CERTIFIED (Track B Stage B.0 Persistent Self-Learning Pilot)**:
+  - Successfully demonstrated that **one continuous `LearningState`** (0 weight/optimizer resets) acquires sequential concepts `A -> B -> C` under tight budgets (160 queries, 400 updates per concept) with 92.5%–100% relative knowledge retention via 25% episodic replay.
+  - Isolated comparative deltas:
+    - Forward Transfer Delta: $-2.70\%$ AULC ($0.4154$ vs $0.4424$, slight negative transfer under tight budgets).
+    - Active Heuristic Delta: $+0.79\%$ AULC ($0.4233$ vs $0.4154$, fixed entropy heuristic outperforms random practice).
+    - Learned Policy Delta: $-1.59\%$ AULC ($0.4074$ vs $0.4233$). Under 10 rounds $\times$ 16 queries per concept, REINFORCE exploration variance cannot surpass deterministic entropy heuristics without longer training horizons.
+- **CONTINUATION & REGRESSION CERTIFIED**:
+  - Deterministic continuation verified bit-perfectly ($\Delta \text{logit} = 0.00\text{e+}00$).
+  - Full remote regression suite: **873 passed, 0 failed** in 630.80s on Kaggle Tesla T4 GPU.

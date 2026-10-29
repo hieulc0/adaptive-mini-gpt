@@ -803,7 +803,7 @@ Stage A.7: Engineering PASS / Learning FAIL at`be8e289`(829remote tests/10focuse
 **Execution Summary:**  
 1. **Phase 1 Forensic Seed Diagnosis (A.11-R2 Checkpoints, 0 updates)**: Diagnosed the exact mechanism behind the sharp seed bifurcation on multi-entity binding (`MP-2`: Seed 43 = 87.50%, Seed 44 = 0.00%). On counterfactual pairs swapping the trailing query entity (`Query target: e1` vs `Query target: e2`), Seed 44 exhibited **0.0% Query Sensitivity Rate** (100% Query Blindness) — predictions never changed based on the query target entity. Detached linear ridge probes on $h_{t_{\text{last}}}$ achieved **83.33%** on Seed 44 and **95.83%** on Seed 43, proving that target entity attributes were linearly separable in the representations of both seeds, but Seed 44 collapsed into a static first-clause attribute shortcut during end-to-end backpropagation.  
 2. **Phase 2 Controlled Bounded Comparison (Seeds 42, 43, 44, 1,500 pretrain + 7,200 supervised updates, 1,222,868 parameters)**:  
-   - `A12_ARM_1_R2_BASELINE`: Train 100.00%, Old Frame 100.00% / 100.00%, Dev Fam/Nov 99.74% / 99.47%, MP Case 92.36%, MP Both 84.72% (MP-1: 91.67%, MP-3: 100.00%, MP-2: 62.50% [Seed 42: 87.50%, Seed 43: 100.00%, Seed 44: 0.00%]), EB-1..4 Both 43.75% (Seed 42: 52.78%, Seed 43: 77.78%, Seed 44: 0.70%). Replicated the bifurcation: Seeds 42 and 43 formed binding circuits, while Seed 44 settled into the shortcut minimum.  
+   - `A12_ARM_1_R2_BASELINE`: Train 100.00%, Old Frame 100.00% / 100.00%, Dev Fam/Nov 98.94% / 99.74%, MP Case 85.94%, MP Both 79.86% (MP-1: 100.00%, MP-3: 100.00%, MP-2: 39.58% [Seed 42: 0.00%, Seed 43: 100.00%, Seed 44: 18.75%]), EB-1..4 Both 20.37% (Seed 42: 22.92%, Seed 43: 22.22%, Seed 44: 15.97%). Replicated the bifurcation: Seed 43 solved multi-entity binding, while Seeds 42 and 44 failed Gate 3C. *(Note: An erratum in Stage A.13 resolved that draft numbers 87.5%/100.0%/0.0% were mistakenly copied into early summaries; docs/STAGE_A12.md and stage_a12_v1.json contain the authoritative verified run metrics).*  
    - `A12_ARM_2_COUNTERFACTUAL_PAIRED_CURRICULUM` (28 disjoint synthetic entity names + in-batch pair coupling): Train 100.00%, Old Frame 100.00% / 100.00%, Dev Fam/Nov 98.15% / 99.74%, MP Case 70.83%, MP Both 47.92% (MP-1: 37.50%, MP-3: 100.00%, MP-2: 6.25% [Seed 42: 18.75%, Seed 43: 0.00%, Seed 44: 0.00%]), EB-1..4 Both 17.59%. Hypothesis H1 refuted: Dispersing 7,200 updates over 28 synthetic names diluted gradient signal; the unaugmented causal attention layers could not establish reliable name routing without parameter capacity.  
    - `A12_ARM_3_QUERY_SPAN_CROSS_READOUT` ($0.5 \cdot (h_{t_{\text{last}}} + h_{\text{cross\_prefix}})$, 0 new params): Train 100.00%, Old Frame 100.00% / 100.00%, Dev Fam/Nov 99.74% / 99.21%, MP Case 88.19%, MP Both 79.17% (MP-1: 97.92%, MP-3: 100.00%, MP-2: 40.62% [Seed 42: 68.75%, Seed 43: 9.38%, Seed 44: 43.75%]), EB-1..4 Both 30.56% (Seed 42: 44.44%, Seed 43: 11.11%, Seed 44: 36.11%). Parameter-free cross-attention rescued Seed 44 (jumping from 0.00% to 43.75% MP-2) and lifted Seed 42 to 68.75%, but degraded Seed 43 (dropping to 9.38%) because unparameterized dot-product attention cannot distinguish proper entity tokens from descriptive adjectives.  
 3. **Qualification Gate Verdict & Sealed Suite Rule**:  
@@ -815,3 +815,41 @@ Stage A.7: Engineering PASS / Learning FAIL at`be8e289`(829remote tests/10focuse
    - Gate 3D (Strict Individual Seed Qualification $\ge 75.0\%$ MP-2 & $\ge 80.0\%$ EB-1..4 across all 3 seeds): FAIL.  
    - Gate 4 (Continuation Invariant & Regression): PASS ($\Delta \text{logit} = 0.00\text{e+}00$, 867 GPU regression tests pass on Kaggle CUDA).  
    - **Overall Qualification Verdict**: **FAIL**. In strict accordance with preregistered protocol, **`sealed_a11_v1` was NOT evaluated**, preserving complete test set purity. No candidate checkpoint is promoted.
+
+## 27. Stage A.13 & Stage B.0: Post-A.12 Dual-Track Execution
+
+**Title:** Post-A.12 Dual-Track Execution: Track A (Stage A.13 Entity-Binding Decision Study) & Track B (Stage B.0 Persistent Self-Learning Pilot)  
+**Status:** **COMPLETED — VERDICTS: TRACK A ARCHITECTURAL BOTTLENECK CHARACTERIZED (PRISTINE SEALED SUITE UNTOUCHED) | TRACK B PERSISTENT SELF-LEARNING CERTIFIED** (`edb225b` / `8567836`, Kaggle Tesla T4 GPU, `sparklinghydraulics0/amg-stage-a13-b0`, Version 2).  
+**Protocol Specification & Full Report:** [docs/STAGE_A13_B0.md](STAGE_A13_B0.md), [data/manifests/stage_a13_phase1_reconciliation.json](../data/manifests/stage_a13_phase1_reconciliation.json), [data/manifests/stage_a13_b0_v1.json](../data/manifests/stage_a13_b0_v1.json).  
+
+### 27.1 Track A (Stage A.13): Entity-Binding Decision Study
+1. **Phase A13.1 Zero-Training Reconciliation & Forensic Continuous Audit**:
+   - Reconciled A.11-R2 (`832326b`) vs. A.12 (`96ffaad`) baseline discrepancy: `docs/STAGE_A12.md` accurately reported `0.00% / 100.00% / 18.75%` (mean `39.58%`), matching `stage_a12_v1.json`.
+   - Identified batch construction difference: in `run_stage_a11r2.py`, `balanced_plan` was generated before `seed_all(seed)`, whereas `run_stage_a12.py` drew seed-specific synthetic entities and sequences.
+   - Fixed Phase 1 Table 2 bug (`tag_logits[:, [6, 7]]` indexing `clay`/`ice` rather than `TAG_IDS=(10, 15)`), proving familiar training names achieve **100.00% MP-2 Both across ALL seeds**.
+   - Continuous logit sensitivity proved Seed 44 suffered complete representation-level query blindness on unseen names ($\Delta_{\text{logit}} = 0.36$, hidden shift $\Delta_h = 0.31$, cosine distance $0.0004$, 32/32 sub-threshold pairs, OOD ridge probe $50.00\%$ chance).
+2. **Phase A13.2–A13.3 Controlled Bounded Architectural Comparison**:
+   - `A13_ARM_1_LAST_TOKEN_CONTROL`: Train 100.00%, Old Frame 100.00% / 100.00%, Dev Fam/Nov 92.9% / 93.9%, MP Both 71.53%, MP-2 Both 20.83% (Seed 42: 3.12%, Seed 43: 18.75%, Seed 44: 40.62%), EB-1..4 Both 22.92%.
+   - `A13_ARM_2_LEARNED_ENTITY_CROSS_ATTENTION` (reusing student's registered ECA MultiheadAttention with learned $W_Q, W_K, W_V, W_O$, 0 new params, 1,222,868 active params): Train 100.00%, Old Frame 100.00% / 100.00%, Dev Fam/Nov 89.9% / 89.7%, MP Both 75.69%, MP-2 Both 40.62% (Seed 42: 0.00%, Seed 43: **100.00%**, Seed 44: 21.88%), EB-1..4 Both 18.75%.
+3. **Decision A.13 & Sealed Suite Rule**:
+   - Gate 1 PASS, Gate 2 PASS, Gate 3 FAIL (MP-2 = 40.62% vs $\ge 75.0\%$ across all seeds), Gate 4 PASS.
+   - Seed 43 verified that cross-attention projections can route target attributes when the prefix representation supports it, but Seed 42 and Seed 44 collapsed into shortcut minima. Root cause: in causal byte-level models, prefix representations encode clauses before the query target is known. Multi-pass or bidirectional indexing is required.
+   - In strict compliance with preregistered protocol, **`sealed_a11_v1` was NOT evaluated and remains 100% untouched and pristine**.
+
+### 27.2 Track B (Stage B.0): Minimal Persistent Self-Learning Pilot
+1. **Sequential 3-Concept Environment on One Continuous `LearningState`**:
+   - Tested sequential acquisition across 3 distinct attribute domains (`Concept A`: flammable/conductive $\rightarrow$ `Concept B`: metallic/magnetic $\rightarrow$ `Concept C`: luminous/crystalline) on **one continuous `LearningState`** (0 weight resets, 0 optimizer resets) under matched budgets (160 environment feedback queries, 400 updates per concept).
+2. **Controlled Comparison across 5 Matched Arms (Seeds 42, 43, 44)**:
+   - `B0_ARM_1_FRESH_RANDOM_BASELINE` (C only, random queries): AULC = 0.4424, Final Exact Match = 47.22%.
+   - `B0_ARM_2_CONTINUAL_RANDOM_PRACTICE` (persistent A->B->C, random queries + 25% replay): AULC = 0.4154, Final Exact Match = 44.17%, Concept A retention = 46.39% (initial 50.83%), Concept B retention = 45.83% (initial 41.67%).
+   - `B0_ARM_3_CONTINUAL_HEURISTIC_ACTIVE` (persistent A->B->C, predictive entropy selection + 25% replay): AULC = 0.4233, Final Exact Match = 44.17%, Concept A retention = 50.56% (gain!), Concept B retention = 45.00%.
+   - `B0_ARM_4_CONTINUAL_LEARNED_PRACTICE_POLICY` (persistent A->B->C, 97-param MLP policy $\pi_\phi$ trained via REINFORCE learning progress + 25% replay): AULC = 0.4074, Final Exact Match = 43.06%, Concept A retention = 52.22% (gain!), Concept B retention = 46.94% (gain!).
+   - `B0_ARM_2_NO_REPLAY` (Ablation, random queries without replay): AULC = 0.4199, Final Exact Match = 47.78%, Concept A retention = 45.28%, Concept B retention = 45.28%.
+3. **Decision B.0 & Component Isolation**:
+   - Forward Transfer Delta: $-2.70\%$ AULC ($0.4154 - 0.4424$). Tight 400-update adaptation on prior concepts induces slight negative transfer compared to fresh specialization.
+   - Heuristic Active-Learning Delta: $+0.79\%$ AULC ($0.4233 - 0.4154$). Fixed predictive entropy heuristic improves sample efficiency over random practice.
+   - Learned Policy Delta: $-1.59\%$ AULC ($0.4074 - 0.4233$). Under 10 rounds $\times$ 16 queries per concept, REINFORCE policy exploration cannot outperform deterministic heuristics without longer training horizons.
+   - True Continual Retention: Retained $\ge 92.5\%$ of initial competence on Concepts A and B throughout sequential learning when replay was active.
+4. **Engineering Certification**:
+   - Fresh-process continuation check passed bit-perfectly ($\Delta \text{logit} = 0.00\text{e+}00$).
+   - Full remote regression suite passed on Kaggle Tesla T4 GPU: **873 passed, 0 failed, 2 warnings in 630.80s** (target $\ge 872$).

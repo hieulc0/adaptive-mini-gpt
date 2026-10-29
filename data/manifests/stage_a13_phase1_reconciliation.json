@@ -1,0 +1,124 @@
+{
+  "audit_name": "Stage A.13 Phase A13.1 Zero-Training Reconciliation",
+  "documentation_discrepancy_erratum": {
+    "historical_issue_1": "A.11-R2 (832326b) reported R2_ARM_2_LAST_TOKEN MP-2 scores of 75.00% / 87.50% / 0.00% (Seeds 42, 43, 44; mean 54.17%). Stage A.12 (96ffaad) docs/STAGE_A12.md accurately recorded A12_ARM_1_R2_BASELINE as 0.00% / 100.00% / 18.75% (mean 39.58%), matching data/manifests/stage_a12_v1.json. However, README.md and docs/04-experiments.md in 96ffaad erroneously reported 87.50% / 100.00% / 0.00% (mean 62.50%).",
+    "cause_of_doc_discrepancy": "README.md and docs/04-experiments.md inadvertently cited intermediate/swapped draft numbers rather than the finalized manifest data/manifests/stage_a12_v1.json. docs/STAGE_A12.md contains the true empirical measurements from the remote Kaggle run.",
+    "cause_of_a11r2_vs_a12_baseline_divergence": "In scripts/run_stage_a11r2.py, eb_train_suite was instantiated once with fixed seed=42 before the seed loop, and balanced_plan was constructed once before calling seed_all(seed). In contrast, in scripts/run_stage_a12.py, eb_suite_train was called with seed=seed inside the per-seed loop, and plan_fn (build_a11r2_balanced_plan) was invoked after seed_all(seed), which drew seed-specific training entities for Seeds 43 and 44 and altered the pseudo-random batch shuffling sequence.",
+    "phase_1_table_2_bug_explanation": "In scripts/diagnose_stage_a12_seeds.py (lines 278, 292, 398, 410), predictions were extracted via tag_logits[:, [6, 7]], corresponding to attributes 'clay' and 'ice' (or 'crystalline' / 'glass') rather than TAG_IDS = (10, 15) ('flammable' and 'conductive'). Because targets were scored on the wrong attribute dimensions, all seeds produced 0.00% accuracy on Table 2."
+  },
+  "per_seed_continuous_sensitivity": {
+    "seed_42": {
+      "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11r2/stage-a11r2/r2_arm_2_last_token_seed_42_7200.pt",
+      "MP-2": {
+        "n_pairs": 32,
+        "delta_logit_mean": 31.571704864501953,
+        "delta_h_l2_mean": 14.337566375732422,
+        "cosine_distance_mean": 0.542941153049469,
+        "signed_target_margin_mean": 14.868736267089844,
+        "signed_margin_positive_rate": 0.90625,
+        "discrete_prediction_flip_rate": 0.90625,
+        "sub_threshold_sensitivity_count": 3
+      },
+      "EB-1": {
+        "n_pairs": 36,
+        "delta_logit_mean": 30.05470085144043,
+        "delta_h_l2_mean": 16.33214569091797,
+        "cosine_distance_mean": 0.6892157196998596,
+        "signed_target_margin_mean": 15.813217163085938,
+        "signed_margin_positive_rate": 0.9166666865348816,
+        "discrete_prediction_flip_rate": 0.944444477558136,
+        "sub_threshold_sensitivity_count": 2
+      }
+    },
+    "seed_43": {
+      "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11r2/stage-a11r2/r2_arm_2_last_token_seed_43_7200.pt",
+      "MP-2": {
+        "n_pairs": 32,
+        "delta_logit_mean": 37.40250778198242,
+        "delta_h_l2_mean": 17.729040145874023,
+        "cosine_distance_mean": 0.7839335203170776,
+        "signed_target_margin_mean": 18.605283737182617,
+        "signed_margin_positive_rate": 0.984375,
+        "discrete_prediction_flip_rate": 1.0,
+        "sub_threshold_sensitivity_count": 0
+      },
+      "EB-1": {
+        "n_pairs": 36,
+        "delta_logit_mean": 19.52124786376953,
+        "delta_h_l2_mean": 11.548604011535645,
+        "cosine_distance_mean": 0.3952481746673584,
+        "signed_target_margin_mean": 2.6284232139587402,
+        "signed_margin_positive_rate": 0.5333333611488342,
+        "discrete_prediction_flip_rate": 0.694444477558136,
+        "sub_threshold_sensitivity_count": 11
+      }
+    },
+    "seed_44": {
+      "checkpoint": "/kaggle/input/notebooks/sparklinghydraulics0/amg-stage-a11r2/stage-a11r2/r2_arm_2_last_token_seed_44_7200.pt",
+      "MP-2": {
+        "n_pairs": 32,
+        "delta_logit_mean": 0.36259132623672485,
+        "delta_h_l2_mean": 0.3067546486854553,
+        "cosine_distance_mean": 0.0004144608974456787,
+        "signed_target_margin_mean": -0.013188733719289303,
+        "signed_margin_positive_rate": 0.453125,
+        "discrete_prediction_flip_rate": 0.0,
+        "sub_threshold_sensitivity_count": 32
+      },
+      "EB-1": {
+        "n_pairs": 36,
+        "delta_logit_mean": 0.6553427577018738,
+        "delta_h_l2_mean": 0.5586894154548645,
+        "cosine_distance_mean": 0.0010077242041006684,
+        "signed_target_margin_mean": -0.16037476062774658,
+        "signed_margin_positive_rate": 0.4166666865348816,
+        "discrete_prediction_flip_rate": 0.02777777798473835,
+        "sub_threshold_sensitivity_count": 35
+      }
+    }
+  },
+  "per_seed_probe_verification": {
+    "seed_42": {
+      "corrected_familiar_vs_unseen": {
+        "familiar_train_names_mp2_both": 1.0,
+        "unseen_dev_names_mp2_both": 0.75,
+        "generalization_gap": 0.25
+      },
+      "strict_ood_ridge_probe": {
+        "train_samples": 192,
+        "eval_samples": 64,
+        "probe_flammable_test_acc": 0.890625,
+        "probe_conductive_test_acc": 0.828125,
+        "probe_mean_test_acc": 0.859375
+      }
+    },
+    "seed_43": {
+      "corrected_familiar_vs_unseen": {
+        "familiar_train_names_mp2_both": 1.0,
+        "unseen_dev_names_mp2_both": 0.65625,
+        "generalization_gap": 0.34375
+      },
+      "strict_ood_ridge_probe": {
+        "train_samples": 192,
+        "eval_samples": 64,
+        "probe_flammable_test_acc": 1.0,
+        "probe_conductive_test_acc": 0.890625,
+        "probe_mean_test_acc": 0.9453125
+      }
+    },
+    "seed_44": {
+      "corrected_familiar_vs_unseen": {
+        "familiar_train_names_mp2_both": 1.0,
+        "unseen_dev_names_mp2_both": 0.0,
+        "generalization_gap": 1.0
+      },
+      "strict_ood_ridge_probe": {
+        "train_samples": 192,
+        "eval_samples": 64,
+        "probe_flammable_test_acc": 0.5,
+        "probe_conductive_test_acc": 0.5,
+        "probe_mean_test_acc": 0.5
+      }
+    }
+  }
+}
