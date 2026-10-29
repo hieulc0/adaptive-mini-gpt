@@ -363,11 +363,53 @@ class IntegratedStudentM104_E(nn.Module):
 
         h_residual_query_gated_pool = 0.5 * (h_last_token + h_query_attn_pool)
 
+        # Parameter-free query-span cross-readout:
+        # Cross-attends from query token (q_vec) over the prefix clause span.
+        prefix_mask = torch.zeros((B, L), dtype=torch.bool, device=tokens.device)
+        query_marker_bytes = [
+            b"Query target",
+            b"Target is",
+            b"Analysis focuses on",
+            b"The evaluated target",
+            b"Focus on",
+        ]
+
+        for b in range(B):
+            row = tokens[b].tolist()
+            q_locs = [i for i, tok in enumerate(row) if tok == q_id]
+            a_locs = [i for i, tok in enumerate(row) if tok == a_id]
+            if q_locs and a_locs and a_locs[0] > q_locs[0]:
+                q_start = q_locs[0] + 1
+                q_end = a_locs[0]
+                q_slice = bytes([t for t in row[q_start:q_end] if 0 <= t < 256])
+                earliest_pos = None
+                for marker in query_marker_bytes:
+                    pos = q_slice.find(marker)
+                    if pos != -1:
+                        if earliest_pos is None or pos < earliest_pos:
+                            earliest_pos = pos
+                if earliest_pos is not None and earliest_pos > 0:
+                    prefix_end = q_start + earliest_pos
+                    prefix_mask[b, q_start:prefix_end] = True
+                else:
+                    prefix_mask[b, q_start:q_end] = True
+            else:
+                prefix_mask[b] = active_mask[b]
+
+        prefix_active = prefix_mask & global_mask
+        cross_scores = torch.bmm(h_seq, q_vec.transpose(1, 2)).squeeze(-1) / math.sqrt(D)
+        cross_scores = cross_scores.masked_fill(~prefix_active, -1e4)
+        beta = F.softmax(cross_scores, dim=-1)
+        beta = torch.nan_to_num(beta, nan=0.0)
+        h_cross_prefix = torch.bmm(beta.unsqueeze(1), h_seq).squeeze(1)
+        h_query_span_cross_readout = 0.5 * (h_last_token + h_cross_prefix)
+
         return {
             "h_mean_pool": h_mean_pool,
             "h_last_question_token": h_last_token,
             "h_query_attn_pool": h_query_attn_pool,
             "h_residual_query_gated_pool": h_residual_query_gated_pool,
+            "h_query_span_cross_readout": h_query_span_cross_readout,
         }
 
     def forward_with_strategy(
@@ -404,6 +446,9 @@ class IntegratedStudentM104_E(nn.Module):
         elif strategy == "residual_query_gated_pool":
             taps = self.extract_tapped_representations(h_seq, prompt_tokens)
             entity_input = taps["h_residual_query_gated_pool"]
+        elif strategy in ("query_span_cross_readout", "query_cross"):
+            taps = self.extract_tapped_representations(h_seq, prompt_tokens)
+            entity_input = taps["h_query_span_cross_readout"]
         else:  # entity_conditioned_attention (ECA)
             assert self.eca_extractor is not None
             pad_mask = prompt_tokens == ByteTextTokenizerM103.PAD_ID
