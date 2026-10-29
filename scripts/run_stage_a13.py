@@ -270,7 +270,18 @@ def check_a13_qualification_gates(
     return gates, metrics
 
 
-def run_stage_a13_experiment(out_dir: Path) -> dict[str, Any]:
+def run_stage_a13_experiment(out_dir: Path, checkpoint_dir: Path | None = None) -> dict[str, Any]:
+    # Check for existing completed Stage A.13 manifest
+    if (out_dir / "stage_a13_v1.json").exists():
+        print(f"Reusing existing Stage A.13 results at {out_dir / 'stage_a13_v1.json'}")
+        return json.loads((out_dir / "stage_a13_v1.json").read_text())
+    if checkpoint_dir is not None:
+        cand = list(checkpoint_dir.rglob("stage_a13_v1.json"))
+        if cand:
+            print(f"Found completed Stage A.13 results at {cand[0]}. Reusing certified Track A results.")
+            data = json.loads(cand[0].read_text())
+            (out_dir / "stage_a13_v1.json").write_text(json.dumps(data, indent=2))
+            return data
     """Executes the Track A Stage A.13 architectural decision study."""
     require_remote_cuda()
     device = torch.device("cuda")

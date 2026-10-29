@@ -32,12 +32,11 @@ class FixedHeuristicSelectorB0:
         k: int = 16,
     ) -> list[int]:
         """Ranks candidates by predictive entropy."""
-        sub_logits = logits[unqueried_indices]
-        probs = torch.sigmoid(sub_logits)
+        probs = torch.sigmoid(logits)
         entropy = compute_binary_entropy(probs)
-        # Higher entropy = higher uncertainty
-        top_k_local = torch.topk(entropy, min(k, len(unqueried_indices))).indices.tolist()
-        return [unqueried_indices[i] for i in top_k_local]
+        k_actual = min(k, len(unqueried_indices))
+        top_k_local = torch.topk(entropy, k_actual).indices.tolist()
+        return [unqueried_indices[int(i)] for i in top_k_local]
 
 
 class NeuralPracticePolicyB0(nn.Module):
@@ -77,8 +76,7 @@ class NeuralPracticePolicyB0(nn.Module):
         sample: bool = True,
     ) -> tuple[list[int], torch.Tensor | None]:
         """Selects k candidate indices based on policy scores."""
-        sub_feats = features[unqueried_indices]
-        scores = self.forward(sub_feats)  # (M,)
+        scores = self.forward(features)  # (M,)
         k_actual = min(k, len(unqueried_indices))
 
         if sample and len(unqueried_indices) > k_actual:

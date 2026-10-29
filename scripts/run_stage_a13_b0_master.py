@@ -47,7 +47,7 @@ def run_master_experiment(out_dir: Path, checkpoint_dir: Path) -> dict[str, Any]
 
     # 2. Phase A13.2-A13.3 Track A
     track_a_out = out_dir / "stage-a13"
-    track_a_results = run_stage_a13_experiment(track_a_out)
+    track_a_results = run_stage_a13_experiment(track_a_out, checkpoint_dir=checkpoint_dir)
 
     # 3. Phase B0.1-B0.3 Track B
     track_b_out = out_dir / "stage-b0"

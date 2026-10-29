@@ -185,8 +185,7 @@ def run_stage_b0_seed(
                         strategy="last_question_token",
                     )
                 assert c_logits is not None
-                chosen_locals = FixedHeuristicSelectorB0.rank_candidates(c_logits[:, list(spec.tag_ids)], list(range(len(unqueried_pool))), k=queries_per_round)
-                chosen_indices = [unqueried_pool[i] for i in chosen_locals]
+                chosen_indices = FixedHeuristicSelectorB0.rank_candidates(c_logits[:, list(spec.tag_ids)], unqueried_pool, k=queries_per_round)
                 log_prob = None
             else:  # learned_policy
                 assert policy is not None
@@ -243,6 +242,11 @@ def run_stage_b0_seed(
                 targets_full[i, t_ids[0]] = float(c.labels[0])
                 targets_full[i, t_ids[1]] = float(c.labels[1])
 
+            # Active observed tags across all stages encountered so far
+            active_tags: list[int] = []
+            for s in range(stage_idx + 1):
+                active_tags.extend(list(CONCEPTS[concept_stages[s]].tag_ids))
+
             model.train()
             batch_sz = 16
             for _ in range(updates_per_round):
@@ -251,8 +255,8 @@ def run_stage_b0_seed(
                 assert logits is not None
 
                 loss = nn.functional.binary_cross_entropy_with_logits(
-                    logits[:, list(spec.tag_ids)],
-                    targets_full[ix][:, list(spec.tag_ids)],
+                    logits[:, active_tags],
+                    targets_full[ix][:, active_tags],
                 )
                 optimizer.zero_grad()
                 loss.backward()
