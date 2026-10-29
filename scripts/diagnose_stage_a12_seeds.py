@@ -397,7 +397,7 @@ def run_phase1_forensics(checkpoint_dir: Path, out_json: Path) -> dict[str, Any]
         mp_metrics = compute_paired_metrics_from_predictions(dev_mp_cases, mp_preds)
 
         # Compute query sensitivity on MP-2
-        mp2_pairs = mp_suite["dev_pairs_by_family"]["MP-2"]
+        mp2_pairs = mp_suite["by_family"]["dev"]["MP-2"]
         mp2_sensitivity = compute_query_sensitivity(mp2_pairs, preds_mp_dict)
 
         # 2. Dev Entity Binding Suite
@@ -411,7 +411,7 @@ def run_phase1_forensics(checkpoint_dir: Path, out_json: Path) -> dict[str, Any]
         preds_eb_dict = {c.case_id: p for c, p in zip(dev_eb_cases, eb_preds, strict=True)}
         eb_metrics = compute_paired_metrics_from_predictions(dev_eb_cases, eb_preds)
 
-        eb1_pairs = eb_suite["pairs_by_family"]["EB-1_QUERY_SWAP"]
+        eb1_pairs = eb_suite["by_family"]["EB-1"]
         eb1_sensitivity = compute_query_sensitivity(eb1_pairs, preds_eb_dict)
 
         # 3. Familiar vs. Unseen Entity Probe
