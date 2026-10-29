@@ -12,7 +12,7 @@ from typing import Any
 
 import torch
 
-PINNED_SHA = "PLACEHOLDER_PINNED_SHA"
+PINNED_SHA = "832326beb0dd7be87b43bfaef710426e7a007a79"
 REPO = Path("/tmp/amg-stage-a11r2")
 OUT = Path("/kaggle/working/stage-a11r2")
 
