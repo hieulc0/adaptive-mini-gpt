@@ -361,19 +361,25 @@ class IntegratedStudentM104_E(nn.Module):
         alpha = torch.nan_to_num(alpha, nan=0.0)
         h_query_attn_pool = torch.bmm(alpha.unsqueeze(1), h_seq).squeeze(1)  # (B, D)
 
+        h_residual_query_gated_pool = 0.5 * (h_last_token + h_query_attn_pool)
+
         return {
             "h_mean_pool": h_mean_pool,
             "h_last_question_token": h_last_token,
             "h_query_attn_pool": h_query_attn_pool,
+            "h_residual_query_gated_pool": h_residual_query_gated_pool,
         }
 
     def forward_with_strategy(
         self,
         prompt_tokens: torch.Tensor,
         action_ids: torch.Tensor,
-        strategy: str = "entity_conditioned_attention",
+        strategy: str | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor | None, torch.Tensor, torch.Tensor]:
         """Forward pass supporting configurable extraction strategies."""
+        if strategy is None:
+            strategy = self.default_strategy
+
         h_seq = self.extract_sequence_hidden_states(prompt_tokens)  # (B, L, d_model)
         q_entity_repr, global_repr = self.pool_representations(h_seq, prompt_tokens)
 
@@ -395,6 +401,9 @@ class IntegratedStudentM104_E(nn.Module):
         elif strategy == "query_attn_pool":
             taps = self.extract_tapped_representations(h_seq, prompt_tokens)
             entity_input = taps["h_query_attn_pool"]
+        elif strategy == "residual_query_gated_pool":
+            taps = self.extract_tapped_representations(h_seq, prompt_tokens)
+            entity_input = taps["h_residual_query_gated_pool"]
         else:  # entity_conditioned_attention (ECA)
             assert self.eca_extractor is not None
             pad_mask = prompt_tokens == ByteTextTokenizerM103.PAD_ID

@@ -373,34 +373,35 @@ def build_semantic_minimal_pairs_suite() -> dict[str, Any]:
     }
 
 
-def compute_paired_metrics(
+def compute_paired_metrics_from_predictions(
     cases: list[Any],
     predictions: Any,
 ) -> dict[str, Any]:
-    """Computes deterministic paired metrics on Semantic Minimal Pairs.
+    """Computes deterministic paired metrics from a unified set of predictions.
 
-    Metrics computed:
-    - n_cases: integer count of individual examples
-    - n_pairs: integer count of complete (case_a, case_b) pairs
-    - n_label_changing_pairs: pairs where true_a != true_b
-    - per_property_binary_acc: elementwise accuracy across all binary labels
-    - case_exact_acc: fraction of individual cases where all property labels match truth
-    - pair_both_correct_acc: fraction of complete pairs where both members are correct
-    - pair_counterfactual_flip_acc: fraction of label-changing pairs where both are correct and pred_a != pred_b
-    - by_family: metrics breakdown for MP-1, MP-2, MP-3
-    - Hard Invariant Assertion:
-        pair_both_correct_acc + 1e-9 >= max(0.0, 2.0 * case_exact_acc - 1.0) on paired cases.
+    Supports predictions as:
+    - list of predictions aligned with cases
+    - dict of predictions keyed by case_id
+    - torch.Tensor of logits or binary values
+
+    Enforces the mathematical pigeonhole lower bound:
+        pair_both_correct_acc + 1e-9 >= max(0.0, 2.0 * case_exact_acc - 1.0)
+    on the overall set and across each family.
     """
-    if len(cases) != len(predictions):
-        raise ValueError(f"Mismatch between cases ({len(cases)}) and predictions ({len(predictions)})")
-
-    if isinstance(predictions, torch.Tensor):
+    if isinstance(predictions, dict):
+        raw_list = [predictions[getattr(c, "case_id", f"case_{i}")] for i, c in enumerate(cases)]
+    elif isinstance(predictions, torch.Tensor):
         if predictions.dtype.is_floating_point:
-            binary_preds = (predictions >= 0).long().tolist()
+            raw_list = (predictions >= 0).long().tolist()
         else:
-            binary_preds = predictions.long().tolist()
+            raw_list = predictions.long().tolist()
     else:
-        binary_preds = [list(p) for p in predictions]
+        raw_list = list(predictions)
+
+    if len(cases) != len(raw_list):
+        raise ValueError(f"Mismatch between cases ({len(cases)}) and predictions ({len(raw_list)})")
+
+    binary_preds = [[int(v) for v in p] for p in raw_list]
 
     # Evaluate case-level correctness
     total_elements = 0
@@ -442,6 +443,7 @@ def compute_paired_metrics(
                 "case_exact_acc": 0.0,
                 "pair_both_correct_acc": 0.0,
                 "pair_counterfactual_flip_acc": 0.0,
+                "confusion_matrices": {},
             }
 
         g_elem_total = 0
@@ -451,6 +453,12 @@ def compute_paired_metrics(
         g_label_changing = 0
         g_flip_correct = 0
 
+        # Confusion statistics per property: traits = ("flammable", "conductive")
+        tp_counts = [0, 0]
+        tn_counts = [0, 0]
+        fp_counts = [0, 0]
+        fn_counts = [0, 0]
+
         for _pid, m in p_dict.items():
             for mem in ("A", "B"):
                 c_case = m[mem]["case"]
@@ -458,9 +466,17 @@ def compute_paired_metrics(
                 c_true = list(c_case.labels)
                 if m[mem]["correct"]:
                     g_case_correct += 1
-                for p_val, t_val in zip(c_pred, c_true, strict=True):
+                for p_idx, (p_val, t_val) in enumerate(zip(c_pred, c_true, strict=True)):
                     g_elem_correct += int(p_val == t_val)
                     g_elem_total += 1
+                    if p_val == 1 and t_val == 1:
+                        tp_counts[p_idx] += 1
+                    elif p_val == 0 and t_val == 0:
+                        tn_counts[p_idx] += 1
+                    elif p_val == 1 and t_val == 0:
+                        fp_counts[p_idx] += 1
+                    elif p_val == 0 and t_val == 1:
+                        fn_counts[p_idx] += 1
 
             true_a = list(m["A"]["case"].labels)
             true_b = list(m["B"]["case"].labels)
@@ -482,6 +498,23 @@ def compute_paired_metrics(
         flip_acc = g_flip_correct / g_label_changing if g_label_changing > 0 else 0.0
         prop_acc = g_elem_correct / g_elem_total if g_elem_total > 0 else 0.0
 
+        confusion = {}
+        for p_idx, trait in enumerate(TRAITS):
+            tp = tp_counts[p_idx]
+            tn = tn_counts[p_idx]
+            fp = fp_counts[p_idx]
+            fn = fn_counts[p_idx]
+            prec = tp / max(1, tp + fp)
+            rec = tp / max(1, tp + fn)
+            confusion[trait] = {
+                "TP": tp,
+                "TN": tn,
+                "FP": fp,
+                "FN": fn,
+                "precision": float(prec),
+                "recall": float(rec),
+            }
+
         # Mathematical bound assertion: Pigeonhole principle
         pigeonhole_bound = max(0.0, 2.0 * case_acc - 1.0)
         assert both_acc + 1e-9 >= pigeonhole_bound, (
@@ -497,6 +530,7 @@ def compute_paired_metrics(
             "case_exact_acc": case_acc,
             "pair_both_correct_acc": both_acc,
             "pair_counterfactual_flip_acc": flip_acc,
+            "confusion_matrices": confusion,
         }
 
     overall_paired = _eval_pair_group(complete_pairs)
@@ -504,7 +538,7 @@ def compute_paired_metrics(
     overall_case_acc = sum(case_matches) / total_cases if total_cases > 0 else 0.0
     overall_prop_acc = correct_elements / total_elements if total_elements > 0 else 0.0
 
-    families = ("MP-1", "MP-2", "MP-3")
+    families = sorted({getattr(c, "family", "unknown") for c in cases if getattr(c, "family", None)})
     by_family: dict[str, dict[str, Any]] = {}
     for fam in families:
         fam_pairs = {
@@ -521,8 +555,13 @@ def compute_paired_metrics(
         "case_exact_acc": overall_case_acc,
         "pair_both_correct_acc": overall_paired["pair_both_correct_acc"],
         "pair_counterfactual_flip_acc": overall_paired["pair_counterfactual_flip_acc"],
+        "confusion_matrices": overall_paired.get("confusion_matrices", {}),
         "by_family": by_family,
     }
+
+
+# Backwards compatibility alias
+compute_paired_metrics = compute_paired_metrics_from_predictions
 
 
 def evaluate_pair_exact_accuracy(
@@ -531,42 +570,16 @@ def evaluate_pair_exact_accuracy(
     cases: list[Any],
 ) -> dict[str, Any]:
     """Computes pair metrics on Semantic Minimal Pairs using compute_paired_metrics."""
-    # Support both model + eval_batch or direct prediction list
     if hasattr(predictions, "forward_with_strategy"):
         model = predictions
         tokens, actions, _targets = eval_batch
         with torch.no_grad():
             _, tag_logits, _, _ = model.forward_with_strategy(tokens, actions)
-            # Evaluate attribute head predictions on TAG_IDS
-            from adaptive_mini_gpt.data.attribute_learning import TAG_IDS
-            binary_preds = (tag_logits[:, TAG_IDS] >= 0).long().tolist()
-    elif isinstance(predictions, torch.Tensor):
-        if predictions.dtype.is_floating_point:
-            binary_preds = (predictions >= 0).long().tolist()
-        else:
-            binary_preds = predictions.long().tolist()
-    else:
-        binary_preds = [list(p) for p in predictions]
+            assert tag_logits is not None
+            preds = (tag_logits[:, (10, 15)] >= 0).long().tolist()
+        return compute_paired_metrics(cases, preds)
 
-    metrics = compute_paired_metrics(cases, binary_preds)
-
-    res: dict[str, Any] = {
-        "exact": metrics["case_exact_acc"],
-        "pair_exact_accuracy": metrics["pair_both_correct_acc"],
-        "pair_exact_flip_rate": metrics["pair_counterfactual_flip_acc"],
-        "pair_both_correct_acc": metrics["pair_both_correct_acc"],
-        "pair_counterfactual_flip_acc": metrics["pair_counterfactual_flip_acc"],
-        "per_property_binary_acc": metrics["per_property_binary_acc"],
-        "n_cases": metrics["n_cases"],
-        "n_pairs": metrics["n_pairs"],
-        "n_label_changing_pairs": metrics["n_label_changing_pairs"],
-        "by_family": metrics["by_family"],
-    }
-    for fam, fmetrics in metrics["by_family"].items():
-        res[f"pair_exact_{fam.lower()}"] = fmetrics["pair_both_correct_acc"]
-        res[f"pair_flip_{fam.lower()}"] = fmetrics["pair_counterfactual_flip_acc"]
-
-    return res
+    return compute_paired_metrics(cases, predictions)
 
 
 def build_balanced_relational_plan(
@@ -607,3 +620,64 @@ def build_balanced_relational_plan(
         rel_plan.append(batch)
 
     return repeated_plan(rel_plan, total_steps), len_broad + (2 * num_train_pairs)
+
+
+def build_a11r2_balanced_plan(
+    single_coverage_plan: list[list[int]],
+    len_broad: int,
+    mp_train_pairs: list[Any],
+    eb_train_pairs: list[Any],
+    synthetic_offset: int,
+    total_steps: int = 7200,
+) -> tuple[list[list[int]], int]:
+    """Constructs balanced 24-case batches for Stage A.11-R2:
+
+    6 single-clause, 6 minimal-pair (3 pairs), 6 entity-binding (3 pairs), 6 rehearsal.
+    """
+    from adaptive_mini_gpt.data.exposure_a7 import repeated_plan
+
+    mp_offset = len_broad
+    num_mp_pairs = len(mp_train_pairs)
+
+    eb_offset = len_broad + (2 * num_mp_pairs)
+    num_eb_pairs = len(eb_train_pairs)
+
+    syn_offset_in_dataset = eb_offset + (2 * num_eb_pairs)
+
+    rel_plan: list[list[int]] = []
+    for b_idx, ix in enumerate(single_coverage_plan):
+        syn_items = [i for i in ix if i >= synthetic_offset]
+        reindexed_syn = [syn_offset_in_dataset + (i - synthetic_offset) for i in syn_items]
+
+        new_items = [i for i in ix if i < synthetic_offset]
+        selected_single = new_items[:6]
+
+        p1_mp = (b_idx * 3) % num_mp_pairs
+        p2_mp = (b_idx * 3 + 1) % num_mp_pairs
+        p3_mp = (b_idx * 3 + 2) % num_mp_pairs
+        mp_items = [
+            mp_offset + (2 * p1_mp),
+            mp_offset + (2 * p1_mp + 1),
+            mp_offset + (2 * p2_mp),
+            mp_offset + (2 * p2_mp + 1),
+            mp_offset + (2 * p3_mp),
+            mp_offset + (2 * p3_mp + 1),
+        ]
+
+        p1_eb = (b_idx * 3) % num_eb_pairs
+        p2_eb = (b_idx * 3 + 1) % num_eb_pairs
+        p3_eb = (b_idx * 3 + 2) % num_eb_pairs
+        eb_items = [
+            eb_offset + (2 * p1_eb),
+            eb_offset + (2 * p1_eb + 1),
+            eb_offset + (2 * p2_eb),
+            eb_offset + (2 * p2_eb + 1),
+            eb_offset + (2 * p3_eb),
+            eb_offset + (2 * p3_eb + 1),
+        ]
+
+        batch = selected_single + mp_items + eb_items + reindexed_syn
+        assert len(batch) == 24, f"Batch size mismatch: {len(batch)} != 24"
+        rel_plan.append(batch)
+
+    return repeated_plan(rel_plan, total_steps), syn_offset_in_dataset
