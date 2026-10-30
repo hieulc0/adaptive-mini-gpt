@@ -606,6 +606,10 @@ def run_stage_b1_master(
     manifest_p = Path("runs/kaggle-stage-a13-b0/output/stage_b0_v1.json")
     if not manifest_p.exists():
         manifest_p = Path("data/manifests/stage_a13_b0_v1.json")
+    if not manifest_p.exists():
+        cand = list(Path("/kaggle/input").rglob("stage_b0_v1.json"))
+        if cand:
+            manifest_p = cand[0]
     phase1_audit = audit_stage_b0_artifacts(manifest_p)
     print("Phase 1 Audit complete. 10 questions answered and confirmed defects categorized.")
 
