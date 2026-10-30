@@ -12,7 +12,7 @@ from typing import Any
 
 import torch
 
-PINNED_SHA = "fcdf9788d75e2fa67f1396a84ebfa24fcf81ec0a"
+PINNED_SHA = "87e8928bb7c83f9408221800f145be8a356fc8a3"
 REPO = Path("/tmp/amg-stage-b1")
 OUT = Path("/kaggle/working/stage-b1")
 
@@ -33,6 +33,7 @@ def main():
         ],
         check=True,
     )
+    subprocess.run(["git", "fetch", "--all"], cwd=REPO, check=True)
     subprocess.run(["git", "checkout", PINNED_SHA], cwd=REPO, check=True)
 
     env = {
